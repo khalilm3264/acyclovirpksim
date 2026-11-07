@@ -1,8 +1,9 @@
-name: Deploy AyFlux to GitHub Pages
+name: Test and deploy AyFlux
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -11,11 +12,30 @@ permissions:
   id-token: write
 
 concurrency:
-  group: github-pages
+  group: github-pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/assets/vendor/plotly-basic-3.3.1.min.js
+          node --check public/assets/pk-engine.js
+          node --check public/assets/simulator-ui.js
+      - name: Run AyFlux regression tests
+        run: node --test tests/*.test.cjs
+
   deploy:
+    if: github.event_name != 'pull_request'
+    needs: test
     runs-on: ubuntu-latest
     environment:
       name: github-pages
