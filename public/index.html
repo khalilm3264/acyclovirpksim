@@ -230,6 +230,10 @@ html body header.ay-header .ay-header-brand{display:flex;align-items:center;gap:
 html body header.ay-header .ay-header-brand .ay-title-stack{min-width:0;flex:1 1 auto}
 html body header.ay-header .ay-brand-mark{width:42px;height:42px;flex:0 0 42px;object-fit:contain;display:block}
 @media(max-width:640px){html body header.ay-header .ay-header-brand{gap:9px;flex-basis:210px}html body header.ay-header .ay-brand-mark{width:36px;height:36px;flex-basis:36px}}
+
+/* An intentionally understated link to the AyFlux Easter egg. */
+html body footer.site-footer .cat-easter-egg{display:inline-block;margin-left:5px;font-size:13px;text-decoration:none;opacity:.52;filter:grayscale(1);vertical-align:middle}
+html body footer.site-footer .cat-easter-egg:hover,html body footer.site-footer .cat-easter-egg:focus-visible{opacity:1;filter:none}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
@@ -353,7 +357,7 @@ html body header.ay-header .ay-brand-mark{width:42px;height:42px;flex:0 0 42px;o
  <div class="scroll"><table><thead><tr><th>Parameter</th><th>Plasma AUC</th><th>Peak CSF acyclovir</th><th>Peak plasma CMMG</th><th>Dialysis removal</th></tr></thead><tbody id="sensitivityRows"></tbody></table></div><p id="sensitivityCaption" class="caption"></p>
  </div>
 </section>
-<div class="screen-reader-status" id="status" role="status" aria-live="polite">Loading simulator...</div><footer class="site-footer"><span>© 2026 Muhammad Khalil · AyFlux · AGPLv3</span><span>For educational use only · <a href="#ayfluxLicense">License</a> · <a href="#ayfluxCitation">Cite</a> · <button type="button" class="footer-link" id="footerReferences">Methods and references</button></span></footer>
+<div class="screen-reader-status" id="status" role="status" aria-live="polite">Loading simulator...</div><footer class="site-footer"><span>© 2026 Muhammad Khalil · AyFlux · AGPLv3 <a class="cat-easter-egg" href="/cats/" title="A small surprise" aria-label="Meet the AyFlux cats">🐾</a></span><span>For educational use only · <a href="#ayfluxLicense">License</a> · <a href="#ayfluxCitation">Cite</a> · <button type="button" class="footer-link" id="footerReferences">Methods and references</button></span></footer>
 <section id="ayfluxLicense" class="project-info" tabindex="-1" aria-labelledby="ayfluxLicenseHeading">
   <div class="topline"><h2 id="ayfluxLicenseHeading">AyFlux license — GNU AGPLv3</h2><a class="project-close" href="#tabs">Close</a></div>
   <p>AyFlux source code is distributed under the GNU Affero General Public License, version 3. Existing third-party components, including Plotly, retain their own licenses. See the included THIRD_PARTY_NOTICES.md in the hosting ZIP.</p>
