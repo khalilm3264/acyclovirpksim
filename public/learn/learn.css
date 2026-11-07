@@ -188,3 +188,9 @@ a:focus-visible { outline: 2px solid #238ac4; outline-offset: 2px; }
 .guide-topics a:hover{text-decoration:underline}
 .guide-topics a[aria-current="page"]{color:#213e53;font-weight:700;border-bottom:2px solid #2d6084}
 @media(max-width:640px){.site-header.ay-header .ay-title-stack{flex-basis:210px}.guide-topics{gap:6px 12px}.guide-topics-label{flex-basis:100%}}
+
+/* Same molecule mark and compact header spacing as the main simulator. */
+.site-header.ay-header .ay-header-brand{display:flex;align-items:center;gap:11px;flex:1 1 350px;min-width:0}
+.site-header.ay-header .ay-header-brand .ay-title-stack{min-width:0;flex:1 1 auto}
+.site-header.ay-header .ay-brand-mark{display:block;width:42px;height:42px;flex:0 0 42px;object-fit:contain}
+@media(max-width:640px){.site-header.ay-header .ay-header-brand{gap:9px;flex-basis:210px}.site-header.ay-header .ay-brand-mark{width:36px;height:36px;flex-basis:36px}}

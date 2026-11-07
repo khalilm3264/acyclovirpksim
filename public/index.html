@@ -224,9 +224,18 @@ html body header.ay-header .ay-guide-link:hover{background:#375c76;border-color:
 html body header.ay-header .ay-guide-link:focus-visible{outline:2px solid #fff;outline-offset:3px}
 @media(max-width:640px){html body header.ay-header .ay-title-stack{flex-basis:210px}html body header.ay-header .ay-guide-link{padding:6px 10px}}
 
+
+/* Identical molecule branding on the simulator and user guide. */
+html body header.ay-header .ay-header-brand{display:flex;align-items:center;gap:11px;flex:1 1 350px;min-width:0}
+html body header.ay-header .ay-header-brand .ay-title-stack{min-width:0;flex:1 1 auto}
+html body header.ay-header .ay-brand-mark{width:42px;height:42px;flex:0 0 42px;object-fit:contain;display:block}
+@media(max-width:640px){html body header.ay-header .ay-header-brand{gap:9px;flex-basis:210px}html body header.ay-header .ay-brand-mark{width:36px;height:36px;flex-basis:36px}}
 </style></head><body>
 <header class="ay-header">
-  <div class="ay-title-stack"><h1>AyFlux</h1><p class="site-subtitle">Acyclovir pharmacokinetics across kidney function, hemodialysis, peritoneal dialysis, and CRRT</p></div>
+  <div class="ay-header-brand">
+    <img class="ay-brand-mark" src="/favicon.ico?v=rotated-20261107" alt="" width="42" height="42">
+    <div class="ay-title-stack"><h1>AyFlux</h1><p class="site-subtitle">Acyclovir pharmacokinetics across kidney function, hemodialysis, peritoneal dialysis, and CRRT</p></div>
+  </div>
   <a class="ay-guide-link" href="/learn/" aria-label="Open AyFlux user guide">User guide</a>
 </header>
 <div class="shell"><div class="notice">For educational use only. Do not base patient dosing or dialysis prescriptions on this tool.</div>
