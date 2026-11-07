@@ -1,0 +1,143 @@
+/* AyFlux learning pages — uses the simulator's colors, spacing, and components. */
+:root {
+  --ink: #27253f;
+  --muted: #746e81;
+  --purple: #6743a2;
+  --border: #ebe3f0;
+  --coral: #e86a70;
+  --teal: #149c87;
+  --amber: #d49a31;
+  --bg: #f7f5fc;
+  font: 14px/1.58 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: #6a3d9b; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+.site-header {
+  background: linear-gradient(112deg, #392559, #8050ad 51%, #e97879);
+  color: white;
+  padding: 29px max(20px, calc((100vw - 1060px) / 2)) 25px;
+}
+.site-header .brand {
+  display: inline-block;
+  margin: 4px 0 7px;
+  color: white;
+  font-size: clamp(24px, 3vw, 35px);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-decoration: none;
+}
+.site-subtitle {
+  max-width: 920px;
+  margin: 5px 0 0;
+  line-height: 1.45;
+  font-size: 12.5px;
+  color: #e8eff5;
+}
+.shell { max-width: 1060px; padding: 15px 18px 30px; margin: auto; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+.tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 37px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #67577f;
+  padding: 9px 13px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-decoration: none;
+}
+.tabs a[aria-current="page"] {
+  background: #6e459c;
+  color: white;
+  border-color: #6e459c;
+}
+.tabs a:hover:not([aria-current="page"]) { background: #f7f1fb; }
+.page-intro { margin: 4px 0 16px; }
+.page-intro .eyebrow {
+  color: var(--purple);
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+}
+.page-intro h1 { font-size: clamp(23px, 3vw, 32px); line-height: 1.24; letter-spacing: -.65px; margin: 5px 0 8px; }
+.page-intro p { margin: 0; color: var(--muted); font-size: 14px; max-width: 75ch; }
+.notice {
+  background: #fff8e9;
+  border-left: 5px solid #e1a045;
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin-bottom: 15px;
+}
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 7px 25px #3925580a;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.card h2 { font-size: 17px; line-height: 1.35; letter-spacing: -.2px; margin: 0 0 9px; }
+.card h3 { font-size: 13px; margin: 12px 0 6px; }
+.card p { max-width: 82ch; margin: 0 0 11px; }
+.card p:last-child, .card ul:last-child, .card ol:last-child { margin-bottom: 0; }
+.card ul, .card ol { padding-left: 22px; margin-top: 8px; }
+.card li { padding-left: 3px; margin: 6px 0; }
+.topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.topic-link {
+  display: block;
+  padding: 13px;
+  background: #fcfaff;
+  border: 1px solid #eee6f5;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.topic-link strong { display: block; color: var(--purple); font-size: 13px; margin-bottom: 3px; }
+.topic-link span { color: var(--muted); font-size: 12px; }
+.topic-link:hover { background: #f5eafa; }
+.actions { margin: 18px 0 6px; }
+.btn {
+  display: inline-block;
+  border: 0;
+  border-radius: 9px;
+  background: var(--coral);
+  color: white;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.btn:hover { background: #d95861; color: white; }
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid #bdcbd5;
+  background: #e2e9ee;
+  color: #4c5f6d;
+  margin-top: 15px;
+  padding: 14px 12px;
+  font-size: 12px;
+}
+.site-footer a { color: #1a5c8c; }
+@media (max-width: 640px) {
+  .shell { padding: 13px 12px 24px; }
+  .site-header { padding: 25px 16px 22px; }
+  .topic-grid { grid-template-columns: minmax(0, 1fr); }
+  .tabs { gap: 6px; }
+  .tabs a { padding: 8px 10px; font-size: 11px; }
+  .card { padding: 16px; }
+}
