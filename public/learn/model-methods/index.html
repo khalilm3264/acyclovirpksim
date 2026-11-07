@@ -1,29 +1,78 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AyFlux Modeling Methods, CMMG, CSF and Limitations | AyFlux</title>
-<meta name="description" content="Learn how to interpret AyFlux two-compartment modeling, plasma and CSF concentrations, CMMG estimates, uncertainty bands, and scientific references.">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://ayflux.org/learn/model-methods/">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="AyFlux">
-<meta property="og:title" content="AyFlux Modeling Methods, CMMG, CSF and Limitations | AyFlux">
-<meta property="og:description" content="Learn how to interpret AyFlux two-compartment modeling, plasma and CSF concentrations, CMMG estimates, uncertainty bands, and scientific references.">
-<meta property="og:url" content="https://ayflux.org/learn/model-methods/">
-<meta name="twitter:card" content="summary">
-<style>:root{font:16px/1.65 system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#28233f;background:#f8f6fc}*{box-sizing:border-box}body{margin:0}a{color:#62419b}a:hover{text-decoration-thickness:2px}header{background:linear-gradient(115deg,#392559,#8050ad 60%,#df777f);color:#fff;padding:32px max(20px,calc((100vw - 960px)/2))}header a{color:#fff}header p{color:#f6eaf9}main{max-width:960px;margin:auto;padding:28px 20px 52px}nav{display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem}h1{font-size:clamp(1.65rem,3.5vw,2.55rem);line-height:1.2}h2{font-size:1.35rem;margin:32px 0 8px}h3{font-size:1.05rem}p{max-width:78ch}article,aside{background:#fff;border:1px solid #e9e2f0;border-radius:10px;padding:22px;margin:18px 0}article h2:first-child{margin-top:0}.warning{border-left:4px solid #d49a31;background:#fff9eb;padding:12px 16px}li{margin:7px 0}.cta{display:inline-block;background:#6743a2;color:white;padding:10px 16px;border-radius:6px;text-decoration:none;font-weight:700}footer{max-width:960px;margin:auto;padding:20px;border-top:1px solid #dfd9e8;color:#69617d;font-size:.9rem}@media(max-width:650px){article,aside{padding:16px}}</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AyFlux Model Methods and Limitations | AyFlux</title>
+  <meta name="description" content="Understand AyFlux two-compartment pharmacokinetic modeling, predicted CSF and CMMG concentrations, uncertainty bands, and important limitations.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ayflux.org/learn/model-methods/">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico?v=rotated-20261107">
+  <link rel="stylesheet" href="/learn/learn.css">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="AyFlux">
+  <meta property="og:title" content="AyFlux Model Methods and Limitations | AyFlux">
+  <meta property="og:description" content="Understand AyFlux two-compartment pharmacokinetic modeling, predicted CSF and CMMG concentrations, uncertainty bands, and important limitations.">
+  <meta property="og:url" content="https://ayflux.org/learn/model-methods/">
+  <meta name="twitter:card" content="summary">
 </head>
 <body>
-<header><nav aria-label="Site"><a href="/">AyFlux simulator</a><a href="/learn/">Learning center</a><a href="/learn/dialysis/">Dialysis</a><a href="/learn/model-methods/">Model methods</a></nav><h1>How to interpret the AyFlux model</h1><p>An accessible explanation of compartment simulations, metabolite estimates, and uncertainty—without treating estimates as measured clinical values.</p></header>
-<main><p class="warning"><strong>Educational use only.</strong> AyFlux is not a validated clinical decision-support system. Its output must not determine medication dosing, toxicity diagnosis, or dialysis prescriptions.</p>
-<article><h2>Compartment models</h2><p>A compartment model represents drug movement and elimination with mathematical simplifications. Different compartments allow modeled distribution and concentration changes to occur on different timescales. These compartments should not be mistaken for direct measurements of particular organs.</p><p>AyFlux models acyclovir exposure using a two-compartment framework with adjustable clearance and treatment scenarios. Parameter choices and the applicability of underlying studies are important limitations.</p></article>
-<article><h2>Plasma versus CSF concentrations</h2><p>Plasma and cerebrospinal fluid concentration patterns need not match because distribution into the central nervous system differs from circulating plasma exposure. AyFlux's CSF view is a model-derived estimate, not a substitute for sampling, laboratory analysis, or clinical assessment.</p></article>
-<article><h2>What is CMMG?</h2><p>9-carboxymethoxymethylguanine (CMMG) is a metabolite associated in published observational research with neurological symptoms during acyclovir exposure. An observed association does not establish a universally diagnostic concentration threshold. AyFlux's CMMG curves and any displayed comparison lines are educational assumptions rather than diagnostic tests.</p><p>Read <a href="https://pubmed.ncbi.nlm.nih.gov/12748346/">Helldén and colleagues' CMMG study</a> and <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6857197/">research on CNS acyclovir and CMMG observations</a> for clinical and methodological context.</p></article>
-<article><h2>Uncertainty bands and sensitivity</h2><p>Simulation intervals describe variation under the model's assumed parameter distributions and calculations. They do not establish prospective clinical coverage or account for every source of patient-to-patient variability. Sensitivity analysis asks how changing an assumption changes predictions; it does not independently validate the assumption.</p></article>
-<article><h2>Important limitations</h2><ul><li>Predictions depend on source data, parameter choices, and simplified physiology.</li><li>Dialysis performance, patient physiology, and clinical events may differ substantially from the simulated scenario.</li><li>Observed neurotoxicity and antiviral effectiveness cannot be reliably diagnosed from a single modeled concentration.</li><li>AyFlux is for education and exploration, not medication or dialysis decision-making.</li></ul></article>
-<article><h2>Sources and reproducibility</h2><p>Review the simulator's internal <a href="/">Methods and references</a> section alongside the <a href="https://github.com/khalilm3264/acyclovirpksim">public source repository</a>. Refer to original publications, not model outputs, when making scientific or clinical claims.</p></article>
-<p><a class="cta" href="/">Open the interactive simulator</a></p></main>
-<footer>© 2026 AyFlux · <a href="https://github.com/khalilm3264/acyclovirpksim">Source code</a> · Educational pharmacokinetic modeling</footer>
-</body></html>
+<header class="site-header">
+  <a class="brand" href="/">AyFlux</a>
+  <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function, hemodialysis, peritoneal dialysis, and CRRT</p>
+</header>
+<div class="shell">
+  <nav class="tabs" aria-label="AyFlux navigation">
+    <a href="/">Simulator</a>
+    <a href="/learn/">Overview</a>
+    <a href="/learn/dialysis/">Dialysis</a>
+    <a href="/learn/model-methods/" aria-current="page">Model methods</a>
+  </nav>
+  <main id="main-content">
+    <div class="page-intro">
+      <span class="eyebrow">AyFlux learning center</span>
+      <h1>Model methods and limitations</h1>
+      <p>What AyFlux calculates, how to read the estimates, and where the model has limits.</p>
+    </div>
+    <div class="notice"><strong>For educational use only.</strong> Do not base patient dosing, toxicity assessment, or dialysis prescriptions on this tool.</div>
+    <section class="card">
+  <h2>How the model works</h2>
+  <p>AyFlux uses a two-compartment model to describe how acyclovir distributes and is cleared over time. The central and peripheral compartments are mathematical simplifications, not direct maps of specific organs.</p>
+  <p>Changing a parameter, such as assumed kidney clearance, changes the predicted curve. The result depends on the model and its inputs, not on measurements from a particular patient.</p>
+</section>
+<section class="card">
+  <h2>Plasma and CSF estimates</h2>
+  <p>Concentrations in blood and cerebrospinal fluid (CSF) do not necessarily rise and fall at the same rate. AyFlux displays separate plasma and CSF estimates to explore that difference. The CSF curve is a prediction, not a laboratory measurement.</p>
+</section>
+<section class="card">
+  <h2>What is CMMG?</h2>
+  <p>9-Carboxymethoxymethylguanine (CMMG) is a metabolite of acyclovir. Studies have found an association between CMMG concentrations and neurological symptoms in some patients receiving acyclovir.</p>
+  <p>That association does not make a single concentration a reliable diagnostic cutoff. AyFlux's CMMG curves and reference lines should not be used to diagnose or rule out neurotoxicity. See <a href="https://pubmed.ncbi.nlm.nih.gov/12748346/" target="_blank" rel="noopener noreferrer">the CMMG study by Helldén and colleagues</a> and <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6857197/" target="_blank" rel="noopener noreferrer">research on acyclovir and CMMG in the central nervous system</a>.</p>
+</section>
+<section class="card">
+  <h2>Uncertainty and sensitivity</h2>
+  <p>Shaded bands show how predictions vary under the assumptions used in the simulation. They do not guarantee that an individual patient's concentration will fall inside the band.</p>
+  <p>Sensitivity analysis shows which inputs have the greatest effect on a prediction. It helps you understand the model, but does not confirm that its assumptions are correct.</p>
+</section>
+<section class="card">
+  <h2>What the model cannot tell you</h2>
+  <ul>
+    <li>It cannot measure a patient's actual plasma, CSF, or CMMG concentrations.</li>
+    <li>It cannot determine whether an individual has acyclovir neurotoxicity or adequate antiviral exposure.</li>
+    <li>It cannot account for every difference in physiology, drug handling, or dialysis performance.</li>
+    <li>It cannot establish a safe dose or treatment schedule.</li>
+  </ul>
+</section>
+<section class="card">
+  <h2>Sources and code</h2>
+  <p>Open the simulator and select <strong>Methods and references</strong> for the source list and model details. The <a href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer">AyFlux source code</a> is also available on GitHub.</p>
+</section>
+    <div class="actions"><a class="btn" href="/">Open simulator</a></div>
+  </main>
+  <footer class="site-footer">
+    <span>© 2026 Muhammad Khalil · AyFlux · AGPLv3</span>
+    <span>For educational use only · <a href="/learn/">Learning center</a> · <a href="https://github.com/khalilm3264/acyclovirpksim">Source code</a></span>
+  </footer>
+</div>
+</body>
+</html>
