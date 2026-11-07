@@ -50,6 +50,11 @@ export default {
             element.append(homepageMetadata, { html: true });
           },
         })
+        .on("footer.site-footer", {
+          element(element) {
+            element.append(' · <a href="/learn/">Learning center</a>', { html: true });
+          },
+        })
         .transform(securedResponse);
     }
 
