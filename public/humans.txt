@@ -1,0 +1,14 @@
+/* TEAM */
+Project: AyFlux
+Creator: Muhammad Khalil
+Source code: https://github.com/khalilm3264/acyclovirpksim
+
+/* SITE */
+Website: https://ayflux.org/
+Purpose: Educational simulation of acyclovir and valacyclovir pharmacokinetics with renal impairment and dialysis.
+Technology: HTML, CSS, JavaScript, Cloudflare Workers and static assets
+License: GNU Affero General Public License, version 3. See https://github.com/khalilm3264/acyclovirpksim/blob/main/LICENSE
+Language: English
+
+/* IMPORTANT */
+AyFlux is for educational use only. It must not be used for clinical dosing decisions or dialysis prescriptions.

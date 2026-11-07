@@ -1,4 +1,6 @@
+# AyFlux — educational pharmacokinetics simulator
 User-agent: *
 Allow: /
 
 Sitemap: https://ayflux.org/sitemap.xml
+# Project credits: https://ayflux.org/humans.txt
