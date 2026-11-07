@@ -1,0 +1,1326 @@
+
+:root{
+--ink:#27253f;
+--muted:#746e81;
+--purple:#6743a2;
+--border:#ebe3f0;
+--coral:#e86a70;
+--teal:#149c87;
+--amber:#d49a31;
+--pink:#c64e92;
+--bg:#f7f5fc;
+font:14px/1.48 system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+color:var(--ink);
+background:var(--bg)}
+*{
+box-sizing:border-box}
+body{
+margin:0}
+button,input,select,textarea{
+font:inherit}
+button{
+cursor:pointer}
+a{
+color:#6a3d9b}
+header{
+background:linear-gradient(112deg,#392559,#8050ad 51%,#e97879);
+color:white;
+padding:29px max(20px,calc((100vw - 1660px)/2)) 25px}
+header h1{
+margin:4px 0 7px;
+font-size:clamp(24px,3vw,35px);
+letter-spacing:-1px}
+header .eyebrow{
+font-size:11px;
+letter-spacing:2px;
+color:#ffe4ae;
+text-transform:uppercase;
+font-weight:800}
+header p{
+max-width:920px;
+margin:0;
+color:#fffdf8dd}
+.shell{
+max-width:1660px;
+margin:auto;
+padding:15px 18px 30px}
+.notice{
+background:#fff8e9;
+border-left:5px solid #e1a045;
+padding:13px 16px;
+border-radius:10px;
+font-size:12.5px;
+line-height:1.55;
+margin-bottom:15px}
+.layout{
+display:grid;
+grid-template-columns:315px minmax(0,1fr);
+gap:16px;
+align-items:start}
+aside,.card{
+background:white;
+border:1px solid var(--border);
+border-radius:16px;
+box-shadow:0 7px 25px #3925580a}
+aside{
+padding:18px;
+position:sticky;
+top:12px;
+max-height:calc(100vh - 24px);
+overflow:auto}
+aside h2{
+color:var(--purple);
+text-transform:uppercase;
+letter-spacing:.8px;
+font-size:12px;
+margin:16px 0 10px}
+aside h2:first-child{
+margin-top:0}
+.inputrow{
+margin:10px 0 15px}
+.inputrow label{
+display:block;
+font-size:12px;
+font-weight:750;
+margin-bottom:4px}
+.entry{
+display:grid;
+grid-template-columns:minmax(0,1fr) 76px;
+gap:9px;
+align-items:center}
+.entry input[type=range]{
+width:100%;
+accent-color:var(--pink)}
+.entry input[type=number],.intervals input[type=number]{
+border:1px solid #d8cfe2;
+background:#fff;
+padding:6px;
+border-radius:7px;
+width:100%;
+min-width:0;
+color:var(--ink)}
+.unit{
+font-size:11px;
+color:var(--muted);
+margin-top:2px}
+select,textarea{
+border:1px solid #d8cfe2;
+background:#fffdff;
+padding:10px;
+border-radius:9px;
+width:100%;
+color:var(--ink)}
+.tip{
+font-size:11.5px;
+color:var(--muted);
+line-height:1.57}
+.advanced{
+border:1px solid #e6ddec;
+background:#fdfbff;
+border-radius:12px;
+padding:11px;
+margin-top:14px}
+.advanced summary{
+color:#67409a;
+font-weight:800;
+cursor:pointer}
+.check{
+display:flex;
+align-items:center;
+gap:7px;
+font-size:12px;
+margin:8px 0}
+.check input{
+accent-color:var(--purple)}
+main{
+min-width:0}
+.tabs{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-bottom:13px}
+.tabs button{
+background:white;
+border:1px solid var(--border);
+color:#67577f;
+border-radius:10px;
+padding:9px 13px;
+font-size:12px;
+font-weight:800}
+.tabs button.active{
+background:#6e459c;
+color:white;
+border-color:#6e459c}
+.card{
+padding:18px;
+margin-bottom:14px}
+.card h2{
+font-size:17px;
+margin:0 0 8px;
+letter-spacing:-.2px}
+.card h3{
+margin:12px 0 5px;
+font-size:13px}
+.topline{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+flex-wrap:wrap}
+.pill{
+background:#f5e9fa;
+color:#8a4a9e;
+border-radius:20px;
+font-size:11px;
+font-weight:800;
+padding:5px 10px}
+.btn{
+border:0;
+border-radius:9px;
+background:var(--coral);
+color:white;
+padding:9px 12px;
+font-size:12px;
+font-weight:800}
+.btn.secondary{
+background:#f1eaf7;
+color:#6e459c}
+.btn.small{
+padding:6px 9px}
+.warning{
+color:#aa353f;
+background:#fff1f2;
+border:1px solid #f2c7cc;
+padding:10px;
+border-radius:10px;
+font-size:12px;
+margin:10px 0;
+white-space:pre-wrap}
+.hidden{
+display:none!important}
+.scenarios{
+display:flex;
+flex-wrap:wrap;
+gap:7px;
+margin:12px 0}
+.scenario{
+display:flex;
+gap:7px;
+align-items:center;
+border:1px solid var(--border);
+border-radius:10px;
+padding:7px 9px;
+font-size:11.5px;
+font-weight:700;
+cursor:pointer}
+.scenario input{
+accent-color:var(--tone)}
+.dot{
+width:10px;
+height:10px;
+background:var(--tone);
+border-radius:99px}
+.stats{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:10px;
+margin:13px 0}
+.metric{
+background:#fcfaff;
+border:1px solid #f1eaf4;
+border-left:4px solid var(--tone);
+padding:12px;
+border-radius:11px}
+.metric .key{
+font-size:11px;
+color:var(--muted)}
+.metric .val{
+font-size:19px;
+font-weight:850;
+margin:4px 0}
+.metric .sub{
+font-size:10.5px;
+color:#787184}
+.chart{
+height:345px;
+width:100%}
+.chart.big{
+height:390px}
+.caption{
+font-size:11.5px;
+color:var(--muted);
+line-height:1.6;
+margin:9px 1px 2px}
+.intervals{
+display:grid;
+grid-template-columns:1.3fr 1fr 1fr auto;
+gap:9px;
+align-items:end;
+margin:8px 0}
+.intervals label{
+font-size:11px;
+font-weight:750;
+display:block;
+color:#6b5a7d;
+margin-bottom:4px}
+.timeline-tip{
+background:#f7f1fb;
+padding:11px;
+border-radius:9px;
+font-size:12px;
+line-height:1.6}
+.timeline-actions{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:12px}
+.schedulebar{
+height:40px;
+display:flex;
+position:relative;
+background:#f6f0f8;
+border-radius:8px;
+margin:12px 0;
+overflow:hidden}
+.schedulebar span{
+position:absolute;
+top:0;
+height:100%;
+opacity:.85;
+border-right:1px solid white}
+.keyline{
+display:flex;
+flex-wrap:wrap;
+gap:13px;
+font-size:11px;
+color:#685c73}
+.keyline i{
+display:inline-block;
+width:12px;
+height:12px;
+border-radius:3px;
+margin-right:5px;
+vertical-align:middle}
+.scroll{
+overflow-x:auto}
+table{
+border-collapse:collapse;
+width:100%;
+min-width:680px;
+font-size:12px}
+th,td{
+padding:9px;
+border-bottom:1px solid #efeaf1;
+text-align:left}
+th{
+background:#faf7fd;
+color:#665477;
+font-size:11px}
+ol.refs{
+line-height:1.85;
+font-size:12px;
+padding-left:23px}
+footer{
+font-size:11px;
+color:#857c90;
+margin:16px 0}
+.source-id{
+font-size:11px;
+font-weight:850;
+color:#7548ae;
+text-decoration:none}
+.progressbar{
+font-size:11px;
+color:#72697e}
+fieldset{
+border:none;
+padding:0}
+.advisory{
+border-left:3px solid #a181cb;
+padding:10px 12px;
+background:#f8f3fc;
+font-size:12px;
+margin:10px 0}
+.two{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px}
+@media(max-width:1100px){
+.stats{
+grid-template-columns:repeat(2,1fr)}
+.two{
+grid-template-columns:1fr}
+}
+@media(max-width:810px){
+.layout{
+grid-template-columns:1fr}
+aside{
+position:static;
+max-height:none}
+.shell{
+padding:12px}
+.card{
+padding:13px}
+}
+
+
+/* v7 medication timing editor */
+.dose-row{
+display:grid;
+grid-template-columns:minmax(75px,1fr) minmax(160px,1.7fr) minmax(80px,1fr) minmax(88px,1fr) 38px;
+align-items:end;
+gap:9px;
+margin:9px 0;
+padding:10px;
+background:#fcf9fe;
+border:1px solid #ede0f0;
+border-radius:10px}
+
+.dose-row label{
+font-size:11px;
+font-weight:750;
+display:block;
+margin-bottom:5px;
+color:#68517c}
+
+.dose-row input,.dose-row select{
+width:100%;
+border:1px solid #d8cfe2;
+background:#fff;
+padding:8px 7px;
+border-radius:7px;
+color:var(--ink);
+min-width:0}
+
+.dose-row input:disabled{
+background:#f3eff4;
+color:#aaa}
+
+.dose-row button{
+height:36px;
+padding:5px}
+
+@media(max-width:780px){
+.dose-row{
+grid-template-columns:repeat(2,minmax(0,1fr))}
+.dose-row>div:nth-child(2){
+grid-column:span 2}
+.dose-row button{
+grid-column:span 2}
+}
+
+
+/* Version 8 visual refresh: restrained 2010–2015 clinical desktop application */
+:root{
+--ink:#213145;
+--muted:#596778;
+--purple:#315b7d;
+--border:#c6d1dc;
+--coral:#28638d;
+--teal:#276d72;
+--amber:#927133;
+--pink:#874b59;
+--bg:#e9edf1;
+font:13px/1.4 Arial,Helvetica,sans-serif}
+
+body{
+background:#e9edf1}
+header{
+background:#24445f;
+border-bottom:4px solid #426b8a;
+padding:17px max(20px,calc((100vw - 1660px)/2)) 16px}
+
+header h1{
+font:600 23px Arial,Helvetica,sans-serif;
+letter-spacing:0}
+header p{
+font-size:12px;
+max-width:1100px;
+color:#e8eff6}
+header .eyebrow{
+letter-spacing:.5px;
+font-size:10px;
+color:#c2d9e8}
+
+.shell{
+padding-top:12px}
+.notice{
+background:#fff9e8;
+border-left:3px solid #b68739;
+border-radius:2px;
+padding:10px 14px}
+
+aside,.card{
+border:1px solid #becbd6;
+border-radius:2px;
+box-shadow:none}
+aside{
+padding:13px;
+background:#f8fafc}
+
+.card{
+padding:15px;
+margin-bottom:11px;
+background:#fff}
+.card h2{
+font-size:15px;
+letter-spacing:0}
+
+aside h2{
+font-size:11px;
+text-transform:uppercase;
+color:#284f6b;
+letter-spacing:.2px;
+border-bottom:1px solid #d6e0e8;
+padding-bottom:4px}
+
+select,textarea,.entry input[type=number],.intervals input[type=number],.dose-row input,.dose-row select{
+border-radius:2px;
+border-color:#aebdca;
+background:#fff;
+padding:6px}
+
+.tabs{
+gap:3px;
+margin-bottom:10px}
+.tabs button{
+border-radius:2px;
+border:1px solid #a9bdcc;
+padding:8px 11px;
+background:#edf2f5;
+color:#35536b}
+.tabs button.active{
+background:#285a7b;
+color:#fff;
+border-color:#285a7b}
+
+.btn{
+border-radius:2px;
+background:#32698b;
+font-weight:600}
+.btn.secondary{
+background:#e1e9ef;
+color:#245373;
+border:1px solid #b8c9d7}
+
+.pill,.tag,.badge-warn{
+border-radius:2px!important;
+background:#e5edf4!important;
+color:#28516b!important;
+font-weight:600}
+
+.metric,.advisory,.warning,.advanced,.dose-row,.intervals{
+border-radius:2px!important;
+box-shadow:none!important}
+.metric{
+border:1px solid #d3dce4!important}
+
+.advanced{
+background:#f3f6f8;
+border:1px solid #c9d5de}
+.advanced summary{
+color:#234e6f}
+.entry input[type=range]{
+accent-color:#3f6c8a}
+
+.chart{
+border:0!important}
+.source-id{
+font-size:11px}
+.medmeas{
+width:100%;
+border-collapse:collapse;
+font-size:12px}
+.medmeas th,.medmeas td{
+border:1px solid #cbd5de;
+padding:5px;
+text-align:left}
+.medmeas th{
+background:#e8eff5}
+.medmeas input,.medmeas select{
+width:100%;
+min-width:0;
+border-radius:2px;
+border:1px solid #acbcc8;
+padding:5px}
+.medmeas button{
+padding:5px 8px}
+.measure-stat{
+padding:10px;
+background:#eef3f6;
+border:1px solid #c6d4e0;
+margin:11px 0;
+font-size:12px}
+.measure-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:10px}
+.measure-grid>div{
+padding:9px;
+border:1px solid #cbd7df;
+background:#f6f8fa}
+.measure-grid strong{
+display:block;
+font-size:17px;
+color:#204c6b}
+.research-note{
+font-size:12px;
+line-height:1.5;
+padding:9px 12px;
+background:#f4f7f9;
+border-left:3px solid #7b95a6;
+margin:9px 0}
+
+@media(max-width:850px){
+.measure-grid{
+grid-template-columns:1fr}
+}
+
+
+/* Version 10 clinical desktop UI: rectangular controls, compact header, clear axis spacing. */
+:root{
+--bg:#e8edf0;
+--ink:#1f3443;
+--muted:#526272;
+--border:#b8c6d0}
+
+header{
+padding:14px max(20px,calc((100vw - 1660px)/2)) 13px;
+background:#28485e;
+border-bottom:3px solid #7994a7}
+
+header h1{
+font-size:21px;
+font-weight:600;
+margin:0 0 3px}
+
+header p{
+font-size:12px;
+margin:0}
+
+.notice{
+background:#fefbe9;
+border:1px solid #e0d3a6;
+border-left:4px solid #a88a3d;
+font-size:12px;
+margin-bottom:12px;
+padding:9px 12px}
+
+.entry input[type=number],input.cg-field,#cgAge,#cgScr{
+width:100%;
+max-width:170px;
+padding:6px;
+border:1px solid #abbac6;
+background:#fff;
+border-radius:2px}
+
+.calculated{
+padding:8px 10px;
+border:1px solid #aec2cf;
+background:#e8f1f5;
+margin:8px 0;
+font-size:12px}
+
+.calculated strong{
+font-size:14px}
+
+.tabs button{
+font-weight:600}
+
+.pill{
+border:1px solid #c3d2df;
+padding:3px 7px}
+
+.chart .xtitle,.chart .ytitle{
+font-family:Arial,Helvetica,sans-serif}
+
+.source-id{
+white-space:nowrap}
+
+
+/* Consistent readable clinical input fields in light and dark browser themes. */
+#cgAge,#cgScr,input.cg-field,#cgSex,#crclSource,
+.entry input[type="number"],.intervals input[type="number"],.dose-row input[type="number"],
+#measureRows input[type="number"] {
+background-color:#fff !important;
+color:#183349 !important;
+
+ -webkit-text-fill-color:#183349 !important;
+opacity:1 !important;
+caret-color:#183349;
+
+ border:1px solid #8195a4 !important;
+box-shadow:none;
+}
+
+#cgAge::placeholder,#cgScr::placeholder {
+color:#667789;
+opacity:1;
+}
+
+#cgAge:focus-visible,#cgScr:focus-visible,input.cg-field:focus-visible {
+outline:2px solid #1767a0;
+outline-offset:1px;
+}
+
+#cgAge:disabled,#cgScr:disabled {
+background:#e7edf2 !important;
+color:#46596b !important;
+}
+
+/* Keep the compact clinical aesthetic and default OS theme predictable. */
+:root {
+color-scheme:light;
+}
+
+
+/* Version 11: medical dashboard, mobile and Firefox readability */
+header h1{
+margin:0;
+line-height:1.25;
+font-size:clamp(19px,2.1vw,25px)}
+
+.metric .key{
+font-size:12px;
+font-weight:700;
+line-height:1.25;
+min-height:2.35em;
+overflow-wrap:anywhere}
+
+.metric .val{
+font-size:clamp(16px,2.1vw,22px);
+white-space:normal}
+
+.metric .sub{
+overflow-wrap:anywhere;
+font-size:11px}
+
+.site-footer{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+flex-wrap:wrap;
+border-top:1px solid #bdcbd5;
+background:#e2e9ee;
+color:#4c5f6d;
+margin-top:15px;
+padding:14px 12px;
+font-size:12px}
+
+.footer-link{
+border:0;
+padding:0;
+background:none;
+text-decoration:underline;
+color:#1a5c8c;
+cursor:pointer;
+font:inherit}
+
+.screen-reader-status{
+position:absolute;
+width:1px;
+height:1px;
+padding:0;
+margin:-1px;
+overflow:hidden;
+clip:rect(0,0,0,0);
+white-space:nowrap;
+border:0}
+
+.dose-key{
+font-size:11px;
+color:#475a68;
+margin:9px 0}
+
+.dose-key-iv,.dose-key-oral{
+display:inline-block;
+height:13px;
+width:5px;
+border-left:2px dashed #b54b28;
+margin:0 6px 0 10px;
+vertical-align:middle}
+
+.dose-key-oral{
+border-color:#19856e}
+
+.virus-note{
+margin:0 0 5px;
+line-height:1.45}
+
+@media (max-width:650px){
+
+ header{
+padding:12px 14px}
+
+ .shell{
+padding:8px 8px 15px}
+
+ .card{
+padding:10px}
+
+ .site-footer{
+padding:12px 8px;
+align-items:flex-start}
+
+ .metric .key{
+min-height:0}
+
+ .tabs{
+overflow-x:auto;
+-webkit-overflow-scrolling:touch;
+flex-wrap:nowrap}
+
+ .tabs button{
+white-space:nowrap;
+flex:0 0 auto}
+
+ .chart.big{
+min-height:310px}
+
+ .dose-key span{
+display:inline-block}
+
+}
+
+
+.mobile-skip{
+display:none;
+color:#1c567e;
+font-weight:700;
+padding:6px 0 10px;
+text-decoration:underline}
+
+@media(max-width:650px){
+.mobile-skip{
+display:block}
+}
+
+
+/* Version 13 research extensions: compact, clinical style. */
+.rx-table{
+min-width:750px;
+table-layout:fixed}
+.rx-table th:first-child{
+width:36px}
+.rx-table th:last-child{
+width:48px}
+
+.rx-table input{
+width:100%;
+min-width:65px;
+background:#fff!important;
+color:#183349!important;
+border:1px solid #9fafbf;
+padding:5px 4px;
+border-radius:2px}
+
+.file-btn{
+display:inline-block;
+cursor:pointer}
+.sr-only{
+position:absolute;
+width:1px;
+height:1px;
+opacity:0;
+pointer-events:none}
+
+#research .card{
+margin-bottom:12px}
+#researchStatus{
+min-height:1.4em}
+#pdRxErrors:empty{
+display:none}
+
+#benchmarkParams{
+margin-top:10px;
+font-weight:600}
+#research th{
+white-space:normal}
+#research td{
+vertical-align:middle}
+
+/* Distinct scenarios with line-pattern swatches; never rely on color alone. */
+.scenario .dot{
+width:29px;
+height:0;
+min-width:29px;
+border:0;
+border-top:3px solid var(--tone);
+border-radius:0;
+background:transparent}
+
+#pdRxPanel{
+scroll-margin-top:16px}
+
+#pdRxStatus:empty{
+display:none}
+
+@media(max-width:650px){
+.rx-table{
+min-width:690px}
+}
+
+.scenario .line-key{
+display:inline-block;
+flex:0 0 30px;
+width:30px;
+height:0;
+border-top-width:4px;
+border-top-style:solid;
+margin:0 3px 0 1px}
+
+.scenario{
+font-weight:700;
+min-height:34px}
+.scenario input{
+width:16px;
+height:16px}
+.rx-table td select{
+min-width:140px}
+
+.timeline-medications{
+margin-top:14px}
+
+
+/* AyFlux v15 visual consistency: square-edged clinical desktop UI across all widgets.
+   Includes dynamically created timeline and prescription rows, notices and tooltips. */
+html body :is(.shell, header, footer) *,
+html body :is(.shell, header, footer) *::before,
+html body :is(.shell, header, footer) *::after,
+html body .plotly .modebar,
+html body .plotly .modebar-btn,
+html body .plotly .hovertext rect {
+
+  border-radius: 0 !important;
+
+}
+
+html body .shell input[type="checkbox"],
+html body .shell input[type="radio"],
+html body .shell select,
+html body .shell textarea,
+html body .shell button {
+ border-radius:0 !important;
+ }
+
+/* Distinguishable scenario keys, including when horizontal space is limited. */
+html body .shell .scenario {
+border-radius:0!important;
+}
+
+html body .shell .schedulebar, html body .shell .dose-row,
+html body .shell .timeline-tip, html body .shell .warning,
+html body .shell .notice, html body .shell .advisory,
+html body .shell .advanced {
+border-radius:0!important;
+}
+
+
+/* One clear commit action for the unified custom timeline; individual buttons remain for internal compatibility. */
+#applySchedule, #applyDoses, #applyPdRx {
+display:none!important;
+}
+
+
+/* AyFlux v16: fluid desktop layout, economical wide-screen graph grid. */
+html body .shell {
+ width:100%;
+ max-width:none;
+ margin:0;
+ padding-left:clamp(12px,1.4vw,36px);
+ padding-right:clamp(12px,1.4vw,36px);
+ }
+
+html body header {
+padding-left:clamp(14px,1.4vw,36px);
+padding-right:clamp(14px,1.4vw,36px);
+}
+
+html body header .site-subtitle {
+max-width:none;
+margin:5px 0 0;
+line-height:1.45;
+font-size:12.5px;
+color:#e8eff5;
+letter-spacing:0;
+}
+
+html body .layout {
+grid-template-columns:clamp(285px,19vw,345px) minmax(0,1fr);
+gap:clamp(12px,1vw,18px);
+}
+
+html body .primary-charts {
+min-width:0;
+}
+
+html body .primary-charts>.card, html body .two>* {
+min-width:0;
+}
+
+@media (max-width:1100px){
+html body .two {
+grid-template-columns:minmax(0,1fr);
+}
+}
+
+@media (min-width:1670px){
+
+ html body .primary-charts {
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+align-items:stretch;
+}
+
+ html body .primary-charts>.card {
+min-width:0;
+margin-bottom:11px;
+}
+
+ html body .primary-charts>.card .chart {
+height:360px;
+}
+
+}
+
+@media (max-width:810px){
+
+ html body .layout {
+grid-template-columns:minmax(0,1fr);
+}
+
+ html body .shell {
+padding-left:10px;
+padding-right:10px;
+}
+
+}
+
+@media (max-width:650px){
+html body header .site-subtitle {
+font-size:11.5px;
+}
+}
+
+
+/* AyFlux v17 — compact mobile controls, no horizontal tabs or drug reference overflow. */
+@media (min-width:811px){
+
+  html body .layout {
+grid-template-columns:minmax(0,1fr) clamp(270px,19vw,340px);
+}
+
+  html body .layout > main {
+grid-column:1;
+grid-row:1;
+min-width:0;
+}
+
+  html body .layout > aside {
+grid-column:2;
+grid-row:1;
+min-width:0;
+}
+
+}
+
+html body #concentration .card:first-child .tip {
+margin:6px 0 8px;
+}
+
+html body #concentration .card:first-child .scenarios {
+margin:7px 0;
+gap:5px;
+}
+
+html body #concentration .card:first-child .dose-key {
+margin:6px 0;
+}
+
+html body #concentration .card:first-child .keyline {
+margin:5px 0 0;
+}
+
+html body #concentration .summary-card .stats {
+grid-template-columns:repeat(4,minmax(0,1fr));
+margin:8px 0;
+gap:7px;
+}
+
+html body #concentration .summary-card .metric {
+padding:9px;
+}
+
+html body #concentration .summary-card .metric .key {
+min-height:0;
+}
+
+html body #concentration .summary-card .metric .val {
+font-size:clamp(16px,1.65vw,21px);
+}
+
+html body #concentration .primary-charts .card {
+margin-bottom:10px;
+}
+
+@media(min-width:1250px){
+
+  html body .primary-charts {
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+align-items:stretch;
+gap:10px;
+}
+
+  html body .primary-charts>.card {
+min-width:0;
+margin-bottom:10px;
+}
+
+  html body .primary-charts>.card .chart {
+height:340px;
+}
+
+}
+
+@media(max-width:1249px){
+
+  html body #concentration .summary-card .stats {
+grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+}
+
+@media(max-width:810px){
+
+  html body .layout>aside {
+grid-column:auto;
+grid-row:auto;
+}
+
+  html body .layout>main {
+grid-column:auto;
+grid-row:auto;
+}
+
+  html body #tabs {
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:5px;
+overflow-x:visible;
+flex-wrap:wrap;
+}
+
+  html body #tabs button {
+min-width:0;
+white-space:normal;
+text-align:center;
+font-size:12px;
+min-height:38px;
+padding:7px 5px;
+line-height:1.25;
+overflow-wrap:anywhere;
+}
+
+  html body #concentration .summary-card .stats {
+grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+}
+
+@media(min-width:620px) and (max-width:810px){
+
+  html body #tabs {
+grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+}
+
+/* Override global 680px table width only for the drug reference table. */
+html body #reference .medmeas {
+width:100%;
+min-width:0;
+table-layout:fixed;
+}
+
+html body #reference .medmeas th,html body #reference .medmeas td {
+white-space:normal;
+overflow-wrap:anywhere;
+word-break:normal;
+vertical-align:top;
+}
+
+html body #reference .medmeas th:nth-child(1) {
+width:30%;
+}
+
+html body #reference .medmeas th:nth-child(2) {
+width:31%;
+}
+
+html body #reference .medmeas th:nth-child(3) {
+width:39%;
+}
+
+@media(max-width:700px){
+
+  html body #reference .medmeas,html body #reference .medmeas tbody {
+display:block;
+width:100%;
+min-width:0;
+}
+
+  html body #reference .medmeas thead {
+display:none;
+}
+
+  html body #reference .medmeas tr {
+display:block;
+border:1px solid #b7c6d0;
+margin:0 0 9px;
+padding:7px 9px;
+background:#fff;
+}
+
+  html body #reference .medmeas td {
+display:block;
+border:0;
+width:100%;
+padding:3px 0;
+white-space:normal;
+overflow-wrap:anywhere;
+}
+
+  html body #reference .medmeas td:nth-child(1) {
+font-weight:700;
+color:#264f6d;
+}
+
+  html body #reference .medmeas td:nth-child(2)::before {
+content:'Published figure: ';
+font-weight:700;
+color:#526272;
+}
+
+  html body #reference .medmeas td:nth-child(3)::before {
+content:'Interpretation: ';
+font-weight:700;
+color:#526272;
+}
+
+}
+
+/* Standalone and hosted source/citation detail disclosures. */
+html body .project-info{
+display:none;
+margin-top:12px;
+padding:15px;
+border:1px solid #b8c6d0;
+background:#fff;
+max-width:100%;
+min-width:0;
+scroll-margin-top:12px;
+}
+
+html body .project-info:target{
+display:block;
+}
+
+html body .project-info .topline{
+margin-bottom:10px;
+}
+
+html body .project-info h2{
+font-size:16px;
+margin:0;
+}
+
+html body .project-info .project-close {
+font-weight:700;
+}
+
+html body .project-info .legal-text {
+font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;
+white-space:pre-wrap;
+overflow-wrap:anywhere;
+max-height:480px;
+overflow:auto;
+padding:12px;
+border:1px solid #b8c6d0;
+background:#f7f9fa;
+color:#263c4f;
+}
+
+
+
+/* AyFlux v19: left-side patient/medication controls and compact clinical graph workspace */
+@media(min-width:811px){
+
+  html body .layout {
+grid-template-columns:clamp(284px,20vw,342px) minmax(0,1fr);
+}
+
+  html body .layout>aside {
+grid-column:1;
+grid-row:1;
+}
+
+  html body .layout>main {
+grid-column:2;
+grid-row:1;
+}
+
+}
+
+html body #concentration .summary-card {
+margin-bottom:10px;
+}
+
+html body #concentration .summary-card .stats {
+grid-template-columns:repeat(auto-fit,minmax(142px,1fr));
+gap:6px;
+margin:7px 0;
+}
+
+html body #concentration .summary-card .metric {
+padding:7px 8px;
+}
+
+html body #concentration .summary-card .metric .key {
+font-size:11px;
+line-height:1.15;
+min-height:0;
+}
+
+html body #concentration .summary-card .metric .val {
+font-size:clamp(16px,1.4vw,20px);
+margin:3px 0;
+}
+
+html body #concentration .summary-card .metric .sub {
+font-size:10px;
+}
+
+html body #concentration .summary-card .caption {
+margin-top:4px;
+}
+
+html body #concentration .primary-charts>.card {
+padding-left:10px;
+padding-right:10px;
+}
+
+html body #concentration .primary-charts .chart {
+max-width:100%;
+}
+
+@media(max-width:650px){
+
+ html body #concentration .summary-card .stats {
+grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+}
+
