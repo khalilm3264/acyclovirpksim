@@ -175,3 +175,20 @@ a:focus-visible { outline: 2px solid #238ac4; outline-offset: 2px; }
   .page-intro h1 { font-size: 17px; }
   .topic-grid { grid-template-columns: 1fr; }
 }
+
+/* Shared AyFlux site navigation: one level of nested learning links. */
+.ay-site-nav{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start;margin:0 0 11px;position:relative;z-index:40;font:700 12px/1.25 Arial,"Segoe UI",sans-serif}
+.ay-site-nav .ay-nav-main,.ay-site-nav .ay-nav-menu>summary{min-height:35px;padding:9px 12px;border:1px solid #a9bfd0;border-radius:0;background:#edf2f5;color:#31526e;text-decoration:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer}
+.ay-site-nav .ay-nav-main:hover,.ay-site-nav .ay-nav-menu>summary:hover{background:#dce8ef;color:#224d6e}
+.ay-site-nav .ay-nav-main[aria-current="page"],.ay-site-nav .ay-nav-menu[data-section="active"]>summary{background:#2d6084;color:#fff;border-color:#2d6084}
+.ay-site-nav .ay-nav-menu[data-section="active"]>summary:hover{background:#234e6e;color:#fff}
+.ay-site-nav .ay-nav-menu{position:relative}
+.ay-site-nav .ay-nav-menu>summary{list-style:none;user-select:none}
+.ay-site-nav .ay-nav-menu>summary::-webkit-details-marker{display:none}
+.ay-site-nav .ay-nav-menu[open]>summary{border-color:#2d6084}
+.ay-site-nav .ay-nav-dropdown{position:absolute;top:calc(100% + 2px);left:0;min-width:190px;max-width:min(280px,calc(100vw - 24px));background:white;border:1px solid #a9bfd0;z-index:41}
+.ay-site-nav .ay-nav-dropdown a{display:block;padding:10px 12px;border-bottom:1px solid #d6e2e9;color:#31526e;text-decoration:none;white-space:nowrap}
+.ay-site-nav .ay-nav-dropdown a:last-child{border-bottom:0}
+.ay-site-nav .ay-nav-dropdown a:hover,.ay-site-nav .ay-nav-dropdown a:focus-visible{background:#e8f0f5;color:#234e6e}
+.ay-site-nav .ay-nav-dropdown a[aria-current="page"]{background:#e4edf3;font-weight:700;border-left:3px solid #2d6084;padding-left:9px}
+@media(max-width:640px){.ay-site-nav{gap:3px;margin-bottom:10px;font-size:11px}.ay-site-nav .ay-nav-main,.ay-site-nav .ay-nav-menu>summary{min-height:33px;padding:8px 11px}}
