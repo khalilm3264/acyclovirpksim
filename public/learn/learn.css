@@ -176,19 +176,15 @@ a:focus-visible { outline: 2px solid #238ac4; outline-offset: 2px; }
   .topic-grid { grid-template-columns: 1fr; }
 }
 
-/* Shared AyFlux site navigation: one level of nested learning links. */
-.ay-site-nav{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start;margin:0 0 11px;position:relative;z-index:40;font:700 12px/1.25 Arial,"Segoe UI",sans-serif}
-.ay-site-nav .ay-nav-main,.ay-site-nav .ay-nav-menu>summary{min-height:35px;padding:9px 12px;border:1px solid #a9bfd0;border-radius:0;background:#edf2f5;color:#31526e;text-decoration:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer}
-.ay-site-nav .ay-nav-main:hover,.ay-site-nav .ay-nav-menu>summary:hover{background:#dce8ef;color:#224d6e}
-.ay-site-nav .ay-nav-main[aria-current="page"],.ay-site-nav .ay-nav-menu[data-section="active"]>summary{background:#2d6084;color:#fff;border-color:#2d6084}
-.ay-site-nav .ay-nav-menu[data-section="active"]>summary:hover{background:#234e6e;color:#fff}
-.ay-site-nav .ay-nav-menu{position:relative}
-.ay-site-nav .ay-nav-menu>summary{list-style:none;user-select:none}
-.ay-site-nav .ay-nav-menu>summary::-webkit-details-marker{display:none}
-.ay-site-nav .ay-nav-menu[open]>summary{border-color:#2d6084}
-.ay-site-nav .ay-nav-dropdown{position:absolute;top:calc(100% + 2px);left:0;min-width:190px;max-width:min(280px,calc(100vw - 24px));background:white;border:1px solid #a9bfd0;z-index:41}
-.ay-site-nav .ay-nav-dropdown a{display:block;padding:10px 12px;border-bottom:1px solid #d6e2e9;color:#31526e;text-decoration:none;white-space:nowrap}
-.ay-site-nav .ay-nav-dropdown a:last-child{border-bottom:0}
-.ay-site-nav .ay-nav-dropdown a:hover,.ay-site-nav .ay-nav-dropdown a:focus-visible{background:#e8f0f5;color:#234e6e}
-.ay-site-nav .ay-nav-dropdown a[aria-current="page"]{background:#e4edf3;font-weight:700;border-left:3px solid #2d6084;padding-left:9px}
-@media(max-width:640px){.ay-site-nav{gap:3px;margin-bottom:10px;font-size:11px}.ay-site-nav .ay-nav-main,.ay-site-nav .ay-nav-menu>summary{min-height:33px;padding:8px 11px}}
+
+/* User guide pages use a restrained local topic list, not the simulator tab bar. */
+.site-header.ay-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px}
+.site-header.ay-header .ay-title-stack{flex:1 1 350px;min-width:0}
+.site-header.ay-header .ay-guide-link{display:inline-flex;align-items:center;justify-content:center;min-height:33px;border:1px solid #91abbc;border-radius:0;background:transparent;padding:7px 12px;color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+.site-header.ay-header .ay-guide-link:hover{background:#375c76;color:#fff}
+.guide-topics{display:flex;flex-wrap:wrap;gap:6px 17px;align-items:center;margin:0 0 12px;padding:2px 0 9px;border-bottom:1px solid #b7cad9;font-size:12px}
+.guide-topics-label{font-weight:700;color:#52667c;margin-right:3px}
+.guide-topics a{padding:3px 0;color:#315c7a;text-decoration:none}
+.guide-topics a:hover{text-decoration:underline}
+.guide-topics a[aria-current="page"]{color:#213e53;font-weight:700;border-bottom:2px solid #2d6084}
+@media(max-width:640px){.site-header.ay-header .ay-title-stack{flex-basis:210px}.guide-topics{gap:6px 12px}.guide-topics-label{flex-basis:100%}}

@@ -215,36 +215,22 @@ html body #concentration .primary-charts .chart {max-width:100%;}
  html body #concentration .summary-card .stats {grid-template-columns:repeat(2,minmax(0,1fr));}
 }
 
-/* Shared AyFlux site navigation: one level of nested learning links. */
-.ay-site-nav{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start;margin:0 0 11px;position:relative;z-index:40;font:700 12px/1.25 Arial,"Segoe UI",sans-serif}
-.ay-site-nav .ay-nav-main,.ay-site-nav .ay-nav-menu>summary{min-height:35px;padding:9px 12px;border:1px solid #a9bfd0;border-radius:0;background:#edf2f5;color:#31526e;text-decoration:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer}
-.ay-site-nav .ay-nav-main:hover,.ay-site-nav .ay-nav-menu>summary:hover{background:#dce8ef;color:#224d6e}
-.ay-site-nav .ay-nav-main[aria-current="page"],.ay-site-nav .ay-nav-menu[data-section="active"]>summary{background:#2d6084;color:#fff;border-color:#2d6084}
-.ay-site-nav .ay-nav-menu[data-section="active"]>summary:hover{background:#234e6e;color:#fff}
-.ay-site-nav .ay-nav-menu{position:relative}
-.ay-site-nav .ay-nav-menu>summary{list-style:none;user-select:none}
-.ay-site-nav .ay-nav-menu>summary::-webkit-details-marker{display:none}
-.ay-site-nav .ay-nav-menu[open]>summary{border-color:#2d6084}
-.ay-site-nav .ay-nav-dropdown{position:absolute;top:calc(100% + 2px);left:0;min-width:190px;max-width:min(280px,calc(100vw - 24px));background:white;border:1px solid #a9bfd0;z-index:41}
-.ay-site-nav .ay-nav-dropdown a{display:block;padding:10px 12px;border-bottom:1px solid #d6e2e9;color:#31526e;text-decoration:none;white-space:nowrap}
-.ay-site-nav .ay-nav-dropdown a:last-child{border-bottom:0}
-.ay-site-nav .ay-nav-dropdown a:hover,.ay-site-nav .ay-nav-dropdown a:focus-visible{background:#e8f0f5;color:#234e6e}
-.ay-site-nav .ay-nav-dropdown a[aria-current="page"]{background:#e4edf3;font-weight:700;border-left:3px solid #2d6084;padding-left:9px}
-@media(max-width:640px){.ay-site-nav{gap:3px;margin-bottom:10px;font-size:11px}.ay-site-nav .ay-nav-main,.ay-site-nav .ay-nav-menu>summary{min-height:33px;padding:8px 11px}}
+
+/* Contextual documentation link in the upper-right app header. */
+html body header.ay-header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 18px}
+html body header.ay-header .ay-title-stack{min-width:0;flex:1 1 350px}
+html body header.ay-header .ay-guide-link{display:inline-flex;justify-content:center;align-items:center;min-height:33px;white-space:nowrap;border:1px solid #91abbc;border-radius:0;padding:7px 12px;background:transparent;color:#f5f9fc;text-decoration:none;font:600 12px/1.3 Arial,"Segoe UI",sans-serif}
+html body header.ay-header .ay-guide-link:hover{background:#375c76;border-color:#d7e3eb;color:#fff}
+html body header.ay-header .ay-guide-link:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(max-width:640px){html body header.ay-header .ay-title-stack{flex-basis:210px}html body header.ay-header .ay-guide-link{padding:6px 10px}}
+
 </style></head><body>
-<header><h1>AyFlux</h1><p class="site-subtitle">Acyclovir pharmacokinetics across kidney function, hemodialysis, peritoneal dialysis, and CRRT</p></header>
+<header class="ay-header">
+  <div class="ay-title-stack"><h1>AyFlux</h1><p class="site-subtitle">Acyclovir pharmacokinetics across kidney function, hemodialysis, peritoneal dialysis, and CRRT</p></div>
+  <a class="ay-guide-link" href="/learn/" aria-label="Open AyFlux user guide">User guide</a>
+</header>
 <div class="shell"><div class="notice">For educational use only. Do not base patient dosing or dialysis prescriptions on this tool.</div>
-<nav class="ay-site-nav" aria-label="Site navigation">
-  <a class="ay-nav-main" href="/" aria-current="page">Simulator</a>
-  <details class="ay-nav-menu">
-    <summary>Learn <span aria-hidden="true">▾</span></summary>
-    <div class="ay-nav-dropdown">
-      <a href="/learn/">Overview</a>
-      <a href="/learn/dialysis/">Dialysis</a>
-      <a href="/learn/model-methods/">Model methods</a>
-    </div>
-  </details>
-</nav><a class="mobile-skip" href="#concentration">View concentration charts ↓</a>
+<a class="mobile-skip" href="#concentration">View concentration charts ↓</a>
 <div class="layout"><aside>
 <h2>Patient</h2><div id="patientControls"></div><div id="drugCaution" class="advisory hidden" role="note"></div>
 <h2>Dialysis scenario</h2><label for="primary" class="tip">Primary mode for detailed modeling and uncertainty band</label><select id="primary"><option>No dialysis</option><option>Intermittent HD</option><option>Peritoneal dialysis</option><option>CRRT</option><option>Custom sequence</option></select><p id="modeHint" class="tip"></p><div id="modeControls"></div>
