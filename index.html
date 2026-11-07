@@ -997,7 +997,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 &lt;https://www.gnu.org/licenses/&gt;.
 </pre>
 </section>
-<section id="ayfluxCitation" class="project-info" tabindex="-1" aria-labelledby="ayfluxCitationHeading">  <div class="topline"><h2 id="ayfluxCitationHeading">Cite AyFlux</h2><a class="project-close" href="#tabs">Close</a></div>
+<section id="ayfluxCitation" class="project-info" tabindex="-1" aria-labelledby="ayfluxCitationHeading">
+  <div class="topline"><h2 id="ayfluxCitationHeading">Cite AyFlux</h2><a class="project-close" href="#tabs">Close</a></div>
   <p>Suggested software citation metadata (CITATION.cff):</p>
   <pre class="legal-text">cff-version: 1.2.0
 message: &quot;If you use AyFlux in research, cite this software and the original pharmacokinetic studies referenced in the Methods section.&quot;
@@ -1996,7 +1997,8 @@ function benchmarkHtml(){
  $('benchmarkParams').textContent=`Nominal 70 kg, CrCl 95 mL/min, 1-hour infusions, 10 doses. Central volume ×${c.vcScale.toFixed(3)}, renal/nonrenal clearance ×${c.clearanceScale.toFixed(3)}. ${fitActive?'Modified from default values.':'Default parameters.'}`;
 }
 $('fitPublished').addEventListener('click',()=>{
- researchStatus('Calculating aggregate-label parameter fit…'); // Yield the main thread before synchronous, small-grid optimization.
+ researchStatus('Calculating aggregate-label parameter fit…');
+ // Yield the main thread before synchronous, small-grid optimization.
  setTimeout(()=>{
   try{const fit=E.fitBenchmark(c);c.vcScale=+fit.vcScale.toFixed(4);c.clearanceScale=+fit.clearanceScale.toFixed(4);
    benchmarkHtml();renderInputs();defer();researchStatus(`Applied fit to four aggregate label values: volume ×${c.vcScale}, clearance ×${c.clearanceScale}. These values are not independently validated.`);
