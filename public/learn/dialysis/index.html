@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acyclovir and Dialysis: PK Simulation Guide | AyFlux</title>
+<meta name="description" content="Understand how hemodialysis, peritoneal dialysis, CRRT, and residual kidney function can influence modeled acyclovir exposure in AyFlux.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://ayflux.org/learn/dialysis/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="AyFlux">
+<meta property="og:title" content="Acyclovir and Dialysis: PK Simulation Guide | AyFlux">
+<meta property="og:description" content="Understand how hemodialysis, peritoneal dialysis, CRRT, and residual kidney function can influence modeled acyclovir exposure in AyFlux.">
+<meta property="og:url" content="https://ayflux.org/learn/dialysis/">
+<meta name="twitter:card" content="summary">
+<style>:root{font:16px/1.65 system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#28233f;background:#f8f6fc}*{box-sizing:border-box}body{margin:0}a{color:#62419b}a:hover{text-decoration-thickness:2px}header{background:linear-gradient(115deg,#392559,#8050ad 60%,#df777f);color:#fff;padding:32px max(20px,calc((100vw - 960px)/2))}header a{color:#fff}header p{color:#f6eaf9}main{max-width:960px;margin:auto;padding:28px 20px 52px}nav{display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem}h1{font-size:clamp(1.65rem,3.5vw,2.55rem);line-height:1.2}h2{font-size:1.35rem;margin:32px 0 8px}h3{font-size:1.05rem}p{max-width:78ch}article,aside{background:#fff;border:1px solid #e9e2f0;border-radius:10px;padding:22px;margin:18px 0}article h2:first-child{margin-top:0}.warning{border-left:4px solid #d49a31;background:#fff9eb;padding:12px 16px}li{margin:7px 0}.cta{display:inline-block;background:#6743a2;color:white;padding:10px 16px;border-radius:6px;text-decoration:none;font-weight:700}footer{max-width:960px;margin:auto;padding:20px;border-top:1px solid #dfd9e8;color:#69617d;font-size:.9rem}@media(max-width:650px){article,aside{padding:16px}}</style>
+</head>
+<body>
+<header><nav aria-label="Site"><a href="/">AyFlux simulator</a><a href="/learn/">Learning center</a><a href="/learn/dialysis/">Dialysis</a><a href="/learn/model-methods/">Model methods</a></nav><h1>Acyclovir pharmacokinetics and dialysis</h1><p>A conceptual comparison of renal replacement modalities in an educational concentration–time model.</p></header>
+<main><p class="warning"><strong>Educational use only.</strong> AyFlux is not a validated clinical decision-support system. Its output must not determine medication dosing, toxicity diagnosis, or dialysis prescriptions.</p>
+<article><h2>Hemodialysis</h2><p>Intermittent hemodialysis changes drug clearance during a scheduled session. In AyFlux, comparing a simulation with and without dialysis helps illustrate why the timing and duration of a session matter when interpreting a plasma concentration curve.</p><p>Real-world drug removal depends on factors such as equipment, treatment prescription, and patient characteristics. A modeled session is not a clinical clearance measurement.</p></article>
+<article><h2>Peritoneal dialysis</h2><p>Peritoneal dialysis relies on transfer across the peritoneal membrane and exchanges of dialysate. Unlike a simplified intermittent hemodialysis session, concentration changes may depend on dwell timing, dialysate handling, and prescribed exchange characteristics. AyFlux offers educational peritoneal dialysis controls for exploring these assumptions.</p><p>See the primary literature on <a href="https://pubmed.ncbi.nlm.nih.gov/2243158/">acyclovir in continuous ambulatory peritoneal dialysis</a> for historical measured data.</p></article>
+<article><h2>Continuous renal replacement therapy</h2><p>Continuous treatments introduce a different clearance timeline from intermittent sessions. Modeled clearance should be interpreted in the context of the particular CRRT settings and any remaining native kidney function; modalities are not interchangeable.</p></article>
+<article><h2>No dialysis and residual kidney function</h2><p>Always consider the baseline modeled scenario. A no-dialysis comparison can help separate the effect of assumed native kidney clearance from the effect of a dialysis prescription. Changes in residual kidney function can materially alter simulated exposure.</p></article>
+<article><h2>Reading a modality comparison</h2><ol><li>Keep the modeled dose and patient assumptions unchanged across scenarios.</li><li>Compare concentration curves against the timing of dialysis sessions.</li><li>Review uncertainty and sensitivity rather than treating a single estimate as exact.</li><li>Do not infer a patient-specific dose, safety threshold, or treatment schedule from these curves.</li></ol></article>
+<p><a class="cta" href="/">Open the interactive simulator</a></p></main>
+<footer>© 2026 AyFlux · <a href="https://github.com/khalilm3264/acyclovirpksim">Source code</a> · Educational pharmacokinetic modeling</footer>
+</body></html>
