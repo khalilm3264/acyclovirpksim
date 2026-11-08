@@ -2,6 +2,10 @@
 
 AyFlux provides **result-level interoperability**, not a native PK-Sim or MoBi model. In the simulator's **CSV format** selector, choose **Detailed results** for the wide-format file or **R / OSP tidy** for the consistent long-format file, then click **Export CSV**. The tidy format is designed for independent plotting, analysis, and cross-model comparisons. The **Research tools** tab can also import a PK-Sim or MoBi results CSV and overlay the corresponding curves after you explicitly map its columns and units. Imported data remain in your browser.
 
+## Dynamic kidney function data
+
+If using the optional time-varying CrCl profile, the **Detailed results** CSV includes an `entered_residual_crcl_mL_min` column at each simulated time point. The configuration JSON preserves the original user-entered hour/CrCl pairs. The **R / OSP tidy** export remains a concentration-only schema and does not carry a separate CrCl trajectory; keep the matching JSON configuration when sharing a reproducible example.
+
 ## Tidy CSV schema (v1)
 
 The CSV contains **one row per time, scenario, analyte, and statistic**. The file is UTF-8, comma-delimited, double-quote escaped per standard CSV conventions, and uses a decimal point. It contains no patient identifiers unless someone adds such information outside AyFlux.
