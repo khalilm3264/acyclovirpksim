@@ -9,3 +9,5 @@ test('XLSX is an OOXML ZIP with typed concentration cells and simulation metadat
 test('XLSX rejects missing, nonfinite or misaligned simulation values',()=>{
  assert.throws(()=>xlsx.workbook({},['missing']));const r=fixture();r['A & B'].plasma.median[1]=NaN;assert.throws(()=>xlsx.workbook(r,['A & B']));r['A & B'].plasma.median=[];assert.throws(()=>xlsx.workbook(r,['A & B']));
 });
+
+test('export includes numeric molecular weights for both analytes',()=>{const text=new TextDecoder().decode(xlsx.workbook(fixture(),['A & B']));assert.match(text,/Molecular Weight \[g\/mol\]/);assert.match(text,/<c r="I2"><v>225\.21<\/v><\/c>/);assert.match(text,/<c r="I2"><v>239\.19<\/v><\/c>/);});
