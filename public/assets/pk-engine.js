@@ -399,7 +399,7 @@ function sensitivity(c,mode){
  const hasHD=mode==='Intermittent HD'||(mode==='Custom sequence'&&config.schedule.some(r=>r.type==='HD'));
  const hasCRRT=mode==='CRRT'||(mode==='Custom sequence'&&config.schedule.some(r=>r.type==='CRRT'));
  const oral=config.dosingMode==='repeat'?config.route==='Valacyclovir oral':config.customDoses.some(d=>d.route==='Valacyclovir oral');
- const factors=[['crcl','Residual CrCl'],['vcScale','Central distribution volume'],['clearanceScale','Plasma clearance multiplier'],['csfRatio','CSF/plasma partition'],['formFactor','CMMG formation factor']];
+ const factors=(config.renalMode==='profile'?[]:[['crcl','Residual CrCl']]).concat([['vcScale','Central distribution volume'],['clearanceScale','Plasma clearance multiplier'],['csfRatio','CSF/plasma partition'],['formFactor','CMMG formation factor']]);
  if(hasPD)factors.push(['pdCl','PD membrane solute transfer'],['pdGlucose','PD dextrose (uniform base)'],['pdUfBase','PD osmotic UF coefficient']);
  if(hasHD)factors.push(['hdCl','Hemodialysis clearance']);
  if(hasCRRT)factors.push(['effluent','CRRT effluent rate']);
