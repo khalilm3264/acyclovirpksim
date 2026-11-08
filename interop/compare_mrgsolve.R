@@ -40,10 +40,8 @@ for (case in cases) {
     VCSCALE = 1, CLSCALE = 1, FORMFACTOR = 1, METRENAL = 1,
     HDCL = 0, HDSTART = 30, HDEND = 30, METDIAL = 1
   )
-  output <- as.data.frame(
-    mrgsolve::mrgsim(mod, events = regimen, end = 24, delta = 0.25,
-                     atol = 1e-11, rtol = 1e-9)
-  )
+  output <- mrgsolve::mrgsim(mod, events = regimen, end = 24, delta = 0.25,
+                            atol = 1e-11, rtol = 1e-9, output = "df")
   # mrgsolve may emit two rows at the administration boundary (t=0).
   output <- output[!duplicated(output$time, fromLast = TRUE), , drop = FALSE]
   output <- output[order(output$time), , drop = FALSE]
