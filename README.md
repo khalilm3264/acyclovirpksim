@@ -1,82 +1,110 @@
-# AyFlux
+<p align="center">
+  <img src="public/ayflux-logo.png" alt="AyFlux molecule logo" width="88">
+</p>
 
-**Preview release: v0.20.0 · configuration schema 2 · AGPL-3.0-only.** See [CHANGELOG.md](CHANGELOG.md). This is an educational, not clinically validated application.
+<h1 align="center">AyFlux</h1>
 
-AyFlux is an educational acyclovir and valacyclovir pharmacokinetics simulator covering kidney function, intermittent hemodialysis, peritoneal dialysis, and CRRT.
+<p align="center"><strong>Explore acyclovir pharmacokinetics across kidney function and dialysis.</strong></p>
 
-## Project structure
+<p align="center">
+  An open-source, browser-based teaching and exploratory research simulator for IV acyclovir, oral valacyclovir, and the CMMG metabolite.
+</p>
 
-- `public/index.html` — simulator interface and styles
-- `public/assets/vendor/plotly-basic-3.3.1.min.js` — locally hosted Plotly Basic v3.3.1 (third-party MIT-licensed code)
-- `public/assets/pk-engine.js` — pharmacokinetic modeling engine
-- `public/assets/simulator-ui.js` — simulator interactions, rendering, and configuration handling
-- `public/assets/ayflux-exchange.js` — versioned, tidy CSV result export for R/OSP comparison
-- `public/assets/osp-import.js` — local CSV parser, explicit unit mapping and curve comparison
-- `public/assets/research-workspace.js` and `model-integrity.js` — optional research and numerical quality tools
-- `public/sw.js` and `manifest.webmanifest` — static offline app shell and install metadata
-- `public/assets/simulator-worker.js` — same-origin background calculation worker
-- `public/learn/` — educational documentation
-- `src/index.js` — Cloudflare Worker security headers and site metadata
-- `tests/` — dependency-free model and site regression tests
-- `interop/` — base-R CSV comparison helper; `docs/data-exchange.md` describes the result schema
+<p align="center">
+  <a href="https://ayflux.org/"><strong>Open simulator</strong></a> ·
+  <a href="https://ayflux.org/learn/">User guide</a> ·
+  <a href="wiki/Roadmap.md">Development roadmap</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="https://ayflux.org/cite/">Cite AyFlux</a>
+</p>
 
-The browser loads Plotly, the PK engine, the CSV exchange helper, release metadata, numerical helpers, the OSP CSV parser, the simulator interface, optional research workspace, and offline registration **in that order**. JavaScript runs from same-origin files instead of inline script blocks, matching the Worker's `script-src 'self'` Content Security Policy. Styling remains inline in the main HTML, allowed by the Worker's existing style policy.
+<p align="center">
+  <a href="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml"><img alt="Build and tests" src="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: AGPL-3.0-only" src="https://img.shields.io/badge/license-AGPL--3.0--only-315f7b"></a>
+  <a href="CHANGELOG.md"><img alt="Version 0.21.0 preview" src="https://img.shields.io/badge/version-0.21.0_preview-326f79"></a>
+</p>
 
-## Development
+> [!IMPORTANT]
+> **Educational simulation only.** AyFlux is **not** a validated clinical decision-support system. Modeled plasma, CSF and CMMG concentrations must not be used to prescribe medication, select dialysis prescriptions, determine treatment efficacy, diagnose neurotoxicity or make other patient-care decisions.
 
-You can serve `public/` with a local static server. To run the automated checks, use Node.js 22 or newer:
+## What does AyFlux do?
 
-```sh
+AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal clearance, a CMMG formation/elimination compartment, oral valacyclovir absorption and exploratory CSF effect models. It lets you explore how hypothetical changes in dosing, renal function and dialysis schedules affect **predicted** concentration–time curves.
+
+| Explore | Current tools |
+| --- | --- |
+| **Kidney function** | Constant CrCl or an optional user-drawn, piecewise-linear CrCl trajectory; independent renal clearance terms for acyclovir and CMMG |
+| **Renal replacement therapy** | Intermittent hemodialysis, peritoneal dialysis, CRRT and custom sequential schedules |
+| **Drug administration** | IV acyclovir infusions and oral valacyclovir, with repeat or custom dose timelines |
+| **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and estimated peaks |
+| **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity and model consistency checks |
+| **Data exchange** | Detailed or tidy CSV exports, configuration JSON, an R comparison script, and local PK-Sim/MoBi **results** CSV overlays |
+| **Reports and access** | Printable research report, literature benchmark examples and offline static app caching where supported |
+
+**What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
+
+## Get started
+
+**Use it online:** [ayflux.org](https://ayflux.org/) — no sign-in or app download is needed.
+
+**Run it locally** with Node.js 22+ and a local static server:
+
+```bash
+git clone https://github.com/khalilm3264/acyclovirpksim.git
+cd acyclovirpksim
+python3 -m http.server 8000 --directory public
+```
+
+Open `http://localhost:8000` in your browser. You can run the dependency-free test suite with:
+
+```bash
 node --test tests/*.test.cjs
 ```
 
-The test suite covers loading order, Content Security Policy compatibility, key dosing/renal rules, and basic simulation behavior across dialysis modes. It **does not replace** browser testing or external clinical validation.
+The browser uses a locally served Plotly bundle, a pharmacokinetic engine, and a separate interface. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
 
-## Deployment
+## A guide to the interface
 
-Cloudflare Wrangler uses `./public` as the assets directory (see `wrangler.jsonc`).
+1. **Patient and medication:** set body mass, residual CrCl or a kidney-function trajectory, dosing, and the simulation horizon.
+2. **Dialysis scenario:** select no dialysis, HD, PD, CRRT or a custom schedule. The graph overlays are hypothetical counterfactual comparisons; a custom schedule follows a single simulated switching timeline.
+3. **Concentration and clearance:** explore plasma, CSF, CMMG, and time-resolved dialysis/renal clearance results, with clearly labeled units.
+4. **Research tools:** inspect model assumptions, compare a local OSP results CSV, export data, run numerical diagnostics and create a printable research summary.
 
-GitHub Actions runs syntax checks and pharmacokinetic regression tests on pull requests and pushes to `main`. Only successful pushes can deploy. The same workflow retains GitHub Pages hosting and can deploy the Cloudflare Worker.
+For deeper explanations, see [Dialysis](https://ayflux.org/learn/dialysis/), [Model methods and limits](https://ayflux.org/learn/model-methods/) and the [CSV/R/OSP exchange guide](docs/data-exchange.md).
 
-### Enable test-gated Cloudflare deployments
+## Reproducibility and project plans
 
-The GitHub workflow is ready, but **Cloudflare deployment is disabled until explicitly enabled**. Do these steps in order:
+AyFlux is a **teaching model with exploratory parameters**, not a fitted, externally validated population PK model. Agreement between two simulated curves is not independent clinical validation. Data exchange files include explicit time and concentration units; simulations remain subject to model assumptions and numerical limitations.
 
-1. In Cloudflare, create a **new scoped API token** using the **Edit Cloudflare Workers** template (or the smallest Worker Editor permissions sufficient to deploy the existing `acyclovpksim` Worker). Revoke any token previously disclosed outside a secure secret store.
-2. Find your Cloudflare account ID in the Cloudflare dashboard.
-3. In this GitHub repository, visit **Settings → Secrets and variables → Actions → Secrets**, and add repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Never commit these values to source files or paste the API token into chat.
-4. Disable the existing Cloudflare **Worker Git-triggered builds** (Cloudflare → Workers & Pages → `acyclovpksim` → Settings → Builds → **Disconnect**). This leaves the existing deployment and custom domain in place, but prevents Cloudflare from deploying pushes before GitHub's tests finish.
-5. In GitHub, visit **Settings → Secrets and variables → Actions → Variables** and create the **repository variable** `CLOUDFLARE_DEPLOY_ENABLED` with value `true`. The variable only enables the deployment job; it is not a secret.
-6. Go to **Actions → Test and deploy AyFlux → Run workflow** on `main`. Verify the `test` job passes before `deploy-cloudflare` succeeds. The deployment uses `wrangler.jsonc` to update the existing Worker. No secrets are needed in the source code.
+- [Version history](CHANGELOG.md) · [Software citation](CITATION.cff) · [Data-exchange schema](docs/data-exchange.md)
+- [Roadmap and planned scientific work](wiki/Roadmap.md) · [Verification plan](wiki/Release-Plan.md)
+- [Wiki-ready pages](wiki/Home.md) · [How to publish to the GitHub Wiki](docs/wiki-publishing.md)
 
-If the variable is unset or not `true`, the Cloudflare deployment job is skipped, while tests and GitHub Pages continue. If it is enabled but either secret is missing, deployment fails **before invoking Wrangler** with a clear error.
+The `wiki/` directory contains the reviewed wiki source pages. GitHub's separate **Wiki** tab is not automatically updated by changes to this repository.
 
-After activation, each push to `main` deploys Cloudflare only after tests pass. Pull requests run tests but never deploy. This protects against regressions caught by the test suite, not all possible browser or clinical issues.
+## Contributing
 
-## Data exchange and community contributions
+Contributions are welcome, particularly reproducible bugs, accessibility improvements, model-unit checks, and literature-backed proposals. Before opening a pull request, read [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md).
 
-AyFlux can export a detailed CSV and a tidy concentration–time CSV with explicit hours, analyte, scenario, statistic, and mg/L units. The new **Export R / OSP CSV** button is designed for analysis and comparison in R with separately exported PK-Sim or MoBi data. It does **not** export `.pkml` or other OSP model/project files.
+Scientific changes should include the units, equations or assumptions changed, primary references, model uncertainty, and regression tests. Please **do not post identifiable patient data or secrets** in issues, examples, or pull requests.
 
-- [CSV and R / PK-Sim / MoBi comparison guide](docs/data-exchange.md)
-- [Public data exchange guide](https://ayflux.org/learn/interoperability/)
-- [Contributing guidelines](CONTRIBUTING.md) and [security reporting](SECURITY.md)
+## Repository map
 
-## Research workspace (v0.20.0 preview)
+| Location | Purpose |
+| --- | --- |
+| [`public/index.html`](public/index.html) | Responsive simulator interface |
+| [`public/assets/pk-engine.js`](public/assets/pk-engine.js) | Model equations, dialysis state and numerical integration |
+| [`public/assets/simulator-ui.js`](public/assets/simulator-ui.js) | Form validation, plots, scenarios and configuration handling |
+| [`public/assets/osp-import.js`](public/assets/osp-import.js) / [`ayflux-exchange.js`](public/assets/ayflux-exchange.js) | Unit-aware results import/export |
+| [`public/assets/research-workspace.js`](public/assets/research-workspace.js) | Diagnostic, sensitivity and research comparison tools |
+| [`src/index.js`](src/index.js) | Cloudflare Worker headers and static routing |
+| [`tests/`](tests/) | Dependency-free regression and scientific consistency checks |
+| [`wiki/`](wiki/) / [`docs/`](docs/) | Roadmap, model exchange, deployment and contributor documentation |
 
-The Research tools tab offers local PK-Sim/MoBi CSV comparisons (with manual column/unit mapping), an exploratory CrCl × HD-clearance heatmap, model-array consistency and time-step diagnostics, an aggregate published-study reference catalog, and a browser print report (choose **Save as PDF**).
+## License, citations and contact
 
-These comparisons are **not** native OSP file imports, patient-level validation, or a substitute for clinical advice. The offline service worker caches only public static files on the ayflux.org origin; uploaded CSV contents and configurations are not cached or uploaded by this feature. First online load is required before offline use. Installation support depends on browser features.
+© 2026 Muhammad Khalil. AyFlux's first-party source code is licensed under **GNU Affero General Public License v3.0 only** ([LICENSE](LICENSE)). Third-party packages retain their respective licenses ([notices](THIRD_PARTY_NOTICES.md)).
 
-## License and safety
+If you use AyFlux for teaching or research illustration, cite the software using [`CITATION.cff`](CITATION.cff) and cite the primary pharmacokinetic sources relevant to your analysis. A software citation does not imply clinical validation.
 
-AyFlux source: GNU Affero General Public License v3.0 only (AGPL-3.0-only), see [LICENSE](LICENSE). Third-party libraries retain their own licenses.
-
-Project contact: [contact@ayflux.org](mailto:contact@ayflux.org). Website: [ayflux.org](https://ayflux.org/). Source and project copyright notices are in [NOTICE](NOTICE).
-
-**Educational use only.** Not for clinical prescribing, dosing decisions, or patient care.
-
-## Public documentation
-
-The site provides an educational model guide, a separate medical disclaimer at `/disclaimer/`, software citation at `/cite/`, and open-source license notices at `/license/`. The repository root now includes `CITATION.cff`, `NOTICE`, and `THIRD_PARTY_NOTICES.md`. The standard GNU AGPL license text in `LICENSE` remains unchanged.
-
-Terms of Use and Privacy Policy drafts remain outside `public/` pending an accurate public contact address and verification of the live hosting/privacy configuration; they are **not** yet a substitute for attorney review. See `drafts/README.md`.
+**Public project email:** [contact@ayflux.org](mailto:contact@ayflux.org) · **Website:** [ayflux.org](https://ayflux.org/) · **Release/deployment instructions:** [docs/deployment.md](docs/deployment.md).
