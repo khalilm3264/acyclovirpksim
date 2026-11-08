@@ -7,7 +7,7 @@ const CORE = [
  "/assets/pk-engine.js", "/assets/simulator-ui.js",
  "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
  "/assets/model-integrity.js", "/assets/research-workspace.js",
- "/assets/vendor/plotly-basic-3.3.1.min.js",
+ "/assets/plotly-loader.js",
  "/lite/", "/lite/lite.js", "/assets/lite-fallback.js",
  "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",
@@ -36,7 +36,7 @@ self.addEventListener("fetch", event => {
    return;
  }
  event.respondWith(caches.match(request,{ignoreSearch:true}).then(cached => cached || fetch(request).then(response => {
-   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || url.pathname === "/assets/vendor/plotly-cartesian-3.3.1.min.js")) {
+   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || ["/assets/vendor/plotly-basic-3.3.1.min.js","/assets/vendor/plotly-cartesian-3.3.1.min.js"].includes(url.pathname))) {
      const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(request,copy)).catch(()=>{});
    }
    return response;
