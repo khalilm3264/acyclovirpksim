@@ -8,6 +8,7 @@ const CORE = [
  "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
  "/assets/model-integrity.js", "/assets/research-workspace.js",
  "/assets/vendor/plotly-basic-3.3.1.min.js",
+ "/lite/", "/lite/lite.js", "/assets/lite-fallback.js",
  "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",
  "/learn/model-methods/", "/learn/dialysis/",
