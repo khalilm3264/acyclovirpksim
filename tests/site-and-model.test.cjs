@@ -146,6 +146,17 @@ test('the outdated research release label is absent', () => {
   assert.ok(html.includes('Peritoneal dialysis (PD) exchange table:'));
 });
 
+test('CSV export is a single sharp-cornered field across browsers', () => {
+  const markup = read('public/index.html');
+  assert.ok(markup.includes('<div class="export-control"><select id="csv"'));
+  assert.ok(!markup.includes('id="csvFormat"'));
+  assert.ok(markup.includes('-webkit-appearance:none!important'));
+  assert.ok(markup.includes('-moz-appearance:none!important'));
+  assert.ok(markup.includes('border-radius:0!important'));
+  assert.ok(markup.includes('class="export-picker"'));
+  assert.ok(!markup.includes('class="btn export-picker"'));
+});
+
 test('R/OSP CSV export is wired and interoperability documentation exists', () => {
   const ui = read('public/assets/simulator-ui.js');
   const dataExchange = require('../public/assets/ayflux-exchange.js');
