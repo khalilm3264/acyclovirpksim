@@ -1,6 +1,7 @@
 /* TEAM */
 Project: AyFlux
 Creator: Muhammad Khalil
+Contact: contact@ayflux.org
 Source code: https://github.com/khalilm3264/acyclovirpksim
 
 /* SITE */
