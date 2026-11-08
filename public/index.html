@@ -59,7 +59,7 @@ header h1{margin:0;line-height:1.25;font-size:clamp(19px,2.1vw,25px)}
 .metric .val{font-size:clamp(16px,2.1vw,22px);white-space:normal}
 .metric .sub{overflow-wrap:anywhere;font-size:11px}
 .site-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid #bdcbd5;background:#e2e9ee;color:#4c5f6d;margin-top:15px;padding:14px 12px;font-size:12px}
-.footer-link{border:0;padding:0;background:none;text-decoration:underline;color:#1a5c8c;cursor:pointer;font:inherit}
+.footer-link{border:0;padding:0;background:none;text-decoration:underline;color:#1a5c8c;cursor:pointer;font:inherit}.export-actions{display:flex;gap:7px;flex-wrap:wrap}.site-footer .source-link{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.site-footer .source-link svg{width:15px;height:15px;flex:none}
 .screen-reader-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .dose-key{font-size:11px;color:#475a68;margin:9px 0}
 .dose-key-iv,.dose-key-oral{display:inline-block;height:13px;width:5px;border-left:2px dashed #b54b28;margin:0 6px 0 10px;vertical-align:middle}
@@ -265,7 +265,7 @@ html body .shell > footer.site-footer{
 <div id="alerts" class="warning hidden" role="alert"></div>
 <p id="calculationState" class="progressbar hidden" role="status">Updating simulation…</p>
 <section id="concentration"><div class="card summary-card"><div class="topline"><h2>Simulation summary</h2></div><div class="stats" id="metrics"></div><p class="caption"><strong>90% model interval:</strong> the 5th–95th percentile of simulated parameter outcomes. “Unfitted” means no measured drug concentrations were used to update the model; “updated” means observations were used for Bayesian reweighting. Neither establishes 90% accuracy in clinical patients. Use Model validation to check held-out measurements.</p></div>
-<div class="card"><div class="topline"><h2>Compare modes on the same graph</h2><button class="btn" id="csv">Export CSV</button></div><p class="tip">Choose overlays. <strong>Custom sequence</strong> represents one patient switching modalities; the other curves are separate counterfactual scenarios. Dialysis shading follows the primary scenario so windows do not become visually ambiguous.</p><div class="scenarios" id="scenarioChecks"></div><p class="dose-key"><span class="dose-key-iv"></span> IV acyclovir administration <span class="dose-key-oral"></span> Oral valacyclovir administration (vertical dashed lines)</p><div class="keyline" id="shadeLegend"></div></div>
+<div class="card"><div class="topline"><h2>Compare modes on the same graph</h2><div class="export-actions"><button class="btn" id="csv">Export CSV</button><button class="btn secondary" id="csvInterop" type="button">Export R / OSP CSV</button></div></div><p class="tip">Choose overlays. <strong>Custom sequence</strong> represents one patient switching modalities; the other curves are separate counterfactual scenarios. Dialysis shading follows the primary scenario so windows do not become visually ambiguous. <a href="/learn/interoperability/">CSV and R guide</a>.</p><div class="scenarios" id="scenarioChecks"></div><p class="dose-key"><span class="dose-key-iv"></span> IV acyclovir administration <span class="dose-key-oral"></span> Oral valacyclovir administration (vertical dashed lines)</p><div class="keyline" id="shadeLegend"></div></div>
 <div class="primary-charts">
 <div class="card"><div class="topline"><h2>Plasma acyclovir</h2></div><div class="chart big" id="plasmaChart"></div><p class="caption">No validated therapeutic or toxic plasma acyclovir concentration has been established. Published steady-state IV peak and trough values are presented in Drug references <a class="source-id" href="#ref10">[10]</a>.</p></div>
 <div class="card"><div class="topline"><h2>CSF acyclovir</h2></div><div class="chart big" id="csfChart"></div><p class="caption">No validated CSF acyclovir therapeutic threshold is established. The optional shaded IC₅₀ range represents cell-culture susceptibility, not a CNS efficacy target <a class="source-id" href="#ref11">[11]</a>.</p></div>
@@ -372,10 +372,11 @@ html body .shell > footer.site-footer{
 
 
 </main></div>
-<footer class="site-footer"><span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a> <a class="cat-easter-egg" href="/cats/" title="A small surprise" aria-label="Meet the AyFlux cats">🐾</a></span><span>Educational use only · <a href="/disclaimer/">Disclaimer</a> · <a href="/license/">License</a> · <a href="/cite/">Cite</a> · <button type="button" class="footer-link" id="footerReferences">Methods and references</button> · <a href="/learn/">User guide</a></span></footer>
+<footer class="site-footer"><span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a> <a class="cat-easter-egg" href="/cats/" title="A small surprise" aria-label="Meet the AyFlux cats">🐾</a></span><span>Educational use only · <a href="/disclaimer/">Disclaimer</a> · <a href="/license/">License</a> · <a href="/cite/">Cite</a> · <button type="button" class="footer-link" id="footerReferences">Methods and references</button> · <a href="/learn/">User guide</a> · <a class="source-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" aria-label="AyFlux source code on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg> GitHub source</a></span></footer>
 </div>
 
 <script src="./assets/vendor/plotly-basic-3.3.1.min.js"></script>
 <script src="./assets/pk-engine.js"></script>
+<script src="./assets/ayflux-exchange.js"></script>
 <script src="./assets/simulator-ui.js"></script>
 </body></html>
