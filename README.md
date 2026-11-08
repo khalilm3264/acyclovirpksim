@@ -22,7 +22,7 @@
 <p align="center">
   <a href="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml"><img alt="Build and tests" src="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: AGPL-3.0-only" src="https://img.shields.io/badge/license-AGPL--3.0--only-315f7b"></a>
-  <a href="CHANGELOG.md"><img alt="Version 0.24.0 preview" src="https://img.shields.io/badge/version-0.24.0_preview-326f79"></a>
+  <a href="CHANGELOG.md"><img alt="Version 0.24.1 preview" src="https://img.shields.io/badge/version-0.24.1_preview-326f79"></a>
 </p>
 
 > [!IMPORTANT]
