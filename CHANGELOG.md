@@ -2,6 +2,15 @@
 
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
+## [0.24.2] - 2026-11-08 (preview)
+
+- Rebuilt **AyFlux Lite** around the original Renal PK Lab v2 interactive workflow: compact sidebar sliders, repeat-dose inputs, adjustable simulation duration, HD session timing/clearance, CRRT intensity, PD fill volume, and interactive comparison of **no dialysis, HD, CAPD, APD and CRRT**.
+- Added a route selector for IV acyclovir or oral valacyclovir, alongside one-draw nominal plasma acyclovir/CMMG curves, summary metrics, scenario visibility, cursor inspection, optional clearance chart and local CSV export.
+- Kept the **current canonical AyFlux PK engine** and its peritoneal membrane-transfer approximation, rather than reverting to the older simplified v2 PD clearance model. Removed v2's famciclovir, urea Kt/V and embedded multi-megabyte Plotly bundle. No Monte Carlo, external-model tools or custom dialysis prescription editor in Lite.
+- Retained the full-site More menu and slow-load Lite fallback. Default Lite controls resemble the former v2 educational values but remain nonclinical illustration only.
+- Added regression tests for source-model parity, CAPD/APD schedule distinction, oral dose conversion path, CSV data integrity, the size budget and extended user inputs.
+- Configuration schema stays at 2; this is a small incremental release within v0.24, not a new model major version.
+
 ## [0.24.1] - 2026-11-08 (preview)
 
 - Reduced AyFlux Lite visual prominence with a smaller, light header and removed its introductory heading and paragraph.
@@ -64,6 +73,7 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
+[0.24.2]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.24.1]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.24.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
