@@ -112,7 +112,7 @@ function modalControls(){if(primary==='No dialysis')return '';
 }
 function renalInputs(){
  const method=`<div class="inputrow"><label for="crclSource">Creatinine clearance input</label><select id="crclSource"><option value="manual" ${c.crclSource==='manual'?'selected':''}>Enter CrCl</option><option value="estimated" ${c.crclSource==='estimated'?'selected':''}>Estimate (Cockcroft–Gault)</option></select></div>`;
- if(c.renalMode==='profile')return '<p class="tip">The kidney function profile below sets residual CrCl for each time point. Cockcroft–Gault is not used for a changing profile.</p>';
+ if(c.renalMode==='profile')return '';
  if(c.crclSource==='manual')return method+numericField('crcl');
  const estimated=calculatedCrCl();
  return method+`<div class="inputrow"><label for="cgAge">Age (years)</label><input id="cgAge" type="number" min="18" max="120" step="1" value="${c.age}" class="cg-field"></div>`+
@@ -174,7 +174,7 @@ function renderRenalProfileChart(){
  pendingPlots.set('kidneyClearChart',{key:'kidneyClear',traces,layout:ll,signature});requestPlotFrame();
 }
 function renderInputs(){let keepAdvanced=$('advanced').open;
- $('patientControls').innerHTML=numericField('weight')+renalInputs()+renalProfileControls()+
+ $('patientControls').innerHTML=numericField('weight')+renalProfileControls()+renalInputs()+
  `<h2>Medication</h2><div class="inputrow"><label for="dosingMode">Dosing schedule</label><select id="dosingMode"><option value="repeat" ${c.dosingMode==='repeat'?'selected':''}>Repeat dose</option><option value="custom" ${c.dosingMode==='custom'?'selected':''}>Custom oral / IV schedule</option></select></div>`+
  (c.dosingMode==='repeat'?`<div class="inputrow"><label for="route">Drug and route</label><select id="route"><option value="Acyclovir IV" ${c.route==='Acyclovir IV'?'selected':''}>Acyclovir — IV</option><option value="Valacyclovir oral" ${c.route==='Valacyclovir oral'?'selected':''}>Valacyclovir — oral</option></select></div>`:'')+
  (c.dosingMode==='repeat'?['dose','every','doseCount'].concat(c.route==='Valacyclovir oral'?[]:['infusion']).map(numericField).join(''):
