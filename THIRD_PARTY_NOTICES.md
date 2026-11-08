@@ -9,7 +9,15 @@ AyFlux's own source is offered under the GNU Affero General Public License, vers
 - License: MIT
 - License text: https://github.com/plotly/plotly.js/blob/v3.3.1/LICENSE
 
-The following MIT license applies to the bundled Plotly.js distribution:
+## Plotly.js Cartesian v3.3.1 (optional on-demand heatmap)
+
+- Project: https://github.com/plotly/plotly.js
+- Package: `plotly.js-cartesian-dist-min@3.3.1` (pinned)
+- Staged deployment asset: `public/assets/vendor/plotly-cartesian-3.3.1.min.js`
+- License: MIT, using the same license terms stated below.
+- Built by `scripts/stage-cartesian.cjs` in GitHub Actions, rather than loading a third-party runtime CDN script.
+
+The following MIT license applies to the bundled Plotly.js distributions:
 
 ```text
 MIT License
