@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest an AyFlux improvement for research and teaching.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Problem and suggested improvement
+      description: What is hard to do currently, and how should AyFlux help?
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References and assumptions (if scientific)
+      description: Include primary literature and any relevant file specifications.
+  - type: textarea
+    id: testcases
+    attributes:
+      label: Example workflow
+      description: Describe synthetic input and expected output, with explicit units.
