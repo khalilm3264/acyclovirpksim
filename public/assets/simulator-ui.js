@@ -457,7 +457,7 @@ $('applyFullTimeline').addEventListener('click',()=>{
  pdStatusText('Applied dialysis sessions, exchange prescriptions and medication administrations together.');
 });
 $('applyFullTimelineBottom').addEventListener('click',()=>$('applyFullTimeline').click());
-$('csv').addEventListener('click',()=>{if(!dataIsCurrent)return;const format=$('csvFormat').value==='tidy'?'tidy':'wide';if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else download();});
+$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent||!['wide','tidy'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else download();});
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;
