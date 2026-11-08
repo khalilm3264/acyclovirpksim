@@ -19,4 +19,4 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
-[0.20.0]: https://github.com/khalilm3264/acyclovirpksim/tree/feature/research-workspace-v020
+[0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
