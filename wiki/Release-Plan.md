@@ -2,7 +2,7 @@
 
 ## Versioning
 
-AyFlux uses semantic-style versions for app releases, e.g., `v0.20.0`. Its configuration `schemaVersion: 2` is separately tracked; an application release does not automatically change the file schema. The GNU AGPLv3 is the **license** version, not the application version.
+AyFlux uses semantic-style versions for app releases, e.g., `v0.21.0`. Its configuration `schemaVersion: 2` is separately tracked; an application release does not automatically change the file schema. The GNU AGPLv3 is the **license** version, not the application version.
 
 ## Before merging
 
