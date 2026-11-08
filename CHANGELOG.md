@@ -2,6 +2,14 @@
 
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
+## [0.24.0] - 2026-11-08 (preview)
+
+- Created **AyFlux Lite** at `/lite/`: fixed no-dialysis, intermittent HD, CAPD and CRRT example curves for plasma acyclovir and CMMG, rendered using native Canvas without Plotly.
+- Reused the canonical PK engine with one deterministic nominal parameter set, fixed one-hour 700-mg IV demonstration, 70-kg adult and CrCl 0 mL/min over 48 hours. No dose, patient or dialysis customization, Monte Carlo, research tools or external charting libraries in the Lite page.
+- Added an always-visible **Lite** header link in the full simulator and an independent, dismissible **slow-load alternative** offered after ~9.5 seconds if the full simulator has not produced its first successful result. The fallback never redirects automatically.
+- Added accessible summary results, stated assumptions and scientific limitations, performance-focused regression tests and offline app-shell caching for Lite assets.
+- Preserved the full PK modeling equations and saved configuration schema 2. **Lite is an educational comparison, not clinical advice.**
+
 ## [0.23.0] - 2026-11-08 (preview)
 
 - Added two documented **optional R research workflows**: mrgsolve/C++ deterministic IV acyclovir/CMMG ODE parity checks and an OSPSuite-R example aciclovir PBPK results export for AyFlux curve overlays. Included frozen AyFlux reference fixtures, tests, and a dedicated mrgsolve parity CI workflow.
@@ -47,6 +55,7 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
+[0.24.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
