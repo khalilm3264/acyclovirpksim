@@ -15,7 +15,7 @@ AyFlux is an educational acyclovir and valacyclovir pharmacokinetics simulator c
 - `tests/` — dependency-free model and site regression tests
 - `interop/` — base-R CSV comparison helper; `docs/data-exchange.md` describes the result schema
 
-The browser loads the Plotly library, PK engine, and interface script **in that order**. JavaScript runs from same-origin files instead of inline script blocks, matching the Worker's `script-src 'self'` Content Security Policy. Styling remains inline in the main HTML, allowed by the Worker's existing style policy.
+The browser loads Plotly, the PK engine, the CSV exchange helper, and the interface script **in that order**. JavaScript runs from same-origin files instead of inline script blocks, matching the Worker's `script-src 'self'` Content Security Policy. Styling remains inline in the main HTML, allowed by the Worker's existing style policy.
 
 ## Development
 
