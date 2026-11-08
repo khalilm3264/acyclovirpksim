@@ -2,6 +2,15 @@
 
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
+## [0.23.0] - 2026-11-08 (preview)
+
+- Added two documented **optional R research workflows**: mrgsolve/C++ deterministic IV acyclovir/CMMG ODE parity checks and an OSPSuite-R example aciclovir PBPK results export for AyFlux curve overlays. Included frozen AyFlux reference fixtures, tests, and a dedicated mrgsolve parity CI workflow.
+- Published the **implemented AyFlux differential equations** for central/peripheral acyclovir, CMMG, oral absorption, PD flux/dialysate states and the separately updated CSF concentrations in the public model-methods guide, with explicit units, numerical method, and parameter evidence status.
+- Expanded literature citations with Smith et al. (2010, PMID 20038622) and Shah et al. (1986, PMID 3717158). Flagged the unexplained difference between the exploratory CSF CMMG model partition (0.25) and Smith's observed CSF/plasma AUC ratio (~0.025) as a **scientific limitation requiring recalibration**. **No PK parameter was silently changed.**
+- Applied a dual-weight Poppins ExtraBold/Light **AyFlux wordmark** and peach terminal x consistently across the simulator and informational pages, using first-party self-hosted font assets and license attribution.
+- Reduced footer clutter: the GitHub cat icon now serves as the source link without redundant text; the existing paw-print Easter egg still points to the cats page.
+- Preserved saved-configuration schema 2, current PK equations, and educational-use scope.
+
 ## [0.22.0] - 2026-11-07 (preview)
 
 - Made CSV export a **single compact dropdown**: choose a format to download immediately, with no second button.
@@ -38,6 +47,7 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
+[0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
