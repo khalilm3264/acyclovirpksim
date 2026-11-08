@@ -122,15 +122,17 @@ test('pointer interaction and nice-axis ticks are implemented without a chart li
  assert.ok(js.includes('clearTimeout(pending);pending=setTimeout(update,180)'));
 });
 
-test('slow-load fallback still offers Lite from nested main-site menu',()=>{
- const main=read('public/index.html'),helper=read('public/assets/lite-fallback.js');
- const ui=read('public/assets/simulator-ui.js');
- assert.ok(main.includes('<details class="ay-head-menu">'));
- assert.ok(main.includes('href="/lite/"'));
- assert.ok(main.includes('src="/assets/lite-fallback.js"'));
- assert.ok(helper.includes('setTimeout(offerLite,9500)'));
- assert.ok(helper.includes('window.addEventListener("ayflux:charts-ready",clearPrompt)'));
- assert.ok(ui.includes("document.documentElement.dataset.ayfluxReady='true'"));
+test('Lite is discoverable only inside the guide, with a direct guide header link',()=>{
+ const main=read('public/index.html'),guide=read('public/learn/index.html');
+ const sw=read('public/sw.js');
+ assert.ok(main.includes('<a class="ay-guide-link" href="/learn/"'));
+ assert.ok(!main.includes('<details class="ay-head-menu">'));
+ assert.ok(!main.includes('href="/lite/"'));
+ assert.ok(!main.includes('src="/assets/lite-fallback.js"'));
+ assert.ok(!main.includes('id="liteFallbackPrompt"'));
+ assert.ok(guide.includes('<summary>Alternative lightweight interface</summary>'));
+ assert.ok(guide.includes('href="/lite/"'));
+ assert.ok(!sw.includes('"/assets/lite-fallback.js"'));
 });
 
 test('Lite route is indexed and service worker caches only small first-load assets',()=>{
