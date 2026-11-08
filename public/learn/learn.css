@@ -222,3 +222,15 @@ html body .site-header.ay-header .ayflux-logo:focus-visible{outline:2px solid #f
 .site-footer .github-icon-link{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:23px;height:23px;padding:2px}
 .site-footer .github-icon-link img{display:block;width:19px;height:19px}
 .site-footer .github-icon-link:focus-visible{outline:2px solid #306487;outline-offset:2px}
+
+/* Reproducible published model-equation and parameter-provenance displays. */
+.model-equation{max-width:100%;overflow-x:auto;margin:10px 0 13px;border:1px solid #bdcbd5;border-left:3px solid #4383a8;padding:12px;background:#f5f9fb}
+.model-equation pre{font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow-x:visible;margin:0;color:#243f55}
+.model-table-wrap{width:100%;overflow-x:auto;max-width:100%}
+.model-parameter-table{width:100%;min-width:620px;border-collapse:collapse;font-size:12px;line-height:1.5}
+.model-parameter-table th,.model-parameter-table td{border:1px solid #b6c9d5;padding:8px;vertical-align:top;text-align:left}
+.model-parameter-table th{background:#e5eff4;color:#274760}
+.model-parameter-table td:first-child{font-weight:700}
+.model-parameter-table td{overflow-wrap:anywhere}
+.card:target{scroll-margin-top:12px;outline:2px solid #3d729a;outline-offset:3px}
+@media(max-width:640px){.model-equation{padding:8px}.model-equation pre{font-size:10.5px}.model-parameter-table{font-size:11px}}
