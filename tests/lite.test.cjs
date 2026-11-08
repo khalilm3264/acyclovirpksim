@@ -14,8 +14,8 @@ test('AyFlux Lite uses the full scientific engine but skips heavy rendering depe
  assert.match(page,/<script defer src="\/assets\/pk-engine\.js"><\/script>/);
  assert.match(page,/<script defer src="\/lite\/lite\.js"><\/script>/);
  assert.doesNotMatch(page,/plotly|chart\.js|echarts|cdn\./i);
- assert.equal((page.match(/<input\\b/g)||[]).length,3);
- assert.doesNotMatch(page,/<select\\b|<button\\b/i);
+ assert.equal((page.match(/<input\b/g)||[]).length,3);
+ assert.doesNotMatch(page,/<select\b|<button\b/i);
  for(const id of ['liteWeight','liteCrcl','liteDose'])assert.ok(page.includes('id="'+id+'"'));
  assert.doesNotMatch(page,/Four dialysis scenarios\. Two concentration charts\.|A quick, fixed-assumption comparison using/i);
  assert.equal((page.match(/<canvas\b/g)||[]).length,2);
