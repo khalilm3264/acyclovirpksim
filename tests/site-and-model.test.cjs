@@ -43,7 +43,7 @@ function scenario(overrides = {}) {
 }
 
 test('simulator loads external scripts in the required order', () => {
-  const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+  const tags = [...html.matchAll(/<script\s([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
   assert.equal(tags.length, scriptPaths.length);
   const sources = tags.map(([, attrs, content]) => {
     assert.equal(content.trim(), '', 'Inline JavaScript would violate script-src self');
@@ -66,7 +66,7 @@ test('worker Content Security Policy allows local scripts but not inline scripts
   const directive = /script-src ([^;]+);/.exec(worker)?.[1];
   assert.equal(directive?.trim(), "'self'");
   assert.doesNotMatch(directive, /unsafe-inline|unsafe-eval/);
-  const markup = html.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '');
+  const markup = html;
   assert.doesNotMatch(markup, /\s(?:onclick|onchange|oninput|onload|onerror)\s*=/i);
 });
 

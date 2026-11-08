@@ -206,8 +206,8 @@ function updateCustomDoseSummary(){
 }
 function renderChecks(){$('scenarioChecks').innerHTML=modes.map(m=>`<label class="scenario" style="--tone:${COLORS[m]}"><input type="checkbox" data-mode="${m}" ${visible.has(m)?'checked':''} ><span class="line-key" aria-hidden="true" style="border-top-style:${LEGEND_DASH[m]};border-top-color:${COLORS[m]}"></span>${m}</label>`).join('');
 const rows=results?results[primary].rows:[];
-$('shadeLegend').innerHTML=`<span>Background shading: <strong>${primary}</strong> schedule only${visible.has(primary)?'':' (curve hidden)'}</span>`+
- [...new Set(rows.map(r=>r.type))].map(type=>`<span><i style="background:${typeColor(type)}"></i>${type} active</span>`).join('');}
+const legend=$('shadeLegend'),label=document.createElement('span'),strong=document.createElement('strong');strong.textContent=primary;label.append('Background shading: ',strong,' schedule only'+(visible.has(primary)?'':' (curve hidden)'));legend.replaceChildren(label);
+ for(const type of new Set(rows.map(r=>r.type))){const item=document.createElement('span'),key=document.createElement('i');key.style.background=typeColor(type);item.append(key,document.createTextNode(type+' active'));legend.append(item);}}
 function typeColor(t){return ({HD:COLORS['Intermittent HD'],PD:COLORS['Peritoneal dialysis'],CAPD:COLORS['Peritoneal dialysis'],APD:COLORS['Peritoneal dialysis'],CRRT:COLORS.CRRT})[t]||'#888';}
 function plotShade(rows){if(!c.showShades)return [];
  const shapes=[];for(const r of rows){if(r.end<=r.start)continue;
@@ -239,7 +239,7 @@ function requestPlotFrame(){
    }).catch(error=>{
     plotlyWait=null;
     pendingPlots.clear();
-    alertMessage('Unable to load interactive charts: '+error.message+' You can use AyFlux Lite instead.');
+    alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'.');
    });
   }
   return;
@@ -502,7 +502,7 @@ function renderDoseRows(){
  paintDoses();checkDoseDraft();
 }
 function paintDoses(){
- $('doseBar').innerHTML=doseDraft.filter(d=>Number.isFinite(d.time)&&d.time>=0&&d.time<c.horizon).map((d,i)=>`<span title="${d.route} ${d.amount} mg @ ${timeLabel(d.time)}" style="left:${100*d.time/c.horizon}%;width:4px;background:${d.route==='Valacyclovir oral'?'#159b87':'#da5982'}"></span>`).join('');
+ $('doseBar').replaceChildren(...doseDraft.filter(d=>Number.isFinite(d.time)&&d.time>=0&&d.time<c.horizon).map(d=>{const marker=document.createElement('span');marker.title=d.route+' '+d.amount+' mg @ '+timeLabel(d.time);marker.style.left=(100*d.time/c.horizon)+'%';marker.style.width='4px';marker.style.background=d.route==='Valacyclovir oral'?'#159b87':'#da5982';return marker;}));
 }
 function checkDoseDraft(){const e=E.validateDoses({...c,dosingMode:'custom',customDoses:doseDraft});
  $('doseErrors').textContent=e.join('\n');$('doseErrors').classList.toggle('hidden',!e.length);return e;}

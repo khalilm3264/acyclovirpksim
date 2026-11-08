@@ -140,6 +140,6 @@ test('Lite route is indexed and service worker caches only small first-load asse
  for(const file of ['/lite/','/lite/lite.js','/assets/pk-engine.js']){
   assert.ok(sw.includes('"'+file+'"'),file);
  }
- assert.ok(site.includes('https://ayflux.org/lite/'));
- assert.ok(read('README.md').includes('https://ayflux.org/lite/'));
+ assert.ok([...site.matchAll(/<loc>([^<]+)<\/loc>/g)].some(([,value])=>{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='ayflux.org'&&url.pathname==='/lite/';}));
+ assert.ok(read('README.md').split(/\s|[()<>]/).some(value=>{try{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='ayflux.org'&&url.pathname==='/lite/';}catch{return false;}}));
 });
