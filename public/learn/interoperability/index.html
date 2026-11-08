@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSV and R Data Exchange with PK-Sim and MoBi | AyFlux</title>
+  <meta name="description" content="Export AyFlux pharmacokinetic simulation results to CSV, analyze them in R, and compare time profiles with PK-Sim and MoBi exports.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ayflux.org/learn/interoperability/">
+  <link rel="icon" href="/favicon.ico?v=rotated-20261107" type="image/x-icon">
+  <link rel="stylesheet" href="/learn/learn.css">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="AyFlux">
+  <meta property="og:title" content="CSV and R Data Exchange with PK-Sim and MoBi | AyFlux">
+  <meta property="og:description" content="How to export AyFlux model results for use in R and for comparison with Open Systems Pharmacology tools.">
+  <meta property="og:url" content="https://ayflux.org/learn/interoperability/">
+</head>
+<body>
+<header class="site-header ay-header">
+  <div class="ay-header-brand">
+    <img class="ay-brand-mark" src="/ayflux-logo.png?v=1" alt="" width="42" height="42">
+    <div class="ay-title-stack">
+      <a class="brand" href="/">AyFlux</a>
+      <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function and dialysis</p>
+    </div>
+  </div>
+  <a class="ay-guide-link" href="/">← Simulator</a>
+</header>
+<div class="shell">
+  <div class="notice"><strong>Educational use only.</strong> Data exchange supports research comparison, not clinical validation or treatment decisions.</div>
+  <nav class="guide-topics" aria-label="User guide topics">
+    <span class="guide-topics-label">User guide</span>
+    <a href="/learn/">Overview</a>
+    <a href="/learn/dialysis/">Dialysis</a>
+    <a href="/learn/model-methods/">Model methods</a>
+    <a href="/learn/interoperability/" aria-current="page">Data exchange</a>
+  </nav>
+  <main>
+    <section class="page-intro">
+      <span class="eyebrow">Data interoperability</span>
+      <h1>Using AyFlux results with CSV, R, PK-Sim, and MoBi</h1>
+      <p>Export simulated concentration–time profiles for analysis and comparison outside AyFlux.</p>
+    </section>
+    <section class="card">
+      <h2>Export results from AyFlux</h2>
+      <p>On the simulator's <strong>Concentrations</strong> tab, choose <strong>Export R / OSP CSV</strong>. This produces a tidy CSV with time in hours, dialysis scenario, analyte, model statistic, concentration in mg/L, and interval coverage. The existing <strong>Export CSV</strong> button remains available for the detailed AyFlux table.</p>
+      <p>The tidy file includes plasma and CSF acyclovir, plasma and CSF CMMG, and modeled lower, median, and upper curves across scenarios. Each concentration is a <em>model result</em>, not a patient measurement.</p>
+    </section>
+    <section class="card">
+      <h2>Read and compare in R</h2>
+      <p>Use the <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/interop/ayflux_compare.R">AyFlux R example</a> to read one scenario and compare it with a time series exported by PK-Sim or MoBi. It uses base R and asks you to choose the exact OSP columns and units rather than guessing.</p>
+      <pre><code>source("interop/ayflux_compare.R")
+ayflux &lt;- read_ayflux_curve("ayflux_results_tidy.csv",
+                            scenario = "Intermittent HD")
+plot(ayflux$time_hours, ayflux$concentration_mg_L,
+     type = "l", xlab = "Time (h)", ylab = "mg/L")</code></pre>
+      <p>The full <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/docs/data-exchange.md">exchange guide</a> explains column names and comparing an OSP export.</p>
+    </section>
+    <section class="card">
+      <h2>What works with PK-Sim and MoBi?</h2>
+      <p><a href="https://www.open-systems-pharmacology.org/">Open Systems Pharmacology</a> tools can export model results as CSV. You can compare those results against AyFlux in R after matching time, concentration units, dosing, dialysis settings, and sampling compartment.</p>
+      <p><strong>Important:</strong> AyFlux does not create a native PK-Sim or MoBi model. The OSP <code>.pkml</code> format contains model structure, not just results. AyFlux's CSV is not a substitute for <code>.pkml</code>, and direct import into OSP has not been verified for this schema.</p>
+    </section>
+    <section class="card">
+      <h2>Before comparing models</h2>
+      <ul>
+        <li>Use the same drug, administered dose and route, and simulation timeline.</li>
+        <li>Check whether values are in <strong>mg/L</strong>, <strong>µg/mL</strong>, or a molar unit before comparing them.</li>
+        <li>Match plasma with plasma. Do not treat a CSF or CMMG curve as equivalent to a plasma acyclovir curve.</li>
+        <li>Account for differences in kidney function, dialysis scheduling, and model structure.</li>
+        <li>Recognize that agreement between two models is not independent clinical validation.</li>
+      </ul>
+      <p>For more detail, see <a href="https://docs.open-systems-pharmacology.org/working-with-pk-sim/pk-sim-documentation/importing-exporting-project-data-models">PK-Sim's import/export documentation</a> and the <a href="https://github.com/Open-Systems-Pharmacology/OSPSuite-R">OSPSuite-R project</a>.</p>
+    </section>
+    <div class="actions"><a class="btn" href="/">Open simulator</a></div>
+  </main>
+  <footer class="site-footer">
+    <span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a></span>
+    <span><a href="/learn/">User guide</a> · <a href="/disclaimer/">Disclaimer</a> · <a href="/cite/">Cite</a> · <a href="https://github.com/khalilm3264/acyclovirpksim">GitHub source</a></span>
+  </footer>
+</div>
+</body>
+</html>
