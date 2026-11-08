@@ -140,3 +140,20 @@ test('the outdated research release label is absent', () => {
   assert.ok(!html.includes('Version 13 research tools:'));
   assert.ok(html.includes('Peritoneal dialysis (PD) exchange table:'));
 });
+
+test('R/OSP CSV export is wired and interoperability documentation exists', () => {
+  const ui = read('public/assets/simulator-ui.js');
+  const dataExchange = require('../public/assets/ayflux-exchange.js');
+  assert.ok(html.includes('id="csvInterop"'));
+  assert.ok(html.includes('href="/learn/interoperability/"'));
+  assert.ok(html.includes('src="./assets/ayflux-exchange.js"'));
+  assert.ok(ui.includes("window.AyFluxExchange.exportTidyCSV"));
+  assert.ok(read('public/learn/interoperability/index.html').includes('rel="canonical"'));
+  assert.ok(read('public/sitemap.xml').includes('/learn/interoperability/'));
+  const result = pk.simulate(scenario({ horizon: 2 }), 'No dialysis');
+  const csv = dataExchange.exportTidyCSV({ 'No dialysis': result },
+    ['No dialysis'], { coverage: 0.9 });
+  assert.ok(csv.startsWith('time_hours,scenario,analyte,statistic,'));
+  assert.ok(csv.includes('No dialysis,plasma_acyclovir,median,'));
+  assert.ok(!csv.includes('NaN'));
+});
