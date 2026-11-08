@@ -12,3 +12,19 @@ Language: English
 
 /* IMPORTANT */
 AyFlux is for educational use only. It must not be used for clinical dosing decisions or dialysis prescriptions.
+
+/* CATS */
+The hidden AyFlux mascots: Claire, George, Sabrina, and Diamond.
+                         /\_/\
+   /\_/\       /\  /\   ( o.o )
+  ( o.o )     /  \/  \   > ^ <
+  / > < \    (  o  o  )  /   \
+ (_______)   (   ^    ) (_____)
+             /  _____  \
+            /__/     \__\
+
+  /\_/\
+ ( o.o )
+ ( >#< )
+ /     \
+(_______)
