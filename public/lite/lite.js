@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  *
  * Native Canvas rendering. No Plotly, worker, saved inputs, analytics or API calls.
- * Nominal model, no Monte Carlo, no user customization, not clinical validation.
+ * Nominal model, no Monte Carlo, just three educational inputs; not clinical validation.
  */
 (function(root,factory){
  "use strict";
@@ -23,7 +23,14 @@
   {mode:"Peritoneal dialysis",label:"Peritoneal dialysis",color:"#07856d",dash:[2,4]},
   {mode:"CRRT",label:"CRRT",color:"#376dbc",dash:[9,3,2,3]}
  ]);
- function fixedConfiguration(engine){
+ const INPUT_LIMITS=Object.freeze({weight:[30,150],crcl:[0,120],dose:[0,1500]});
+ function fixedConfiguration(engine,inputs={}){
+  for(const [key,limits] of Object.entries(INPUT_LIMITS)){
+   const value=inputs[key];
+   if(value!==undefined&&(!Number.isFinite(value)||value<limits[0]||value>limits[1]))
+    throw Error(key+" must be between "+limits[0]+" and "+limits[1]+".");
+  }
+  if(Object.keys(inputs).some(key=>!Object.hasOwn(INPUT_LIMITS,key)))throw Error("Unsupported Lite input.");
   // All parameters below are illustrative inputs, NOT suggested medical therapy.
   return {...engine.DEFAULTS,
    weight:70,crclSource:"manual",crcl:0,renalMode:"constant",
@@ -33,12 +40,13 @@
    hdStart:8,hdDuration:4,hdRepeat:48,hdCl:81.8,
    pdMethod:"manual",pdRxEnabled:false,
    capdDwell:6,capdExchanges:4,pdVolume:2,
-   effluent:25,sieving:0.95,delivered:0.85
+   effluent:25,sieving:0.95,delivered:0.85,
+   ...inputs
   };
  }
- function compute(engine){
+ function compute(engine,inputs={}){
   if(!engine||typeof engine.simulate!=="function")throw Error("AyFlux PK engine is unavailable.");
-  const config=fixedConfiguration(engine);
+  const config=fixedConfiguration(engine,inputs);
   return MODES.map(meta=>{
    const result=engine.simulate(config,meta.mode);
    const series=(key)=>result[key]?.median;
@@ -104,35 +112,60 @@
   const status=document.getElementById("liteStatus");
   const resultsBody=document.getElementById("liteResults");
   const canvases=[document.getElementById("acvChart"),document.getElementById("cmmgChart")];
-  if(!status||!resultsBody||canvases.some(x=>!x))return;
-  try{
-   const results=compute(engine);
-   resultsBody.replaceChildren();
-   for(const r of results){
-    const tr=document.createElement("tr");
-    const cells=[r.label,r.peak.toFixed(2),r.auc.toFixed(1),r.cmmgPeak.toFixed(2)];
-    cells.forEach((val,i)=>{
-     const cell=document.createElement(i===0?"th":"td");
-     if(i===0)cell.setAttribute("scope","row");else cell.className="num";
-     cell.textContent=val;tr.appendChild(cell);
-    });
-    resultsBody.appendChild(tr);
+  const controls={weight:document.getElementById("liteWeight"),crcl:document.getElementById("liteCrcl"),dose:document.getElementById("liteDose")};
+  const assumptionText=document.getElementById("liteAssumptions");
+  if(!status||!resultsBody||canvases.some(x=>!x)||Object.values(controls).some(x=>!x))return;
+  let results=[],refreshTimer=0,frame=0;
+  const repaint=()=>{
+   if(!results.length)return;
+   draw(canvases[0],results,"plasma");
+   draw(canvases[1],results,"cmmg");
+  };
+  function readInputs(){
+   const values={};
+   for(const [key,element] of Object.entries(controls)){
+    const value=element.valueAsNumber;
+    if(element.value.trim()===""||!Number.isFinite(value))throw Error("Enter a valid "+key+".");
+    values[key]=value;
    }
-   const repaint=()=>{draw(canvases[0],results,"plasma");draw(canvases[1],results,"cmmg");};
-   repaint();
-   let frame=0;
-   window.addEventListener("resize",()=>{
-    if(frame)cancelAnimationFrame(frame);
-    frame=requestAnimationFrame(()=>{frame=0;repaint();});
-   },{passive:true});
-   status.textContent="Generated locally using the AyFlux nominal PK engine. No inputs or uploads.";
-  }catch(error){
-   resultsBody.replaceChildren();
-   const tr=document.createElement("tr"),td=document.createElement("td");
-   td.colSpan=4;td.textContent="Charts unavailable. Try refreshing or open the full simulator.";
-   tr.appendChild(td);resultsBody.appendChild(tr);
-   status.textContent="Unable to render the fixed demonstration: "+error.message;
+   return values;
   }
+  function update(){
+   try{
+    const inputs=readInputs();
+    const next=compute(engine,inputs);
+    results=next;
+    resultsBody.replaceChildren();
+    for(const r of results){
+     const tr=document.createElement("tr");
+     const cells=[r.label,r.peak.toFixed(2),r.auc.toFixed(1),r.cmmgPeak.toFixed(2)];
+     cells.forEach((val,i)=>{
+      const cell=document.createElement(i===0?"th":"td");
+      if(i===0)cell.setAttribute("scope","row");else cell.className="num";
+      cell.textContent=val;tr.appendChild(cell);
+     });
+     resultsBody.appendChild(tr);
+    }
+    if(assumptionText)assumptionText.textContent=inputs.weight+" kg, residual creatinine clearance "+inputs.crcl+" mL/min, one "+inputs.dose+" mg IV acyclovir infusion";
+    repaint();
+    status.textContent="Updated locally using the AyFlux nominal PK engine. Fixed dialysis schedules; no uploads.";
+   }catch(error){
+    status.textContent="Check inputs: "+error.message+" Previous valid curves are retained.";
+   }
+  }
+  for(const input of Object.values(controls)){
+   input.addEventListener("input",()=>{
+    clearTimeout(refreshTimer);
+    refreshTimer=setTimeout(update,160);
+   });
+   input.addEventListener("change",()=>{clearTimeout(refreshTimer);update();});
+  }
+  window.addEventListener("resize",()=>{
+   if(frame)cancelAnimationFrame(frame);
+   frame=requestAnimationFrame(()=>{frame=0;repaint();});
+  },{passive:true});
+  update();
  }
+
  return {MODES,fixedConfiguration,compute,ticks,mount};
 });
