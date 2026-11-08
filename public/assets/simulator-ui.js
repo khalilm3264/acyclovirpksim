@@ -674,6 +674,7 @@ $('loadConfig').addEventListener('change',async e=>{
   Object.assign(c,next);setPalette(importedPalette);primary=input.primary;
   visible=new Set(input.visibleScenarios);
   draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
+  renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
   measureDraft=structuredClone(c.observations);rxDraft=structuredClone(c.pdRxRows);
   $('primary').value=primary;researchRenderedPrimary='';renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxRows();
   migratedPayload=migrating?converted:null;
