@@ -53,7 +53,7 @@ function finishJob(data,error){
  const job=activeJob;activeJob=null;
  if(job.id===calculationVersion){
   if(error){pendingCsvExport=false;calculationError(error);}
-  else{results=data;resultsRevision++;dataIsCurrent=true;document.documentElement.dataset.ayfluxReady='true';alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
+  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
  }
  startNextJob();
 }
@@ -257,6 +257,10 @@ function drawNextPlot(){
  .then(()=>{
   const rect=target.getBoundingClientRect();
   chartStates.set(where,{signature:job.signature,width:rect.width,height:rect.height});
+  if(document.documentElement.dataset.ayfluxReady!=='true'){
+   document.documentElement.dataset.ayfluxReady='true';
+   window.dispatchEvent(new Event('ayflux:charts-ready'));
+  }
  }).catch(error=>{alertMessage('Unable to draw chart: '+error.message);})
  .finally(()=>{plotRunning=false;activePlot=null;requestPlotFrame();});
 }
