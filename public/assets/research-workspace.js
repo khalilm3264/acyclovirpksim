@@ -111,12 +111,12 @@ $('runHeatmap').addEventListener("click",async ()=>{
   const tbody=document.createElement("tbody");
   values.forEach((row,j)=>{
    const tr=document.createElement("tr"),th=document.createElement("th");th.scope="row";th.textContent=String(yValues[j]);tr.append(th);
-   row.forEach(value=>{
+   row.forEach((value,i)=>{
     const td=document.createElement("td"),pct=hi===lo?0:(value-lo)/(hi-lo);
     const shade=Math.round(244-110*pct);
     td.style.backgroundColor="rgb("+shade+","+Math.round(248-72*pct)+","+Math.round(250-48*pct)+")";
     td.style.color="#203c50";td.textContent=value.toFixed(value>=100?0:2);
-    td.title="HD "+yValues[j]+" mL/min; CrCl "+xValues[row.indexOf(value)]+" mL/min";
+    td.title="HD "+yValues[j]+" mL/min; CrCl "+xValues[i]+" mL/min";
     tr.append(td);
    });
    tbody.append(tr);
