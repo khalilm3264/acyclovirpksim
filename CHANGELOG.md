@@ -2,6 +2,16 @@
 
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
+## [0.25.0] - 2026-11-08 (preview)
+
+- Added a dedicated visual explorer, accessible from Research tools with the current simulation settings.
+- Added an optional mass-accounting Sankey with a time slider, remaining compartment amounts, cumulative elimination and acyclovir-equivalent CMMG formation. CSF estimates remain outside the mass balance.
+- Added configurable two-input heatmaps, selectable cells with linked concentration curves, grid CSV export, and an on-demand rotatable 3D response surface.
+- Added PK-Sim / MoBi XLSX concentration-data export with numeric time/concentration columns, explicit units, simulated-data labels, and separate scenario/analyte sheets. This is comparison data, not a runnable PKML model.
+- Replaced shared header logos with a transparent vector molecular mark and typeset Model Methods equations with native MathML and TeX annotations.
+- Verified mass conservation, unchanged concentration predictions with optional accounting, workbook readback, and desktop/mobile browser interactions in automated checks.
+- Updated release labels, citations, JSON export metadata and offline cache. Configuration schema remains 2.
+
 ## [0.24.2] - 2026-11-08 (preview)
 
 - UI polish: in custom medication schedules, show infusion duration only for IV acyclovir rows. The full-site header now links directly to the User guide; Lite is linked within a collapsed guide section instead of a header menu or automatic loading prompt. No model or configuration schema changes.
@@ -81,3 +91,5 @@ This changelog distinguishes the application version from the configuration sche
 [0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
+
+[0.25.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md

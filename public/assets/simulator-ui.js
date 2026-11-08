@@ -639,8 +639,8 @@ function downloadJSON(obj,name){
 }
 $('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
 $('saveConfig').addEventListener('click',()=>{
- const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.24.2',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
- downloadJSON(data,'ayflux_simulation_v0.24.2.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
+ const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
+ downloadJSON(data,'ayflux_simulation_v0.25.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
 });
 $('loadConfig').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
@@ -703,7 +703,7 @@ $('loadConfig').addEventListener('change',async e=>{
   const errors=[...new Set(E.MODES.flatMap(mode=>E.validate(next,mode)))];
   if(errors.length)throw Error('Configuration fails model validation: '+errors.slice(0,3).join('; '));
   // Only now, after all shape and numerical checks, apply the loaded configuration.
-  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.24.2',savedAt:new Date().toISOString(),
+  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
   Object.assign(c,next);setPalette(importedPalette);primary=input.primary;
