@@ -210,3 +210,15 @@ body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 body>.shell{width:100%;flex:1 0 auto;display:flex;flex-direction:column}
 body>.shell>main{flex:1 0 auto}
 body>.shell>.site-footer{margin-top:auto}
+
+/* AyFlux dual-weight logo, pinned and served locally for CSP/offline use. */
+@font-face{font-family:"AyFlux Poppins";font-style:normal;font-weight:300;font-display:swap;src:url("/assets/fonts/poppins-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"AyFlux Poppins";font-style:normal;font-weight:800;font-display:swap;src:url("/assets/fonts/poppins-latin-800-normal.woff2") format("woff2")}
+html body .site-header.ay-header .ayflux-logo{display:inline-flex;align-items:baseline;white-space:nowrap;font-family:"AyFlux Poppins","Poppins",sans-serif;font-size:clamp(25px,2.35vw,31px);line-height:1.14;letter-spacing:-0.035em;text-decoration:none;color:#fff}
+html body .site-header.ay-header .ayflux-logo .ay{font-weight:800}
+html body .site-header.ay-header .ayflux-logo .flux{font-weight:300}
+html body .site-header.ay-header .ayflux-logo .x{color:#f0a37c}
+html body .site-header.ay-header .ayflux-logo:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.site-footer .github-icon-link{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:23px;height:23px;padding:2px}
+.site-footer .github-icon-link img{display:block;width:19px;height:19px}
+.site-footer .github-icon-link:focus-visible{outline:2px solid #306487;outline-offset:2px}
