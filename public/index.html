@@ -261,6 +261,13 @@ html body .shell > footer.site-footer{
 .site-footer .release-link{font-weight:700;white-space:nowrap}
 .site-footer .offline-status{font-size:11px;color:#31556f}
 @media(max-width:650px){#research .research-plot{min-height:240px}#research #heatmapTable th,#research #heatmapTable td{min-width:47px}}
+
+/* Keep the footer at the viewport bottom on short pages; let it follow content on long pages. */
+html{min-height:100%}
+html body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+html body>.shell{width:100%;flex:1 0 auto;display:flex;flex-direction:column}
+html body>.shell>.layout{flex:1 0 auto}
+html body .shell>footer.site-footer{margin-top:auto}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
