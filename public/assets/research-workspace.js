@@ -93,7 +93,7 @@ $('runHeatmap').addEventListener("click",async ()=>{
    updateText("heatmapStatus","Computing "+(j+1)+" of "+yValues.length+" rows…");
    await pause();
    for(const crcl of xValues){
-    const c={...config,crcl,hdCl:yValues[j]};
+    const c={...config,renalMode:'constant',crcl,hdCl:yValues[j]};
     const simulated=pk.simulate(c,"Intermittent HD");
     const value=simulated.summary[metric].median;
     if(!Number.isFinite(value))throw Error("Nonfinite model result in grid.");
