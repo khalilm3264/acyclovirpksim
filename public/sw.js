@@ -34,7 +34,7 @@ self.addEventListener("fetch", event => {
    return;
  }
  event.respondWith(caches.match(request,{ignoreSearch:true}).then(cached => cached || fetch(request).then(response => {
-   if(response.ok && response.type === "basic" && CORE.includes(url.pathname)) {
+   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || url.pathname === "/assets/vendor/plotly-cartesian-3.3.1.min.js")) {
      const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(request,copy)).catch(()=>{});
    }
    return response;
