@@ -81,7 +81,8 @@ test('kidney profile editor, CSV format selector and layout share consistent UI 
  const root=path.resolve(__dirname,'..');
  const html=fs.readFileSync(path.join(root,'public/index.html'),'utf8');
  const ui=fs.readFileSync(path.join(root,'public/assets/simulator-ui.js'),'utf8');
- assert.ok(html.includes('id="csvFormat"'));
+ assert.ok(html.includes('select id="csv"'));
+ assert.ok(!html.includes('id="csvFormat"'));
  assert.ok(html.includes('id="csv"'));
  assert.ok(!html.includes('id="csvInterop"'));
  assert.ok(ui.includes('function renalProfileControls'));
