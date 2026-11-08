@@ -168,7 +168,7 @@ $('printResearchReport').addEventListener("click",async ()=>{
  try{
   const snap=getSnapshot(),config=snap.config,sim=snap.results[snap.primary];
   const values=[
-   ["Release","v0.20.0 (research preview)"],["Scenario",snap.primary],["Dose route",config.route],["Dose (mg)",config.dose],
+   ["Release","v0.21.0 (research preview)"],["Scenario",snap.primary],["Dose route",config.route],["Dose (mg)",config.dose],
    ["Dose interval (hours)",config.every],["Dose administrations",config.doseCount],["Body mass (kg)",config.weight],
    ["Creatinine clearance (mL/min)",config.crcl],["Simulation horizon (hours)",config.horizon],
    ["Monte Carlo draws",config.draws],["Model interval fraction",config.coverage],
@@ -193,7 +193,7 @@ $('printResearchReport').addEventListener("click",async ()=>{
   const report='<!doctype html><html lang="en"><head><meta charset="utf-8"><title>AyFlux research report</title><style>'+
   '@page{size:A4;margin:17mm}body{font:12px/1.55 Arial,sans-serif;color:#263e52}h1{font-size:23px;color:#28485e;border-bottom:3px solid #829dad;padding-bottom:8px}h2{font-size:15px;color:#28485e;margin:20px 0 8px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #adbfca;padding:6px 9px;text-align:left}th{width:55%;background:#edf2f5}.note{background:#fdf6e5;border-left:3px solid #a79851;padding:9px}.sources{font-size:10px;word-break:break-word}.meta{color:#5a6b77}img{display:block;margin:8px 0}'+
   '</style></head><body><h1>AyFlux — educational PK research report</h1>'+
-  '<p class="meta">Generated '+escapeHtml(new Date().toLocaleString())+' · AyFlux v0.20.0 · Configuration schema 2</p>'+
+  '<p class="meta">Generated '+escapeHtml(new Date().toLocaleString())+' · AyFlux v0.21.0 · Configuration schema 2</p>'+
   '<p class="note"><strong>EDUCATIONAL USE ONLY.</strong> This report contains simulated, non-validated concentration estimates. It must not determine medication dosing, diagnosis, toxicity assessment, dialysis prescription, or patient care.</p>'+
   '<h2>Simulation assumptions</h2><table>'+values.map(r=>row(...r)).join('')+'</table>'+
   '<h2>Model summary (medians)</h2><table>'+metrics.map(r=>row(...r)).join('')+'</table>'+
