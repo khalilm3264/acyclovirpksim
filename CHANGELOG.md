@@ -4,6 +4,7 @@ This changelog distinguishes the application version from the configuration sche
 
 ## [0.24.2] - 2026-11-08 (preview)
 
+- UI polish: in custom medication schedules, show infusion duration only for IV acyclovir rows. The full-site header now links directly to the User guide; Lite is linked within a collapsed guide section instead of a header menu or automatic loading prompt. No model or configuration schema changes.
 - Rebuilt **AyFlux Lite** around the original Renal PK Lab v2 interactive workflow: compact sidebar sliders, repeat-dose inputs, adjustable simulation duration, HD session timing/clearance, CRRT intensity, PD fill volume, and interactive comparison of **no dialysis, HD, CAPD, APD and CRRT**.
 - Added a route selector for IV acyclovir or oral valacyclovir, alongside one-draw nominal plasma acyclovir/CMMG curves, summary metrics, scenario visibility, cursor inspection, optional clearance chart and local CSV export.
 - Kept the **current canonical AyFlux PK engine** and its peritoneal membrane-transfer approximation, rather than reverting to the older simplified v2 PD clearance model. Removed v2's famciclovir, urea Kt/V and embedded multi-megabyte Plotly bundle. No Monte Carlo, external-model tools or custom dialysis prescription editor in Lite.
