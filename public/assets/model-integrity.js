@@ -32,7 +32,20 @@
        if(lo>m+1e-8||m>hi+1e-8){issues.push(key+": median outside interval");break;}
      }
    }
-   if(config?.crcl===0 && sim.kidneyClear?.median?.some(v=>Math.abs(v)>1e-8))
+   const getCrCl=t=>{
+     if(config?.renalMode!=='profile')return config?.crcl;
+     const points=config?.renalProfile;
+     if(!Array.isArray(points)||!points.length)return NaN;
+     if(t<=points[0].time)return points[0].crcl;
+     for(let j=1;j<points.length;j++){
+       if(t<=points[j].time){
+         const a=points[j-1],b=points[j];
+         return a.crcl+(b.crcl-a.crcl)*(t-a.time)/(b.time-a.time);
+       }
+     }
+     return points.at(-1).crcl;
+   };
+   if(sim.kidneyClear?.median?.some((v,i)=>Math.abs(getCrCl(sim.time[i]))<1e-8&&Math.abs(v)>1e-8))
      issues.push("Renal acyclovir clearance is nonzero at CrCl = 0");
    notes.push("Checks only numerical consistency, not clinical accuracy or external validation.");
    return {passed:!issues.length,issues,notes};
