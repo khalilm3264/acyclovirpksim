@@ -2,6 +2,16 @@
 
 This is a **living plan**, not a promise of release dates, clinical utility, or completion. The priority is scientific transparency, reliable numerical behavior, and a compact interface.
 
+## v0.21.0 preview additions
+
+- An optional user-entered CrCl time trajectory, interpolated into the acyclovir and CMMG renal elimination models
+- A dual-axis CrCl / modeled renal drug-clearance chart instead of an uninformative constant renal-clearance trace
+- A single CSV export button with a format selector; detailed CSV includes the entered CrCl at every time sample
+- Uniform spacing between sidebar fields, buttons, blocks and mobile layouts; short-page footer alignment
+- A refreshed GitHub README, roadmap and verification documentation
+
+The CrCl trajectory is a **hypothetical model input**, never a prediction of kidney injury or recovery.
+
 ## Current / near-term
 
 | Priority | Workstream | Deliverable | Definition of done |
