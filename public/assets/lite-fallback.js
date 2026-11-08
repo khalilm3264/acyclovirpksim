@@ -10,7 +10,7 @@
  let ready=false,hidden=false,prompt=null;
  function clearPrompt(){ready=true;if(prompt){prompt.remove();prompt=null;}}
  if(document.documentElement.dataset.ayfluxReady==="true")ready=true;
- window.addEventListener("ayflux:results-updated",clearPrompt);
+ window.addEventListener("ayflux:charts-ready",clearPrompt);
  function offerLite(){
   if(hidden||ready||document.documentElement.dataset.ayfluxReady==="true")return;
   if(!document.body){setTimeout(offerLite,1200);return;}
