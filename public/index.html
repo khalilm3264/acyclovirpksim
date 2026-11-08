@@ -268,6 +268,27 @@ html body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 html body>.shell{width:100%;flex:1 0 auto;display:flex;flex-direction:column}
 html body>.shell>.layout{flex:1 0 auto}
 html body .shell>footer.site-footer{margin-top:auto}
+
+/* Unified simulator spacing: one compact rhythm across sidebar, cards and controls. */
+:root{--ui-space-1:6px;--ui-space-2:10px;--ui-space-3:14px}
+html body .shell>.layout{gap:var(--ui-space-3)}
+html body .shell .layout>aside{padding:var(--ui-space-3)}
+html body aside h2{margin:var(--ui-space-3) 0 var(--ui-space-2)}
+html body aside .inputrow{margin:0 0 var(--ui-space-2)}
+html body aside .inputrow .entry{gap:var(--ui-space-1)}
+html body .shell .card{padding:var(--ui-space-3);margin-bottom:var(--ui-space-3)}
+html body .shell .tabs{gap:var(--ui-space-1);margin-bottom:var(--ui-space-3)}
+html body .shell .topline{gap:var(--ui-space-2)}
+html body .shell .export-actions,
+html body .shell .timeline-actions,
+html body .shell .research-tools-actions{gap:8px;row-gap:8px}
+html body .shell .primary-charts,
+html body .shell .two{gap:var(--ui-space-3)}
+html body .shell aside .renal-profile-grid{gap:var(--ui-space-1);margin-bottom:var(--ui-space-1)}
+html body .shell aside .renal-profile-actions{gap:var(--ui-space-1)}
+html body .shell aside .renal-profile-panel{margin:var(--ui-space-2) 0;padding:var(--ui-space-2)}
+html body .shell .export-actions select{max-width:min(170px,42vw)}
+@media(max-width:650px){html body .shell>.layout{gap:var(--ui-space-2)}html body .shell .layout>aside{padding:var(--ui-space-2)}html body .shell .card{padding:var(--ui-space-2);margin-bottom:var(--ui-space-2)}html body .shell .export-actions{justify-content:flex-start}}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
@@ -297,7 +318,7 @@ html body .shell>footer.site-footer{margin-top:auto}
 <div class="two"><div class="card"><h2>Plasma CMMG </h2><div class="chart" id="cmmgChart"></div><p class="caption">CMMG level associated with reported neurotoxicity: <strong>2.58 mg/L = 10.8 µmol/L</strong> <a class="source-id" href="#ref3">[3]</a>. Not a toxic dose, cutoff for therapy, or diagnostic test.</p></div><div class="card"><h2>CSF CMMG </h2><div class="chart" id="csfCmmgChart"></div><p class="caption">No validated CSF CMMG neurotoxicity threshold has been established <a class="source-id" href="#ref4">[4]</a>.</p></div></div>
 </section>
 <section id="clearance" class="hidden">
-<div class="card"><h2>Residual kidney function over time</h2><div id="renalState" class="advisory" role="status" aria-live="polite"></div><div id="kidneyDynamicPrompt" class="renal-prompt"><p class="tip">A constant CrCl produces a flat graph. Add a time-varying kidney function profile to see changing residual kidney clearance alongside the simulation.</p><button class="btn secondary" id="enableRenalProfile" type="button">Set up a CrCl profile</button></div><div class="chart big hidden" id="kidneyClearChart"></div><p class="caption">This graph displays your <strong>entered/interpolated CrCl</strong> alongside model-derived acyclovir renal clearance. They are different quantities, both in mL/min. Acyclicovir and CMMG renal clearance are exactly zero when the entered CrCl is zero. The linear CrCl trajectory is a user-selected exploratory assumption, <strong>not a prediction of kidney recovery or decline</strong>. <a class="source-id" href="#ref1">[1]</a></p></div>
+<div class="card"><h2>Residual kidney function over time</h2><div id="renalState" class="advisory" role="status" aria-live="polite"></div><div id="kidneyDynamicPrompt" class="renal-prompt"><p class="tip">A constant CrCl produces a flat graph. Add a time-varying kidney function profile to see changing residual kidney clearance alongside the simulation.</p><button class="btn secondary" id="enableRenalProfile" type="button">Set up a CrCl profile</button></div><div class="chart big hidden" id="kidneyClearChart"></div><p class="caption">This graph displays your <strong>entered/interpolated CrCl</strong> alongside model-derived acyclovir renal clearance. They are different quantities, both in mL/min. Acyclovir and CMMG renal clearance are exactly zero when the entered CrCl is zero. The linear CrCl trajectory is a user-selected exploratory assumption, <strong>not a prediction of kidney recovery or decline</strong>. <a class="source-id" href="#ref1">[1]</a></p></div>
 <div class="card"><h2>Dialysis-only acyclovir clearance </h2><div class="chart big" id="dialClearChart"></div><p class="caption"><strong>Net dialysis transfer is zero outside active HD, PD dwells, and CRRT. The peritoneal transfer component may be negative during back-diffusion.</strong> Colored comparison lines can remain above zero if other scenarios with active dialysis are overlaid. <a class="source-id" href="#ref1">[1]</a><a class="source-id" href="#ref2">[2]</a></p></div>
 <div class="card"><h2>Total acyclovir clearance (including the patient's kidneys) </h2><div class="chart big" id="clearanceChart"></div><p class="caption">Displayed instantaneous net elimination = residual kidney + nonrenal/metabolic + net dialysis transfer. During PD, net drug back-diffusion can reduce apparent total elimination. <strong>It normally remains above zero when dialysis is off</strong> because the body still eliminates some acyclovir.</p></div>
 <div class="card"><h2>Dialysis drug removal / peritoneal transfer </h2><div class="chart big" id="dialRateChart"></div><p class="caption">Membrane transfer rate is zero outside dialysis windows; PD mass is counted as removed only after a drain. Back-diffusion can make net transfer negative during a dwell. Urea Kt/V is not substituted for acyclovir clearance <a class="source-id" href="#ref1">[1]</a><a class="source-id" href="#ref2">[2]</a>.</p></div><div class="card"><h2>Peritoneal dialysis membrane transport</h2><p class="tip">Model-predicted net ultrafiltration and dialysate acyclovir, reflecting glucose gradient decay, membrane transport and completed drains. This is a simplified mass-balance teaching model, not a validated three-pore model. <a href="#ref12">[12]</a></p><div class="two"><div><h3>Net ultrafiltration rate (mL/hour)</h3><div class="chart" id="pdUfChart"></div></div><div><h3>Dialysate acyclovir concentration (mg/L)</h3><div class="chart" id="pdConChart"></div></div></div></div>
