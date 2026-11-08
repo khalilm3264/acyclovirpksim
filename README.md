@@ -12,7 +12,6 @@
 
 <p align="center">
   <a href="https://ayflux.org/"><strong>Open simulator</strong></a> ·
-  <a href="https://ayflux.org/lite/"><strong>AyFlux Lite</strong></a> ·
   <a href="https://ayflux.org/learn/">User guide</a> ·
   <a href="wiki/Roadmap.md">Development roadmap</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
@@ -56,7 +55,7 @@ Lite deliberately excludes Monte Carlo uncertainty, CSF forecasts, Kt/V, famcicl
 
 **Performance:** the Lite HTML, JavaScript interface and shared PK engine total approximately **65 KB uncompressed**. Lite renders line charts with the browser's native Canvas API; it does **not** request Plotly or another charting library. The older self-contained Renal PK Lab v2 HTML bundled about 4.84 MB of Plotly despite a roughly 6.6 KB simulation engine. These sizes are not independently measured mobile loading times.
 
-The full site keeps Lite under **More → Lite quick view**. An optional prompt also offers Lite if the full simulator has not successfully drawn a chart after approximately 9.5 seconds. No automatic navigation or loss of user-entered settings.
+The full simulator header links directly to the **User guide**. Lite is available from a collapsed alternative-interface note in the guide's **About AyFlux** section; the full site no longer displays a separate Lite button or slow-load pop-up.
 
 ## Get started
 
