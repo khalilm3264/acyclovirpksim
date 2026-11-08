@@ -34,6 +34,7 @@ variability:['Parameter variability multiplier (assumed)','×',0,2,.1]
 const c=structuredClone(E.DEFAULTS);let primary='No dialysis',visible=new Set(['No dialysis','Intermittent HD','Custom sequence']),tab='concentration',results=null,timer=null,draft=structuredClone(c.schedule),dirtyTimeline=false,doseDraft=structuredClone(c.customDoses),dirtyDoses=false;
 let calculationVersion=0,activeJob=null,queuedJob=null,worker=null,workerDisabled=false,dataIsCurrent=false,resultsRevision=0;
 let pendingCsvExport=false, migratedPayload=null;
+let renalDraft=structuredClone(c.renalProfile),renalDirty=false,renalProfileEdited=false;
 // Narrow read-only integration point for optional research workspace.
 window.AyFluxResearchBridge=Object.freeze({snapshot:()=>({results,config:structuredClone(c),primary,updated:dataIsCurrent,revision:resultsRevision})});
 function requestedModes(all=false){return all||tab==='table'?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
@@ -41,7 +42,6 @@ function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
- $('csvInterop').disabled=busy||!dataIsCurrent;
  if(busy)$('status').textContent='Updating simulation';
 }
 function calculationError(error){
@@ -112,6 +112,7 @@ function modalControls(){if(primary==='No dialysis')return '';
 }
 function renalInputs(){
  const method=`<div class="inputrow"><label for="crclSource">Creatinine clearance input</label><select id="crclSource"><option value="manual" ${c.crclSource==='manual'?'selected':''}>Enter CrCl</option><option value="estimated" ${c.crclSource==='estimated'?'selected':''}>Estimate (Cockcroft–Gault)</option></select></div>`;
+ if(c.renalMode==='profile')return '';
  if(c.crclSource==='manual')return method+numericField('crcl');
  const estimated=calculatedCrCl();
  return method+`<div class="inputrow"><label for="cgAge">Age (years)</label><input id="cgAge" type="number" min="18" max="120" step="1" value="${c.age}" class="cg-field"></div>`+
@@ -120,8 +121,60 @@ function renalInputs(){
  `<div class="calculated">Estimated CrCl: <strong id="cgOutput">${Number.isFinite(estimated)?estimated.toFixed(1):'—'} mL/min</strong></div>`+
  `<p class="tip">Uses actual weight. Estimates may be unreliable in acute kidney injury, dialysis, and altered muscle mass. Use measured clearance when available. <a class="source-id" href="#ref13">[13]</a></p>`;
 }
+function renalProfileControls(){
+ const dynamic=c.renalMode==='profile';
+ const selector=`<div class="inputrow"><label for="renalMode">Kidney function over time</label><select id="renalMode"><option value="constant" ${dynamic?'':'selected'}>Constant CrCl</option><option value="profile" ${dynamic?'selected':''}>Custom CrCl trajectory</option></select></div>`;
+ if(!dynamic)return selector;
+ const rows=renalDraft.map((r,i)=>`<div class="renal-profile-grid">
+ <input type="number" aria-label="Time for CrCl point ${i+1} in hours" min="0" max="${c.horizon}" step="any" data-renal-row="${i}" data-renal-key="time" value="${r.time}" ${i===0?'disabled':''}>
+ <input type="number" aria-label="CrCl value for point ${i+1} in mL/min" min="0" max="140" step="any" data-renal-row="${i}" data-renal-key="crcl" value="${r.crcl}">
+ <button type="button" class="btn secondary small" data-renal-remove="${i}" ${i===0||renalDraft.length<=2?'disabled':''} aria-label="Remove CrCl point ${i+1}">×</button></div>`).join('');
+ return selector+`<div class="renal-profile-panel">
+ <div class="renal-profile-grid"><span class="renal-heading">Time (h)</span><span class="renal-heading">CrCl (mL/min)</span><span></span></div>
+ ${rows}
+ <div class="renal-profile-actions"><button type="button" class="btn secondary small" id="renalAdd">+ Time point</button><button type="button" class="btn small" id="renalApply">Apply profile</button></div>
+ <p class="tip">Linear change between points, with fixed endpoints. Hypothetical CrCl inputs, not a kidney recovery forecast.</p>
+ <p id="renalProfileStatus" class="tip" role="status" aria-live="polite">${renalDirty?'Unapplied edits — click Apply profile.':'Current profile applied.'}</p>
+ </div>`;
+}
+function activateRenalProfile(){
+ c.crclSource='manual';
+ c.renalMode='profile';
+ if(!renalProfileEdited||E.validateRenalProfile(c).length){
+  c.renalProfile=[{time:0,crcl:c.crcl},{time:c.horizon,crcl:c.crcl}];
+ }
+ renalDraft=structuredClone(c.renalProfile);
+ renalDirty=false;
+ renderInputs();defer();
+}
+function applyRenalDraft(){
+ const fields=Array.from($('patientControls').querySelectorAll('[data-renal-row]'));
+ if(fields.some(element=>!Number.isFinite(element.valueAsNumber))){
+  const status=$('renalProfileStatus');if(status)status.textContent='Correct missing or invalid kidney function values before applying.';return;
+ }
+ const errors=E.validateRenalProfile({...c,renalMode:'profile',crclSource:'manual',renalProfile:renalDraft});
+ const status=$('renalProfileStatus');
+ if(errors.length){if(status)status.textContent=errors.join('; ');return;}
+ c.renalProfile=structuredClone(renalDraft);
+ c.crcl=renalDraft[0].crcl;
+ renalDirty=false;renalProfileEdited=true;
+ renderInputs();defer();
+}
+function renderRenalProfileChart(){
+ if(!results||!dataIsCurrent||c.renalMode!=='profile')return;
+ const signature=chartSignature('kidneyClear')+':dynamic';
+ if(pendingPlots.get('kidneyClearChart')?.signature===signature||chartStates.get('kidneyClearChart')?.signature===signature)return;
+ const d=results[primary],ll=layout('Acyclovir renal clearance (mL/min)');
+ ll.yaxis2={title:{text:'Entered CrCl (mL/min)'},overlaying:'y',side:'right',showgrid:false,color:'#237d8c'};
+ ll.margin={...ll.margin,r:68};
+ const traces=[
+ {x:d.time,y:d.kidneyClear.median,mode:'lines',type:'scatter',name:'Modeled renal acyclovir clearance',line:{color:'#0054e9',width:3},hovertemplate:'Time %{x:.2f} h<br>Renal acyclovir clearance %{y:.2f} mL/min<extra></extra>'},
+ {x:d.time,y:d.time.map(t=>E.renalCrClAt(c,t)),yaxis:'y2',mode:'lines',type:'scatter',name:'User-entered CrCl',line:{color:'#237d8c',width:3,dash:'dash'},hovertemplate:'Time %{x:.2f} h<br>CrCl %{y:.2f} mL/min<extra></extra>'}
+ ];
+ pendingPlots.set('kidneyClearChart',{key:'kidneyClear',traces,layout:ll,signature});requestPlotFrame();
+}
 function renderInputs(){let keepAdvanced=$('advanced').open;
- $('patientControls').innerHTML=numericField('weight')+renalInputs()+
+ $('patientControls').innerHTML=numericField('weight')+renalProfileControls()+renalInputs()+
  `<h2>Medication</h2><div class="inputrow"><label for="dosingMode">Dosing schedule</label><select id="dosingMode"><option value="repeat" ${c.dosingMode==='repeat'?'selected':''}>Repeat dose</option><option value="custom" ${c.dosingMode==='custom'?'selected':''}>Custom oral / IV schedule</option></select></div>`+
  (c.dosingMode==='repeat'?`<div class="inputrow"><label for="route">Drug and route</label><select id="route"><option value="Acyclovir IV" ${c.route==='Acyclovir IV'?'selected':''}>Acyclovir — IV</option><option value="Valacyclovir oral" ${c.route==='Valacyclovir oral'?'selected':''}>Valacyclovir — oral</option></select></div>`:'')+
  (c.dosingMode==='repeat'?['dose','every','doseCount'].concat(c.route==='Valacyclovir oral'?[]:['infusion']).map(numericField).join(''):
@@ -254,8 +307,11 @@ function renderNow(){if(!results||!dataIsCurrent)return;
  curve('plasma','Plasma acyclovir concentration (mg/L)','plasmaChart');
  curve('csf','CSF acyclovir concentration (mg/L)','csfChart');
  curve('cmmg','Plasma CMMG (mg/L)','cmmgChart');curve('csfCmmg','CSF CMMG (mg/L)','csfCmmgChart');
- }else if(tab==='clearance'){curve('kidneyClear','Residual kidney-only acyclovir clearance (mL/min)','kidneyClearChart');
- $('renalState').textContent=c.crcl===0?'CrCl = 0 mL/min → renal clearance exactly 0 mL/min, including renal CMMG clearance. Nonrenal and dialytic clearance may remain positive.':`Residual CrCl ${c.crcl} mL/min → model estimates kidney-only clearance separately from dialysis and metabolism.`;
+ }else if(tab==='clearance'){
+ const dynamic=c.renalMode==='profile';$('kidneyDynamicPrompt').classList.toggle('hidden',dynamic);$('kidneyClearChart').classList.toggle('hidden',!dynamic);
+ if(dynamic){renderRenalProfileChart();$('renalState').textContent='A user-defined, piecewise-linear CrCl profile drives time-varying acyclovir and CMMG renal clearance; no clinical GFR trajectory is inferred.';}
+ else{pendingPlots.delete('kidneyClearChart');$('renalState').textContent=c.crcl===0?'Constant CrCl = 0 mL/min: renal clearance is zero. Nonrenal and dialytic clearance remain separate.':`Constant CrCl ${c.crcl} mL/min: select a time-varying profile to explore changes in kidney function.`;}
+
  curve('dialClear','Net dialytic transfer / plasma (mL/min; may be negative during PD)','dialClearChart');curve('clearance','Total acyclovir clearance — kidneys + nonrenal + dialysis (mL/min)','clearanceChart');curve('dialRate','Net acyclovir transfer toward dialysate (mg/hour)','dialRateChart');curve('pdUF','PD net ultrafiltration (mL/hour)','pdUfChart');curve('pdDialConc','PD dialysate acyclovir (mg/L)','pdConChart');}
  if(dataIsCurrent)$('status').textContent=`Simulation updated: ${results[primary].doses.length} administrations, ${c.draws} model draws.`;
  resizeVisibleCharts();
@@ -290,8 +346,8 @@ function switchTab(next){if(next==='doses')next='timeline';tab=next;for(const bt
  else if(results)render();
  if(tab==='timeline'){renderSchedule();renderPdRxEditor();renderDoseRows();}
  if(tab==='research')renderResearch();resizeVisibleCharts();}
-function download(){if(!results)return;const heads=['time_hours','day_hour','mode','plasma_mg_L_median','plasma_mg_L_lower','plasma_mg_L_upper','csf_mg_L_median','csf_mg_L_lower','csf_mg_L_upper','cmmg_mg_L_median','cmmg_mg_L_lower','cmmg_mg_L_upper','residual_kidney_clearance_mL_min_median','cmmg_residual_kidney_clearance_mL_min_median','total_clearance_mL_min_median','dialysis_only_clearance_mL_min_median','dialysis_removal_mg_hour_median','medication_events_at_time'];let lines=[heads.join(',')];
- for(const mode of modes){let d=results[mode];for(let i=0;i<d.time.length;i++){lines.push([d.time[i],JSON.stringify(timeLabel(d.time[i])),JSON.stringify(mode),d.plasma.median[i],d.plasma.lower[i],d.plasma.upper[i],d.csf.median[i],d.csf.lower[i],d.csf.upper[i],d.cmmg.median[i],d.cmmg.lower[i],d.cmmg.upper[i],d.kidneyClear.median[i],d.cmmgKidneyClear.median[i],d.clearance.median[i],d.dialClear.median[i],d.dialRate.median[i],JSON.stringify(d.doses.filter(x=>Math.abs(x.time-d.time[i])<1e-7).map(x=>`${x.route}: ${x.amount} mg${x.route==='Acyclovir IV'?` / ${x.infusion} h infusion`:''}`).join('; '))].join(','));}}
+function download(){if(!results)return;const heads=['time_hours','day_hour','mode','plasma_mg_L_median','plasma_mg_L_lower','plasma_mg_L_upper','csf_mg_L_median','csf_mg_L_lower','csf_mg_L_upper','cmmg_mg_L_median','cmmg_mg_L_lower','cmmg_mg_L_upper','residual_kidney_clearance_mL_min_median','cmmg_residual_kidney_clearance_mL_min_median','total_clearance_mL_min_median','dialysis_only_clearance_mL_min_median','dialysis_removal_mg_hour_median','medication_events_at_time','entered_residual_crcl_mL_min'];let lines=[heads.join(',')];
+ for(const mode of modes){let d=results[mode];for(let i=0;i<d.time.length;i++){lines.push([d.time[i],JSON.stringify(timeLabel(d.time[i])),JSON.stringify(mode),d.plasma.median[i],d.plasma.lower[i],d.plasma.upper[i],d.csf.median[i],d.csf.lower[i],d.csf.upper[i],d.cmmg.median[i],d.cmmg.lower[i],d.cmmg.upper[i],d.kidneyClear.median[i],d.cmmgKidneyClear.median[i],d.clearance.median[i],d.dialClear.median[i],d.dialRate.median[i],JSON.stringify(d.doses.filter(x=>Math.abs(x.time-d.time[i])<1e-7).map(x=>`${x.route}: ${x.amount} mg${x.route==='Acyclovir IV'?` / ${x.infusion} h infusion`:''}`).join('; ')),E.renalCrClAt(c,d.time[i])].join(','));}}
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='ayflux_simulation_data.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
 // Long-format result exchange is independent of AyFlux configuration JSON and the existing CSV.
 function downloadTidyCSV(){
@@ -303,11 +359,7 @@ function downloadTidyCSV(){
   setTimeout(()=>URL.revokeObjectURL(url),2000);
  }catch(error){alertMessage('Unable to export R / OSP CSV: '+error.message);}
 }
-$('csvInterop').addEventListener('click',()=>{
- if(!dataIsCurrent)return;
- if(modes.some(m=>!results[m])){pendingCsvExport='tidy';calculate(true);}
- else downloadTidyCSV();
-});
+
 let measureDraft=structuredClone(c.observations);
 function renderMeasureRows(){
  $('measureRows').innerHTML=measureDraft.map((m,i)=>`<tr><td><input data-mi="${i}" data-mk="time" type="number" min="0" max="${c.horizon}" step="any" value="${m.time}"></td><td><select data-mi="${i}" data-mk="analyte">${[['plasma','Plasma acyclovir'],['csf','CSF acyclovir'],['cmmg','Plasma CMMG'],['csfCmmg','CSF CMMG']].map(([k,v])=>`<option value="${k}" ${m.analyte===k?'selected':''}>${v}</option>`).join('')}</select></td><td><input type="number" data-mi="${i}" data-mk="value" min="0" step="any" value="${m.value}"></td><td><select data-mi="${i}" data-mk="role"><option value="fit" ${m.role==='fit'?'selected':''}>Fit</option><option value="holdout" ${m.role==='holdout'?'selected':''}>Hold-out</option></select></td><td><button class="btn secondary" data-remove-measure="${i}" type="button">×</button></td></tr>`).join('');
@@ -333,6 +385,47 @@ $('measureRows').addEventListener('click',e=>{const b=e.target.closest('[data-re
 $('addMeasure').addEventListener('click',()=>{measureDraft.push({time:12,analyte:'plasma',value:2,role:'fit'});renderMeasureRows();});
 $('applyMeasures').addEventListener('click',()=>{const errors=validationErrors();$('measureWarning').textContent=errors.join('\n');$('measureWarning').classList.toggle('hidden',!errors.length);if(errors.length)return;c.observations=structuredClone(measureDraft);calculate();});
 $('clearMeasures').addEventListener('click',()=>{measureDraft=[];c.observations=[];renderMeasureRows();calculate();});
+
+function handleRenalRowChange(element){
+ const index=Number(element.dataset.renalRow),key=element.dataset.renalKey;
+ if(!Number.isInteger(index)||index<0||index>=renalDraft.length||!['time','crcl'].includes(key))return;
+ const value=element.valueAsNumber;
+ if(!Number.isFinite(value)){const status=$('renalProfileStatus');if(status)status.textContent='Enter a valid number in the kidney profile.';return;}
+ renalDraft[index][key]=value;
+ renalDirty=true;
+ const status=$('renalProfileStatus');if(status)status.textContent='Edits not yet applied. Click Apply profile to update the graph.';
+}
+function addRenalPoint(){
+ if(renalDraft.length>=24)return;
+ let index=-1,width=0;
+ for(let i=1;i<renalDraft.length;i++){
+  const gap=renalDraft[i].time-renalDraft[i-1].time;
+  if(gap>width){width=gap;index=i;}
+ }
+ if(index<1||width<.002)return;
+ const a=renalDraft[index-1],b=renalDraft[index];
+ renalDraft.splice(index,0,{time:Number(((a.time+b.time)/2).toFixed(3)),crcl:Number(((a.crcl+b.crcl)/2).toFixed(2))});
+ renalDirty=true;renderInputs();
+}
+$('patientControls').addEventListener('change',e=>{
+ if(e.target.matches('[data-renal-row]'))handleRenalRowChange(e.target);
+ else if(e.target.id==='renalMode'){
+  if(e.target.value==='profile')activateRenalProfile();
+  else {c.crcl=c.renalProfile?.[0]?.crcl??c.crcl;c.renalMode='constant';c.crclSource='manual';renalDraft=structuredClone(c.renalProfile);renalDirty=false;renderInputs();defer();}
+ }
+});
+$('patientControls').addEventListener('click',e=>{
+ if(e.target.id==='renalAdd')addRenalPoint();
+ else if(e.target.id==='renalApply')applyRenalDraft();
+ else if(e.target.hasAttribute('data-renal-remove')){
+  const index=Number(e.target.dataset.renalRemove);
+  if(Number.isInteger(index)&&index>0&&renalDraft.length>2){renalDraft.splice(index,1);renalDirty=true;renderInputs();}
+ }
+});
+$('enableRenalProfile').addEventListener('click',()=>{
+ activateRenalProfile();
+ if(tab!=='clearance')switchTab('clearance');
+});
 $('patientControls').addEventListener('change',e=>{if(e.target.id==='crclSource'){c.crclSource=e.target.value;if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='cgSex'){c.sex=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='route'){c.route=e.target.value;c.dose=c.route==='Valacyclovir oral'?1000:700;renderInputs();defer();}else if(e.target.id==='dosingMode'){c.dosingMode=e.target.value;renderInputs();defer();if(c.dosingMode==='custom')switchTab('doses');}});
 $('patientControls').addEventListener('input',e=>{if(e.target.id==='cgAge'||e.target.id==='cgScr'){const v=Number(e.target.value);if(!Number.isFinite(v)||e.target.value==='')return;if(e.target.id==='cgAge')c.age=v;else c.scr=v;c.crcl=calculatedCrCl();const target=$('cgOutput');if(target)target.textContent=Number.isFinite(c.crcl)?c.crcl.toFixed(1)+' mL/min':'—';defer();}});
 $('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');});
@@ -364,7 +457,7 @@ $('applyFullTimeline').addEventListener('click',()=>{
  pdStatusText('Applied dialysis sessions, exchange prescriptions and medication administrations together.');
 });
 $('applyFullTimelineBottom').addEventListener('click',()=>$('applyFullTimeline').click());
-$('csv').addEventListener('click',()=>{if(!dataIsCurrent)return;if(modes.some(m=>!results[m])){pendingCsvExport=true;calculate(true);}else download();});
+$('csv').addEventListener('click',()=>{if(!dataIsCurrent)return;const format=$('csvFormat').value==='tidy'?'tidy':'wide';if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else download();});
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;
@@ -515,8 +608,8 @@ function downloadJSON(obj,name){
 }
 $('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
 $('saveConfig').addEventListener('click',()=>{
- const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.20.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
- downloadJSON(data,'ayflux_simulation_v0.20.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
+ const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.21.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
+ downloadJSON(data,'ayflux_simulation_v0.21.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
 });
 $('loadConfig').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
@@ -535,12 +628,14 @@ $('loadConfig').addEventListener('change',async e=>{
   if(!src||typeof src!=='object'||Array.isArray(src))throw Error('Configuration data is missing. No settings were changed.');
   const next=structuredClone(E.DEFAULTS);
   const required=Object.keys(next),number=x=>typeof x==='number'&&Number.isFinite(x);
-  const missing=required.filter(key=>!Object.prototype.hasOwnProperty.call(src,key));
+  const missing=required.filter(key=>!['renalMode','renalProfile'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
   if(missing.length)throw Error('Configuration is incomplete (missing '+missing.slice(0,4).join(', ')+'). No settings were changed.');
   for(const key of required){
+   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile'].includes(key))continue;
    const v=src[key];
-   if(['schedule','customDoses','observations','pdRxRows'].includes(key)){
-    if(!Array.isArray(v)||v.length>(key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
+   if(['schedule','customDoses','observations','pdRxRows','renalProfile'].includes(key)){
+    if(!Array.isArray(v)||v.length>(key==='renalProfile'?24:key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
+    if(key==='renalProfile'&&!v.every(x=>x&&number(x.time)&&number(x.crcl)))throw Error('Invalid kidney function profile');
     if(key==='schedule'&&!v.every(x=>x&&E.TYPES.includes(x.type)&&number(x.start)&&number(x.end)))throw Error('Invalid dialysis session data');
     if(key==='customDoses'&&!v.every(x=>x&&E.ROUTES.includes(x.route)&&number(x.time)&&number(x.amount)&&
        (x.route!=='Acyclovir IV'||number(x.infusion))))throw Error('Invalid medication schedule data');
@@ -577,12 +672,13 @@ $('loadConfig').addEventListener('change',async e=>{
   const errors=[...new Set(E.MODES.flatMap(mode=>E.validate(next,mode)))];
   if(errors.length)throw Error('Configuration fails model validation: '+errors.slice(0,3).join('; '));
   // Only now, after all shape and numerical checks, apply the loaded configuration.
-  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.20.0',savedAt:new Date().toISOString(),
+  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.21.0',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
   Object.assign(c,next);setPalette(importedPalette);primary=input.primary;
   visible=new Set(input.visibleScenarios);
   draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
+  renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
   measureDraft=structuredClone(c.observations);rxDraft=structuredClone(c.pdRxRows);
   $('primary').value=primary;researchRenderedPrimary='';renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxRows();
   migratedPayload=migrating?converted:null;

@@ -1,6 +1,10 @@
 # AyFlux results exchange (CSV, R, PK-Sim, and MoBi)
 
-AyFlux provides **result-level interoperability**, not a native PK-Sim or MoBi model. The existing **Export CSV** button produces AyFlux's detailed wide-format file. The new **Export R / OSP CSV** button produces a consistent long-format file for independent plotting, analysis, and cross-model comparisons. The **Research tools** tab can also import a PK-Sim or MoBi results CSV and overlay the corresponding curves after you explicitly map its columns and units. Imported data remain in your browser.
+AyFlux provides **result-level interoperability**, not a native PK-Sim or MoBi model. In the simulator's **CSV format** selector, choose **Detailed results** for the wide-format file or **R / OSP tidy** for the consistent long-format file, then click **Export CSV**. The tidy format is designed for independent plotting, analysis, and cross-model comparisons. The **Research tools** tab can also import a PK-Sim or MoBi results CSV and overlay the corresponding curves after you explicitly map its columns and units. Imported data remain in your browser.
+
+## Dynamic kidney function data
+
+If using the optional time-varying CrCl profile, the **Detailed results** CSV includes an `entered_residual_crcl_mL_min` column at each simulated time point. The configuration JSON preserves the original user-entered hour/CrCl pairs. The **R / OSP tidy** export remains a concentration-only schema and does not carry a separate CrCl trajectory; keep the matching JSON configuration when sharing a reproducible example.
 
 ## Tidy CSV schema (v1)
 
@@ -60,7 +64,7 @@ If the PK-Sim/MoBi CSV has different headers, inspect it with `names(read.csv("o
 
 1. Run a simulation in PK-Sim or MoBi.
 2. Export that simulation's **results**, not the full model, as CSV or Excel. See [OSP's import/export documentation](https://docs.open-systems-pharmacology.org/working-with-pk-sim/pk-sim-documentation/importing-exporting-project-data-models).
-3. Export AyFlux results using **Export R / OSP CSV**.
+3. Export AyFlux results by selecting **R / OSP tidy** in the CSV format selector and clicking **Export CSV**.
 4. In R, map the OSP time/concentration columns using `read_osp_curve()`. Specify the exported time and concentration units.
 5. Compare time courses only after aligning dose, route, administration schedule, kidney function, dialysis settings, sampling compartment, and model assumptions.
 

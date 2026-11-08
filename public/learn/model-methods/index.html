@@ -48,6 +48,11 @@
   <p>Changing a parameter, such as assumed kidney clearance, changes the predicted curve. The result depends on the model and its inputs, not on measurements from a particular patient.</p>
 </section>
 <section class="card">
+  <h2>Changing kidney function over time</h2>
+  <p>AyFlux can use either a constant residual creatinine clearance (CrCl) or a <strong>user-entered sequence of CrCl values</strong> at specified hours. In the time-varying mode, the simulator linearly interpolates between values and scales the acyclovir and CMMG renal elimination terms as CrCl changes.</p>
+  <p>To try it, choose <strong>Custom CrCl trajectory</strong> under Patient, edit the hour and CrCl pairs, then select <strong>Apply profile</strong>. The Clearance &amp; sessions tab plots the entered CrCl and modeled renal acyclovir clearance on separately labeled axes. This does <strong>not</strong> predict kidney injury or recovery from serum creatinine, and the relationship between CrCl and drug clearance remains an assumption rather than patient-specific validation.</p>
+</section>
+<section class="card">
   <h2>Plasma and CSF estimates</h2>
   <p>Concentrations in blood and cerebrospinal fluid (CSF) do not necessarily rise and fall at the same rate. AyFlux displays separate plasma and CSF estimates to explore that difference. The CSF curve is a prediction, not a laboratory measurement.</p>
 </section>
