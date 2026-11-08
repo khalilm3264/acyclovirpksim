@@ -23,13 +23,45 @@ const ACV_MW=225.21, VAL_MW=324.34;
 const ROUTES=['Acyclovir IV','Valacyclovir oral'];
 // UI limits for exploration only; they are not approved or suggested doses.
 const MAX_DOSE_MG={'Acyclovir IV':2000,'Valacyclovir oral':6000};
-const DEFAULTS={virus:'VZV',age:55,sex:'male',scr:1,crclSource:'manual',pdMethod:'manual',route:'Acyclovir IV',dosingMode:'repeat',doseCount:12,customDoses:[{time:12,route:'Valacyclovir oral',amount:1000},{time:24,route:'Acyclovir IV',amount:250,infusion:1},{time:48,route:'Acyclovir IV',amount:250,infusion:1}],weight:70,crcl:95,dose:700,every:8,infusion:1,horizon:96,valF:0.545,valKa:1.8,
+const DEFAULTS={virus:'VZV',age:55,sex:'male',scr:1,crclSource:'manual',pdMethod:'manual',route:'Acyclovir IV',dosingMode:'repeat',doseCount:12,customDoses:[{time:12,route:'Valacyclovir oral',amount:1000},{time:24,route:'Acyclovir IV',amount:250,infusion:1},{time:48,route:'Acyclovir IV',amount:250,infusion:1}],weight:70,crcl:95,renalMode:'constant',renalProfile:[{time:0,crcl:95},{time:96,crcl:95}],dose:700,every:8,infusion:1,horizon:96,valF:0.545,valKa:1.8,
  hdStart:24,hdDuration:4,hdRepeat:48,hdCl:81.8,
  pdRxEnabled:false,pdRxRows:[],vcScale:1,clearanceScale:1,pdCl:6,pdVolume:2,capdDwell:6,capdExchanges:4,pdGlucose:2.5,pdTransport:1,pdUfBase:120,pdAbsorb:20,pdSmallPore:0.5,pdSigma:0.12,apdStart:20,apdHours:10,apdCycles:5,apdDwell:1.5,apdTurnover:0.25,apdFactor:1,
  effluent:25,sieving:0.95,delivered:0.85,
  csfRatio:0.3,csfLag:4,csfMetRatio:0.25,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
  variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,
  schedule:[{type:'PD',start:0,end:24},{type:'PD',start:24,end:48},{type:'HD',start:54,end:58}]};
+// Time-varying residual CrCl is a user-defined illustration, not a measured GFR estimate.
+// Piecewise-linear interpolation, holding the first and last endpoints outside the knots.
+function renalCrClAt(c,t){
+ if(c.renalMode!=='profile')return c.crcl;
+ const points=c.renalProfile;
+ if(!Array.isArray(points)||!points.length)return NaN;
+ if(t<=points[0].time)return points[0].crcl;
+ for(let i=1;i<points.length;i++){
+  const prior=points[i-1],next=points[i];
+  if(t<=next.time)return prior.crcl+(next.crcl-prior.crcl)*(t-prior.time)/(next.time-prior.time);
+ }
+ return points[points.length-1].crcl;
+}
+function validateRenalProfile(c){
+ const err=[];
+ if(!['constant','profile'].includes(c.renalMode??'constant'))err.push('Choose a valid residual kidney function mode');
+ if(c.renalMode!=='profile')return err;
+ if(c.crclSource!=='manual')err.push('Time-varying CrCl must use manual profile inputs, not Cockcroft–Gault');
+ const pts=c.renalProfile;
+ if(!Array.isArray(pts)||pts.length<2||pts.length>24)return ['Kidney function profile needs 2–24 time points'];
+ let previous=-Infinity;
+ for(let i=0;i<pts.length;i++){
+  const row=pts[i];
+  if(!row||!Number.isFinite(row.time)||row.time<0||row.time>c.horizon||row.time<=previous)
+    err.push('Kidney function times must increase and stay within the simulation horizon');
+  if(!row||!Number.isFinite(row.crcl)||row.crcl<0||row.crcl>140)
+    err.push('Kidney function values must be within 0–140 mL/min');
+  previous=row?.time;
+ }
+ if(pts[0]?.time!==0)err.push('Kidney function profile must begin at hour 0');
+ return [...new Set(err)];
+}
 function cockcroftGault({age,sex,scr,weight}){
  if(!Number.isFinite(age)||age<18||age>120||!Number.isFinite(weight)||weight<=0||!Number.isFinite(scr)||scr<=0||!['male','female'].includes(sex))return NaN;
  return (140-age)*weight*(sex==='female'?.85:1)/(72*scr);
@@ -119,6 +151,7 @@ function validate(c,mode){let err=[];
  if(!Number.isFinite(c.horizon)||c.horizon>336||c.horizon<1)err.push('Simulation duration must be 1–336 hours');
  if(!ROUTES.includes(c.route))err.push('Unsupported medication route');
  err.push(...validateDoses(c));
+ err.push(...validateRenalProfile(c));
  if(!(c.valF>0&&c.valF<=1&&c.valKa>0))err.push('Oral bioavailability and absorption rate must be valid');
  if(c.hdDuration>24||c.hdDuration<=0)err.push('HD session duration must be >0 and ≤24 hours');
  if(c.apdHours>24||c.apdHours<=0)err.push('APD session duration must be >0 and ≤24 hours per day');
@@ -162,10 +195,13 @@ function scheduleError(c,mode){const errs=validate(c,mode);if(mode!=='Custom seq
 function drawParams(c){let random=rng(), norm=()=>Math.sqrt(-2*Math.log(Math.max(1e-10,random())))*Math.cos(2*Math.PI*random());
  let logn=cv=>{const s=Math.sqrt(Math.log(1+cv*cv));return Math.exp(-s*s/2+s*norm());};
  let params=[],scale=Math.pow(c.weight/70,0.75),v=c.variability;
+ // Under a dynamic profile the sampled renal rates are per 1 mL/min CrCl;
+ // fixed mode retains the original sampled parameters exactly.
+ const sampledCrCl=c.renalMode==='profile'?1:c.crcl;
  for(let i=0;i<c.draws;i++)params.push({
  vc:0.32*c.weight*(c.vcScale||1)*logn(0.20*v),vp:0.37*c.weight*logn(0.25*v),q:10*scale*logn(0.35*v),
- other:0.12*scale*(c.clearanceScale||1)*logn(0.35*v),renal:0.202*c.crcl*scale*(c.clearanceScale||1)*logn(0.35*v),form:1.6*c.formFactor*scale*logn(0.5*v),
- vm:0.4*c.weight*logn(0.35*v),mr:0.12*c.crcl*c.metRenal*scale*logn(0.65*v),mn:0.25*scale*logn(0.6*v),
+ other:0.12*scale*(c.clearanceScale||1)*logn(0.35*v),renal:0.202*sampledCrCl*scale*(c.clearanceScale||1)*logn(0.35*v),form:1.6*c.formFactor*scale*logn(0.5*v),
+ vm:0.4*c.weight*logn(0.35*v),mr:0.12*sampledCrCl*c.metRenal*scale*logn(0.65*v),mn:0.25*scale*logn(0.6*v),
  hd:c.hdCl*0.06*logn(0.2*v), pd:c.pdCl*0.06*logn(0.35*v),
  crrt:c.effluent*c.weight/1000*c.sieving*c.delivered*logn(0.25*v),
  kp:Math.min(1.3,c.csfRatio*logn(0.4*v)),km:Math.min(1.3,c.csfMetRatio*logn(0.55*v)),
@@ -234,6 +270,7 @@ function timeGrid(c,rows,dt,doses=buildDoses(c)){
  const pts=new Set([0,c.horizon]);
  function put(t){if(Number.isFinite(t)&&t>0&&t<c.horizon)pts.add(+t.toFixed(9));}
  for(let t=0;t<c.horizon;t+=dt)put(t);
+ if(c.renalMode==='profile')for(const point of c.renalProfile)put(point.time);
  for(const r of rows){put(r.start);put(r.end);
   if((r.type==='CAPD'||r.type==='APD')&&c.pdRxEnabled){for(const x of exchangesForSession(c,r)){put(r.start+x.start);put(Math.min(r.end,r.start+x.start+x.dwell));}continue;}
   if(r.type==='APD'){let cyc=c.apdDwell+c.apdTurnover;for(let j=0;j<c.apdCycles;j++){put(r.start+j*cyc);put(Math.min(r.end,r.start+j*cyc+c.apdDwell));}}
@@ -271,7 +308,9 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  const mw=239.19/225.21;
  // Terminal eigenvalue of the no-dialysis linear central-peripheral disposition model.
  // Not a measured or validated half-life; only meaningful if clearance remains fixed.
- const aRate=(p.other+p.renal+p.form+p.q)/p.vc,bRate=p.q/p.vp;
+ const renalAt=t=>c.renalMode==='profile'?p.renal*renalCrClAt(c,t):p.renal;
+ const metaboliteRenalAt=t=>c.renalMode==='profile'?p.mr*renalCrClAt(c,t):p.mr;
+ const aRate=(p.other+renalAt(0)+p.form+p.q)/p.vc,bRate=p.q/p.vp;
  const slowRate=Math.max(1e-9,(aRate+bRate-Math.sqrt(Math.pow(aRate-bRate,2)+4*p.q*p.q/(p.vc*p.vp)))/2);
  const modelHalfLife=Math.log(2)/slowRate;
  for(let i=0;i<tarr.length;i++){
@@ -284,23 +323,23 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   const pd=pdTransfer(c,p,t,C,pdAmount,pdVol,currentPD),netFlux=dial*C+pd.flux;
   const dialCL=C>1e-10?netFlux/C:(dial+(currentPD?p.pd:0));
   cols.plasma.push(C);cols.cmmg.push(CM);cols.csf.push(sc);cols.csfCmmg.push(sm);
-  cols.kidneyClear.push(p.renal/.06);cols.cmmgKidneyClear.push(p.mr/.06);
-  cols.clearance.push((p.other+p.renal+p.form+dialCL)/.06);
+  cols.kidneyClear.push(renalAt(t)/.06);cols.cmmgKidneyClear.push(metaboliteRenalAt(t)/.06);
+  cols.clearance.push((p.other+renalAt(t)+p.form+dialCL)/.06);
   cols.dialClear.push(dialCL/.06);cols.dialRate.push(netFlux);
   cols.pdUF.push(currentPD?pd.uf:0);cols.pdDialConc.push(currentPD?pdAmount/pdVol:0);
   peak=Math.max(peak,C);csfPeak=Math.max(csfPeak,sc);mPeak=Math.max(mPeak,CM);
   if(i===tarr.length-1)break;
   const step=tarr[i+1]-t,mid=t+step/2,midPD=timeline.midPD[i],midActive=timeline.midActive[i],ivRate=timeline.ivRate[i],midDial=midActive.active?(midActive.type==='HD'?p.hd:midActive.type==='CRRT'?p.crrt:0):0;
   // Integrate central/peripheral, metabolite, oral depot, PD drug amount and PD fluid volume.
-  function rhs(A,B,M,D,P,V){
+  function rhs(A,B,M,D,P,V,kTime){
    const cc=A/p.vc,cp=B/p.vp,ex=p.q*(cc-cp),mem=pdTransfer(c,p,mid,cc,P,V,midPD),net=midDial*cc+mem.flux;
-   const dA=ivRate+p.oralKa*D-(p.other+p.renal+p.form)*cc-ex-net;
-   const dB=ex,dM=p.form*cc*mw-(p.mn+p.mr+(midDial+(midPD?p.pd:0))*c.metDial)*M/p.vm;
+   const dA=ivRate+p.oralKa*D-(p.other+renalAt(kTime)+p.form)*cc-ex-net;
+   const dB=ex,dM=p.form*cc*mw-(p.mn+metaboliteRenalAt(kTime)+(midDial+(midPD?p.pd:0))*c.metDial)*M/p.vm;
    return [dA,dB,dM,-p.oralKa*D,mem.flux,mem.netVolume];
   }
   let x=[a,b,m,oralDepot,pdAmount,pdVol];
   function stage(x,k,f){return x.map((v,j)=>v+f*step*k[j]);}
-  const k1=rhs(...x),k2=rhs(...stage(x,k1,.5)),k3=rhs(...stage(x,k2,.5)),k4=rhs(...stage(x,k3,1));
+  const k1=rhs(...x,t),k2=rhs(...stage(x,k1,.5),mid),k3=rhs(...stage(x,k2,.5),mid),k4=rhs(...stage(x,k3,1),t+step);
   const y=x.map((v,j)=>v+step*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6);
   const na=Math.max(0,y[0]),nb=Math.max(0,y[1]),nm=Math.max(0,y[2]),nd=Math.max(0,y[3]);
   pdAmount=Math.max(0,y[4]);pdVol=Math.max(.2,y[5]);
@@ -308,7 +347,10 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   const nsc=Math.max(0,sc+step*(p.kp*(C+nextC)/2-sc)/c.csfLag),nsm=Math.max(0,sm+step*(p.km*(CM+nextM)/2-sm)/c.csfMetLag);
   auc+=step*(C+nextC)/2;csfAuc+=step*(sc+nsc)/2;
   administeredAcyclovirEqMg+=ivRate*step;
-  systemicEliminationMg+=step*(p.other+p.renal+p.form)*(C+nextC)/2;
+  // Trapezoidal integral of linear concentration × time-varying renal clearance.
+  const elimAtStart=(p.other+renalAt(t)+p.form)*C;
+  const elimAtEnd=(p.other+renalAt(t+step)+p.form)*nextC;
+  systemicEliminationMg+=step*(elimAtStart+elimAtEnd)/2;
   mass+=step*midDial*(C+nextC)/2;
   a=na;b=nb;m=nm;oralDepot=nd;sc=nsc;sm=nsm;
  }
@@ -477,7 +519,7 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={renalCrClAt,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);
