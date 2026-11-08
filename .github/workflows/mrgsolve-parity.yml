@@ -1,0 +1,37 @@
+name: Independent mrgsolve parity checks
+
+on:
+  pull_request:
+    paths:
+      - "interop/ayflux_reference.cpp"
+      - "interop/compare_mrgsolve.R"
+      - "interop/fixtures/**"
+      - ".github/workflows/mrgsolve-parity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mrgsolve-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout AyFlux
+        uses: actions/checkout@v7
+      - name: Configure R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "release"
+          use-public-rspm: true
+      - name: Install mrgsolve
+        run: Rscript -e 'install.packages("mrgsolve")'
+      - name: Compare independent ODE solver against AyFlux deterministic fixtures
+        run: Rscript interop/compare_mrgsolve.R
+      - name: Archive comparison CSVs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ayflux-mrgsolve-comparison
+          path: interop/results/*.csv
+          if-no-files-found: ignore

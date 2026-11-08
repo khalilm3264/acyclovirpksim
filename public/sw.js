@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.22.0";
+const CACHE = "ayflux-static-v0.23.0";
 const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-logo.png",
@@ -8,6 +8,7 @@ const CORE = [
  "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
  "/assets/model-integrity.js", "/assets/research-workspace.js",
  "/assets/vendor/plotly-basic-3.3.1.min.js",
+ "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",
  "/learn/model-methods/", "/learn/dialysis/",
  "/license/", "/cite/", "/disclaimer/"

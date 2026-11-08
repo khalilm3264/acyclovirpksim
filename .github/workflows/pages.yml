@@ -25,13 +25,15 @@ jobs:
           node-version: '22'
       - name: Stage optional Cartesian heatmap bundle
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
+          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1 @fontsource/poppins@5.3.0
           node scripts/stage-cartesian.cjs
+          node scripts/stage-poppins.cjs
       - name: Check JavaScript syntax
         run: |
           node --check public/assets/vendor/plotly-basic-3.3.1.min.js
           node --check public/assets/vendor/plotly-cartesian-3.3.1.min.js
           node --check scripts/stage-cartesian.cjs
+          node --check scripts/stage-poppins.cjs
           node --check public/assets/ayflux-exchange.js
           node --check public/assets/ayflux-version.js
           node --check public/assets/model-integrity.js
@@ -61,8 +63,9 @@ jobs:
         uses: actions/checkout@v7
       - name: Stage optional Cartesian heatmap bundle
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
+          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1 @fontsource/poppins@5.3.0
           node scripts/stage-cartesian.cjs
+          node scripts/stage-poppins.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v6
       - name: Upload public directory
@@ -98,8 +101,9 @@ jobs:
           fi
       - name: Stage optional Cartesian heatmap bundle
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
+          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1 @fontsource/poppins@5.3.0
           node scripts/stage-cartesian.cjs
+          node scripts/stage-poppins.cjs
       - name: Deploy tested Worker to Cloudflare
         uses: cloudflare/wrangler-action@v4
         with:

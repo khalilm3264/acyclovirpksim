@@ -12,6 +12,14 @@ This is a **living plan**, not a promise of release dates, clinical utility, or 
 
 The CrCl trajectory is a **hypothetical model input**, never a prediction of kidney injury or recovery.
 
+## Scientific follow-up following the source audit
+
+**Priority P0: review and recalibrate the exploratory CSF CMMG partition parameter.** AyFlux currently defaults to 0.25, whereas [Smith et al., 2010 (PMID 20038622)](https://pubmed.ncbi.nlm.nih.gov/20038622/) reported CSF/plasma AUC ratios around 0.025 for CMMG in a very small cohort. These are not perfectly equivalent estimands, but the order-of-magnitude difference means current simulated CSF CMMG results should remain explicitly caution-labeled. Do not silently replace a model coefficient or treat one small study as sufficient validation: define a parameter-identification and independent-evaluation protocol first.
+
+**Priority P1: expand the mrgsolve model-equation parity suite** from single IV, no dialysis to repeated dose events, HD transitions, oral valacyclovir, and then PD mass-transfer conservation; keep each extension independently testable.
+
+**Priority P1: make a matched OSPSuite aciclovir PBPK comparator** with a documented individual, administered route, time horizon, total versus unbound plasma output and renal physiology. Compare only after these are aligned, and distinguish model structural differences from numerical errors.
+
 ## Current / near-term
 
 | Priority | Workstream | Deliverable | Definition of done |

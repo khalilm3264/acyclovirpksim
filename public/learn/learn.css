@@ -210,3 +210,27 @@ body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 body>.shell{width:100%;flex:1 0 auto;display:flex;flex-direction:column}
 body>.shell>main{flex:1 0 auto}
 body>.shell>.site-footer{margin-top:auto}
+
+/* AyFlux dual-weight logo, pinned and served locally for CSP/offline use. */
+@font-face{font-family:"AyFlux Poppins";font-style:normal;font-weight:300;font-display:swap;src:url("/assets/fonts/poppins-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"AyFlux Poppins";font-style:normal;font-weight:800;font-display:swap;src:url("/assets/fonts/poppins-latin-800-normal.woff2") format("woff2")}
+html body .site-header.ay-header .ayflux-logo{display:inline-flex;align-items:baseline;white-space:nowrap;font-family:"AyFlux Poppins","Poppins",sans-serif;font-size:clamp(25px,2.35vw,31px);line-height:1.14;letter-spacing:-0.035em;text-decoration:none;color:#fff}
+html body .site-header.ay-header .ayflux-logo .ay{font-weight:800}
+html body .site-header.ay-header .ayflux-logo .flux{font-weight:300}
+html body .site-header.ay-header .ayflux-logo .x{color:#f0a37c}
+html body .site-header.ay-header .ayflux-logo:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.site-footer .github-icon-link{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:23px;height:23px;padding:2px}
+.site-footer .github-icon-link img{display:block;width:19px;height:19px}
+.site-footer .github-icon-link:focus-visible{outline:2px solid #306487;outline-offset:2px}
+
+/* Reproducible published model-equation and parameter-provenance displays. */
+.model-equation{max-width:100%;overflow-x:auto;margin:10px 0 13px;border:1px solid #bdcbd5;border-left:3px solid #4383a8;padding:12px;background:#f5f9fb}
+.model-equation pre{font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow-x:visible;margin:0;color:#243f55}
+.model-table-wrap{width:100%;overflow-x:auto;max-width:100%}
+.model-parameter-table{width:100%;min-width:620px;border-collapse:collapse;font-size:12px;line-height:1.5}
+.model-parameter-table th,.model-parameter-table td{border:1px solid #b6c9d5;padding:8px;vertical-align:top;text-align:left}
+.model-parameter-table th{background:#e5eff4;color:#274760}
+.model-parameter-table td:first-child{font-weight:700}
+.model-parameter-table td{overflow-wrap:anywhere}
+.card:target{scroll-margin-top:12px;outline:2px solid #3d729a;outline-offset:3px}
+@media(max-width:640px){.model-equation{padding:8px}.model-equation pre{font-size:10.5px}.model-parameter-table{font-size:11px}}

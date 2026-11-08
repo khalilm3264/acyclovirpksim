@@ -67,7 +67,7 @@ test('service worker only caches public static files and no user uploads',()=>{
  const root=path.resolve(__dirname,'..');
  const sw=fs.readFileSync(path.join(root,'public/sw.js'),'utf8');
  assert.match(sw,/request\.method !== "GET"/);
- assert.ok(sw.includes('const CACHE = "ayflux-static-v0.22.0"'));
+ assert.ok(sw.includes('const CACHE = "ayflux-static-v0.23.0"'));
  assert.match(sw,/assets\/research-workspace\.js/);
  assert.doesNotMatch(sw,/indexedDB|POST|localStorage\.setItem/);
 });
@@ -90,7 +90,7 @@ test('research report protects PNG charts from printing across pages',()=>{
  const from=script.indexOf('function buildResearchReportHtml(');
  const to=script.indexOf("$('printResearchReport').addEventListener",from);
  assert.ok(from>=0&&to>from);
- const out={escapeHtml:t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;'),window:{AyFluxVersion:{version:'0.22.0'}}};
+ const out={escapeHtml:t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;'),window:{AyFluxVersion:{version:'0.23.0'}}};
  vm.runInNewContext(script.slice(from,to)+'; this.build=buildResearchReportHtml;',out);
  const html=out.build({date:'2026-11-07',values:[['Route','Acyclovir IV']],metrics:[['AUC',10]],
   charts:[{name:'Plasma acyclovir',image:'data:image/png;base64,AAAA'},

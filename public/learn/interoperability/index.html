@@ -20,7 +20,7 @@
   <div class="ay-header-brand">
     <img class="ay-brand-mark" src="/ayflux-logo.png?v=1" alt="" width="42" height="42">
     <div class="ay-title-stack">
-      <a class="brand" href="/">AyFlux</a>
+      <a class="brand ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a>
       <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function and dialysis</p>
     </div>
   </div>
@@ -76,11 +76,17 @@ plot(ayflux$time_hours, ayflux$concentration_mg_L,
       </ul>
       <p>For more detail, see <a href="https://docs.open-systems-pharmacology.org/working-with-pk-sim/pk-sim-documentation/importing-exporting-project-data-models">PK-Sim's import/export documentation</a> and the <a href="https://github.com/Open-Systems-Pharmacology/OSPSuite-R">OSPSuite-R project</a>.</p>
     </section>
-    <div class="actions"><a class="btn" href="/">Open simulator</a></div>
+    <section class="card">
+  <h2>Independent R model comparisons</h2>
+  <p>AyFlux now provides two optional, documented research workflows. The first uses <strong>mrgsolve</strong> to implement AyFlux's IV acyclovir/CMMG compartment equations independently and compare deterministic predicted curves, including a changing CrCl example. The second uses <strong>OSPSuite-R</strong> to run the official Aciclovir PBPK example and export its plasma curve with explicit concentration and time units.</p>
+  <p>They serve different purposes: the mrgsolve exercise checks <em>code/solver agreement</em>, while the OSPSuite example compares a different model structure. Neither establishes clinical validation, and OSPSuite's built-in example is not guaranteed to match AyFlux's route, administered dose or simulated individual. OSPSuite-R must be run in a supported local environment; the browser does not run R packages directly.</p>
+  <p><a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/docs/research-model-comparison.md" target="_blank" rel="noopener noreferrer">Read the comparison guide and runnable R scripts</a>. The <a href="/learn/model-methods/#equations">model equations and parameter provenance</a> are available in the Methods guide.</p>
+</section>
+<div class="actions"><a class="btn" href="/">Open simulator</a></div>
   </main>
   <footer class="site-footer">
     <span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a></span>
-    <span><a href="/learn/">User guide</a> · <a href="/disclaimer/">Disclaimer</a> · <a href="/cite/">Cite</a> · <a href="https://github.com/khalilm3264/acyclovirpksim">GitHub source</a></span>
+    <span><a href="/learn/">User guide</a> · <a href="/disclaimer/">Disclaimer</a> · <a href="/cite/">Cite</a> · <a class="github-icon-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" title="AyFlux on GitHub" aria-label="AyFlux source code on GitHub"><img src="/github-mark.svg" width="19" height="19" alt=""></a></span>
   </footer>
 </div>
 </body>
