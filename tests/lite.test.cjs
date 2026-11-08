@@ -91,7 +91,9 @@ test('slow-loading message is optional, non-redirecting and removed at model rea
  assert.ok(main.includes('src="/assets/lite-fallback.js"'));
  assert.ok(helper.includes('setTimeout(offerLite,9500)'));
  assert.ok(helper.includes("link.href=\"/lite/\""));
- assert.ok(helper.includes('window.addEventListener("ayflux:results-updated",clearPrompt)'));
+ assert.ok(helper.includes('window.addEventListener("ayflux:charts-ready",clearPrompt)'));
+ assert.ok(main.includes('<details class="ay-head-menu">'));
+ assert.ok(!main.includes('class="ay-guide-link ay-lite-link"'));
  assert.ok(!/location\.replace\(|location\.assign\(|location\.href\s*=/.test(helper));
  assert.ok(ui.includes("document.documentElement.dataset.ayfluxReady='true'"));
 });
