@@ -8,10 +8,12 @@ AyFlux is an educational acyclovir and valacyclovir pharmacokinetics simulator c
 - `public/assets/vendor/plotly-basic-3.3.1.min.js` — locally hosted Plotly Basic v3.3.1 (third-party MIT-licensed code)
 - `public/assets/pk-engine.js` — pharmacokinetic modeling engine
 - `public/assets/simulator-ui.js` — simulator interactions, rendering, and configuration handling
+- `public/assets/ayflux-exchange.js` — versioned, tidy CSV result export for R/OSP comparison
 - `public/assets/simulator-worker.js` — same-origin background calculation worker
 - `public/learn/` — educational documentation
 - `src/index.js` — Cloudflare Worker security headers and site metadata
 - `tests/` — dependency-free model and site regression tests
+- `interop/` — base-R CSV comparison helper; `docs/data-exchange.md` describes the result schema
 
 The browser loads the Plotly library, PK engine, and interface script **in that order**. JavaScript runs from same-origin files instead of inline script blocks, matching the Worker's `script-src 'self'` Content Security Policy. Styling remains inline in the main HTML, allowed by the Worker's existing style policy.
 
@@ -45,6 +47,14 @@ The GitHub workflow is ready, but **Cloudflare deployment is disabled until expl
 If the variable is unset or not `true`, the Cloudflare deployment job is skipped, while tests and GitHub Pages continue. If it is enabled but either secret is missing, deployment fails **before invoking Wrangler** with a clear error.
 
 After activation, each push to `main` deploys Cloudflare only after tests pass. Pull requests run tests but never deploy. This protects against regressions caught by the test suite, not all possible browser or clinical issues.
+
+## Data exchange and community contributions
+
+AyFlux can export a detailed CSV and a tidy concentration–time CSV with explicit hours, analyte, scenario, statistic, and mg/L units. The new **Export R / OSP CSV** button is designed for analysis and comparison in R with separately exported PK-Sim or MoBi data. It does **not** export `.pkml` or other OSP model/project files.
+
+- [CSV and R / PK-Sim / MoBi comparison guide](docs/data-exchange.md)
+- [Public data exchange guide](https://ayflux.org/learn/interoperability/)
+- [Contributing guidelines](CONTRIBUTING.md) and [security reporting](SECURITY.md)
 
 ## License and safety
 
