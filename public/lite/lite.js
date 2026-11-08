@@ -185,7 +185,7 @@
   const plots={plasma:$("acvChart"),cmmg:$("cmmgChart"),clearance:$("clearChart")};
   if(!form||!table||!status||!plots.plasma||!plots.cmmg)return;
   const visibility=new Set(MODES.map(m=>m.id));
-  let scenarios=[],config=null,active="hd",hoverHour=null,pending=null,frame=0;
+  let scenarios=[],config=null,active="hd",hoverHour=null,hoverKey="plasma",pending=null,frame=0;
   const fields=Object.keys(DEFAULT_INPUTS);
   const inputs=Object.fromEntries(fields.map(key=>[key,$("lite_"+key)]));
   function readValues(){
@@ -236,7 +236,7 @@
    if(hover&&Number.isFinite(hoverHour)){
     const rows=scenarios.filter(s=>visibility.has(s.id)).map(s=>{
       const i=closest(s.time,hoverHour);
-      return s.label+" "+formatNumber(s.plasma[i],2)+" mg/L";
+      return s.label+" "+formatNumber(s[hoverKey][i],2)+" "+SERIES[hoverKey].unit;
     });
     hover.textContent=formatNumber(hoverHour,1)+" h · "+rows.join(" · ");
    }else if(hover)hover.textContent="Move over the charts to inspect values.";
@@ -259,6 +259,7 @@
    updateOutputs();clearTimeout(pending);pending=setTimeout(update,180);
   }
   for(const key of fields){
+   if(key==="route")continue; // the separate change handler updates dose first
    const element=inputs[key];
    if(!element)continue;
    element.addEventListener("input",schedule);
@@ -271,7 +272,7 @@
    dose.max=route.value==="Valacyclovir oral"?"6000":"2000";
    dose.step=route.value==="Valacyclovir oral"?"100":"25";
    dose.value=route.value==="Valacyclovir oral"?"1000":"350";
-   schedule();
+   clearTimeout(pending);update();
   });
   const highlight=$("liteHighlight");
   if(highlight)highlight.addEventListener("change",()=>{active=highlight.value;updateStats();requestPaint();});
@@ -283,15 +284,16 @@
     requestPaint();
    });
   }
-  function trackHover(event,canvas){
+  function trackHover(event,canvas,key){
    const r=canvas.getBoundingClientRect(),left=53,right=15;
    const x=event.clientX-r.left,available=Math.max(1,r.width-left-right);
    hoverHour=Math.min(config.horizon,Math.max(0,(x-left)/available*config.horizon));
+   hoverKey=key;
    requestPaint();
   }
-  for(const canvas of Object.values(plots)){
+  for(const [key,canvas] of Object.entries(plots)){
    if(!canvas)continue;
-   canvas.addEventListener("pointermove",event=>{if(config)trackHover(event,canvas);});
+   canvas.addEventListener("pointermove",event=>{if(config)trackHover(event,canvas,key);});
    canvas.addEventListener("pointerleave",()=>{hoverHour=null;requestPaint();});
   }
   $("clearanceDetails")?.addEventListener("toggle",requestPaint);
