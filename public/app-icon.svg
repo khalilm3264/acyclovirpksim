@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AyFlux logo">
+<rect width="512" height="512" rx="76" fill="#28485e"/>
+<circle cx="145" cy="168" r="37" fill="#ffffff"/><circle cx="349" cy="144" r="29" fill="#7bbbd0"/>
+<circle cx="349" cy="330" r="44" fill="#ffffff"/><circle cx="155" cy="351" r="26" fill="#7bbbd0"/>
+<path d="M176 167 321 149M341 172 348 285M312 324 182 347M168 207 176 327" stroke="#d4eaf3" stroke-width="20" stroke-linecap="round"/>
+<circle cx="145" cy="168" r="37" fill="#ffffff"/><circle cx="349" cy="144" r="29" fill="#7bbbd0"/>
+<circle cx="349" cy="330" r="44" fill="#ffffff"/><circle cx="155" cy="351" r="26" fill="#7bbbd0"/>
+</svg>
