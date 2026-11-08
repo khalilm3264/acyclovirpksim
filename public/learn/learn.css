@@ -197,3 +197,9 @@ a:focus-visible { outline: 2px solid #238ac4; outline-offset: 2px; }
 
 .site-footer .cat-easter-egg{display:inline-block;margin-left:5px;font-size:13px;text-decoration:none;opacity:.52;filter:grayscale(1);vertical-align:middle}
 .site-footer .cat-easter-egg:hover,.site-footer .cat-easter-egg:focus-visible{opacity:1;filter:none}
+
+/* Compact document pages: license, software citation and medical disclaimer. */
+.legal-content{max-width:1060px}
+.legal-content p{line-height:1.65}
+.legal-content pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f7f9;border:1px solid #b7cad9;padding:12px;font-size:12px;line-height:1.5}
+.legal-content .metadata{color:#52667c;font-size:11px;margin-bottom:12px}

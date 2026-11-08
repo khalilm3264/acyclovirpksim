@@ -50,19 +50,14 @@ function startNextJob(){
  if(!workerDisabled){
   try{
    if(!worker){
-    const source=$('pk-engine').textContent+'\nself.onmessage='+function(event){
-     const {id,config}=event.data;
-     try{self.postMessage({id,data:self.RenalPKV7.simulateMany(config)});}
-     catch(error){self.postMessage({id,error:error.message});}
-    }.toString();
-    const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
-    try{worker=new Worker(url);}finally{URL.revokeObjectURL(url);}
+    // Same-origin Worker loads the model separately and keeps calculations off the UI thread.
+    worker=new Worker('/assets/simulator-worker.js');
     worker.onmessage=event=>{
      if(activeJob&&event.data.id===activeJob.id)finishJob(event.data.data,event.data.error?new Error(event.data.error):null);
     };
     worker.onerror=event=>{
      event.preventDefault();worker.terminate();worker=null;workerDisabled=true;
-     // Blob workers may be disabled by browser policy; retain a functional fallback.
+     // Worker creation may fail under restricted browser policies; retain a functional fallback.
      if(!queuedJob)queuedJob=activeJob;activeJob=null;startNextJob();
     };
    }

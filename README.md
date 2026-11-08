@@ -8,6 +8,7 @@ AyFlux is an educational acyclovir and valacyclovir pharmacokinetics simulator c
 - `public/assets/vendor/plotly-basic-3.3.1.min.js` — locally hosted Plotly Basic v3.3.1 (third-party MIT-licensed code)
 - `public/assets/pk-engine.js` — pharmacokinetic modeling engine
 - `public/assets/simulator-ui.js` — simulator interactions, rendering, and configuration handling
+- `public/assets/simulator-worker.js` — same-origin background calculation worker
 - `public/learn/` — educational documentation
 - `src/index.js` — Cloudflare Worker security headers and site metadata
 - `tests/` — dependency-free model and site regression tests
@@ -50,3 +51,9 @@ After activation, each push to `main` deploys Cloudflare only after tests pass. 
 AyFlux source: GNU Affero General Public License v3.0, see [LICENSE](LICENSE). Third-party libraries retain their own licenses.
 
 **Educational use only.** Not for clinical prescribing, dosing decisions, or patient care.
+
+## Public documentation
+
+The site provides an educational model guide, a separate medical disclaimer at `/disclaimer/`, software citation at `/cite/`, and open-source license notices at `/license/`. The repository root now includes `CITATION.cff`, `NOTICE`, and `THIRD_PARTY_NOTICES.md`. The standard GNU AGPL license text in `LICENSE` remains unchanged.
+
+Terms of Use and Privacy Policy drafts remain outside `public/` pending an accurate public contact address and verification of the live hosting/privacy configuration; they are **not** yet a substitute for attorney review. See `drafts/README.md`.

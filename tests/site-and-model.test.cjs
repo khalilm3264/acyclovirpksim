@@ -109,3 +109,33 @@ test('each primary dialysis scenario produces finite concentration curves', () =
     }
   }
 });
+
+test('simulator uses a same-origin Worker with shared engine', () => {
+  const ui=read('public/assets/simulator-ui.js');
+  const code=read('public/assets/simulator-worker.js');
+  assert.ok(ui.includes("new Worker('/assets/simulator-worker.js')"));
+  assert.ok(code.includes("importScripts('/assets/pk-engine.js')"));
+  assert.ok(code.includes('self.RenalPKV7.simulateMany(config)'));
+  assert.ok(!ui.includes("$('pk-engine').textContent"));
+  const policy=read('src/index.js');
+  assert.ok(policy.includes("worker-src 'self'"));
+});
+
+test('public citations and license links resolve to actual files', () => {
+  for(const page of ['license','cite','disclaimer']){
+    assert.ok(html.includes('href="/'+page+'/"'),page);
+    const pageHtml=read('public/'+page+'/index.html');
+    assert.ok(pageHtml.includes('<title>') && pageHtml.includes('rel="canonical"'),page);
+  }
+  assert.ok(read('CITATION.cff').includes('cff-version: 1.2.0'));
+  assert.equal(read('public/CITATION.cff'),read('CITATION.cff'));
+  assert.equal(read('public/LICENSE.txt'),read('LICENSE'));
+  assert.ok(read('THIRD_PARTY_NOTICES.md').includes('MIT License'));
+  assert.ok(!html.includes('id="ayfluxLicense"'));
+  assert.ok(!html.includes('id="ayfluxCitation"'));
+});
+
+test('the outdated research release label is absent', () => {
+  assert.ok(!html.includes('Version 13 research tools:'));
+  assert.ok(html.includes('Peritoneal dialysis (PD) exchange table:'));
+});

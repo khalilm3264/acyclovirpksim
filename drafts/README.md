@@ -32,3 +32,7 @@ These files are **drafts for review**, intentionally stored outside `public/`. T
 - Google people-first guidance: https://developers.google.com/search/docs/fundamentals/creating-helpful-content
 
 Prepared November 7, 2026. These drafts are not legal advice or a claim of regulatory status.
+
+## Publication status (November 2026)
+
+The standalone `/license/`, `/cite/`, and `/disclaimer/` pages have been prepared for public release, along with factual SEO metadata revisions and a clearer research-tools explanation. The Terms and Privacy drafts **have not been published** because a suitable public contact method and Cloudflare data-handling details still need confirmation. Do not treat the privacy draft as verified or effective until those questions are resolved.

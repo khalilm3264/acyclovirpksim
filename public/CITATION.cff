@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use AyFlux in research or teaching, cite this software and any primary studies relevant to your analysis."
+title: "AyFlux: Acyclovir Pharmacokinetics Simulator"
+type: software
+authors:
+  - family-names: "Khalil"
+    given-names: "Muhammad"
+license: "AGPL-3.0-only"
+repository-code: "https://github.com/khalilm3264/acyclovirpksim"
+url: "https://ayflux.org/"
+keywords:
+  - acyclovir
+  - valacyclovir
+  - pharmacokinetics
+  - renal impairment
+  - hemodialysis
+  - peritoneal dialysis
+  - CRRT

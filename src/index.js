@@ -5,18 +5,18 @@ const securityHeaders = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
   "Content-Security-Policy":
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+    "default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
   "X-XSS-Protection": "1; mode=block",
 };
 
 const homepageMetadata = [
-  '<meta name="description" content="Explore acyclovir and valacyclovir pharmacokinetics in renal impairment, hemodialysis, and peritoneal dialysis with the AyFlux educational simulator.">',
+  '<meta name="description" content="Explore simulated acyclovir and valacyclovir concentrations across kidney function, hemodialysis, peritoneal dialysis, and CRRT. Educational use only.">',
   '<meta name="robots" content="index, follow">',
   '<link rel="canonical" href="https://ayflux.org/">',
   '<meta property="og:type" content="website">',
   '<meta property="og:site_name" content="AyFlux">',
-  '<meta property="og:title" content="AyFlux | Acyclovir Pharmacokinetics Simulator">',
-  '<meta property="og:description" content="Interactive educational simulation of acyclovir and valacyclovir pharmacokinetics, including renal impairment and dialysis.">',
+  '<meta property="og:title" content="AyFlux — Acyclovir PK Simulator for Renal Function and Dialysis">',
+  '<meta property="og:description" content="Explore how model assumptions about kidney function and dialysis affect simulated acyclovir concentrations. Not for patient care.">',
   '<meta property="og:url" content="https://ayflux.org/">',
   '<meta name="twitter:card" content="summary">',
 ].join("\n");
@@ -48,11 +48,6 @@ export default {
         .on("head", {
           element(element) {
             element.append(homepageMetadata, { html: true });
-          },
-        })
-        .on("footer.site-footer", {
-          element(element) {
-            element.append(' · <a href="/learn/">Learning center</a>', { html: true });
           },
         })
         .transform(securedResponse);

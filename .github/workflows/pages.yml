@@ -28,6 +28,7 @@ jobs:
           node --check public/assets/vendor/plotly-basic-3.3.1.min.js
           node --check public/assets/pk-engine.js
           node --check public/assets/simulator-ui.js
+          node --check public/assets/simulator-worker.js
       - name: Run AyFlux regression tests
         run: node --test tests/*.test.cjs
 
