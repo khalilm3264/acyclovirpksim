@@ -38,7 +38,7 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 | **Drug administration** | IV acyclovir infusions and oral valacyclovir, with repeat or custom dose timelines |
 | **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and estimated peaks |
 | **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity and model consistency checks |
-| **Data exchange** | Detailed or tidy CSV exports, configuration JSON, an R comparison script, and local PK-Sim/MoBi **results** CSV overlays |
+| **Data exchange** | Detailed or tidy CSV exports, configuration JSON, optional independent **mrgsolve** and **OSPSuite-R** comparison scripts, and local PK-Sim/MoBi **results** CSV overlays |
 | **Reports and access** | Print-formatted PDF report with scenario-specific charts and page breaks, literature benchmark examples and offline static app caching where supported |
 
 **What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
@@ -84,10 +84,20 @@ For deeper explanations, see [Dialysis](https://ayflux.org/learn/dialysis/), [Mo
 AyFlux is a **teaching model with exploratory parameters**, not a fitted, externally validated population PK model. Agreement between two simulated curves is not independent clinical validation. Data exchange files include explicit time and concentration units; simulations remain subject to model assumptions and numerical limitations.
 
 - [Version history](CHANGELOG.md) · [Software citation](CITATION.cff) · [Data-exchange schema](docs/data-exchange.md)
+- [Independent mrgsolve/OSPSuite-R comparison workflows](docs/research-model-comparison.md) · [Visible implementation equations and parameter evidence](https://ayflux.org/learn/model-methods/#equations)
 - [Roadmap and planned scientific work](wiki/Roadmap.md) · [Verification plan](wiki/Release-Plan.md)
 - [Wiki-ready pages](wiki/Home.md) · [How to publish to the GitHub Wiki](docs/wiki-publishing.md)
 
 The `wiki/` directory contains the reviewed wiki source pages. GitHub's separate **Wiki** tab is not automatically updated by changes to this repository.
+
+## Independent model comparisons
+
+The repository now contains two complementary optional R research workflows under [`interop/`](interop/):
+
+- **mrgsolve**: a C++ translation of AyFlux's deterministic IV acyclovir/CMMG ODEs, compared against committed browser-engine reference curves for constant and time-varying CrCl.
+- **OSPSuite-R**: a unit-normalized plasma aciclovir CSV export from the official example `.pkml` model. Its regimen and individual are **not automatically matched** to AyFlux; only explicitly matched comparisons would be interpretable.
+
+See the [step-by-step guide](docs/research-model-comparison.md) for prerequisites, scripts, units and limitations. These exercises are implementation checks or model comparisons, **not independent clinical validation**. Note especially the [unresolved CMMG CSF partition mismatch](https://ayflux.org/learn/model-methods/#source-notes) revealed by a small published plasma/CSF study.
 
 ## Contributing
 
