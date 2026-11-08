@@ -15,6 +15,7 @@ const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
   './assets/vendor/plotly-basic-3.3.1.min.js',
   './assets/pk-engine.js',
+  './assets/ayflux-exchange.js',
   './assets/simulator-ui.js',
 ];
 
