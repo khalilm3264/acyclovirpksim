@@ -43,6 +43,8 @@ jobs:
           node --check public/sw.js
           node --check public/assets/pk-engine.js
           node --check public/assets/simulator-ui.js
+          node --check public/lite/lite.js
+          node --check public/assets/lite-fallback.js
           node --check public/assets/simulator-worker.js
       - name: Run AyFlux regression tests
         run: node --test tests/*.test.cjs
