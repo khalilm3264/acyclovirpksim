@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: "Khalil"
     given-names: "Muhammad"
-version: "0.24.0"
+version: "0.24.1"
 license: "AGPL-3.0-only"
 repository-code: "https://github.com/khalilm3264/acyclovirpksim"
 url: "https://ayflux.org/"
