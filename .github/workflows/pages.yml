@@ -36,6 +36,7 @@ jobs:
           node --check scripts/stage-poppins.cjs
           node --check public/assets/ayflux-exchange.js
           node --check public/assets/ayflux-version.js
+          node --check public/assets/plotly-loader.js
           node --check public/assets/model-integrity.js
           node --check public/assets/osp-import.js
           node --check public/assets/research-workspace.js

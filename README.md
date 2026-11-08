@@ -22,7 +22,7 @@
 <p align="center">
   <a href="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml"><img alt="Build and tests" src="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: AGPL-3.0-only" src="https://img.shields.io/badge/license-AGPL--3.0--only-315f7b"></a>
-  <a href="CHANGELOG.md"><img alt="Version 0.24.0 preview" src="https://img.shields.io/badge/version-0.24.0_preview-326f79"></a>
+  <a href="CHANGELOG.md"><img alt="Version 0.24.1 preview" src="https://img.shields.io/badge/version-0.24.1_preview-326f79"></a>
 </p>
 
 > [!IMPORTANT]
@@ -46,11 +46,11 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 
 ## AyFlux Lite — a faster, fixed-scenario alternative
 
-[**Open AyFlux Lite**](https://ayflux.org/lite/) for a small page with no Plotly and no configurable inputs. It uses the **same** PK engine but renders two native Canvas charts and a summary table for four nominal scenarios: no dialysis, a 4-hour intermittent HD session, CAPD and CRRT. The illustrated setup is a **70-kg adult with CrCl 0 mL/min and one 700-mg IV acyclovir infusion over one hour**, modeled for 48 hours with all uncertainty disabled. This is a deliberately hypothetical software demonstration, not a medical dose recommendation.
+[**Open AyFlux Lite**](https://ayflux.org/lite/) for a small page with no Plotly and just three adjustable educational inputs: weight, residual CrCl, and a single IV dose. It uses the **same** PK engine but renders two native Canvas charts and a summary table for four nominal scenarios: no dialysis, a 4-hour intermittent HD session, CAPD and CRRT. The defaults illustrate a **70-kg adult with CrCl 0 mL/min and a single 700-mg IV acyclovir infusion over one hour**, modeled for 48 hours with all uncertainty disabled. Changing a Lite input reruns the same four fixed dialysis schedules. This is a deliberately hypothetical software demonstration, not a medical dose recommendation.
 
-The full simulator links to Lite from its header. If the full simulator hasn't produced an initial result after approximately **9.5 seconds**, a dismissible, optional link appears. There is **no automatic redirect**, so unsaved settings aren't discarded. On the full origin, the existing offline service worker precaches the Lite page and scripts when its app shell is installed.
+The full simulator keeps Lite nested under its **More** menu. If the full simulator hasn't produced an initial result after approximately **9.5 seconds**, a dismissible, optional link appears. There is **no automatic redirect**, so unsaved settings aren't discarded. On the full origin, the existing offline service worker precaches the Lite page and scripts when its app shell is installed.
 
-Lite avoids the full interface, Monte Carlo calculation, extra charting bundles and research tools. It does **not** replace them.
+Lite avoids Monte Carlo calculation, additional charting bundles and research tools. Only the three simple patient/medication inputs are adjustable; it does **not** replace the full simulator.
 
 ## Get started
 
@@ -77,7 +77,7 @@ The numerical heatmap table still works when the optional script is absent. GitH
 node --test tests/*.test.cjs
 ```
 
-The browser uses a locally served Plotly Basic bundle for standard graphs and loads Plotly Cartesian **only on demand** for the interactive sensitivity heatmap. The pharmacokinetic engine and interface remain separate. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
+The browser **loads Plotly Basic on demand when a standard chart needs drawing**, and loads Plotly Cartesian only when the interactive sensitivity heatmap is requested. The heavy Plotly Basic bundle is not a blocking initial script or service-worker precache; it is cached after first use, so offline full charts require one successful online rendering first. The pharmacokinetic engine and interface remain separate. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
 
 ## A guide to the interface
 

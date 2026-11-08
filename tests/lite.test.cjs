@@ -14,7 +14,10 @@ test('AyFlux Lite uses the full scientific engine but skips heavy rendering depe
  assert.match(page,/<script defer src="\/assets\/pk-engine\.js"><\/script>/);
  assert.match(page,/<script defer src="\/lite\/lite\.js"><\/script>/);
  assert.doesNotMatch(page,/plotly|chart\.js|echarts|cdn\./i);
- assert.doesNotMatch(page,/<input\b|<select\b|<button\b/i);
+ assert.equal((page.match(/<input\b/g)||[]).length,3);
+ assert.doesNotMatch(page,/<select\b|<button\b/i);
+ for(const id of ['liteWeight','liteCrcl','liteDose'])assert.ok(page.includes('id="'+id+'"'));
+ assert.doesNotMatch(page,/Four dialysis scenarios\. Two concentration charts\.|A quick, fixed-assumption comparison using/i);
  assert.equal((page.match(/<canvas\b/g)||[]).length,2);
  assert.ok(page.includes('Educational demonstration only'));
  assert.ok(page.includes('href="/learn/model-methods/#equations"'));
@@ -44,6 +47,30 @@ test('AyFlux Lite four scenarios reproduce direct fixed-input AyFlux runs',()=>{
  }
 });
 
+test('Lite inputs update nominal model outputs without changing dialysis schedules',()=>{
+ const initial=lite.compute(pk);
+ const custom=lite.compute(pk,{weight:80,crcl:35,dose:500});
+ assert.equal(custom.length,4);
+ const cfg=lite.fixedConfiguration(pk,{weight:80,crcl:35,dose:500});
+ assert.equal(cfg.doseCount,1);
+ assert.equal(cfg.draws,1);
+ assert.equal(cfg.variability,0);
+ assert.equal(cfg.weight,80);
+ assert.equal(cfg.crcl,35);
+ assert.equal(cfg.dose,500);
+ assert.notEqual(custom[0].auc,initial[0].auc);
+ for(const run of custom){
+  const expected=pk.simulate(cfg,run.mode);
+  assert.equal(run.peak,expected.summary.peak.median);
+  assert.equal(run.auc,expected.summary.auc.median);
+ }
+ for(const value of [-1,NaN,200]){
+  assert.throws(()=>lite.compute(pk,{crcl:value}),/crcl must be/);
+ }
+ assert.throws(()=>lite.compute(pk,{dose:1600}),/dose must be/);
+ assert.throws(()=>lite.compute(pk,{unsupported:1}),/Unsupported Lite input/);
+});
+
 test('AyFlux Lite presets distinguish the anticipated illustrative dialysis exposure',()=>{
  const runs=lite.compute(pk);
  const byName=Object.fromEntries(runs.map(r=>[r.mode,r]));
@@ -64,7 +91,9 @@ test('slow-loading message is optional, non-redirecting and removed at model rea
  assert.ok(main.includes('src="/assets/lite-fallback.js"'));
  assert.ok(helper.includes('setTimeout(offerLite,9500)'));
  assert.ok(helper.includes("link.href=\"/lite/\""));
- assert.ok(helper.includes('window.addEventListener("ayflux:results-updated",clearPrompt)'));
+ assert.ok(helper.includes('window.addEventListener("ayflux:charts-ready",clearPrompt)'));
+ assert.ok(main.includes('<details class="ay-head-menu">'));
+ assert.ok(!main.includes('class="ay-guide-link ay-lite-link"'));
  assert.ok(!/location\.replace\(|location\.assign\(|location\.href\s*=/.test(helper));
  assert.ok(ui.includes("document.documentElement.dataset.ayfluxReady='true'"));
 });

@@ -355,14 +355,23 @@ html body header.ay-header .ay-lite-link:hover{background:#3c6882}
 #liteFallbackPrompt .lite-fallback-actions{display:flex;align-items:center;gap:12px}
 #liteFallbackPrompt .lite-fallback-actions a{font-weight:700}
 #liteFallbackPrompt .lite-fallback-actions button{border:0;background:none;color:#526e7d;text-decoration:underline;cursor:pointer;padding:3px}
+
+/* One subdued, keyboard-accessible menu keeps the fast alternative out of the main header. */
+html body header.ay-header .ay-head-menu{position:relative;margin-left:auto;flex:0 0 auto}
+html body header.ay-header .ay-head-menu>summary{list-style:none;cursor:pointer;user-select:none;min-width:64px}
+html body header.ay-header .ay-head-menu>summary::-webkit-details-marker{display:none}
+html body header.ay-header .ay-head-menu>summary::after{content:"⌄";font-size:14px;padding-left:7px}
+html body header.ay-header .ay-head-menu[open]>summary{background:#375c76}
+html body header.ay-header .ay-head-menu>nav{position:absolute;right:0;top:calc(100% + 5px);z-index:200;width:156px;background:#fff;border:1px solid #b5c6d1;box-shadow:0 4px 10px #102d411c;padding:4px;border-radius:0}
+html body header.ay-header .ay-head-menu>nav a{display:block;padding:9px 10px;color:#284c66;text-decoration:none;font:600 12px system-ui;border-radius:0}
+html body header.ay-header .ay-head-menu>nav a:hover,html body header.ay-header .ay-head-menu>nav a:focus-visible{background:#e7f0f5;color:#183c56}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
     <img class="ay-brand-mark" src="/ayflux-logo.png?v=1" alt="" width="42" height="42">
     <div class="ay-title-stack"><h1><a class="ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a></h1><p class="site-subtitle">Acyclovir pharmacokinetics across kidney function, hemodialysis, peritoneal dialysis, and CRRT</p></div>
   </div>
-  <a class="ay-guide-link" href="/learn/" aria-label="Open AyFlux user guide">User guide</a>
-  <a class="ay-guide-link ay-lite-link" href="/lite/" aria-label="Open lightweight fixed-scenario version of AyFlux" title="Fast fixed-scenario overview">Lite</a>
+  <details class="ay-head-menu"><summary class="ay-guide-link">More</summary><nav aria-label="AyFlux resources"><a href="/learn/">User guide</a><a href="/lite/">Lite quick view</a></nav></details>
 </header>
 <div class="shell"><div class="notice"><strong>Educational simulation only.</strong> AyFlux models acyclovir exposure using simplifying assumptions. Outputs are not clinical measurements or patient-specific dosing recommendations. Do not use for prescribing, toxicity assessment, or dialysis decisions. <a href="/disclaimer/">Read the limitations</a>.</div>
 <a class="mobile-skip" href="#concentration">View concentration charts ↓</a>
@@ -529,10 +538,10 @@ html body header.ay-header .ay-lite-link:hover{background:#3c6882}
 
 
 </main></div>
-<footer class="site-footer"><span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a> <a class="cat-easter-egg" href="/cats/" title="A small surprise" aria-label="Meet the AyFlux cats">🐾</a></span><span>Educational use only · <a href="/disclaimer/">Disclaimer</a> · <a href="/license/">License</a> · <a href="/cite/">Cite</a> · <button type="button" class="footer-link" id="footerReferences">Methods and references</button> · <a href="/learn/">User guide</a> · <a class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md" title="AyFlux release notes">v0.24.0</a> · <span class="offline-status" id="connectivityStatus" aria-live="polite">Online</span> · <a class="source-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" aria-label="AyFlux source code on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a></span></footer>
+<footer class="site-footer"><span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a> <a class="cat-easter-egg" href="/cats/" title="A small surprise" aria-label="Meet the AyFlux cats">🐾</a></span><span>Educational use only · <a href="/disclaimer/">Disclaimer</a> · <a href="/license/">License</a> · <a href="/cite/">Cite</a> · <button type="button" class="footer-link" id="footerReferences">Methods and references</button> · <a href="/learn/">User guide</a> · <a class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md" title="AyFlux release notes">v0.24.1</a> · <span class="offline-status" id="connectivityStatus" aria-live="polite">Online</span> · <a class="source-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" aria-label="AyFlux source code on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a></span></footer>
 </div>
 
-<script src="./assets/vendor/plotly-basic-3.3.1.min.js"></script>
+<script src="./assets/plotly-loader.js"></script>
 <script src="./assets/pk-engine.js"></script>
 <script src="./assets/ayflux-exchange.js"></script>
 <script src="./assets/ayflux-version.js"></script>

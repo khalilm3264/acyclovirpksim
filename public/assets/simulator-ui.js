@@ -53,7 +53,7 @@ function finishJob(data,error){
  const job=activeJob;activeJob=null;
  if(job.id===calculationVersion){
   if(error){pendingCsvExport=false;calculationError(error);}
-  else{results=data;resultsRevision++;dataIsCurrent=true;document.documentElement.dataset.ayfluxReady='true';alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
+  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
  }
  startNextJob();
 }
@@ -228,7 +228,24 @@ function labelsFor(time){
  return timeLabelCache.get(time);
 }
 function chartSignature(key){return JSON.stringify([resultsRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
-function requestPlotFrame(){if(!plotFrame&&!plotRunning)plotFrame=requestAnimationFrame(drawNextPlot);}
+let plotlyWait=null;
+function requestPlotFrame(){
+ if(!pendingPlots.size||plotFrame||plotRunning)return;
+ if(!window.Plotly||typeof window.Plotly.react!=='function'){
+  if(!plotlyWait){
+   plotlyWait=window.AyFluxPlotly.ensure().then(()=>{
+    plotlyWait=null;
+    requestPlotFrame();
+   }).catch(error=>{
+    plotlyWait=null;
+    pendingPlots.clear();
+    alertMessage('Unable to load interactive charts: '+error.message+' You can use AyFlux Lite instead.');
+   });
+  }
+  return;
+ }
+ plotFrame=requestAnimationFrame(drawNextPlot);
+}
 function drawNextPlot(){
  plotFrame=0;
  const entry=pendingPlots.entries().next();if(entry.done)return;
@@ -240,6 +257,10 @@ function drawNextPlot(){
  .then(()=>{
   const rect=target.getBoundingClientRect();
   chartStates.set(where,{signature:job.signature,width:rect.width,height:rect.height});
+  if(document.documentElement.dataset.ayfluxReady!=='true'){
+   document.documentElement.dataset.ayfluxReady='true';
+   window.dispatchEvent(new Event('ayflux:charts-ready'));
+  }
  }).catch(error=>{alertMessage('Unable to draw chart: '+error.message);})
  .finally(()=>{plotRunning=false;activePlot=null;requestPlotFrame();});
 }
@@ -608,8 +629,8 @@ function downloadJSON(obj,name){
 }
 $('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
 $('saveConfig').addEventListener('click',()=>{
- const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.24.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
- downloadJSON(data,'ayflux_simulation_v0.24.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
+ const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.24.1',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
+ downloadJSON(data,'ayflux_simulation_v0.24.1.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
 });
 $('loadConfig').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
@@ -672,7 +693,7 @@ $('loadConfig').addEventListener('change',async e=>{
   const errors=[...new Set(E.MODES.flatMap(mode=>E.validate(next,mode)))];
   if(errors.length)throw Error('Configuration fails model validation: '+errors.slice(0,3).join('; '));
   // Only now, after all shape and numerical checks, apply the loaded configuration.
-  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.24.0',savedAt:new Date().toISOString(),
+  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.24.1',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
   Object.assign(c,next);setPalette(importedPalette);primary=input.primary;

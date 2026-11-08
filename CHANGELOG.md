@@ -2,6 +2,15 @@
 
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
+## [0.24.1] - 2026-11-08 (preview)
+
+- Reduced AyFlux Lite visual prominence with a smaller, light header and removed its introductory heading and paragraph.
+- Made Lite minimally interactive: change **body weight, residual CrCl, or a single illustrative IV dose**, and update the same four dialysis scenarios in the existing PK engine with a short debounce. All dialysis settings, model parameters, and simulation horizon remain fixed, and Monte Carlo sampling remains disabled.
+- Nested Lite beneath a **More** header menu on the full simulator. The independently loaded slow-start link remains available when needed and now clears only after the first full chart successfully renders.
+- Removed the blocking Plotly Basic script from the full page. A small shared loader requests it when the first graph actually needs to render, and Research CSV overlays, Cartesian heatmaps and printable reports await that same loader.
+- Moved Plotly Basic out of the service worker's initial precache; it is cached after first use instead. Existing downloaded offline Lite assets remain cached.
+- Preserved all underlying pharmacokinetic equations and configuration **schema 2**. This is a patch release of the v0.24 series, not a feature-major release.
+
 ## [0.24.0] - 2026-11-08 (preview)
 
 - Created **AyFlux Lite** at `/lite/`: fixed no-dialysis, intermittent HD, CAPD and CRRT example curves for plasma acyclovir and CMMG, rendered using native Canvas without Plotly.
@@ -55,6 +64,7 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
+[0.24.1]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.24.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md

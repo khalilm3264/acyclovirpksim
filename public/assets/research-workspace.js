@@ -36,7 +36,7 @@ $('ospFile').addEventListener("change",async event=>{
   updateText("ospStatus",externalTable.rows.length+" rows loaded locally. Confirm the two columns, their units, and target analyte.");
  }catch(error){externalTable=null;updateText("ospStatus","Import error: "+error.message);}
 });
-function renderExternal(){
+async function renderExternal(){
  if(!externalTable)throw Error("Select a CSV file first.");
  const snapshot=getSnapshot(),key=$('ospTarget').value;
  const raw=importer.selectSeries(externalTable,{
@@ -49,6 +49,7 @@ function renderExternal(){
  const simulation=snapshot.results[snapshot.primary];
  const model={time:simulation.time,concentration:simulation[key].median};
  const difference=importer.compareCurves(model,raw);
+ await window.AyFluxPlotly.ensure();
  const unitName=key==="plasma"?"Plasma acyclovir":key==="csf"?"CSF acyclovir":key==="cmmg"?"Plasma CMMG":"CSF CMMG";
  const layout={
   margin:{l:69,r:16,t:38,b:52},paper_bgcolor:"#fff",plot_bgcolor:"#fff",showlegend:true,
@@ -69,8 +70,8 @@ function renderExternal(){
  updateText("ospStatus","Compared with AyFlux "+snapshot.primary+". Re-run comparison if the model settings change.");
  lastExternal={time:raw.time,concentration:raw.concentration,unitName,metrics:difference};
 }
-$('ospCompare').addEventListener("click",()=>{
- try{renderExternal();}catch(error){updateText("ospStatus","Comparison error: "+error.message);}
+$('ospCompare').addEventListener("click",async ()=>{
+ try{await renderExternal();}catch(error){updateText("ospStatus","Comparison error: "+error.message);}
 });
 $('ospClear').addEventListener("click",()=>{
  $('ospFile').value="";externalTable=null;lastExternal=null;
@@ -85,14 +86,14 @@ const pause=()=>new Promise(resolve=>setTimeout(resolve,0));
 let cartesianPromise=null;
 function loadCartesianForHeatmap(){
  if(cartesianPromise)return cartesianPromise;
- cartesianPromise=new Promise((resolve,reject)=>{
+ cartesianPromise=window.AyFluxPlotly.ensure().then(()=>new Promise((resolve,reject)=>{
   const script=document.createElement('script');
   script.src='/assets/vendor/plotly-cartesian-3.3.1.min.js';
   script.async=true;
   script.onload=()=>resolve(window.Plotly);
   script.onerror=()=>reject(new Error('Optional heatmap bundle could not be loaded'));
   document.head.append(script);
- }).catch(error=>{cartesianPromise=null;throw error;});
+ })).catch(error=>{cartesianPromise=null;throw error;});
  return cartesianPromise;
 }
 $('runHeatmap').addEventListener("click",async ()=>{
@@ -266,7 +267,7 @@ function buildResearchReportHtml({date,values,metrics,charts,diagnostic,scenario
   '</style></head><body>'+
   '<p class="screen-help">Use your browser Print command (Ctrl+P / Cmd+P) and select Save as PDF.</p>'+
   '<section class="report-summary"><h1>AyFlux — educational PK research report</h1>'+
-  '<p class="meta">Generated '+escapeHtml(date)+' · AyFlux '+escapeHtml(window.AyFluxVersion?.version||'0.24.0')+
+  '<p class="meta">Generated '+escapeHtml(date)+' · AyFlux '+escapeHtml(window.AyFluxVersion?.version||'0.24.1')+
   ' · Configuration schema 2</p>'+
   '<p class="note"><strong>EDUCATIONAL USE ONLY.</strong> Simulated, non-validated concentration estimates. Not for prescribing, toxicity assessment, clinical decisions, or dialysis planning.</p>'+
   '<h2>Simulation assumptions</h2><table>'+values.map(r=>tableRow(...r)).join('')+'</table>'+
@@ -292,8 +293,9 @@ $('printResearchReport').addEventListener('click',async ()=>{
  updateText('reportStatus','Preparing print-ready chart images…');
  try{
   const snap=getSnapshot(),config=snap.config,sim=snap.results[snap.primary];
+  await window.AyFluxPlotly.ensure();
   const values=[
-   ['Release','v0.24.0 (research preview)'],['Scenario',snap.primary],
+   ['Release','v0.24.1 (research preview)'],['Scenario',snap.primary],
    ['Medication schedule',config.dosingMode==='custom'?'Custom doses':'Repeating regimen'],
    ['Drug and route',config.dosingMode==='custom'?'See saved configuration':config.route],
    ['Dose (mg)',config.dosingMode==='custom'?'See custom schedule':config.dose],
