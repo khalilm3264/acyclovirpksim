@@ -187,9 +187,9 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(index.includes('id="printResearchReport"'));
  assert.ok(ui.includes('window.AyFluxResearchBridge'));
  assert.ok(index.includes('/manifest.webmanifest'));
- assert.ok(read('public/sw.js').includes('ayflux-static-v0.22.0'));
+ assert.ok(read('public/sw.js').includes('ayflux-static-v0.23.0'));
  assert.ok(read('public/manifest.webmanifest').includes('AyFlux'));
- assert.ok(read('CITATION.cff').includes('version: "0.22.0"'));
+ assert.ok(read('CITATION.cff').includes('version: "0.23.0"'));
  assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
- assert.ok(read('CHANGELOG.md').includes('[0.22.0]'));
+ assert.ok(read('CHANGELOG.md').includes('[0.23.0]'));
 });
