@@ -482,11 +482,11 @@ $('csv').addEventListener('change',event=>{const format=event.target.value;event
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;
- target.innerHTML=doseDraft.map((d,i)=>`<div class="dose-row" data-dose-row="${i}">
+ target.innerHTML=doseDraft.map((d,i)=>`<div class="dose-row ${d.route==='Acyclovir IV'?'':'dose-row--oral'}" data-dose-row="${i}">
  <div><label>Time (hours)</label><input type="number" step="any" min="0" data-dose-index="${i}" data-dose-field="time" value="${d.time}"></div>
  <div><label>Medication / route</label><select data-dose-index="${i}" data-dose-field="route">${E.ROUTES.map(r=>`<option value="${r}" ${r===d.route?'selected':''}>${r==='Acyclovir IV'?'Acyclovir · IV':'Valacyclovir · oral'}</option>`).join('')}</select></div>
  <div><label>Amount (mg)</label><input type="number" step="any" min="0.01" max="${E.MAX_DOSE_MG[d.route]}" data-dose-index="${i}" data-dose-field="amount" value="${d.amount}"></div>
- <div><label>IV infusion (hours)</label><input type="number" step="any" min="0.01" max="24" data-dose-index="${i}" data-dose-field="infusion" value="${d.infusion||1}" ${d.route==='Valacyclovir oral'?'disabled':''}></div>
+ ${d.route==='Acyclovir IV'?`<div><label>IV infusion (hours)</label><input type="number" step="any" min="0.01" max="24" data-dose-index="${i}" data-dose-field="infusion" value="${d.infusion||1}"></div>`:''}
  <button class="btn secondary small" data-delete-dose="${i}" aria-label="Remove medication dose ${i+1}">✕</button></div>`).join('');
  $('doseCountPreview').textContent=`${doseDraft.length} planned administration${doseDraft.length===1?'':'s'} · Oral and IV amounts are in their own labeled drug milligrams, not equivalent doses.`;
  paintDoses();checkDoseDraft();
