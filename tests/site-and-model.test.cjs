@@ -13,7 +13,6 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const html = read('public/index.html');
 const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
-  '/assets/lite-fallback.js',
   './assets/plotly-loader.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
