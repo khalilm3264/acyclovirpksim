@@ -48,7 +48,9 @@ After activation, each push to `main` deploys Cloudflare only after tests pass. 
 
 ## License and safety
 
-AyFlux source: GNU Affero General Public License v3.0, see [LICENSE](LICENSE). Third-party libraries retain their own licenses.
+AyFlux source: GNU Affero General Public License v3.0 only (AGPL-3.0-only), see [LICENSE](LICENSE). Third-party libraries retain their own licenses.
+
+Project contact: [contact@ayflux.org](mailto:contact@ayflux.org). Website: [ayflux.org](https://ayflux.org/). Source and project copyright notices are in [NOTICE](NOTICE).
 
 **Educational use only.** Not for clinical prescribing, dosing decisions, or patient care.
 
