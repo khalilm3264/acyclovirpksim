@@ -14,7 +14,7 @@ const html = read('public/index.html');
 const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
   '/assets/lite-fallback.js',
-  './assets/vendor/plotly-basic-3.3.1.min.js',
+  './assets/plotly-loader.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
   './assets/ayflux-version.js',
@@ -56,6 +56,9 @@ test('simulator loads external scripts in the required order', () => {
     assert.ok(fs.statSync(filename).size > 0, relative + ' must exist');
   }
   assert.ok(read('public/assets/vendor/plotly-basic-3.3.1.min.js').includes('plotly.js (basic'));
+  assert.ok(!html.includes('<script src="./assets/vendor/plotly-basic-3.3.1.min.js"'));
+  assert.ok(read('public/assets/plotly-loader.js').includes('script.async=true'));
+  assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxPlotly.ensure()'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.RenalPKV7'));
 });
 
