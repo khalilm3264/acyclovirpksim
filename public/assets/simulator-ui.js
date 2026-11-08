@@ -53,7 +53,7 @@ function finishJob(data,error){
  const job=activeJob;activeJob=null;
  if(job.id===calculationVersion){
   if(error){pendingCsvExport=false;calculationError(error);}
-  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
+  else{results=data;resultsRevision++;dataIsCurrent=true;document.documentElement.dataset.ayfluxReady='true';alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
  }
  startNextJob();
 }
