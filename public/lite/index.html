@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#28485e">
 <title>AyFlux Lite — Quick Dialysis Comparison</title>
-<meta name="description" content="Fast, fixed-assumption educational acyclovir curves comparing no dialysis, HD, PD and CRRT. No sign-in, controls or chart libraries.">
+<meta name="description" content="Fast educational acyclovir curves comparing no dialysis, HD, PD and CRRT with simple dose, weight and kidney-function inputs.">
 <link rel="canonical" href="https://ayflux.org/lite/">
 <style>
 :root{font:14px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#263e52;background:#f5f8fa}
@@ -13,17 +13,17 @@
 body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 a{color:#255e84}
 a:focus-visible{outline:2px solid #2d83a6;outline-offset:3px}
-header{background:#28485e;color:#fff;padding:13px max(18px,calc((100% - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{font-weight:800;font-size:23px;letter-spacing:-.04em}
+header{background:#e6edf2;color:#25465e;border-bottom:1px solid #c6d6e0;padding:9px max(18px,calc((100% - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:19px;letter-spacing:-.04em;line-height:1.2;margin:0}
 .brand span{font-weight:300}
 .brand em{font-style:normal;color:#f0a37c}
-header a{color:#f8fcff;border:1px solid #91b1c4;padding:6px 10px;text-decoration:none;font-size:12px;font-weight:700}
-header a:hover{background:#355f7e}
-main{flex:1;width:min(1160px,100%);margin:0 auto;padding:18px 18px 24px}
-h1{font-size:clamp(22px,3.6vw,28px);margin:0 0 5px;line-height:1.25}
+header a{color:#315875;border:1px solid #9eb6c7;padding:5px 9px;text-decoration:none;font-size:11px;font-weight:700}
+header a:hover{background:#d8e6ee}
+main{flex:1;width:min(1160px,100%);margin:0 auto;padding:14px 18px 22px}
+h1{font-size:19px;margin:0;line-height:1.2}
 h2{font-size:16px;margin:0 0 8px}
-.intro{margin:0 0 12px;color:#546e80}
-.notice{border-left:3px solid #b78234;background:#fff7e8;padding:9px 11px;margin:12px 0 14px}
+.intro{margin:0 0 9px;color:#546e80}
+.notice{border-left:3px solid #b78234;background:#fff7e8;padding:7px 10px;margin:10px 0 12px;font-size:12px}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .card{background:#fff;border:1px solid #c7d5df;padding:13px;min-width:0}
 .chart{display:block;width:100%;height:275px;touch-action:pan-y}
@@ -39,8 +39,8 @@ th{background:#edf3f7;color:#2b5069;font-weight:700}
 details{margin-top:12px}
 summary{cursor:pointer;font-weight:700}
 footer{background:#e9f0f4;padding:10px 18px;text-align:center;color:#4c6679;font-size:11px}
-#liteStatus{min-height:18px;color:#456576;font-size:12px}
-@media(max-width:750px){.cards{grid-template-columns:minmax(0,1fr)}.chart{height:250px}main{padding:14px 12px}header{padding:12px} .card{padding:10px}}
+#liteStatus{min-height:18px;color:#456576;font-size:12px}.lite-controls{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:end;background:#fff;border:1px solid #c7d5df;padding:10px 12px;margin:0 0 10px}.lite-controls label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:#31516a}.lite-controls input{width:115px;height:34px;border-radius:0;border:1px solid #9fb4c3;background:#fff;padding:6px 9px;font:600 13px system-ui;color:#263e52}.lite-controls input:focus-visible{outline:2px solid #2d83a6;outline-offset:1px}.lite-controls .lite-input-note{flex:1 1 185px;font-size:11px;color:#566f80;line-height:1.4;padding-bottom:4px}
+@media(max-width:750px){.cards{grid-template-columns:minmax(0,1fr)}.chart{height:250px}main{padding:12px}header{padding:9px 12px}.card{padding:10px}.lite-controls{gap:8px;padding:9px}.lite-controls label{flex:1 1 85px}.lite-controls input{width:100%}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 <script defer src="/assets/pk-engine.js"></script>
@@ -48,12 +48,16 @@ footer{background:#e9f0f4;padding:10px 18px;text-align:center;color:#4c6679;font
 </head>
 <body>
 <header>
-<div class="brand" aria-label="AyFlux Lite">Ay<span>Flu<em>x</em></span> <small style="font:600 12px system-ui;letter-spacing:0;color:#c9dce7">LITE</small></div>
+<h1 class="brand" aria-label="AyFlux Lite">Ay<span>Flu<em>x</em></span> <small style="font:700 10px system-ui;letter-spacing:.04em;color:#607d91">LITE</small></h1>
 <a href="/">Open full simulator</a>
 </header>
 <main>
-<h1>Four dialysis scenarios. Two concentration charts.</h1>
-<p class="intro">A quick, fixed-assumption comparison using the same pharmacokinetic engine as AyFlux. No settings, uncertainty sampling, accounts or heavy charting library.</p>
+<div class="lite-controls" role="group" aria-label="Illustrative pharmacokinetic inputs">
+<label for="liteWeight">Body weight (kg)<input id="liteWeight" type="number" inputmode="decimal" min="30" max="150" step="1" value="70"></label>
+<label for="liteCrcl">Residual CrCl (mL/min)<input id="liteCrcl" type="number" inputmode="decimal" min="0" max="120" step="1" value="0"></label>
+<label for="liteDose">Single IV dose (mg)<input id="liteDose" type="number" inputmode="decimal" min="0" max="1500" step="50" value="700"></label>
+<span class="lite-input-note">Edit a value to update both curves. Dialysis schedules remain fixed; see the full simulator for more controls.</span>
+</div>
 <div class="notice"><strong>Educational demonstration only.</strong> These are hypothetical modeled concentrations, not a treatment recommendation or validated clinical prediction. Do not use this example to select a dose or dialysis prescription.</div>
 <div class="legend" aria-label="Chart legend">
 <span><i class="swatch" style="background:#8a959f"></i>No dialysis</span>
@@ -74,11 +78,11 @@ footer{background:#e9f0f4;padding:10px 18px;text-align:center;color:#4c6679;font
 </section>
 </div>
 <section class="card" style="margin-top:12px" aria-labelledby="comparisonTitle">
-<h2 id="comparisonTitle">Same assumptions, different modeled dialysis</h2>
+<h2 id="comparisonTitle">Modeled scenario comparison</h2>
 <div class="table-scroll"><table><thead><tr><th scope="col">Scenario</th><th class="num" scope="col">Acyclovir peak<br>(mg/L)</th><th class="num" scope="col">Acyclovir AUC<sub>0–48</sub><br>(mg·h/L)</th><th class="num" scope="col">CMMG peak<br>(mg/L)</th></tr></thead><tbody id="liteResults"><tr><td colspan="4">Calculating fixed example curves…</td></tr></tbody></table></div>
 <p id="liteStatus" role="status" aria-live="polite"></p>
-<details><summary>Exact fixed assumptions and limitations</summary>
-<p><strong>Illustrative adult:</strong> 70 kg, residual creatinine clearance 0 mL/min; 700 mg IV acyclovir infused over one hour at hour 0; one dose only; 48-hour modeling horizon; one deterministic parameter set, with no uncertainty band. The dose is an arbitrary software demonstration, <strong>not a suggested dose</strong>.</p>
+<details><summary>Dialysis schedules and modeling assumptions</summary>
+<p><strong>Illustrative inputs:</strong> <span id="liteAssumptions">70 kg, residual creatinine clearance 0 mL/min, one 700 mg IV acyclovir infusion</span> over one hour at hour 0. One dose only; 48-hour modeling horizon; one deterministic parameter set and no uncertainty band. Any entered dose is hypothetical, <strong>not a suggested dose</strong>.</p>
 <p><strong>Dialysis scenarios:</strong> no dialysis; intermittent HD from hours 8 to 12 with modeled clearance 81.8 mL/min; CAPD with four 6-hour, 2-L dwells per day and an exploratory transport model; or CRRT throughout the 48 hours, with effluent 25 mL/kg/h, sieving coefficient 0.95, delivered fraction 0.85. Other PK coefficients follow the nominal full AyFlux model.</p>
 <p>All results come from the ordinary AyFlux engine with variability disabled. The comparison cannot represent a patient's drug exposure or account for individual dialysis performance. In particular, PD drug transfer and CMMG handling are exploratory assumptions. <a href="/learn/model-methods/#equations">Model equations, citations, and limitations</a>.</p>
 </details>
