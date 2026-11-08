@@ -15,14 +15,14 @@ HDCL = 0, HDSTART = 8, HDEND = 12, METDIAL = 1
 $CMT CENT PERI MET
 
 $ODE
-const double scale = pow(WT/70.0, 0.75);
-const double Vc = 0.32*WT*VCSCALE;
-const double Vp = 0.37*WT;
-const double Vm = 0.40*WT;
-const double Q  = 10.0*scale;
-const double other = 0.12*scale*CLSCALE;
-const double form = 1.6*FORMFACTOR*scale;
-double crcl = CRCL0;
+local_double scale = pow(WT/70.0, 0.75);
+local_double Vc = 0.32*WT*VCSCALE;
+local_double Vp = 0.37*WT;
+local_double Vm = 0.40*WT;
+local_double Q  = 10.0*scale;
+local_double other = 0.12*scale*CLSCALE;
+local_double form = 1.6*FORMFACTOR*scale;
+local_double crcl = CRCL0;
 if(SOLVERTIME < T1 && T1 > 0) {
   crcl = CRCL0 + (CRCL1-CRCL0)*SOLVERTIME/T1;
 } else if(SOLVERTIME <= T2 && T2 > T1) {
@@ -30,12 +30,12 @@ if(SOLVERTIME < T1 && T1 > 0) {
 } else {
   crcl = CRCL2;
 }
-const double renal = 0.202*crcl*scale*CLSCALE;
-const double metRenal = 0.12*crcl*METRENAL*scale;
-const double hd = (SOLVERTIME >= HDSTART && SOLVERTIME < HDEND) ? HDCL*0.06 : 0;
-const double cc = CENT/Vc;
-const double cp = PERI/Vp;
-const double flux = Q*(cc-cp);
+local_double renal = 0.202*crcl*scale*CLSCALE;
+local_double metRenal = 0.12*crcl*METRENAL*scale;
+local_double hd = (SOLVERTIME >= HDSTART && SOLVERTIME < HDEND) ? HDCL*0.06 : 0;
+local_double cc = CENT/Vc;
+local_double cp = PERI/Vp;
+local_double flux = Q*(cc-cp);
 dxdt_CENT = -(other+renal+form+hd)*cc - flux;
 dxdt_PERI = flux;
 dxdt_MET = form*cc*(239.19/225.21)
