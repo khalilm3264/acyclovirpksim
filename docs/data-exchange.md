@@ -60,7 +60,7 @@ If the PK-Sim/MoBi CSV has different headers, inspect it with `names(read.csv("o
 
 1. Run a simulation in PK-Sim or MoBi.
 2. Export that simulation's **results**, not the full model, as CSV or Excel. See [OSP's import/export documentation](https://docs.open-systems-pharmacology.org/working-with-pk-sim/pk-sim-documentation/importing-exporting-project-data-models).
-3. Export AyFlux results using **Export R / OSP CSV**.
+3. Export AyFlux results by selecting **R / OSP tidy** in the CSV format selector and clicking **Export CSV**.
 4. In R, map the OSP time/concentration columns using `read_osp_curve()`. Specify the exported time and concentration units.
 5. Compare time courses only after aligning dose, route, administration schedule, kidney function, dialysis settings, sampling compartment, and model assumptions.
 
