@@ -81,6 +81,20 @@ window.addEventListener("ayflux:results-updated",()=>{
  if(lastExternal)updateText("ospStatus","AyFlux simulation changed. Click Compare curves to refresh the overlay.");
 });
 const pause=()=>new Promise(resolve=>setTimeout(resolve,0));
+// Only users who open the heatmap download the larger Cartesian trace bundle.
+let cartesianPromise=null;
+function loadCartesianForHeatmap(){
+ if(cartesianPromise)return cartesianPromise;
+ cartesianPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  script.src='/assets/vendor/plotly-cartesian-3.3.1.min.js';
+  script.async=true;
+  script.onload=()=>resolve(window.Plotly);
+  script.onerror=()=>reject(new Error('Optional heatmap bundle could not be loaded'));
+  document.head.append(script);
+ }).catch(error=>{cartesianPromise=null;throw error;});
+ return cartesianPromise;
+}
 $('runHeatmap').addEventListener("click",async ()=>{
  const button=$('runHeatmap');button.disabled=true;
  try{
@@ -123,7 +137,30 @@ $('runHeatmap').addEventListener("click",async ()=>{
   });
   table.append(tbody);
   $('heatmapArea').replaceChildren(table);
-  updateText("heatmapStatus","49 deterministic model runs completed; changing other assumptions or the current dose schedule requires regenerating this table.");
+  const label=metric==='auc'?'Plasma acyclovir AUC (mg·h/L)':'Peak plasma acyclovir (mg/L)';
+  try{
+   const renderer=await loadCartesianForHeatmap();
+   const target=$('heatmapPlot');
+   target.classList.remove('hidden');
+   await renderer.react(target,[{
+    type:'heatmap',x:xValues,y:yValues,z:values,
+    colorscale:[[0,'#edf3f6'],[0.33,'#b5d0df'],[0.66,'#6598b5'],[1,'#2b5f82']],
+    hovertemplate:'CrCl %{x} mL/min<br>HD clearance %{y} mL/min<br>'+label+': %{z:.3f}<extra></extra>',
+    colorbar:{title:{text:metric==='auc'?'mg·h/L':'mg/L',side:'right'},thickness:15},
+    xgap:2,ygap:2
+   }],{
+    margin:{l:74,r:68,t:32,b:70},paper_bgcolor:'#fff',plot_bgcolor:'#fff',
+    xaxis:{title:'Residual CrCl (mL/min)',tickmode:'array',tickvals:xValues},
+    yaxis:{title:'HD clearance (mL/min)',tickmode:'array',tickvals:yValues},
+    font:{color:'#28485e',size:11}
+   },{responsive:true,displaylogo:false});
+   $('heatmapArea').parentElement.open=false;
+   updateText('heatmapStatus','Interactive Cartesian heatmap ready (49 deterministic simulations). Hover for values; expand the numeric table for accessible data.');
+  }catch(error){
+   $('heatmapPlot').classList.add('hidden');
+   $('heatmapArea').parentElement.open=true;
+   updateText('heatmapStatus','49 simulations completed. Interactive plot unavailable; numeric table shown. '+error.message);
+  }
  }catch(error){updateText("heatmapStatus","Unable to produce heatmap: "+error.message);}
  finally{button.disabled=false;}
 });
