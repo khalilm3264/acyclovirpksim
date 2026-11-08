@@ -1,3 +1,13 @@
+/*
+ * AyFlux — educational acyclovir and valacyclovir pharmacokinetics simulator.
+ * Copyright (C) 2026 Muhammad Khalil
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * This file is part of AyFlux, licensed under the GNU Affero General
+ * Public License version 3. It is provided without warranty.
+ * See LICENSE: https://github.com/khalilm3264/acyclovirpksim/blob/main/LICENSE
+ * Contact: contact@ayflux.org
+ */
 
 (function(){'use strict';
 const E=window.RenalPKV7,$=id=>document.getElementById(id),modes=E.MODES;
