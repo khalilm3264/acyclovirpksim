@@ -67,7 +67,7 @@ test('service worker only caches public static files and no user uploads',()=>{
  const root=path.resolve(__dirname,'..');
  const sw=fs.readFileSync(path.join(root,'public/sw.js'),'utf8');
  assert.match(sw,/request\.method !== "GET"/);
- assert.match(sw,/const CACHE = "ayflux-static-v0\.21\.0"/);
+ assert.ok(sw.includes('const CACHE = "ayflux-static-v0.22.0"'));
  assert.match(sw,/assets\/research-workspace\.js/);
  assert.doesNotMatch(sw,/indexedDB|POST|localStorage\.setItem/);
 });
@@ -82,7 +82,7 @@ test('research heatmap is interactive when Cartesian is staged and still has num
  assert.match(source,/loadCartesianForHeatmap/);
  assert.match(source,/type:'heatmap'/);
  assert.match(source,/Interactive plot unavailable; numeric table shown/);
- assert.match(workflow,/plotly.js-cartesian-dist-min@3\\.3\\.1/);
+ assert.ok(workflow.includes('plotly.js-cartesian-dist-min@3.3.1'));
 });
 test('research report protects PNG charts from printing across pages',()=>{
  const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
