@@ -47,6 +47,42 @@
   <p>AyFlux uses a two-compartment model to describe how acyclovir distributes and is cleared over time. The central and peripheral compartments are mathematical simplifications, not direct maps of specific organs.</p>
   <p>Changing a parameter, such as assumed kidney clearance, changes the predicted curve. The result depends on the model and its inputs, not on measurements from a particular patient.</p>
 </section>
+<section class="card" id="equations">
+  <h2>AyFlux differential equations (implemented model)</h2>
+  <p>The following expressions correspond to the core amount-state equations in <code>public/assets/pk-engine.js</code>. They describe how the educational model calculates concentrations; they are <strong>not</strong> equations fitted and validated against a clinical cohort. The simulator also handles treatment boundaries, oral dose events and optional dialysis exchanges.</p>
+  <p><strong>State definitions:</strong> A<sub>c</sub> is acyclovir amount in the central compartment (mg); A<sub>p</sub> is peripheral acyclovir amount (mg); M is plasma CMMG amount (mg); D is the bioavailable acyclovir-equivalent oral depot (mg); P is drug in the PD dialysate (mg); V<sub>PD</sub> is dialysate volume (L). C<sub>c</sub> = A<sub>c</sub>/V<sub>c</sub>, C<sub>p</sub> = A<sub>p</sub>/V<sub>p</sub>, C<sub>M</sub> = M/V<sub>M</sub>, and C<sub>d</sub> = P/V<sub>PD</sub> (all concentrations in mg/L).</p>
+  <div class="model-equation" role="group" aria-label="Differential equations for acyclovir and CMMG">
+    <pre>dA_c/dt = R_IV(t) + k_a D
+          − [CL_other + CL_form + CL_kidney(t)] C_c
+          − Q (C_c − C_p)
+          − CL_HD/CRRT(t) C_c − J_PD(t)
+
+dA_p/dt = Q (C_c − C_p)
+
+dM/dt   = CL_form C_c × (MW_CMMG / MW_ACV)
+          − [CL_M,nonrenal + CL_M,renal(t) + CL_M,dial(t)] C_M
+
+dD/dt   = − k_a D
+
+dP/dt   = J_PD(t)                     (during an active PD dwell)
+dV_PD/dt = UF_net(t)                 (during an active PD dwell)</pre>
+  </div>
+  <p>All drug amount derivatives and fluxes are in mg/h. <code>R_IV(t)</code> is the IV infusion rate in mg/h, <code>k_a</code> the oral absorption rate in h<sup>−1</sup>, <code>Q</code> the central–peripheral exchange clearance in L/h, and all <code>CL</code> terms are clearances in L/h. Molecular weights are 225.21 g/mol for acyclovir and 239.19 g/mol for CMMG. A valacyclovir dose enters D as its molecular-weight-converted, model-bioavailable acyclovir-equivalent amount, rather than as the unchanged tablet milligrams. <a href="#source-notes">Evidence and limitations below</a>.</p>
+  <h3>Peritoneal membrane-transfer approximation</h3>
+  <div class="model-equation"><pre>J_PD(t) = PS (C_c − C_d)
+          + UF_small (1 − σ) C_c
+          − Q_reabs C_d</pre></div>
+  <p><code>PS</code> is an assumed drug permeability–surface-area term (L/h), <code>UF_small</code> an assumed small-pore convective water flow (L/h), <code>σ</code> an assumed reflection factor, and <code>Q_reabs</code> an assumed dialysate reabsorption rate (L/h). A positive J<sub>PD</sub> moves acyclovir out of plasma; it can be negative if return transfer dominates. The code applies simplified glucose-dependent ultrafiltration, volume changes and discrete dialysate drains. This <strong>is not an externally fitted PD membrane model</strong>. CMMG PD elimination uses a separate dialysis-clearance proxy rather than the same P and V<sub>PD</sub> states.</p>
+  <h3>Dynamic CrCl and CSF state updates</h3>
+  <p>When the user selects a time-varying renal profile, the entered CrCl (mL/min) is linearly interpolated between specified times and used to scale the renal acyclovir and CMMG clearances at each RK4 stage. If CrCl reaches zero, both renal terms become zero; nonrenal and dialytic terms can persist. The CrCl-to-drug-clearance mapping is an <strong>assumption</strong>, not a prediction of acute kidney injury or recovery.</p>
+  <p>Plasma–CSF acyclovir and CMMG are <strong>not additional integrated mass compartments</strong> in this implementation. Their concentrations are updated after each amount-state Runge–Kutta step using a positive-clamped, first-order lagged partition approximation:</p>
+  <div class="model-equation"><pre>CSF_ACV(next) = max[0, CSF_ACV(t)
+  + Δt × (k_CSF × mean(C_c at step ends) − CSF_ACV(t)) / τ_CSF]
+
+CSF_CMMG(next) = max[0, CSF_CMMG(t)
+  + Δt × (k_CMMG × mean(C_M at step ends) − CSF_CMMG(t)) / τ_CMMG]</pre></div>
+  <p>The core amount states use fourth-order Runge–Kutta with inserted medication and treatment boundaries; the CSF lag state uses the explicit update shown here. These are separate numerical methods, not a whole-body PBPK model.</p>
+</section>
 <section class="card">
   <h2>Changing kidney function over time</h2>
   <p>AyFlux can use either a constant residual creatinine clearance (CrCl) or a <strong>user-entered sequence of CrCl values</strong> at specified hours. In the time-varying mode, the simulator linearly interpolates between values and scales the acyclovir and CMMG renal elimination terms as CrCl changes.</p>
@@ -74,6 +110,20 @@
     <li>It cannot account for every difference in physiology, drug handling, or dialysis performance.</li>
     <li>It cannot establish a safe dose or treatment schedule.</li>
   </ul>
+</section>
+<section class="card" id="source-notes">
+  <h2>Parameter provenance and research gaps</h2>
+  <p>These rows distinguish evidence-backed <em>study context</em> from AyFlux's <em>assumed numerical implementation</em>. A reference does not automatically validate a particular clearance coefficient, compartment volume or interval width.</p>
+  <div class="model-table-wrap"><table class="model-parameter-table"><thead><tr><th>Component</th><th>Current nominal assumption</th><th>Evidence / outstanding work</th></tr></thead><tbody>
+  <tr><td>Plasma volumes and intercompartmental flow</td><td>V<sub>c</sub> = 0.32 × body weight (L); V<sub>p</sub> = 0.37 × weight (L); Q = 10 × (weight/70)<sup>0.75</sup> L/h</td><td>Illustrative parameters, <strong>not individually fitted</strong> to the Laskin study. <a href="https://pubmed.ncbi.nlm.nih.gov/7075109/">Laskin 1982</a> provides renal-failure PK context.</td></tr>
+  <tr><td>Residual kidney clearance</td><td>CL<sub>kidney</sub> = 0.202 × CrCl (mL/min) × (weight/70)<sup>0.75</sup> × clearance multiplier, in L/h</td><td>Assumed mapping and between-scenario scaling. Do not treat as verified patient-specific clearance. Actual renal handling changes with clinical state.</td></tr>
+  <tr><td>CMMG formation and elimination</td><td>CL<sub>form</sub> = 1.6 × (weight/70)<sup>0.75</sup> L/h; CL<sub>M,renal</sub> = 0.12 × CrCl × (weight/70)<sup>0.75</sup> L/h</td><td>Exploratory; research exists for metabolite measurements, but these exact coefficients have not been population-fitted. <a href="https://pubmed.ncbi.nlm.nih.gov/20038622/">Smith et al. 2010</a>.</td></tr>
+  <tr><td>Oral valacyclovir</td><td>Mean F = 0.545, first-order oral absorption k<sub>a</sub> = 1.8 h<sup>−1</sup></td><td>F is anchored to healthy-volunteer <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=56a62c21-bead-4f3b-a24e-c3fd0b4a732f">US labeling</a>; k<sub>a</sub> and its uncertainty are assumed, not independently validated.</td></tr>
+  <tr><td>CSF acyclovir and CMMG</td><td>Nominal acyclovir partition 0.30, CMMG partition 0.25; lag times 4 and 6 h</td><td><strong>Needs recalibration.</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/20038622/">Smith et al. 2010</a> reported CSF/plasma exposure ratios of roughly 0.25 for acyclovir and <strong>0.025 for CMMG</strong>, in nine volunteers. The AyFlux CMMG partition 0.25 is tenfold the observed study ratio; lag times are not fitted. Treat CSF CMMG predictions as especially speculative. No model coefficient was silently changed in this documentation update.</td></tr>
+  <tr><td>Peritoneal transfer and ultrafiltration</td><td>Exploratory membrane PS, small-pore convection, reabsorption and glucose decay</td><td>Relevant <a href="https://pubmed.ncbi.nlm.nih.gov/2243158/">Burgess &amp; Gill 1990</a>, <a href="https://pubmed.ncbi.nlm.nih.gov/3717158/">Shah et al. 1986</a>, and <a href="https://pubmed.ncbi.nlm.nih.gov/3624115/">Boelaert et al. 1987</a>. These sources do <strong>not</strong> establish current APD prescription-level coefficients.</td></tr>
+  <tr><td>Monte Carlo bands</td><td>Lognormal parameter variability with user-adjusted coverage</td><td>Chosen educational prior assumptions; <strong>not</strong> externally calibrated 90% clinical prediction intervals.</td></tr>
+  </tbody></table></div>
+  <p><strong>References to add:</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/20038622/">Smith et al. (2010), ACV/CMMG CSF and systemic PK (PMID 20038622)</a>; <a href="https://pubmed.ncbi.nlm.nih.gov/3717158/">Shah, Winer and Krasny (1986), CAPD acyclovir pharmacokinetics (PMID 3717158)</a>. These provide independent measurements for future evaluation, not validation of this implementation. The source-code <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/public/assets/pk-engine.js">engine</a> and <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/interop/ayflux_reference.cpp">independent mrgsolve reference</a> expose the calculations for review.</p>
 </section>
 <section class="card">
   <h2>Sources and code</h2>
