@@ -1,6 +1,6 @@
 # AyFlux results exchange (CSV, R, PK-Sim, and MoBi)
 
-AyFlux provides **result-level interoperability**, not a native PK-Sim or MoBi model. The existing **Export CSV** button produces AyFlux's detailed wide-format file. The new **Export R / OSP CSV** button produces a consistent long-format file for independent plotting, analysis, and cross-model comparisons. The **Research tools** tab can also import a PK-Sim or MoBi results CSV and overlay the corresponding curves after you explicitly map its columns and units. Imported data remain in your browser.
+AyFlux provides **result-level interoperability**, not a native PK-Sim or MoBi model. In the simulator's **CSV format** selector, choose **Detailed results** for the wide-format file or **R / OSP tidy** for the consistent long-format file, then click **Export CSV**. The tidy format for independent plotting, analysis, and cross-model comparisons. The **Research tools** tab can also import a PK-Sim or MoBi results CSV and overlay the corresponding curves after you explicitly map its columns and units. Imported data remain in your browser.
 
 ## Tidy CSV schema (v1)
 
