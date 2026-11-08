@@ -26,6 +26,7 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check public/assets/vendor/plotly-basic-3.3.1.min.js
+          node --check public/assets/ayflux-exchange.js
           node --check public/assets/pk-engine.js
           node --check public/assets/simulator-ui.js
           node --check public/assets/simulator-worker.js
