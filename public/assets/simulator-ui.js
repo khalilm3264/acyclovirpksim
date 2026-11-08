@@ -228,7 +228,24 @@ function labelsFor(time){
  return timeLabelCache.get(time);
 }
 function chartSignature(key){return JSON.stringify([resultsRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
-function requestPlotFrame(){if(!plotFrame&&!plotRunning)plotFrame=requestAnimationFrame(drawNextPlot);}
+let plotlyWait=null;
+function requestPlotFrame(){
+ if(!pendingPlots.size||plotFrame||plotRunning)return;
+ if(!window.Plotly||typeof window.Plotly.react!=='function'){
+  if(!plotlyWait){
+   plotlyWait=window.AyFluxPlotly.ensure().then(()=>{
+    plotlyWait=null;
+    requestPlotFrame();
+   }).catch(error=>{
+    plotlyWait=null;
+    pendingPlots.clear();
+    alertMessage('Unable to load interactive charts: '+error.message+' You can use AyFlux Lite instead.');
+   });
+  }
+  return;
+ }
+ plotFrame=requestAnimationFrame(drawNextPlot);
+}
 function drawNextPlot(){
  plotFrame=0;
  const entry=pendingPlots.entries().next();if(entry.done)return;
