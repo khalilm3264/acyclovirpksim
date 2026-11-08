@@ -302,6 +302,13 @@ html body .shell .export-actions select.export-picker:hover{background:#234e6e}
 html body .shell .export-actions select.export-picker:focus-visible{outline:2px solid #238ac4;outline-offset:2px}
 html body .shell .export-actions select.export-picker:disabled{opacity:.5;cursor:not-allowed}
 html body .shell .export-actions select.export-picker option{color:#263e52;background:#fff}
+
+/* Interactive Plotly heatmap with an accessible numeric-table alternative. */
+#heatmapPanel #heatmapPlot{height:360px;min-height:320px;max-width:100%}
+#heatmapPanel .heatmap-data{margin:8px 0}
+#heatmapPanel .heatmap-data summary{cursor:pointer;font-weight:700;color:#2d6084}
+#heatmapPanel #heatmapArea{margin:10px 0;overflow-x:auto}
+@media(max-width:650px){#heatmapPanel #heatmapPlot{height:310px;min-height:290px}}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
@@ -438,7 +445,7 @@ html body .shell .export-actions select.export-picker option{color:#263e52;backg
  <div class="research-inputs"><label>Output measure<select id="heatmapMetric"><option value="auc">Plasma acyclovir AUC (mg·h/L)</option><option value="peak">Peak plasma acyclovir (mg/L)</option></select></label></div>
  <div class="research-tools-actions"><button type="button" class="btn" id="runHeatmap">Generate 7 × 7 heatmap</button></div>
  <p class="research-status" id="heatmapStatus" role="status" aria-live="polite"></p>
- <div id="heatmapArea" class="heatmap-wrap"></div>
+ <div id="heatmapPlot" class="research-plot hidden" role="img" aria-label="Interactive sensitivity heatmap comparing residual creatinine clearance and hemodialysis clearance"></div><details class="heatmap-data"><summary>View numeric heatmap table</summary><div id="heatmapArea" class="heatmap-wrap"></div></details>
 </div>
 <div class="card" id="integrityPanel">
  <h2>Numerical integrity checks</h2>
