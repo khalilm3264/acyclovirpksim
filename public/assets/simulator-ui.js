@@ -148,6 +148,10 @@ function activateRenalProfile(){
  renderInputs();defer();
 }
 function applyRenalDraft(){
+ const fields=Array.from($('patientControls').querySelectorAll('[data-renal-row]'));
+ if(fields.some(element=>!Number.isFinite(element.valueAsNumber))){
+  const status=$('renalProfileStatus');if(status)status.textContent='Correct missing or invalid kidney function values before applying.';return;
+ }
  const errors=E.validateRenalProfile({...c,renalMode:'profile',crclSource:'manual',renalProfile:renalDraft});
  const status=$('renalProfileStatus');
  if(errors.length){if(status)status.textContent=errors.join('; ');return;}
