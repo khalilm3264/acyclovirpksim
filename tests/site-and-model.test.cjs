@@ -16,7 +16,12 @@ const scriptPaths = [
   './assets/vendor/plotly-basic-3.3.1.min.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
+  './assets/ayflux-version.js',
+  './assets/model-integrity.js',
+  './assets/osp-import.js',
   './assets/simulator-ui.js',
+  './assets/research-workspace.js',
+  './assets/pwa-register.js',
 ];
 
 // Model code is evaluated without the browser-only renderer.
@@ -156,4 +161,20 @@ test('R/OSP CSV export is wired and interoperability documentation exists', () =
   assert.ok(csv.startsWith('time_hours,scenario,analyte,statistic,'));
   assert.ok(csv.includes('No dialysis,plasma_acyclovir,median,'));
   assert.ok(!csv.includes('NaN'));
+});
+
+test('v0.20 research workspace remains optional and has public sources', () => {
+ const ui=read('public/assets/research-workspace.js');
+ const index=read('public/index.html');
+ assert.ok(index.includes('id="ospPanel"'));
+ assert.ok(index.includes('id="runHeatmap"'));
+ assert.ok(index.includes('id="runIntegrity"'));
+ assert.ok(index.includes('id="printResearchReport"'));
+ assert.ok(ui.includes('window.AyFluxResearchBridge'));
+ assert.ok(index.includes('/manifest.webmanifest'));
+ assert.ok(read('public/sw.js').includes('ayflux-static-v0.20.0'));
+ assert.ok(read('public/manifest.webmanifest').includes('AyFlux'));
+ assert.ok(read('CITATION.cff').includes('version: "0.20.0"'));
+ assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
+ assert.ok(read('CHANGELOG.md').includes('[0.20.0]'));
 });

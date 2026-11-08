@@ -1,5 +1,7 @@
 # AyFlux
 
+**Preview release: v0.20.0 · configuration schema 2 · AGPL-3.0-only.** See [CHANGELOG.md](CHANGELOG.md). This is an educational, not clinically validated application.
+
 AyFlux is an educational acyclovir and valacyclovir pharmacokinetics simulator covering kidney function, intermittent hemodialysis, peritoneal dialysis, and CRRT.
 
 ## Project structure
@@ -9,13 +11,16 @@ AyFlux is an educational acyclovir and valacyclovir pharmacokinetics simulator c
 - `public/assets/pk-engine.js` — pharmacokinetic modeling engine
 - `public/assets/simulator-ui.js` — simulator interactions, rendering, and configuration handling
 - `public/assets/ayflux-exchange.js` — versioned, tidy CSV result export for R/OSP comparison
+- `public/assets/osp-import.js` — local CSV parser, explicit unit mapping and curve comparison
+- `public/assets/research-workspace.js` and `model-integrity.js` — optional research and numerical quality tools
+- `public/sw.js` and `manifest.webmanifest` — static offline app shell and install metadata
 - `public/assets/simulator-worker.js` — same-origin background calculation worker
 - `public/learn/` — educational documentation
 - `src/index.js` — Cloudflare Worker security headers and site metadata
 - `tests/` — dependency-free model and site regression tests
 - `interop/` — base-R CSV comparison helper; `docs/data-exchange.md` describes the result schema
 
-The browser loads Plotly, the PK engine, the CSV exchange helper, and the interface script **in that order**. JavaScript runs from same-origin files instead of inline script blocks, matching the Worker's `script-src 'self'` Content Security Policy. Styling remains inline in the main HTML, allowed by the Worker's existing style policy.
+The browser loads Plotly, the PK engine, the CSV exchange helper, release metadata, numerical helpers, the OSP CSV parser, the simulator interface, optional research workspace, and offline registration **in that order**. JavaScript runs from same-origin files instead of inline script blocks, matching the Worker's `script-src 'self'` Content Security Policy. Styling remains inline in the main HTML, allowed by the Worker's existing style policy.
 
 ## Development
 
@@ -55,6 +60,12 @@ AyFlux can export a detailed CSV and a tidy concentration–time CSV with explic
 - [CSV and R / PK-Sim / MoBi comparison guide](docs/data-exchange.md)
 - [Public data exchange guide](https://ayflux.org/learn/interoperability/)
 - [Contributing guidelines](CONTRIBUTING.md) and [security reporting](SECURITY.md)
+
+## Research workspace (v0.20.0 preview)
+
+The Research tools tab offers local PK-Sim/MoBi CSV comparisons (with manual column/unit mapping), an exploratory CrCl × HD-clearance heatmap, model-array consistency and time-step diagnostics, an aggregate published-study reference catalog, and a browser print report (choose **Save as PDF**).
+
+These comparisons are **not** native OSP file imports, patient-level validation, or a substitute for clinical advice. The offline service worker caches only public static files on the ayflux.org origin; uploaded CSV contents and configurations are not cached or uploaded by this feature. First online load is required before offline use. Installation support depends on browser features.
 
 ## License and safety
 

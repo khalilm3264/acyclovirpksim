@@ -266,6 +266,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  const timeline=events||prepareEvents(c,rows,dt,doses);
  const tarr=timeline.tarr,cols={plasma:[],csf:[],cmmg:[],csfCmmg:[],kidneyClear:[],cmmgKidneyClear:[],clearance:[],dialClear:[],dialRate:[],pdUF:[],pdDialConc:[]};
  let a=0,b=0,m=0,oralDepot=0,sc=0,sm=0,auc=0,csfAuc=0,mass=0,peak=0,csfPeak=0,mPeak=0;
+ let administeredAcyclovirEqMg=0,systemicEliminationMg=0;
  let pdAmount=0,pdVol=c.pdVolume,pdKey=null,pdScheduledEnd=null;
  const mw=239.19/225.21;
  // Terminal eigenvalue of the no-dialysis linear central-peripheral disposition model.
@@ -277,7 +278,8 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   const t=tarr[i],currentPD=timeline.pdAt[i];
   const newKey=currentPD?currentPD.key:null;
   if(pdKey!==newKey){if(pdKey!==null&&t>=pdScheduledEnd-1e-8){mass+=pdAmount;}pdAmount=0;pdVol=currentPD?.fillL??c.pdVolume;pdKey=newKey;pdScheduledEnd=currentPD?currentPD.start+(currentPD.dwell??(currentPD.type==='CAPD'?c.capdDwell:c.apdDwell)):null;}
-  oralDepot+=timeline.oralDose[i]*p.oralF;
+  const absorbedDose=timeline.oralDose[i]*p.oralF;
+  oralDepot+=absorbedDose;administeredAcyclovirEqMg+=absorbedDose;
   const C=a/p.vc,CM=m/p.vm,active=timeline.activeAt[i],isHD=active.active&&active.type==='HD',isCRRT=active.active&&active.type==='CRRT',dial=(isHD?p.hd:isCRRT?p.crrt:0);
   const pd=pdTransfer(c,p,t,C,pdAmount,pdVol,currentPD),netFlux=dial*C+pd.flux;
   const dialCL=C>1e-10?netFlux/C:(dial+(currentPD?p.pd:0));
@@ -305,11 +307,15 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   const nextC=na/p.vc,nextM=nm/p.vm;
   const nsc=Math.max(0,sc+step*(p.kp*(C+nextC)/2-sc)/c.csfLag),nsm=Math.max(0,sm+step*(p.km*(CM+nextM)/2-sm)/c.csfMetLag);
   auc+=step*(C+nextC)/2;csfAuc+=step*(sc+nsc)/2;
+  administeredAcyclovirEqMg+=ivRate*step;
+  systemicEliminationMg+=step*(p.other+p.renal+p.form)*(C+nextC)/2;
   mass+=step*midDial*(C+nextC)/2;
   a=na;b=nb;m=nm;oralDepot=nd;sc=nsc;sm=nsm;
  }
  // If the final dwell has not drained, drug remaining in the cavity is NOT counted as drained mass.
- return {t:tarr,cols,summary:{peak,auc,csfPeak,csfAuc,mPeak,mass,modelHalfLife,endPlasma:a/p.vc}};
+ const massBalanceErrorMg=administeredAcyclovirEqMg-(a+b+oralDepot+pdAmount+systemicEliminationMg+mass);
+ return {t:tarr,cols,summary:{peak,auc,csfPeak,csfAuc,mPeak,mass,modelHalfLife,endPlasma:a/p.vc,
+  administeredAcyclovirEqMg,massBalanceErrorMg}};
 }
 
 // Literature anchor: US IV acyclovir label, normal renal function, 1-hour infusions q8h.

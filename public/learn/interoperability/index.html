@@ -47,6 +47,10 @@
       <p>The tidy file includes plasma and CSF acyclovir, plasma and CSF CMMG, and modeled lower, median, and upper curves across scenarios. Each concentration is a <em>model result</em>, not a patient measurement.</p>
     </section>
     <section class="card">
+      <h2>Compare external CSV directly in AyFlux</h2>
+      <p>Open the simulator's <strong>Research tools</strong> tab, import a PK-Sim or MoBi results CSV, and choose its time and concentration columns and units. AyFlux draws the two concentration curves together, plots their difference, and reports curve-to-curve error metrics. Imported data remain in the browser. This is not native model import or clinical validation.</p>
+    </section>
+    <section class="card">
       <h2>Read and compare in R</h2>
       <p>Use the <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/interop/ayflux_compare.R">AyFlux R example</a> to read one scenario and compare it with a time series exported by PK-Sim or MoBi. It uses base R and asks you to choose the exact OSP columns and units rather than guessing.</p>
       <pre><code>source("interop/ayflux_compare.R")

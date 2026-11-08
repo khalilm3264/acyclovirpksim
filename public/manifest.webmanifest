@@ -1,0 +1,19 @@
+{
+  "name": "AyFlux | Acyclovir PK Simulator",
+  "short_name": "AyFlux",
+  "description": "Educational pharmacokinetic simulator for kidney function and dialysis.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#e9edf1",
+  "theme_color": "#28485e",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
