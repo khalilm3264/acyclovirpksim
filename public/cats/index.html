@@ -11,10 +11,10 @@
     .cat-panel{max-width:720px;margin:0 auto;padding:22px}
     .cat-panel h1{font-size:19px}
     .cat-panel .intro{margin-bottom:14px;color:#52667c}
-    .cat-art{overflow-x:auto;white-space:pre;font:15px/1.3 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;color:#28485e;background:#f3f7fa;border:1px solid #b7cad9;padding:18px 16px}
+    .cat-image{display:block;width:min(100%,512px);height:auto;image-rendering:pixelated;margin:15px auto 0;border:1px solid #b7cad9}
     .cat-legend{color:#52667c;font-size:12px;margin:13px 0 0}
     .return{margin-top:18px}
-    @media(max-width:600px){.cat-panel{padding:14px}.cat-art{font-size:12px;padding:13px 10px}}
+    @media(max-width:600px){.cat-panel{padding:14px}.cat-image{width:100%;max-width:512px}}
   </style>
 </head>
 <body>
@@ -32,21 +32,8 @@
     <main class="card cat-panel">
       <h1>Meet the AyFlux cats 🐾</h1>
       <p class="intro">A little company while the concentration curves run.</p>
-      <pre class="cat-art" aria-label="ASCII art of four cats, Claire, George, Sabrina, and Diamond">
-                         /\_/\
-   /\_/\       /\  /\   ( o.o )
-  ( o.o )     /  \/  \   &gt; ^ &lt;
-  / &gt; &lt; \    (  o  o  )  /   \
- (_______)   (   ^    ) (_____)
-             /  _____  \
-            /__/     \__\
-
-  /\_/\
- ( o.o )
- ( &gt;#&lt; )
- /     \
-(_______)</pre>
-      <p class="cat-legend">Top row, left to right: <strong>Claire</strong>, <strong>George</strong>, and <strong>Sabrina</strong>. Bottom: <strong>Diamond</strong>.</p>
+      <img class="cat-image" src="/cats/four-cats.webp" alt="Colorful pixel art of four kittens together on a patterned cushion beside a window." width="128" height="128" decoding="async">
+      <p class="cat-legend"><strong>Claire</strong> · <strong>George</strong> · <strong>Sabrina</strong> · <strong>Diamond</strong></p>
       <p class="return"><a href="/">Return to the simulator</a></p>
     </main>
   </div>
