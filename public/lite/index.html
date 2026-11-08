@@ -1,93 +1,141 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#28485e">
-<title>AyFlux Lite — Quick Dialysis Comparison</title>
-<meta name="description" content="Fast educational acyclovir curves comparing no dialysis, HD, PD and CRRT with simple dose, weight and kidney-function inputs.">
+<title>AyFlux Lite — Fast renal PK simulator</title>
+<meta name="description" content="Fast browser-based acyclovir renal PK exploration with adjustable patient, medication, HD, CAPD, APD and CRRT inputs. Native charts and CSV; no heavy charting library.">
 <link rel="canonical" href="https://ayflux.org/lite/">
 <style>
-:root{font:14px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#263e52;background:#f5f8fa}
-*{box-sizing:border-box}
+:root{font:13px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#273f54;background:#f4f7f9}
+*{box-sizing:border-box}html{scrollbar-gutter:stable}
 body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-a{color:#255e84}
-a:focus-visible{outline:2px solid #2d83a6;outline-offset:3px}
-header{background:#e6edf2;color:#25465e;border-bottom:1px solid #c6d6e0;padding:9px max(18px,calc((100% - 1160px)/2));display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.brand{font-weight:800;font-size:19px;letter-spacing:-.04em;line-height:1.2;margin:0}
-.brand span{font-weight:300}
-.brand em{font-style:normal;color:#f0a37c}
-header a{color:#315875;border:1px solid #9eb6c7;padding:5px 9px;text-decoration:none;font-size:11px;font-weight:700}
-header a:hover{background:#d8e6ee}
-main{flex:1;width:min(1160px,100%);margin:0 auto;padding:14px 18px 22px}
-h1{font-size:19px;margin:0;line-height:1.2}
-h2{font-size:16px;margin:0 0 8px}
-.intro{margin:0 0 9px;color:#546e80}
-.notice{border-left:3px solid #b78234;background:#fff7e8;padding:7px 10px;margin:10px 0 12px;font-size:12px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.card{background:#fff;border:1px solid #c7d5df;padding:13px;min-width:0}
-.chart{display:block;width:100%;height:275px;touch-action:pan-y}
-.legend{display:flex;gap:9px 15px;flex-wrap:wrap;margin:7px 0 11px}
-.legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap}
-.swatch{width:16px;height:3px;display:inline-block}
-.caption{color:#546e80;font-size:11px;margin:5px 0 0}
-.table-scroll{overflow:auto}
-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px}
-th,td{border-bottom:1px solid #d8e2e8;text-align:left;padding:9px 8px}
-th{background:#edf3f7;color:#2b5069;font-weight:700}
-.num{text-align:right}
-details{margin-top:12px}
-summary{cursor:pointer;font-weight:700}
-footer{background:#e9f0f4;padding:10px 18px;text-align:center;color:#4c6679;font-size:11px}
-#liteStatus{min-height:18px;color:#456576;font-size:12px}.lite-controls{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:end;background:#fff;border:1px solid #c7d5df;padding:10px 12px;margin:0 0 10px}.lite-controls label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:#31516a}.lite-controls input{width:115px;height:34px;border-radius:0;border:1px solid #9fb4c3;background:#fff;padding:6px 9px;font:600 13px system-ui;color:#263e52}.lite-controls input:focus-visible{outline:2px solid #2d83a6;outline-offset:1px}.lite-controls .lite-input-note{flex:1 1 185px;font-size:11px;color:#566f80;line-height:1.4;padding-bottom:4px}
-@media(max-width:750px){.cards{grid-template-columns:minmax(0,1fr)}.chart{height:250px}main{padding:12px}header{padding:9px 12px}.card{padding:10px}.lite-controls{gap:8px;padding:9px}.lite-controls label{flex:1 1 85px}.lite-controls input{width:100%}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+button,select,input{font:inherit;color:inherit}a{color:#23648c}
+:focus-visible{outline:2px solid #177da8;outline-offset:2px}
+header{display:flex;align-items:center;gap:9px;padding:9px max(14px,calc((100% - 1450px)/2));background:#e7eef2;border-bottom:1px solid #c7d6df}
+.brand{font-size:19px;line-height:1;font-weight:800;letter-spacing:-.05em;color:#244a63;text-decoration:none}
+.brand span{font-weight:300}.brand em{font-style:normal;color:#db925f}
+.lite-tag{font-size:10px;font-weight:700;letter-spacing:.06em;color:#5d7d90}
+.head-right{margin-left:auto;color:#2e6281;font-size:12px}
+.head-right a{border:1px solid #9ab6c7;padding:5px 9px;text-decoration:none;font-weight:650}
+.workspace{width:min(1450px,100%);margin:0 auto;padding:12px 14px 20px;flex:1}
+.notice{margin:0 0 12px;padding:7px 11px;background:#fff7e8;border-left:3px solid #ad843b;font-size:11.5px;color:#5b5546}
+.layout{display:grid;grid-template-columns:274px minmax(0,1fr);gap:12px;align-items:start}
+.side,.panel{background:#fff;border:1px solid #c9d7e0;min-width:0}
+.side{position:sticky;top:9px;max-height:calc(100vh - 68px);overflow-y:auto;padding:11px 12px}
+.side-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{font-size:14px;margin:0;font-weight:750}h2{font-size:14px;color:#2b5770;margin:0 0 8px}
+.side h2{font-size:12px;margin:10px 0 8px;text-transform:uppercase;letter-spacing:.03em}
+.side h2:first-child{margin-top:0}
+.control{margin:9px 0}
+.control label{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:11.5px;font-weight:600;margin:0 0 5px}
+.control output{font-variant-numeric:tabular-nums;color:#176c91;font-weight:750;white-space:nowrap}
+.control input[type=range]{width:100%;height:20px;margin:0;accent-color:#267ba4;display:block}
+.control select{width:100%;padding:7px 8px;border:1px solid #a9c0ce;background:white;border-radius:0}
+.side hr{border:0;border-top:1px solid #dce5ec;margin:11px 0}
+.side details{border-top:1px solid #dce5ec;padding-top:6px;margin-top:8px}
+summary{cursor:pointer;font-weight:700;color:#2b5f7c}
+.hint{font-size:11px;color:#61798a;margin:8px 0 2px}
+.actions{display:flex;gap:7px;margin-top:10px}
+.btn{border:1px solid #adbfcb;border-radius:0;padding:7px 10px;font-weight:700;background:#f1f6f8;color:#355e77;cursor:pointer}
+.btn:hover{background:#e3edf3}
+.btn.primary{background:#2b6689;color:white;border-color:#2b6689}
+.btn.primary:hover{background:#255674}
+.content{min-width:0;display:grid;gap:12px}
+.panel{padding:12px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.topline label{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600}
+.topline select{border:1px solid #b0c4d0;border-radius:0;padding:5px 7px;min-width:126px;background:#fff}
+.subtitle{font-size:11px;color:#617a88;margin:2px 0 0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.metric{border:1px solid #dbe5eb;background:#f8fbfd;padding:9px 10px;min-width:0}
+.metric .key{font-size:10.5px;color:#5d7787}.metric .val{font-size:19px;font-weight:750;color:#294b63;margin-top:3px;font-variant-numeric:tabular-nums}
+.metric .unit{font-size:10px;color:#697f8b}
+.legend{display:flex;flex-wrap:wrap;gap:7px 14px;padding:8px 0}
+.legend-option{display:flex;gap:5px;align-items:center;font-size:11.5px;white-space:nowrap;cursor:pointer}
+.legend-option input{accent-color:#257ca8;margin:0}
+.swatch{width:18px;height:0;border-top:3px solid var(--line)}
+.chart{width:100%;height:300px;display:block;touch-action:pan-y}
+.chart.mini{height:250px}
+.graphs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.graphs .panel{min-width:0}
+.graphs h2{margin:0 0 5px}
+.graph-note{font-size:11px;color:#587184;margin:3px 0 0}
+#liteHover{font-size:11px;min-height:19px;color:#42677e;margin:4px 0 0}
+#liteStatus{font-size:11px;color:#60798b;min-height:20px;margin:7px 0 0}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;border-bottom:1px solid #dfe7ec;text-align:left}
+thead th{background:#edf4f7;color:#31566b;font-size:10.5px}
+td.numeric{text-align:right}
+table th[scope=row]{white-space:nowrap}
+details>p{color:#587082;line-height:1.55;margin:8px 0 3px}
+footer{margin-top:auto;text-align:center;padding:10px 15px;border-top:1px solid #cedde5;color:#5e7786;background:#eaf0f4;font-size:11px}
+footer a{margin-left:7px}
+@media(max-width:1050px){.layout{grid-template-columns:245px minmax(0,1fr)}.graphs{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.workspace{padding:10px}.layout{grid-template-columns:1fr}.side{position:static;max-height:none}.graphs{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart{height:255px}.chart.mini{height:220px}.panel{padding:10px}.side{padding:10px}.legend{gap:8px}}
 </style>
-<script defer src="/assets/pk-engine.js"></script>
-<script defer src="/lite/lite.js"></script>
-</head>
-<body>
-<header>
-<h1 class="brand" aria-label="AyFlux Lite">Ay<span>Flu<em>x</em></span> <small style="font:700 10px system-ui;letter-spacing:.04em;color:#607d91">LITE</small></h1>
-<a href="/">Open full simulator</a>
-</header>
-<main>
-<div class="lite-controls" role="group" aria-label="Illustrative pharmacokinetic inputs">
-<label for="liteWeight">Body weight (kg)<input id="liteWeight" type="number" inputmode="decimal" min="30" max="150" step="1" value="70"></label>
-<label for="liteCrcl">Residual CrCl (mL/min)<input id="liteCrcl" type="number" inputmode="decimal" min="0" max="120" step="1" value="0"></label>
-<label for="liteDose">Single IV dose (mg)<input id="liteDose" type="number" inputmode="decimal" min="0" max="1500" step="50" value="700"></label>
-<span class="lite-input-note">Edit a value to update both curves. Dialysis schedules remain fixed; see the full simulator for more controls.</span>
+<script defer src="/assets/pk-engine.js"></script><script defer src="/lite/lite.js"></script>
+</head><body>
+<header><a class="brand" href="/" aria-label="AyFlux home">Ay<span>Flu<em>x</em></span></a><span class="lite-tag">LITE</span><div class="head-right"><a href="/">Full simulator</a></div></header>
+<div class="workspace">
+<p class="notice"><strong>Educational model only.</strong> Unvalidated, hypothetical exposure estimates—not for prescribing, toxicity assessment, or dialysis decisions.</p>
+<div class="layout">
+<aside class="side" id="liteControls" aria-label="Patient, regimen and dialysis inputs">
+<div class="side-head"><h1>Parameters</h1><button class="btn" id="liteReset" type="button">Reset</button></div>
+<h2>Patient</h2><div class="control"><label for="lite_weight">Body weight (kg)<output id="out_weight" for="lite_weight">70</output></label><input id="lite_weight" type="range" min="30" max="150" step="5" value="70" aria-label="Body weight (kg)"></div><div class="control"><label for="lite_crcl">Residual CrCl (mL/min)<output id="out_crcl" for="lite_crcl">5</output></label><input id="lite_crcl" type="range" min="0" max="120" step="1" value="5" aria-label="Residual CrCl (mL/min)"></div>
+<hr><h2>Medication</h2><div class="control"><label for="lite_route">Medication / route</label><select id="lite_route" aria-label="Medication route"><option value="Acyclovir IV">Acyclovir IV</option><option value="Valacyclovir oral">Valacyclovir oral</option></select></div><div class="control"><label for="lite_dose">Dose per administration (mg)<output id="out_dose" for="lite_dose">350</output></label><input id="lite_dose" type="range" min="0" max="2000" step="25" value="350" aria-label="Dose per administration (mg)"></div><div class="control"><label for="lite_every">Repeat dose every (hours)<output id="out_every" for="lite_every">24</output></label><input id="lite_every" type="range" min="8" max="48" step="4" value="24" aria-label="Repeat dose every (hours)"></div><div class="control"><label for="lite_horizon">Simulation duration (hours)<output id="out_horizon" for="lite_horizon">96</output></label><input id="lite_horizon" type="range" min="24" max="168" step="24" value="96" aria-label="Simulation duration (hours)"></div>
+<p class="hint" id="liteDosingNote">4 illustrative IV administrations within 96 hours.</p>
+<hr><h2>Hemodialysis</h2><div class="control"><label for="lite_hdStart">First HD starts (hour)<output id="out_hdStart" for="lite_hdStart">24</output></label><input id="lite_hdStart" type="range" min="0" max="72" step="4" value="24" aria-label="First HD starts (hour)"></div><div class="control"><label for="lite_hdDuration">HD session duration (hours)<output id="out_hdDuration" for="lite_hdDuration">4</output></label><input id="lite_hdDuration" type="range" min="2" max="8" step="1" value="4" aria-label="HD session duration (hours)"></div><div class="control"><label for="lite_hdRepeat">Repeat HD every (hours)<output id="out_hdRepeat" for="lite_hdRepeat">48</output></label><input id="lite_hdRepeat" type="range" min="24" max="72" step="12" value="48" aria-label="Repeat HD every (hours)"></div><div class="control"><label for="lite_hdCl">HD acyclovir clearance (mL/min)<output id="out_hdCl" for="lite_hdCl">81.8</output></label><input id="lite_hdCl" type="range" min="30" max="180" step="0.2" value="81.8" aria-label="HD acyclovir clearance (mL/min)"></div>
+<details><summary>PD and CRRT</summary>
+<div class="control"><label for="lite_effluent">CRRT effluent (mL/kg/h)<output id="out_effluent" for="lite_effluent">25</output></label><input id="lite_effluent" type="range" min="0" max="50" step="5" value="25" aria-label="CRRT effluent (mL/kg/h)"></div><div class="control"><label for="lite_pdVolume">PD fill volume (L)<output id="out_pdVolume" for="lite_pdVolume">2</output></label><input id="lite_pdVolume" type="range" min="1" max="3" step="0.25" value="2" aria-label="PD fill volume (L)"></div>
+<p class="hint">CAPD uses four 6-hour dwells per day; APD uses five modeled cycles overnight. Transport and removal assumptions are exploratory. Sieving and delivered fraction are fixed in Lite.</p>
+</details>
+<div class="actions"><button class="btn primary" id="liteExport" type="button">Export CSV</button></div>
+<p class="hint">All inputs are mathematical examples, not treatment recommendations.</p>
+</aside>
+<main class="content">
+<section class="panel">
+<div class="topline"><div><h2>Dialysis scenario comparison</h2><p class="subtitle">Fixed model assumptions · independent scenario curves · no uncertainty sampling</p></div>
+<label for="liteHighlight">Focus scenario <select id="liteHighlight"><option value="none">No dialysis</option><option value="hd" selected>Hemodialysis</option><option value="capd">CAPD</option><option value="apd">APD</option><option value="crrt">CRRT</option></select></label></div>
+<div class="stats">
+<div class="metric"><div class="key">Peak plasma acyclovir</div><div class="val" id="stat_peak">—</div><div class="unit">mg/L</div></div>
+<div class="metric"><div class="key">Acyclovir AUC</div><div class="val" id="stat_auc">—</div><div class="unit">mg·h/L</div></div>
+<div class="metric"><div class="key">Peak plasma CMMG</div><div class="val" id="stat_cmmgPeak">—</div><div class="unit">mg/L · exploratory</div></div>
+<div class="metric"><div class="key">Removed by dialysis</div><div class="val" id="stat_mass">—</div><div class="unit">mg · modeled</div></div>
 </div>
-<div class="notice"><strong>Educational demonstration only.</strong> These are hypothetical modeled concentrations, not a treatment recommendation or validated clinical prediction. Do not use this example to select a dose or dialysis prescription.</div>
-<div class="legend" aria-label="Chart legend">
-<span><i class="swatch" style="background:#8a959f"></i>No dialysis</span>
-<span><i class="swatch" style="background:#d9523e"></i>Intermittent HD</span>
-<span><i class="swatch" style="background:#07856d"></i>Peritoneal dialysis</span>
-<span><i class="swatch" style="background:#376dbc"></i>CRRT</span>
-</div>
-<div class="cards">
-<section class="card" aria-labelledby="acvTitle">
-<h2 id="acvTitle">Plasma acyclovir</h2>
-<canvas id="acvChart" class="chart" role="img" aria-label="Plasma acyclovir concentrations from 0 to 48 hours for four fixed dialysis scenarios"></canvas>
-<p class="caption">Concentration (mg/L) versus time (hours). Individual lines represent fixed, illustrative scenarios.</p>
+<div class="legend" role="group" aria-label="Show or hide individual scenario curves"><label class="legend-option"><input data-lite-mode="none" type="checkbox" checked><span class="swatch" style="--line:#8a959f" aria-hidden="true"></span>No dialysis</label>
+<label class="legend-option"><input data-lite-mode="hd" type="checkbox" checked><span class="swatch" style="--line:#d9523e" aria-hidden="true"></span>HD</label>
+<label class="legend-option"><input data-lite-mode="capd" type="checkbox" checked><span class="swatch" style="--line:#07856d" aria-hidden="true"></span>CAPD</label>
+<label class="legend-option"><input data-lite-mode="apd" type="checkbox" checked><span class="swatch" style="--line:#b48630" aria-hidden="true"></span>APD</label>
+<label class="legend-option"><input data-lite-mode="crrt" type="checkbox" checked><span class="swatch" style="--line:#376dbc" aria-hidden="true"></span>CRRT</label></div>
 </section>
-<section class="card" aria-labelledby="cmmgTitle">
-<h2 id="cmmgTitle">Plasma CMMG</h2>
-<canvas id="cmmgChart" class="chart" role="img" aria-label="Plasma CMMG concentrations from 0 to 48 hours for four fixed dialysis scenarios"></canvas>
-<p class="caption">Exploratory metabolite model. CMMG exposure does not diagnose or exclude neurotoxicity.</p>
+<div class="graphs">
+<section class="panel" aria-labelledby="acvTitle"><h2 id="acvTitle">Plasma acyclovir</h2>
+<canvas id="acvChart" class="chart" role="img" aria-label="Interactive modeled plasma acyclovir concentration curves versus time. Exact numeric scenario results appear in the comparison table."></canvas>
+</section>
+<section class="panel" aria-labelledby="cmmgTitle"><h2 id="cmmgTitle">Plasma CMMG</h2>
+<canvas id="cmmgChart" class="chart" role="img" aria-label="Exploratory modeled plasma CMMG concentration curves versus time."></canvas>
+<p class="graph-note">CMMG is not a validated predictor of neurotoxicity.</p>
 </section>
 </div>
-<section class="card" style="margin-top:12px" aria-labelledby="comparisonTitle">
-<h2 id="comparisonTitle">Modeled scenario comparison</h2>
-<div class="table-scroll"><table><thead><tr><th scope="col">Scenario</th><th class="num" scope="col">Acyclovir peak<br>(mg/L)</th><th class="num" scope="col">Acyclovir AUC<sub>0–48</sub><br>(mg·h/L)</th><th class="num" scope="col">CMMG peak<br>(mg/L)</th></tr></thead><tbody id="liteResults"><tr><td colspan="4">Calculating fixed example curves…</td></tr></tbody></table></div>
-<p id="liteStatus" role="status" aria-live="polite"></p>
-<details><summary>Dialysis schedules and modeling assumptions</summary>
-<p><strong>Illustrative inputs:</strong> <span id="liteAssumptions">70 kg, residual creatinine clearance 0 mL/min, one 700 mg IV acyclovir infusion</span> over one hour at hour 0. One dose only; 48-hour modeling horizon; one deterministic parameter set and no uncertainty band. Any entered dose is hypothetical, <strong>not a suggested dose</strong>.</p>
-<p><strong>Dialysis scenarios:</strong> no dialysis; intermittent HD from hours 8 to 12 with modeled clearance 81.8 mL/min; CAPD with four 6-hour, 2-L dwells per day and an exploratory transport model; or CRRT throughout the 48 hours, with effluent 25 mL/kg/h, sieving coefficient 0.95, delivered fraction 0.85. Other PK coefficients follow the nominal full AyFlux model.</p>
-<p>All results come from the ordinary AyFlux engine with variability disabled. The comparison cannot represent a patient's drug exposure or account for individual dialysis performance. In particular, PD drug transfer and CMMG handling are exploratory assumptions. <a href="/learn/model-methods/#equations">Model equations, citations, and limitations</a>.</p>
+<section class="panel">
+<div id="liteHover" aria-live="off">Move over the charts to inspect values.</div>
+<h2>Scenario summary</h2>
+<div class="scroll"><table>
+<thead><tr><th scope="col">Modality</th><th scope="col">Peak ACV (mg/L)</th><th scope="col">AUC (mg·h/L)</th><th scope="col">Peak CMMG (mg/L)</th><th scope="col">Dialysis removed (mg)</th></tr></thead>
+<tbody id="liteResults"><tr><td colspan="5">Calculating curves…</td></tr></tbody>
+</table></div>
+<details id="clearanceDetails"><summary>Show clearance curves</summary>
+<canvas id="clearChart" class="chart mini" role="img" aria-label="Total modeled acyclovir clearance in mL/min across scenarios."></canvas>
+<p class="graph-note">Modeled total clearance includes residual kidney clearance, nonrenal elimination, and dialysis. Peritoneal transport can be bidirectional.</p>
+</details>
+<p id="liteStatus" role="status" aria-live="polite">Calculating…</p>
+<details><summary>Model assumptions and sources</summary>
+<p>Lite reuses the core AyFlux acyclovir/valacyclovir PK implementation and integrates each dosing and treatment boundary. It uses one nominal parameter draw, not a calibrated patient forecast. Default inputs mirror the older Renal PK Lab v2 example: 70 kg, CrCl 5 mL/min, acyclovir 350 mg IV every 24 hours, simulation 96 hours, HD at hour 24 for four hours, repeated every 48 hours; CRRT effluent 25 mL/kg/h. CAPD and APD now use the current AyFlux exploratory dialysate-transfer model, not v2's constant peritoneal clearances.</p>
+<p>The CMMG CSF partition is not displayed here. Oral valacyclovir uses an assumed absorption model. PD and CMMG parameters have important uncertainties. For equations, references and evidence limitations, see <a href="/learn/model-methods/#equations">model methods</a>.</p>
 </details>
 </section>
-<p class="caption" style="margin:12px 0 0">Need different inputs, oral valacyclovir, custom schedules, CSF estimates, or research tools? <a href="/">Use full AyFlux</a>.</p>
 </main>
-<footer>AyFlux Lite · © 2026 Muhammad Khalil · <a href="/license/">AGPLv3</a> · <a href="/cite/">Citation</a> · <a href="/disclaimer/">Disclaimer</a></footer>
+</div></div>
+<footer>AyFlux Lite · © 2026 Muhammad Khalil <a href="/license/">AGPLv3</a> <a href="/cite/">Citation</a> <a href="/disclaimer/">Disclaimer</a></footer>
 </body></html>

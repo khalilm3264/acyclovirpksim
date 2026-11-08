@@ -22,7 +22,7 @@
 <p align="center">
   <a href="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml"><img alt="Build and tests" src="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: AGPL-3.0-only" src="https://img.shields.io/badge/license-AGPL--3.0--only-315f7b"></a>
-  <a href="CHANGELOG.md"><img alt="Version 0.24.1 preview" src="https://img.shields.io/badge/version-0.24.1_preview-326f79"></a>
+  <a href="CHANGELOG.md"><img alt="Version 0.24.2 preview" src="https://img.shields.io/badge/version-0.24.2_preview-326f79"></a>
 </p>
 
 > [!IMPORTANT]
@@ -44,13 +44,19 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 
 **What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
 
-## AyFlux Lite — a faster, fixed-scenario alternative
+## AyFlux Lite — a compact, v2-inspired alternative
 
-[**Open AyFlux Lite**](https://ayflux.org/lite/) for a small page with no Plotly and just three adjustable educational inputs: weight, residual CrCl, and a single IV dose. It uses the **same** PK engine but renders two native Canvas charts and a summary table for four nominal scenarios: no dialysis, a 4-hour intermittent HD session, CAPD and CRRT. The defaults illustrate a **70-kg adult with CrCl 0 mL/min and a single 700-mg IV acyclovir infusion over one hour**, modeled for 48 hours with all uncertainty disabled. Changing a Lite input reruns the same four fixed dialysis schedules. This is a deliberately hypothetical software demonstration, not a medical dose recommendation.
+[**Open AyFlux Lite**](https://ayflux.org/lite/). Lite revisits the useful design of the original Renal PK Lab v2: a compact parameter sidebar, immediate scenario comparison, clear concentration charts, a summary table and straightforward CSV export. It is **not** a fixed demonstration or a separate, outdated PK model.
 
-The full simulator keeps Lite nested under its **More** menu. If the full simulator hasn't produced an initial result after approximately **9.5 seconds**, a dismissible, optional link appears. There is **no automatic redirect**, so unsaved settings aren't discarded. On the full origin, the existing offline service worker precaches the Lite page and scripts when its app shell is installed.
+Its patient/medication controls cover body weight, residual CrCl, acyclovir IV or oral valacyclovir, dose, interval, and simulation duration. Dialysis controls cover HD start/duration/repeat and modeled clearance, CRRT effluent, and PD fill volume. **No dialysis, HD, CAPD, APD, and CRRT** are independently simulated using the current AyFlux engine. Changing any parameter recomputes all five curves using a deterministic single-draw configuration; the graph has simple on/off visibility and hover inspection.
 
-Lite avoids Monte Carlo calculation, additional charting bundles and research tools. Only the three simple patient/medication inputs are adjustable; it does **not** replace the full simulator.
+Defaults resemble the legacy v2 example: 70 kg, CrCl 5 mL/min, 350 mg acyclovir IV every 24 hours over a 96-hour horizon, and HD beginning at hour 24. These values are **hypothetical educational inputs, not recommended dosing**.
+
+Lite deliberately excludes Monte Carlo uncertainty, CSF forecasts, Kt/V, famciclovir, fit-to-assay tools, external PK-Sim comparisons and advanced dialysis prescription tables. It retains a reference link for scientific limitations and does not replace the full simulator.
+
+**Performance:** the Lite HTML, JavaScript interface and shared PK engine total approximately **65 KB uncompressed**. Lite renders line charts with the browser's native Canvas API; it does **not** request Plotly or another charting library. The older self-contained Renal PK Lab v2 HTML bundled about 4.84 MB of Plotly despite a roughly 6.6 KB simulation engine. These sizes are not independently measured mobile loading times.
+
+The full site keeps Lite under **More → Lite quick view**. An optional prompt also offers Lite if the full simulator has not successfully drawn a chart after approximately 9.5 seconds. No automatic navigation or loss of user-entered settings.
 
 ## Get started
 
