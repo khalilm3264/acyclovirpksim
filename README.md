@@ -39,7 +39,7 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 | **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and estimated peaks |
 | **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity and model consistency checks |
 | **Data exchange** | Detailed or tidy CSV exports, configuration JSON, an R comparison script, and local PK-Sim/MoBi **results** CSV overlays |
-| **Reports and access** | Printable research report, literature benchmark examples and offline static app caching where supported |
+| **Reports and access** | Print-formatted PDF report with scenario-specific charts and page breaks, literature benchmark examples and offline static app caching where supported |
 
 **What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
 
@@ -55,13 +55,20 @@ cd acyclovirpksim
 python3 -m http.server 8000 --directory public
 ```
 
-Open `http://localhost:8000` in your browser. You can run the dependency-free test suite with:
+Open `http://localhost:8000` in your browser. To enable the optional interactive heatmap when developing locally, stage the pinned Cartesian asset first:
+
+```sh
+npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
+node scripts/stage-cartesian.cjs
+```
+
+The numerical heatmap table still works when the optional script is absent. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. You can run the dependency-free test suite with:
 
 ```bash
 node --test tests/*.test.cjs
 ```
 
-The browser uses a locally served Plotly bundle, a pharmacokinetic engine, and a separate interface. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
+The browser uses a locally served Plotly Basic bundle for standard graphs and loads Plotly Cartesian **only on demand** for the interactive sensitivity heatmap. The pharmacokinetic engine and interface remain separate. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
 
 ## A guide to the interface
 
