@@ -25,7 +25,7 @@ jobs:
           r-version: "release"
           use-public-rspm: true
       - name: Install mrgsolve
-        run: Rscript -e 'install.packages("mrgsolve", repos="https://cloud.r-project.org")'
+        run: Rscript -e 'install.packages("mrgsolve")'
       - name: Compare independent ODE solver against AyFlux deterministic fixtures
         run: Rscript interop/compare_mrgsolve.R
       - name: Archive comparison CSVs
