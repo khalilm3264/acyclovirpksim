@@ -13,6 +13,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const html = read('public/index.html');
 const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
+  '/assets/lite-fallback.js',
   './assets/vendor/plotly-basic-3.3.1.min.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
@@ -187,9 +188,9 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(index.includes('id="printResearchReport"'));
  assert.ok(ui.includes('window.AyFluxResearchBridge'));
  assert.ok(index.includes('/manifest.webmanifest'));
- assert.ok(read('public/sw.js').includes('ayflux-static-v0.23.0'));
+ assert.ok(read('public/sw.js').includes('ayflux-static-v0.24.0'));
  assert.ok(read('public/manifest.webmanifest').includes('AyFlux'));
- assert.ok(read('CITATION.cff').includes('version: "0.23.0"'));
+ assert.ok(read('CITATION.cff').includes('version: "0.24.0"'));
  assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
- assert.ok(read('CHANGELOG.md').includes('[0.23.0]'));
+ assert.ok(read('CHANGELOG.md').includes('[0.24.0]'));
 });
