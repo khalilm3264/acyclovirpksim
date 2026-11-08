@@ -381,6 +381,47 @@ $('measureRows').addEventListener('click',e=>{const b=e.target.closest('[data-re
 $('addMeasure').addEventListener('click',()=>{measureDraft.push({time:12,analyte:'plasma',value:2,role:'fit'});renderMeasureRows();});
 $('applyMeasures').addEventListener('click',()=>{const errors=validationErrors();$('measureWarning').textContent=errors.join('\n');$('measureWarning').classList.toggle('hidden',!errors.length);if(errors.length)return;c.observations=structuredClone(measureDraft);calculate();});
 $('clearMeasures').addEventListener('click',()=>{measureDraft=[];c.observations=[];renderMeasureRows();calculate();});
+
+function handleRenalRowChange(element){
+ const index=Number(element.dataset.renalRow),key=element.dataset.renalKey;
+ if(!Number.isInteger(index)||index<0||index>=renalDraft.length||!['time','crcl'].includes(key))return;
+ const value=element.valueAsNumber;
+ if(!Number.isFinite(value)){const status=$('renalProfileStatus');if(status)status.textContent='Enter a valid number in the kidney profile.';return;}
+ renalDraft[index][key]=value;
+ renalDirty=true;
+ const status=$('renalProfileStatus');if(status)status.textContent='Edits not yet applied. Click Apply profile to update the graph.';
+}
+function addRenalPoint(){
+ if(renalDraft.length>=24)return;
+ let index=-1,width=0;
+ for(let i=1;i<renalDraft.length;i++){
+  const gap=renalDraft[i].time-renalDraft[i-1].time;
+  if(gap>width){width=gap;index=i;}
+ }
+ if(index<1||width<.002)return;
+ const a=renalDraft[index-1],b=renalDraft[index];
+ renalDraft.splice(index,0,{time:Number(((a.time+b.time)/2).toFixed(3)),crcl:Number(((a.crcl+b.crcl)/2).toFixed(2))});
+ renalDirty=true;renderInputs();
+}
+$('patientControls').addEventListener('change',e=>{
+ if(e.target.matches('[data-renal-row]'))handleRenalRowChange(e.target);
+ else if(e.target.id==='renalMode'){
+  if(e.target.value==='profile')activateRenalProfile();
+  else {c.crcl=c.renalProfile?.[0]?.crcl??c.crcl;c.renalMode='constant';c.crclSource='manual';renalDraft=structuredClone(c.renalProfile);renalDirty=false;renderInputs();defer();}
+ }
+});
+$('patientControls').addEventListener('click',e=>{
+ if(e.target.id==='renalAdd')addRenalPoint();
+ else if(e.target.id==='renalApply')applyRenalDraft();
+ else if(e.target.hasAttribute('data-renal-remove')){
+  const index=Number(e.target.dataset.renalRemove);
+  if(Number.isInteger(index)&&index>0&&renalDraft.length>2){renalDraft.splice(index,1);renalDirty=true;renderInputs();}
+ }
+});
+$('enableRenalProfile').addEventListener('click',()=>{
+ activateRenalProfile();
+ if(tab!=='clearance')switchTab('clearance');
+});
 $('patientControls').addEventListener('change',e=>{if(e.target.id==='crclSource'){c.crclSource=e.target.value;if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='cgSex'){c.sex=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='route'){c.route=e.target.value;c.dose=c.route==='Valacyclovir oral'?1000:700;renderInputs();defer();}else if(e.target.id==='dosingMode'){c.dosingMode=e.target.value;renderInputs();defer();if(c.dosingMode==='custom')switchTab('doses');}});
 $('patientControls').addEventListener('input',e=>{if(e.target.id==='cgAge'||e.target.id==='cgScr'){const v=Number(e.target.value);if(!Number.isFinite(v)||e.target.value==='')return;if(e.target.id==='cgAge')c.age=v;else c.scr=v;c.crcl=calculatedCrCl();const target=$('cgOutput');if(target)target.textContent=Number.isFinite(c.crcl)?c.crcl.toFixed(1)+' mL/min':'—';defer();}});
 $('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');});
@@ -583,12 +624,14 @@ $('loadConfig').addEventListener('change',async e=>{
   if(!src||typeof src!=='object'||Array.isArray(src))throw Error('Configuration data is missing. No settings were changed.');
   const next=structuredClone(E.DEFAULTS);
   const required=Object.keys(next),number=x=>typeof x==='number'&&Number.isFinite(x);
-  const missing=required.filter(key=>!Object.prototype.hasOwnProperty.call(src,key));
+  const missing=required.filter(key=>!['renalMode','renalProfile'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
   if(missing.length)throw Error('Configuration is incomplete (missing '+missing.slice(0,4).join(', ')+'). No settings were changed.');
   for(const key of required){
+   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile'].includes(key))continue;
    const v=src[key];
-   if(['schedule','customDoses','observations','pdRxRows'].includes(key)){
-    if(!Array.isArray(v)||v.length>(key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
+   if(['schedule','customDoses','observations','pdRxRows','renalProfile'].includes(key)){
+    if(!Array.isArray(v)||v.length>(key==='renalProfile'?24:key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
+    if(key==='renalProfile'&&!v.every(x=>x&&number(x.time)&&number(x.crcl)))throw Error('Invalid kidney function profile');
     if(key==='schedule'&&!v.every(x=>x&&E.TYPES.includes(x.type)&&number(x.start)&&number(x.end)))throw Error('Invalid dialysis session data');
     if(key==='customDoses'&&!v.every(x=>x&&E.ROUTES.includes(x.route)&&number(x.time)&&number(x.amount)&&
        (x.route!=='Acyclovir IV'||number(x.infusion))))throw Error('Invalid medication schedule data');
