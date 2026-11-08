@@ -34,6 +34,8 @@ variability:['Parameter variability multiplier (assumed)','×',0,2,.1]
 const c=structuredClone(E.DEFAULTS);let primary='No dialysis',visible=new Set(['No dialysis','Intermittent HD','Custom sequence']),tab='concentration',results=null,timer=null,draft=structuredClone(c.schedule),dirtyTimeline=false,doseDraft=structuredClone(c.customDoses),dirtyDoses=false;
 let calculationVersion=0,activeJob=null,queuedJob=null,worker=null,workerDisabled=false,dataIsCurrent=false,resultsRevision=0;
 let pendingCsvExport=false, migratedPayload=null;
+// Narrow read-only integration point for optional research workspace.
+window.AyFluxResearchBridge=Object.freeze({snapshot:()=>({results,config:structuredClone(c),primary,updated:dataIsCurrent,revision:resultsRevision})});
 function requestedModes(all=false){return all||tab==='table'?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
 function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
@@ -51,7 +53,7 @@ function finishJob(data,error){
  const job=activeJob;activeJob=null;
  if(job.id===calculationVersion){
   if(error){pendingCsvExport=false;calculationError(error);}
-  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
+  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
  }
  startNextJob();
 }
@@ -513,8 +515,8 @@ function downloadJSON(obj,name){
 }
 $('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
 $('saveConfig').addEventListener('click',()=>{
- const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'19',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
- downloadJSON(data,'ayflux_simulation_v19.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
+ const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.20.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
+ downloadJSON(data,'ayflux_simulation_v0.20.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
 });
 $('loadConfig').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
@@ -527,7 +529,7 @@ $('loadConfig').addEventListener('change',async e=>{
   if(!input||typeof input!=='object'||Array.isArray(input)||input.format!=='acyclovir-pk-simulator')
     throw Error('This file is not an AyFlux simulation configuration. No settings were changed.');
   if(input.schemaVersion!==1&&input.schemaVersion!==2)
-    throw Error(`Unsupported configuration schema (${String(input.schemaVersion??'missing')}). AyFlux supports schema 1 (v13–17) and schema 2 (v18–19). No settings were changed.`);
+    throw Error(`Unsupported configuration schema (${String(input.schemaVersion??'missing')}). AyFlux supports schema 1 (v13–17) and schema 2 (v18 onward). No settings were changed.`);
   const migrating=input.schemaVersion===1;
   const src=input.config;
   if(!src||typeof src!=='object'||Array.isArray(src))throw Error('Configuration data is missing. No settings were changed.');
@@ -575,7 +577,7 @@ $('loadConfig').addEventListener('change',async e=>{
   const errors=[...new Set(E.MODES.flatMap(mode=>E.validate(next,mode)))];
   if(errors.length)throw Error('Configuration fails model validation: '+errors.slice(0,3).join('; '));
   // Only now, after all shape and numerical checks, apply the loaded configuration.
-  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'19',savedAt:new Date().toISOString(),
+  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.20.0',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
   Object.assign(c,next);setPalette(importedPalette);primary=input.primary;
