@@ -39,6 +39,7 @@ function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
+ $('csvInterop').disabled=busy||!dataIsCurrent;
  if(busy)$('status').textContent='Updating simulation';
 }
 function calculationError(error){
@@ -50,7 +51,7 @@ function finishJob(data,error){
  const job=activeJob;activeJob=null;
  if(job.id===calculationVersion){
   if(error){pendingCsvExport=false;calculationError(error);}
-  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();if(tab==='research')renderResearch();if(pendingCsvExport){pendingCsvExport=false;download();}}
+  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
  }
  startNextJob();
 }
@@ -290,6 +291,21 @@ function switchTab(next){if(next==='doses')next='timeline';tab=next;for(const bt
 function download(){if(!results)return;const heads=['time_hours','day_hour','mode','plasma_mg_L_median','plasma_mg_L_lower','plasma_mg_L_upper','csf_mg_L_median','csf_mg_L_lower','csf_mg_L_upper','cmmg_mg_L_median','cmmg_mg_L_lower','cmmg_mg_L_upper','residual_kidney_clearance_mL_min_median','cmmg_residual_kidney_clearance_mL_min_median','total_clearance_mL_min_median','dialysis_only_clearance_mL_min_median','dialysis_removal_mg_hour_median','medication_events_at_time'];let lines=[heads.join(',')];
  for(const mode of modes){let d=results[mode];for(let i=0;i<d.time.length;i++){lines.push([d.time[i],JSON.stringify(timeLabel(d.time[i])),JSON.stringify(mode),d.plasma.median[i],d.plasma.lower[i],d.plasma.upper[i],d.csf.median[i],d.csf.lower[i],d.csf.upper[i],d.cmmg.median[i],d.cmmg.lower[i],d.cmmg.upper[i],d.kidneyClear.median[i],d.cmmgKidneyClear.median[i],d.clearance.median[i],d.dialClear.median[i],d.dialRate.median[i],JSON.stringify(d.doses.filter(x=>Math.abs(x.time-d.time[i])<1e-7).map(x=>`${x.route}: ${x.amount} mg${x.route==='Acyclovir IV'?` / ${x.infusion} h infusion`:''}`).join('; '))].join(','));}}
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='ayflux_simulation_data.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+// Long-format result exchange is independent of AyFlux configuration JSON and the existing CSV.
+function downloadTidyCSV(){
+ if(!results||!dataIsCurrent)return;
+ try{
+  const csv=window.AyFluxExchange.exportTidyCSV(results,modes,{coverage:c.coverage});
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download='ayflux_results_tidy.csv';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+ }catch(error){alertMessage('Unable to export R / OSP CSV: '+error.message);}
+}
+$('csvInterop').addEventListener('click',()=>{
+ if(!dataIsCurrent)return;
+ if(modes.some(m=>!results[m])){pendingCsvExport='tidy';calculate(true);}
+ else downloadTidyCSV();
+});
 let measureDraft=structuredClone(c.observations);
 function renderMeasureRows(){
  $('measureRows').innerHTML=measureDraft.map((m,i)=>`<tr><td><input data-mi="${i}" data-mk="time" type="number" min="0" max="${c.horizon}" step="any" value="${m.time}"></td><td><select data-mi="${i}" data-mk="analyte">${[['plasma','Plasma acyclovir'],['csf','CSF acyclovir'],['cmmg','Plasma CMMG'],['csfCmmg','CSF CMMG']].map(([k,v])=>`<option value="${k}" ${m.analyte===k?'selected':''}>${v}</option>`).join('')}</select></td><td><input type="number" data-mi="${i}" data-mk="value" min="0" step="any" value="${m.value}"></td><td><select data-mi="${i}" data-mk="role"><option value="fit" ${m.role==='fit'?'selected':''}>Fit</option><option value="holdout" ${m.role==='holdout'?'selected':''}>Hold-out</option></select></td><td><button class="btn secondary" data-remove-measure="${i}" type="button">×</button></td></tr>`).join('');
