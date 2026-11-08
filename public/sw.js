@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.24.2-svg-logo";
+const CACHE = "ayflux-static-v0.24.2-visual-explorer";
 const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
@@ -42,3 +42,4 @@ self.addEventListener("fetch", event => {
    return response;
  })));
 });
+

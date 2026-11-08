@@ -304,6 +304,8 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  const tarr=timeline.tarr,cols={plasma:[],csf:[],cmmg:[],csfCmmg:[],kidneyClear:[],cmmgKidneyClear:[],clearance:[],dialClear:[],dialRate:[],pdUF:[],pdDialConc:[]};
  let a=0,b=0,m=0,oralDepot=0,sc=0,sm=0,auc=0,csfAuc=0,mass=0,peak=0,csfPeak=0,mPeak=0;
  let administeredAcyclovirEqMg=0,systemicEliminationMg=0;
+ const accounting=c.trackMassBalance?[]:null;
+ const removed={kidney:0,other:0,formed:0,hd:0,crrt:0,pdDrained:0};
  let pdAmount=0,pdVol=c.pdVolume,pdKey=null,pdScheduledEnd=null;
  const mw=239.19/225.21;
  // Terminal eigenvalue of the no-dialysis linear central-peripheral disposition model.
@@ -316,7 +318,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  for(let i=0;i<tarr.length;i++){
   const t=tarr[i],currentPD=timeline.pdAt[i];
   const newKey=currentPD?currentPD.key:null;
-  if(pdKey!==newKey){if(pdKey!==null&&t>=pdScheduledEnd-1e-8){mass+=pdAmount;}pdAmount=0;pdVol=currentPD?.fillL??c.pdVolume;pdKey=newKey;pdScheduledEnd=currentPD?currentPD.start+(currentPD.dwell??(currentPD.type==='CAPD'?c.capdDwell:c.apdDwell)):null;}
+  if(pdKey!==newKey){if(accounting&&pdKey!==null)removed.pdDrained+=pdAmount;if(pdKey!==null&&t>=pdScheduledEnd-1e-8){mass+=pdAmount;}pdAmount=0;pdVol=currentPD?.fillL??c.pdVolume;pdKey=newKey;pdScheduledEnd=currentPD?currentPD.start+(currentPD.dwell??(currentPD.type==='CAPD'?c.capdDwell:c.apdDwell)):null;}
   const absorbedDose=timeline.oralDose[i]*p.oralF;
   oralDepot+=absorbedDose;administeredAcyclovirEqMg+=absorbedDose;
   const C=a/p.vc,CM=m/p.vm,active=timeline.activeAt[i],isHD=active.active&&active.type==='HD',isCRRT=active.active&&active.type==='CRRT',dial=(isHD?p.hd:isCRRT?p.crrt:0);
@@ -328,6 +330,11 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   cols.dialClear.push(dialCL/.06);cols.dialRate.push(netFlux);
   cols.pdUF.push(currentPD?pd.uf:0);cols.pdDialConc.push(currentPD?pdAmount/pdVol:0);
   peak=Math.max(peak,C);csfPeak=Math.max(csfPeak,sc);mPeak=Math.max(mPeak,CM);
+  if(accounting){
+   const parts={central:a,peripheral:b,depot:oralDepot,pdFluid:pdAmount,...removed};
+   const accounted=Object.values(parts).reduce((sum,v)=>sum+v,0);
+   accounting.push({time:t,input:administeredAcyclovirEqMg,parts,residual:administeredAcyclovirEqMg-accounted});
+  }
   if(i===tarr.length-1)break;
   const step=tarr[i+1]-t,mid=t+step/2,midPD=timeline.midPD[i],midActive=timeline.midActive[i],ivRate=timeline.ivRate[i],midDial=midActive.active?(midActive.type==='HD'?p.hd:midActive.type==='CRRT'?p.crrt:0):0;
   // Integrate central/peripheral, metabolite, oral depot, PD drug amount and PD fluid volume.
@@ -335,11 +342,17 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
    const cc=A/p.vc,cp=B/p.vp,ex=p.q*(cc-cp),mem=pdTransfer(c,p,mid,cc,P,V,midPD),net=midDial*cc+mem.flux;
    const dA=ivRate+p.oralKa*D-(p.other+renalAt(kTime)+p.form)*cc-ex-net;
    const dB=ex,dM=p.form*cc*mw-(p.mn+metaboliteRenalAt(kTime)+(midDial+(midPD?p.pd:0))*c.metDial)*M/p.vm;
-   return [dA,dB,dM,-p.oralKa*D,mem.flux,mem.netVolume];
+   return [dA,dB,dM,-p.oralKa*D,mem.flux,mem.netVolume,...(accounting?[renalAt(kTime)*cc,p.other*cc,p.form*cc,midDial*cc]:[])];
   }
   let x=[a,b,m,oralDepot,pdAmount,pdVol];
   function stage(x,k,f){return x.map((v,j)=>v+f*step*k[j]);}
   const k1=rhs(...x,t),k2=rhs(...stage(x,k1,.5),mid),k3=rhs(...stage(x,k2,.5),mid),k4=rhs(...stage(x,k3,1),t+step);
+  if(accounting){
+   const flux=j=>step*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6;
+   removed.kidney+=flux(6);removed.other+=flux(7);removed.formed+=flux(8);
+   if(midActive.type==='HD')removed.hd+=flux(9);
+   if(midActive.type==='CRRT')removed.crrt+=flux(9);
+  }
   const y=x.map((v,j)=>v+step*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6);
   const na=Math.max(0,y[0]),nb=Math.max(0,y[1]),nm=Math.max(0,y[2]),nd=Math.max(0,y[3]);
   pdAmount=Math.max(0,y[4]);pdVol=Math.max(.2,y[5]);
@@ -356,7 +369,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  }
  // If the final dwell has not drained, drug remaining in the cavity is NOT counted as drained mass.
  const massBalanceErrorMg=administeredAcyclovirEqMg-(a+b+oralDepot+pdAmount+systemicEliminationMg+mass);
- return {t:tarr,cols,summary:{peak,auc,csfPeak,csfAuc,mPeak,mass,modelHalfLife,endPlasma:a/p.vc,
+ return {...(accounting?{accounting}:{}),t:tarr,cols,summary:{peak,auc,csfPeak,csfAuc,mPeak,mass,modelHalfLife,endPlasma:a/p.vc,
   administeredAcyclovirEqMg,massBalanceErrorMg}};
 }
 
@@ -523,6 +536,7 @@ const api={renalCrClAt,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);
+
 
 
 

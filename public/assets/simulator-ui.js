@@ -53,7 +53,7 @@ function finishJob(data,error){
  const job=activeJob;activeJob=null;
  if(job.id===calculationVersion){
   if(error){pendingCsvExport=false;calculationError(error);}
-  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else download();}}
+  else{results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();window.dispatchEvent(new Event('ayflux:results-updated'));if(tab==='research')renderResearch();if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();}}
  }
  startNextJob();
 }
@@ -381,6 +381,16 @@ function downloadTidyCSV(){
  }catch(error){alertMessage('Unable to export R / OSP CSV: '+error.message);}
 }
 
+async function downloadOSPWorkbook(){
+ if(!results||!dataIsCurrent)return;
+ const snapshot=results;
+ try{
+  if(!window.AyFluxXlsx)await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='/assets/osp-xlsx.js';s.onload=resolve;s.onerror=()=>{s.remove();reject(Error('Workbook exporter could not load.'));};document.head.append(s);});
+  const bytes=window.AyFluxXlsx.workbook(snapshot,modes,window.AyFluxVersion?.version||'AyFlux');
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  const a=document.createElement('a');a.href=url;a.download='AyFlux_PKSim_MoBi_predictions.xlsx';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+ }catch(error){alertMessage('Unable to export XLSX: '+error.message);}
+}
 let measureDraft=structuredClone(c.observations);
 function renderMeasureRows(){
  $('measureRows').innerHTML=measureDraft.map((m,i)=>`<tr><td><input data-mi="${i}" data-mk="time" type="number" min="0" max="${c.horizon}" step="any" value="${m.time}"></td><td><select data-mi="${i}" data-mk="analyte">${[['plasma','Plasma acyclovir'],['csf','CSF acyclovir'],['cmmg','Plasma CMMG'],['csfCmmg','CSF CMMG']].map(([k,v])=>`<option value="${k}" ${m.analyte===k?'selected':''}>${v}</option>`).join('')}</select></td><td><input type="number" data-mi="${i}" data-mk="value" min="0" step="any" value="${m.value}"></td><td><select data-mi="${i}" data-mk="role"><option value="fit" ${m.role==='fit'?'selected':''}>Fit</option><option value="holdout" ${m.role==='holdout'?'selected':''}>Hold-out</option></select></td><td><button class="btn secondary" data-remove-measure="${i}" type="button">×</button></td></tr>`).join('');
@@ -478,7 +488,7 @@ $('applyFullTimeline').addEventListener('click',()=>{
  pdStatusText('Applied dialysis sessions, exchange prescriptions and medication administrations together.');
 });
 $('applyFullTimelineBottom').addEventListener('click',()=>$('applyFullTimeline').click());
-$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent||!['wide','tidy'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else download();});
+$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent||!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;
@@ -716,5 +726,6 @@ $('loadConfig').addEventListener('change',async e=>{
 
 $('primary').value=primary;renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxEditor();calculate();
 })();
+
 
 

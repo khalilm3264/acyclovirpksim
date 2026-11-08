@@ -10,6 +10,13 @@ const $=id=>document.getElementById(id);
 const bridge=window.AyFluxResearchBridge;
 const pk=window.RenalPKV7, importer=window.AyFluxOspImport, integrity=window.AyFluxIntegrity;
 if(!bridge||!pk||!importer||!integrity)return;
+$('openVisualExplorer')?.addEventListener('click',event=>{
+ try{
+  const snap=getSnapshot();
+  const config=structuredClone(snap.config);config.observations=[];
+  sessionStorage.setItem('ayflux-explorer',JSON.stringify({config,mode:snap.primary}));
+ }catch(error){event.preventDefault();$('visualExplorerStatus').textContent=error.message+' Settings could not be copied.';}
+});
 let externalTable=null, lastExternal=null;
 const getSnapshot=()=>{
  const snapshot=bridge.snapshot();
@@ -354,3 +361,4 @@ $('printResearchReport').addEventListener('click',async ()=>{
  }finally{button.disabled=false;}
 });
 })();
+

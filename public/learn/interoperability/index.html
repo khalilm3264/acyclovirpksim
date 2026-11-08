@@ -36,7 +36,8 @@
     <a href="/learn/interoperability/" aria-current="page">Data exchange</a>
   </nav>
   <main>
-    <section class="page-intro">
+    <section class="card"><h2>Excel export for PK-Sim and MoBi</h2><p>Choose <strong>Export results → PK-Sim / MoBi (.xlsx)</strong> above the simulator charts. The workbook contains one sheet per scenario and analyte, with numeric time and median predicted concentration, units in the headers, and explicit simulated-data labels.</p><p>In PK-Sim or MoBi, use <strong>Add Observed Data</strong> to import the workbook as comparison data. Map Time to time (h) and Concentration to measurement (mg/l), then confirm molecule and compartment metadata. Despite the importer's name, these are simulated predictions, not patient measurements. Uncertainty bounds are omitted because they are not measurement standard deviations.</p><p>An XLSX file does not contain a runnable PK-Sim/MoBi model. Native <code>.pkml</code> simulation export requires a model built in OSP. OSP also supports PKML data sets, which are distinct from simulation models. See the <a href="https://docs.open-systems-pharmacology.org/shared-tools-and-example-workflows/import-edit-observed-data">OSP data import documentation</a>.</p></section>
+<section class="page-intro">
       <span class="eyebrow">Data interoperability</span>
       <h1>Using AyFlux results with CSV, R, PK-Sim, and MoBi</h1>
       <p>Export simulated concentration–time profiles for analysis and comparison outside AyFlux.</p>
@@ -91,3 +92,4 @@ plot(ayflux$time_hours, ayflux$concentration_mg_L,
 </div>
 </body>
 </html>
+
