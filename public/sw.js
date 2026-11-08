@@ -1,9 +1,9 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.24.2-ui";
+const CACHE = "ayflux-static-v0.24.2-svg-logo";
 const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
- "/favicon.ico", "/ayflux-logo.png",
+ "/favicon.ico", "/ayflux-molecular-logo.svg",
  "/assets/pk-engine.js", "/assets/simulator-ui.js",
  "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
  "/assets/model-integrity.js", "/assets/research-workspace.js",

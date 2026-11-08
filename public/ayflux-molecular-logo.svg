@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="100 110 1010 1000" fill="none" role="img" aria-labelledby="title">
+  <title id="title">AyFlux molecular logo</title>
+  <g stroke="#FAFBFF" stroke-width="84" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M674 361 487 166 243 239 177 470 340 650 590 600Z"/>
+    <path d="M674 361 893 433 928 620 747 751 590 600"/>
+    <path d="M747 751 784 921 991 980"/>
+  </g>
+  <circle cx="991" cy="980" r="97" fill="#FFAE84"/>
+</svg>
