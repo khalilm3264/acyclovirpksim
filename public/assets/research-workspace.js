@@ -170,7 +170,7 @@ $('printResearchReport').addEventListener("click",async ()=>{
   const values=[
    ["Release","v0.21.0 (research preview)"],["Scenario",snap.primary],["Dose route",config.route],["Dose (mg)",config.dose],
    ["Dose interval (hours)",config.every],["Dose administrations",config.doseCount],["Body mass (kg)",config.weight],
-   ["Creatinine clearance (mL/min)",config.crcl],["Simulation horizon (hours)",config.horizon],
+   ["Kidney function input",config.renalMode==="profile"?"User-entered dynamic CrCl":"Constant CrCl"],["Initial CrCl (mL/min)",config.renalMode==="profile"?config.renalProfile[0].crcl:config.crcl],["CrCl time points (hour: mL/min)",config.renalMode==="profile"?config.renalProfile.map(point=>point.time+": "+point.crcl).join("; "):"Constant value"],["Simulation horizon (hours)",config.horizon],
    ["Monte Carlo draws",config.draws],["Model interval fraction",config.coverage],
    ["Central volume multiplier",config.vcScale],["Plasma clearance multiplier",config.clearanceScale]
   ];
