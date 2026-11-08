@@ -149,10 +149,11 @@ test('the outdated research release label is absent', () => {
 test('R/OSP CSV export is wired and interoperability documentation exists', () => {
   const ui = read('public/assets/simulator-ui.js');
   const dataExchange = require('../public/assets/ayflux-exchange.js');
-  assert.ok(html.includes('id="csvFormat"'));
+  assert.ok(html.includes('select id="csv"'));
+  assert.ok(!html.includes('id="csvFormat"'));
   assert.ok(html.includes('id="csv"'));
   assert.ok(!html.includes('id="csvInterop"'));
-  assert.ok(ui.includes("$('csvFormat').value"));
+  assert.ok(ui.includes("$('csv').addEventListener('change'"));
   assert.ok(html.includes('href="/learn/interoperability/"'));
   assert.ok(html.includes('src="./assets/ayflux-exchange.js"'));
   assert.ok(ui.includes("window.AyFluxExchange.exportTidyCSV"));
@@ -175,9 +176,9 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(index.includes('id="printResearchReport"'));
  assert.ok(ui.includes('window.AyFluxResearchBridge'));
  assert.ok(index.includes('/manifest.webmanifest'));
- assert.ok(read('public/sw.js').includes('ayflux-static-v0.21.0'));
+ assert.ok(read('public/sw.js').includes('ayflux-static-v0.22.0'));
  assert.ok(read('public/manifest.webmanifest').includes('AyFlux'));
- assert.ok(read('CITATION.cff').includes('version: "0.21.0"'));
+ assert.ok(read('CITATION.cff').includes('version: "0.22.0"'));
  assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
- assert.ok(read('CHANGELOG.md').includes('[0.21.0]'));
+ assert.ok(read('CHANGELOG.md').includes('[0.22.0]'));
 });

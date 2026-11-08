@@ -23,9 +23,15 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '22'
+      - name: Stage optional Cartesian heatmap bundle
+        run: |
+          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
+          node scripts/stage-cartesian.cjs
       - name: Check JavaScript syntax
         run: |
           node --check public/assets/vendor/plotly-basic-3.3.1.min.js
+          node --check public/assets/vendor/plotly-cartesian-3.3.1.min.js
+          node --check scripts/stage-cartesian.cjs
           node --check public/assets/ayflux-exchange.js
           node --check public/assets/ayflux-version.js
           node --check public/assets/model-integrity.js
@@ -53,6 +59,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+      - name: Stage optional Cartesian heatmap bundle
+        run: |
+          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
+          node scripts/stage-cartesian.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v6
       - name: Upload public directory
@@ -86,6 +96,10 @@ jobs:
             echo "::error::Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as GitHub Actions repository secrets."
             exit 1
           fi
+      - name: Stage optional Cartesian heatmap bundle
+        run: |
+          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
+          node scripts/stage-cartesian.cjs
       - name: Deploy tested Worker to Cloudflare
         uses: cloudflare/wrangler-action@v4
         with:

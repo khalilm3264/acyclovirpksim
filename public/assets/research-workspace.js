@@ -81,6 +81,20 @@ window.addEventListener("ayflux:results-updated",()=>{
  if(lastExternal)updateText("ospStatus","AyFlux simulation changed. Click Compare curves to refresh the overlay.");
 });
 const pause=()=>new Promise(resolve=>setTimeout(resolve,0));
+// Only users who open the heatmap download the larger Cartesian trace bundle.
+let cartesianPromise=null;
+function loadCartesianForHeatmap(){
+ if(cartesianPromise)return cartesianPromise;
+ cartesianPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  script.src='/assets/vendor/plotly-cartesian-3.3.1.min.js';
+  script.async=true;
+  script.onload=()=>resolve(window.Plotly);
+  script.onerror=()=>reject(new Error('Optional heatmap bundle could not be loaded'));
+  document.head.append(script);
+ }).catch(error=>{cartesianPromise=null;throw error;});
+ return cartesianPromise;
+}
 $('runHeatmap').addEventListener("click",async ()=>{
  const button=$('runHeatmap');button.disabled=true;
  try{
@@ -123,7 +137,30 @@ $('runHeatmap').addEventListener("click",async ()=>{
   });
   table.append(tbody);
   $('heatmapArea').replaceChildren(table);
-  updateText("heatmapStatus","49 deterministic model runs completed; changing other assumptions or the current dose schedule requires regenerating this table.");
+  const label=metric==='auc'?'Plasma acyclovir AUC (mg·h/L)':'Peak plasma acyclovir (mg/L)';
+  try{
+   const renderer=await loadCartesianForHeatmap();
+   const target=$('heatmapPlot');
+   target.classList.remove('hidden');
+   await renderer.react(target,[{
+    type:'heatmap',x:xValues,y:yValues,z:values,
+    colorscale:[[0,'#edf3f6'],[0.33,'#b5d0df'],[0.66,'#6598b5'],[1,'#2b5f82']],
+    hovertemplate:'CrCl %{x} mL/min<br>HD clearance %{y} mL/min<br>'+label+': %{z:.3f}<extra></extra>',
+    colorbar:{title:{text:metric==='auc'?'mg·h/L':'mg/L',side:'right'},thickness:15},
+    xgap:2,ygap:2
+   }],{
+    margin:{l:74,r:68,t:32,b:70},paper_bgcolor:'#fff',plot_bgcolor:'#fff',
+    xaxis:{title:'Residual CrCl (mL/min)',tickmode:'array',tickvals:xValues},
+    yaxis:{title:'HD clearance (mL/min)',tickmode:'array',tickvals:yValues},
+    font:{color:'#28485e',size:11}
+   },{responsive:true,displaylogo:false});
+   $('heatmapArea').parentElement.open=false;
+   updateText('heatmapStatus','Interactive Cartesian heatmap ready (49 deterministic simulations). Hover for values; expand the numeric table for accessible data.');
+  }catch(error){
+   $('heatmapPlot').classList.add('hidden');
+   $('heatmapArea').parentElement.open=true;
+   updateText('heatmapStatus','49 simulations completed. Interactive plot unavailable; numeric table shown. '+error.message);
+  }
  }catch(error){updateText("heatmapStatus","Unable to produce heatmap: "+error.message);}
  finally{button.disabled=false;}
 });
@@ -161,51 +198,157 @@ $('runIntegrity').addEventListener("click",async ()=>{
  $('referenceLibrary').replaceChildren(list);
 })();
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
-$('printResearchReport').addEventListener("click",async ()=>{
- const popup=window.open("","_blank");
- if(!popup){updateText("reportStatus","Your browser blocked the print window. Allow popups for ayflux.org and retry.");return;}
- updateText("reportStatus","Preparing chart images and report…");
+// Build print-specific chart images from the selected scenario, not the live
+// overlay chart (which may contain counterfactual scenarios or be hidden).
+async function renderReportChart(sim,key,label,color){
+ const target=document.createElement('div');
+ target.style.cssText='position:fixed;left:-12000px;top:0;width:960px;height:270px;pointer-events:none;';
+ target.setAttribute('aria-hidden','true');
+ document.body.append(target);
+ const series=sim[key],time=sim.time;
+ try{
+  await Plotly.newPlot(target,[
+   {x:time,y:series.lower,mode:'lines',type:'scatter',line:{width:0},
+    hoverinfo:'skip',showlegend:false},
+   {x:time,y:series.upper,mode:'lines',type:'scatter',line:{width:0},
+    fill:'tonexty',fillcolor:'rgba(46,96,132,0.14)',hoverinfo:'skip',
+    name:'Model interval',showlegend:true},
+   {x:time,y:series.median,mode:'lines',type:'scatter',
+    name:'Model median',line:{color,width:2.5}}
+  ],{
+   width:960,height:270,autosize:false,
+   margin:{l:72,r:23,t:30,b:54},
+   title:{text:label,font:{size:15,color:'#28485e'}},
+   xaxis:{title:'Time (hours)',color:'#34586c',tickfont:{size:11}},
+   yaxis:{title:'Concentration (mg/L)',color:'#34586c',rangemode:'tozero'},
+   font:{family:'Arial, sans-serif',color:'#28485e'},
+   paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',
+   legend:{orientation:'h',x:0.4,y:-0.29,font:{size:10}}
+  },{staticPlot:true,displayModeBar:false,responsive:false});
+  return await Plotly.toImage(target,{format:'png',width:960,height:270,scale:1.5});
+ }finally{
+  try{Plotly.purge(target);}catch(_){}
+  target.remove();
+ }
+}
+function buildResearchReportHtml({date,values,metrics,charts,diagnostic,scenario}){
+ const tableRow=(label,value)=>'<tr><th scope="row">'+escapeHtml(label)+'</th><td>'+
+  escapeHtml(value===undefined||value===null?'Not available':
+   typeof value==='number'?Number(value.toPrecision(6)):value)+'</td></tr>';
+ const figure=(item,i)=>'<figure class="report-figure">'+
+  '<img src="'+item.image+'" width="960" height="270" alt="'+escapeHtml(item.name)+' concentration prediction" loading="eager">'+
+  '<figcaption>Figure '+(i+1)+'. '+escapeHtml(item.name)+'; the band shows the selected model interval, not measured clinical variability.</figcaption>'+
+  '</figure>';
+ return '<!doctype html><html lang="en"><head><meta charset="utf-8">'+
+  '<meta name="viewport" content="width=device-width, initial-scale=1"><title>AyFlux research report</title>'+
+  '<style>'+
+  '@page{size:A4;margin:13mm 14mm}'+
+  '*{box-sizing:border-box}html,body{padding:0;margin:0}'+
+  'body{font:11px/1.4 Arial,Helvetica,sans-serif;color:#263e52;background:#fff}'+
+  'h1{font-size:21px;color:#28485e;border-bottom:3px solid #829dad;padding-bottom:7px;margin:0 0 10px}'+
+  'h2{font-size:14px;color:#28485e;margin:14px 0 7px;break-after:avoid;page-break-after:avoid}'+
+  '.meta{font-size:10px;color:#526979;margin-bottom:12px}'+
+  '.note{background:#fdf6e5;border-left:3px solid #a79851;padding:8px;margin:0 0 14px}'+
+  'table{border-collapse:collapse;width:100%;margin:0 0 10px;table-layout:fixed}'+
+  'tr{break-inside:avoid;page-break-inside:avoid}'+
+  'th,td{border:1px solid #adbfca;padding:5px 8px;text-align:left;overflow-wrap:anywhere;vertical-align:top}'+
+  'th{width:52%;font-weight:700;background:#edf2f5}'+
+  '.report-charts{break-before:page;page-break-before:always}'+
+  '.chart-header{margin-top:0}'+
+  '.report-figure{margin:0 0 7px;display:block;break-inside:avoid;page-break-inside:avoid}'+
+  '.report-figure img{display:block;width:100%;height:auto;max-height:220px;object-fit:contain;break-inside:avoid;page-break-inside:avoid}'+
+  'figcaption{font-size:9px;color:#546c7b;margin:1px 0 6px}'+
+  '.report-extras{break-inside:avoid;page-break-inside:avoid}'+
+  '.sources{font-size:9px;overflow-wrap:anywhere;color:#536c7f}'+
+  '.screen-help{padding:7px 10px;background:#edf2f5;margin:10px 0;font-weight:700}'+
+  '@media print{.screen-help{display:none}.report-charts{break-before:page;page-break-before:always}'+
+  '.report-figure,.report-figure img,.report-extras{break-inside:avoid;page-break-inside:avoid}}'+
+  '</style></head><body>'+
+  '<p class="screen-help">Use your browser Print command (Ctrl+P / Cmd+P) and select Save as PDF.</p>'+
+  '<section class="report-summary"><h1>AyFlux — educational PK research report</h1>'+
+  '<p class="meta">Generated '+escapeHtml(date)+' · AyFlux '+escapeHtml(window.AyFluxVersion?.version||'0.22.0')+
+  ' · Configuration schema 2</p>'+
+  '<p class="note"><strong>EDUCATIONAL USE ONLY.</strong> Simulated, non-validated concentration estimates. Not for prescribing, toxicity assessment, clinical decisions, or dialysis planning.</p>'+
+  '<h2>Simulation assumptions</h2><table>'+values.map(r=>tableRow(...r)).join('')+'</table>'+
+  '<h2>Model summary (medians)</h2><table>'+metrics.map(r=>tableRow(...r)).join('')+'</table>'+
+  '</section>'+
+  '<section class="report-charts"><h2 class="chart-header">Concentration curves — '+escapeHtml(scenario)+'</h2>'+
+  charts.map(figure).join('')+
+  '<section class="report-extras"><h2>Numerical diagnostics</h2><p>'+escapeHtml(diagnostic)+'</p>'+
+  '<h2>Limitations and references</h2>'+
+  '<p>All traces are modeled estimates, not observed concentrations. Model intervals do not establish prospective clinical coverage. Predictions depend on assumed renal, nonrenal, distribution, metabolism, and dialysis processes; external patient-level validation is not established.</p>'+
+  '<p class="sources">Source: github.com/khalilm3264/acyclovirpksim · License: AGPL-3.0-only · References: ayflux.org/learn/model-methods/ · ayflux.org/cite/</p>'+
+  '</section></section></body></html>';
+}
+$('printResearchReport').addEventListener('click',async ()=>{
+ const popup=window.open('','_blank');
+ if(!popup){
+  updateText('reportStatus','Allow pop-ups for ayflux.org to prepare the printable report.');
+  return;
+ }
+ popup.document.write('<!doctype html><html><head><title>Preparing AyFlux report</title></head><body><p>Preparing print-ready charts…</p></body></html>');
+ popup.document.close();
+ const button=$('printResearchReport');button.disabled=true;
+ updateText('reportStatus','Preparing print-ready chart images…');
  try{
   const snap=getSnapshot(),config=snap.config,sim=snap.results[snap.primary];
   const values=[
-   ["Release","v0.21.0 (research preview)"],["Scenario",snap.primary],["Dose route",config.route],["Dose (mg)",config.dose],
-   ["Dose interval (hours)",config.every],["Dose administrations",config.doseCount],["Body mass (kg)",config.weight],
-   ["Kidney function input",config.renalMode==="profile"?"User-entered dynamic CrCl":"Constant CrCl"],["Initial CrCl (mL/min)",config.renalMode==="profile"?config.renalProfile[0].crcl:config.crcl],["CrCl time points (hour: mL/min)",config.renalMode==="profile"?config.renalProfile.map(point=>point.time+": "+point.crcl).join("; "):"Constant value"],["Simulation horizon (hours)",config.horizon],
-   ["Monte Carlo draws",config.draws],["Model interval fraction",config.coverage],
-   ["Central volume multiplier",config.vcScale],["Plasma clearance multiplier",config.clearanceScale]
+   ['Release','v0.22.0 (research preview)'],['Scenario',snap.primary],
+   ['Medication schedule',config.dosingMode==='custom'?'Custom doses':'Repeating regimen'],
+   ['Drug and route',config.dosingMode==='custom'?'See saved configuration':config.route],
+   ['Dose (mg)',config.dosingMode==='custom'?'See custom schedule':config.dose],
+   ['Dose interval (hours)',config.dosingMode==='custom'?'—':config.every],
+   ['Scheduled doses',config.dosingMode==='custom'?config.customDoses.length:config.doseCount],
+   ['Body weight (kg)',config.weight],
+   ['Kidney function mode',config.renalMode==='profile'?'User-entered dynamic CrCl':'Constant CrCl'],
+   ['Initial CrCl (mL/min)',config.renalMode==='profile'?config.renalProfile[0].crcl:config.crcl],
+   ['CrCl time points (hour: mL/min)',config.renalMode==='profile'?
+    config.renalProfile.map(p=>p.time+': '+p.crcl).join('; '):'Constant throughout'],
+   ['Simulation horizon (hours)',config.horizon],
+   ['Monte Carlo draws',config.draws],
+   ['Model interval',Math.round(100*config.coverage)+'%'],
+   ['Central volume multiplier',config.vcScale],
+   ['Plasma clearance multiplier',config.clearanceScale]
   ];
-  const metrics=[["Peak plasma acyclovir (mg/L)",sim.summary.peak?.median],
-   ["Plasma AUC (mg·h/L)",sim.summary.auc?.median],
-   ["Peak CSF acyclovir (mg/L)",sim.summary.csfPeak?.median],
-   ["Peak plasma CMMG (mg/L)",sim.summary.mPeak?.median]];
-  const row=(label,value)=>"<tr><th>"+escapeHtml(label)+"</th><td>"+escapeHtml(value===undefined||value===null?"Not available":typeof value==="number"?Number(value.toPrecision(5)):value)+"</td></tr>";
-  let diagnostic="Not performed";
+  const metrics=[
+   ['Peak plasma acyclovir (mg/L)',sim.summary.peak?.median],
+   ['Plasma acyclovir AUC (mg·h/L)',sim.summary.auc?.median],
+   ['Peak CSF acyclovir (mg/L)',sim.summary.csfPeak?.median],
+   ['Peak plasma CMMG (mg/L)',sim.summary.mPeak?.median]
+  ];
+  let diagnostic='Not performed';
   try{
    const result=integrity.checkConvergence(pk,config,snap.primary);
-   diagnostic="AUC difference between 0.25 and 0.125 h steps: "+(100*result.aucRelativeDifference).toFixed(3)+"%; mass-balance residual: "+(result.massBalanceErrorMg??0).toFixed(4)+" mg";
-  }catch(error){diagnostic="Not available: "+error.message;}
-  let chartImage="";
-  try{
-    const chart=$('plasmaChart');
-    if(chart?.data&&typeof Plotly.toImage==="function")chartImage=await Plotly.toImage(chart,{format:"png",width:950,height:430,scale:1});
-  }catch(_){}
-  const chart=chartImage?'<h2>Plasma concentration chart</h2><img src="'+chartImage+'" alt="AyFlux plasma concentration model plot" style="max-width:100%;height:auto">':'<p>Plasma chart image was not available. Refer to tabular results and CSV exports.</p>';
-  const report='<!doctype html><html lang="en"><head><meta charset="utf-8"><title>AyFlux research report</title><style>'+
-  '@page{size:A4;margin:17mm}body{font:12px/1.55 Arial,sans-serif;color:#263e52}h1{font-size:23px;color:#28485e;border-bottom:3px solid #829dad;padding-bottom:8px}h2{font-size:15px;color:#28485e;margin:20px 0 8px}table{border-collapse:collapse;width:100%;margin:8px 0}th,td{border:1px solid #adbfca;padding:6px 9px;text-align:left}th{width:55%;background:#edf2f5}.note{background:#fdf6e5;border-left:3px solid #a79851;padding:9px}.sources{font-size:10px;word-break:break-word}.meta{color:#5a6b77}img{display:block;margin:8px 0}'+
-  '</style></head><body><h1>AyFlux — educational PK research report</h1>'+
-  '<p class="meta">Generated '+escapeHtml(new Date().toLocaleString())+' · AyFlux v0.21.0 · Configuration schema 2</p>'+
-  '<p class="note"><strong>EDUCATIONAL USE ONLY.</strong> This report contains simulated, non-validated concentration estimates. It must not determine medication dosing, diagnosis, toxicity assessment, dialysis prescription, or patient care.</p>'+
-  '<h2>Simulation assumptions</h2><table>'+values.map(r=>row(...r)).join('')+'</table>'+
-  '<h2>Model summary (medians)</h2><table>'+metrics.map(r=>row(...r)).join('')+'</table>'+
-  chart+
-  '<h2>Numerical diagnostics</h2><p>'+escapeHtml(diagnostic)+'</p>'+
-  '<h2>Limitations and references</h2><p>Predictions depend on assumed pharmacokinetic distributions, kidney function, drug administration and dialysis transport. Monte Carlo intervals do not establish prospective clinical coverage. A matched clinical validation of these specific scenarios has not been performed.</p>'+
-  '<p class="sources">Software/source: https://github.com/khalilm3264/acyclovirpksim · License AGPL-3.0-only · Study references: https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=889bccd1-3793-40ce-bca2-c8c9cf6b7488 and https://pubmed.ncbi.nlm.nih.gov/7075109/</p>'+
-  '</body></html>';
+   diagnostic='AUC step-size difference (0.25 vs 0.125 h): '+
+    (100*result.aucRelativeDifference).toFixed(3)+'%. Mass-balance residual: '+
+    (result.massBalanceErrorMg??0).toFixed(4)+' mg. Numerical checks do not validate clinical predictions.';
+  }catch(error){diagnostic='Diagnostic unavailable: '+error.message;}
+  const chartDefs=[
+   ['plasma','Plasma acyclovir','#295f8b'],
+   ['csf','CSF acyclovir','#168677'],
+   ['cmmg','Plasma CMMG','#a65a2a']
+  ];
+  const charts=[];
+  for(const [key,name,color] of chartDefs){
+   const image=await renderReportChart(sim,key,name,color);
+   charts.push({name,image});
+  }
+  const report=buildResearchReportHtml({
+   date:new Date().toLocaleString(),scenario:snap.primary,
+   values,metrics,charts,diagnostic
+  });
   popup.document.open();popup.document.write(report);popup.document.close();
-  await new Promise(resolve=>setTimeout(resolve,250));
-  popup.focus();popup.print();
-  updateText("reportStatus","Report opened for printing. Select 'Save as PDF' in the print destination.");
- }catch(error){popup.close();updateText("reportStatus","Unable to prepare report: "+error.message);}
+  // Do not invoke Print until every embedded image has decoded.
+  await Promise.all(Array.from(popup.document.images,im=>
+   im.decode?im.decode():new Promise((resolve,reject)=>{im.onload=resolve;im.onerror=reject;})
+  ));
+  if(popup.document.fonts?.ready)await popup.document.fonts.ready;
+  popup.focus();
+  popup.print();
+  updateText('reportStatus','Print-ready report opened. Select Save as PDF; the chart page is kept intact.');
+ }catch(error){
+  popup.close();
+  updateText('reportStatus','Unable to prepare research report: '+error.message);
+ }finally{button.disabled=false;}
 });
 })();

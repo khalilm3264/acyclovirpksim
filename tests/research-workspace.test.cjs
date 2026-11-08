@@ -67,7 +67,40 @@ test('service worker only caches public static files and no user uploads',()=>{
  const root=path.resolve(__dirname,'..');
  const sw=fs.readFileSync(path.join(root,'public/sw.js'),'utf8');
  assert.match(sw,/request\.method !== "GET"/);
- assert.match(sw,/const CACHE = "ayflux-static-v0\.21\.0"/);
+ assert.ok(sw.includes('const CACHE = "ayflux-static-v0.22.0"'));
  assert.match(sw,/assets\/research-workspace\.js/);
  assert.doesNotMatch(sw,/indexedDB|POST|localStorage\.setItem/);
+});
+
+test('research heatmap is interactive when Cartesian is staged and still has numeric fallback',()=>{
+ const fs=require('node:fs'),path=require('node:path'),root=path.resolve(__dirname,'..');
+ const source=fs.readFileSync(path.join(root,'public/assets/research-workspace.js'),'utf8');
+ const html=fs.readFileSync(path.join(root,'public/index.html'),'utf8');
+ const workflow=fs.readFileSync(path.join(root,'.github/workflows/pages.yml'),'utf8');
+ assert.match(html,/id="heatmapPlot"/);
+ assert.match(html,/id="heatmapArea"/);
+ assert.match(source,/loadCartesianForHeatmap/);
+ assert.match(source,/type:'heatmap'/);
+ assert.match(source,/Interactive plot unavailable; numeric table shown/);
+ assert.ok(workflow.includes('plotly.js-cartesian-dist-min@3.3.1'));
+});
+test('research report protects PNG charts from printing across pages',()=>{
+ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+ const script=fs.readFileSync(path.resolve(__dirname,'../public/assets/research-workspace.js'),'utf8');
+ const from=script.indexOf('function buildResearchReportHtml(');
+ const to=script.indexOf("$('printResearchReport').addEventListener",from);
+ assert.ok(from>=0&&to>from);
+ const out={escapeHtml:t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;'),window:{AyFluxVersion:{version:'0.22.0'}}};
+ vm.runInNewContext(script.slice(from,to)+'; this.build=buildResearchReportHtml;',out);
+ const html=out.build({date:'2026-11-07',values:[['Route','Acyclovir IV']],metrics:[['AUC',10]],
+  charts:[{name:'Plasma acyclovir',image:'data:image/png;base64,AAAA'},
+   {name:'CSF acyclovir',image:'data:image/png;base64,AAAA'},
+   {name:'Plasma CMMG',image:'data:image/png;base64,AAAA'}],
+  diagnostic:'AUC check',scenario:'No dialysis'});
+ assert.match(html,/\.report-charts\{break-before:page;page-break-before:always\}/);
+ assert.match(html,/page-break-inside:avoid/);
+ assert.equal((html.match(/class="report-figure"/g)||[]).length,3);
+ assert.match(script,/await Promise\.all\(Array\.from\(popup\.document\.images/);
+ assert.match(script,/Plotly\.newPlot\(target,/);
+ assert.doesNotMatch(script,/Plotly\.toImage\(chart,\{/);
 });

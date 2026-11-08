@@ -2,6 +2,14 @@
 
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
+## [0.22.0] - 2026-11-07 (preview)
+
+- Made CSV export a **single compact dropdown**: choose a format to download immediately, with no second button.
+- Added a true, interactive 7 × 7 Plotly Cartesian heatmap, with hover values and a collapsible accessible numeric table. The larger bundled library is loaded on demand and falls back gracefully to the numeric table when absent.
+- Rebuilt the research-report print output with chart images generated from the selected scenario, explicit page breaks, protected figure layout, and awaited image decoding before printing.
+- GitHub Actions stages a pinned Plotly Cartesian v3.3.1 library for both GitHub Pages and Cloudflare deployment; normal time-series charts continue using Plotly Basic.
+- Preserved the v2 saved-configuration schema, educational-use limitations, and scientific equations.
+
 ## [0.21.0] - 2026-11-07 (preview)
 
 - Combined the two CSV export actions into a compact format selector plus a single Export CSV button.
@@ -30,5 +38,6 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
+[0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
