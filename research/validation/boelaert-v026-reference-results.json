@@ -1,0 +1,210 @@
+{
+  "title": "AyFlux full JavaScript-engine Boelaert 1987 CAPD benchmark",
+  "validation": "Exploratory agreement assessment, not patient-level clinical validation",
+  "publishedMeanPdRecoveryPct": 12.1,
+  "publishedSdPdRecoveryPct": 2.1,
+  "software": "public/assets/pk-engine.js",
+  "runtime": "v22.23.4",
+  "solver": "canonical event-grid RK4; finer .125-h repeat for convergence check",
+  "subjects": [
+    {
+      "study": "Boelaert et al. (1987), Tables I-II, pp. 70 and 73",
+      "subject": 1,
+      "weight_kg": 46.5,
+      "dose_mg_daily": 110,
+      "route": "IV acyclovir",
+      "start_hours": [
+        0,
+        24,
+        48,
+        72,
+        96
+      ],
+      "exchange_dwells_hours": [
+        4,
+        4,
+        4,
+        12
+      ],
+      "exchange_fill_liters": 2,
+      "glucose_percent": 1.36,
+      "residual_crcl_ml_min": 0,
+      "reference_class": "author-fitted plasma endpoints",
+      "observed_pd_recovery_percent": 10.6,
+      "observed_pd_clearance_ml_min": 3.25,
+      "checkpoints": [
+        {
+          "metric": "day1PeakMgL",
+          "source_fitted_mg_L": 4.9546,
+          "ayflux_mg_L": 5.7261,
+          "percent_error": 15.5708
+        },
+        {
+          "metric": "day1TroughMgL",
+          "source_fitted_mg_L": 0.9234,
+          "ayflux_mg_L": 1.1248,
+          "percent_error": 21.8183
+        },
+        {
+          "metric": "day5PeakMgL",
+          "source_fitted_mg_L": 6.2158,
+          "ayflux_mg_L": 7.3571,
+          "percent_error": 18.3614
+        },
+        {
+          "metric": "day5TroughMgL",
+          "source_fitted_mg_L": 1.4188,
+          "ayflux_mg_L": 1.7444,
+          "percent_error": 22.947
+        }
+      ],
+      "ayflux_pd_drained_percent_total_5d": 12.9,
+      "ayflux_pd_drained_percent_day5": 14.3508,
+      "ayflux_pd_drained_mass_total_mg": 70.9502,
+      "max_mass_balance_residual_mg": 0,
+      "finer_timestep_auc_rel_error_pct": -0.0011,
+      "finer_timestep_drained_pct_abs_diff": 0.0001,
+      "timing_caveat": "CAPD starts at t=0; published effluent volume by exchange not fully available",
+      "interpretive_caveat": "Model assumptions are not fitted to these subjects; published plasma endpoints are author-fitted, not independent raw measurements",
+      "five_day_plasma_auc_mg_h_L": 332.0493,
+      "no_pd_five_day_auc_mg_h_L": 377.6587,
+      "exchange_timing_five_day_auc_mg_h_L": 332.563,
+      "transport_low_five_day_auc_mg_h_L": 339.4516,
+      "transport_high_five_day_auc_mg_h_L": 326.9821
+    },
+    {
+      "study": "Boelaert et al. (1987), Tables I-II, pp. 70 and 73",
+      "subject": 4,
+      "weight_kg": 59,
+      "dose_mg_daily": 142,
+      "route": "IV acyclovir",
+      "start_hours": [
+        0,
+        24,
+        48,
+        72,
+        96
+      ],
+      "exchange_dwells_hours": [
+        4,
+        4,
+        4,
+        12
+      ],
+      "exchange_fill_liters": 2,
+      "glucose_percent": 1.36,
+      "residual_crcl_ml_min": 0,
+      "reference_class": "author-fitted plasma endpoints",
+      "observed_pd_recovery_percent": 13.6,
+      "observed_pd_clearance_ml_min": 7.3833333333,
+      "checkpoints": [
+        {
+          "metric": "day1PeakMgL",
+          "source_fitted_mg_L": 4.3466,
+          "ayflux_mg_L": 5.9087,
+          "percent_error": 35.94
+        },
+        {
+          "metric": "day1TroughMgL",
+          "source_fitted_mg_L": 0.518,
+          "ayflux_mg_L": 1.2362,
+          "percent_error": 138.6469
+        },
+        {
+          "metric": "day5PeakMgL",
+          "source_fitted_mg_L": 4.9546,
+          "ayflux_mg_L": 7.7857,
+          "percent_error": 57.1412
+        },
+        {
+          "metric": "day5TroughMgL",
+          "source_fitted_mg_L": 0.6756,
+          "ayflux_mg_L": 2.002,
+          "percent_error": 196.3139
+        }
+      ],
+      "ayflux_pd_drained_percent_total_5d": 10.8482,
+      "ayflux_pd_drained_percent_day5": 12.2213,
+      "ayflux_pd_drained_mass_total_mg": 77.0224,
+      "max_mass_balance_residual_mg": 0,
+      "finer_timestep_auc_rel_error_pct": -0.0008,
+      "finer_timestep_drained_pct_abs_diff": 0.0001,
+      "timing_caveat": "CAPD starts at t=0; published effluent volume by exchange not fully available",
+      "interpretive_caveat": "Model assumptions are not fitted to these subjects; published plasma endpoints are author-fitted, not independent raw measurements",
+      "five_day_plasma_auc_mg_h_L": 361.7375,
+      "no_pd_five_day_auc_mg_h_L": 402.3563,
+      "exchange_timing_five_day_auc_mg_h_L": 362.0538,
+      "transport_low_five_day_auc_mg_h_L": 368.433,
+      "transport_high_five_day_auc_mg_h_L": 357.1323
+    },
+    {
+      "study": "Boelaert et al. (1987), Tables I-II, pp. 70 and 73",
+      "subject": 5,
+      "weight_kg": 48,
+      "dose_mg_daily": 122,
+      "route": "IV acyclovir",
+      "start_hours": [
+        0,
+        24,
+        48,
+        72,
+        96
+      ],
+      "exchange_dwells_hours": [
+        4,
+        4,
+        4,
+        12
+      ],
+      "exchange_fill_liters": 2,
+      "glucose_percent": 1.36,
+      "residual_crcl_ml_min": 0,
+      "reference_class": "author-fitted plasma endpoints",
+      "observed_pd_recovery_percent": 12.3,
+      "observed_pd_clearance_ml_min": 5.05,
+      "checkpoints": [
+        {
+          "metric": "day1PeakMgL",
+          "source_fitted_mg_L": 5.9005,
+          "ayflux_mg_L": 6.1643,
+          "percent_error": 4.47
+        },
+        {
+          "metric": "day1TroughMgL",
+          "source_fitted_mg_L": 0.563,
+          "ayflux_mg_L": 1.2217,
+          "percent_error": 116.9837
+        },
+        {
+          "metric": "day5PeakMgL",
+          "source_fitted_mg_L": 6.486,
+          "ayflux_mg_L": 7.9468,
+          "percent_error": 22.5216
+        },
+        {
+          "metric": "day5TroughMgL",
+          "source_fitted_mg_L": 0.6531,
+          "ayflux_mg_L": 1.9056,
+          "percent_error": 191.776
+        }
+      ],
+      "ayflux_pd_drained_percent_total_5d": 12.6086,
+      "ayflux_pd_drained_percent_day5": 14.0501,
+      "ayflux_pd_drained_mass_total_mg": 76.9127,
+      "max_mass_balance_residual_mg": 0,
+      "finer_timestep_auc_rel_error_pct": -0.001,
+      "finer_timestep_drained_pct_abs_diff": 0.0001,
+      "timing_caveat": "CAPD starts at t=0; published effluent volume by exchange not fully available",
+      "interpretive_caveat": "Model assumptions are not fitted to these subjects; published plasma endpoints are author-fitted, not independent raw measurements",
+      "five_day_plasma_auc_mg_h_L": 360.134,
+      "no_pd_five_day_auc_mg_h_L": 408.2912,
+      "exchange_timing_five_day_auc_mg_h_L": 360.653,
+      "transport_low_five_day_auc_mg_h_L": 367.9673,
+      "transport_high_five_day_auc_mg_h_L": 354.7682
+    }
+  ],
+  "source_run": "https://github.com/khalilm3264/acyclovirpksim/actions/runs/42709576574",
+  "source_head_sha": "2165cdedd9208e67175100a5ce72e5dd85245d1f",
+  "release": "0.26.0-preview",
+  "results_kind": "fixed-model exploratory research comparison; not clinical validation"
+}
