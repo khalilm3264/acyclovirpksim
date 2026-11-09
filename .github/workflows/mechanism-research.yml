@@ -21,6 +21,8 @@ jobs:
         run: |
           node --test tests/external-capd-research.test.cjs
           node research/validation/external-capd-holdouts.cjs research/validation/external-capd-holdouts-results.json
+      - name: CSF albumin quotient observational audit
+        run: node research/validation/lindstrom-albumin-audit.cjs research/validation/lindstrom-albumin-audit-results.json
       - name: Upload research outputs
         uses: actions/upload-artifact@v4
         with:
@@ -28,3 +30,4 @@ jobs:
           path: |
             research/validation/mechanism-sensitivity-results.json
             research/validation/external-capd-holdouts-results.json
+            research/validation/lindstrom-albumin-audit-results.json
