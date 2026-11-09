@@ -57,6 +57,12 @@ Lite deliberately excludes Monte Carlo uncertainty, CSF forecasts, Kt/V, famcicl
 
 The full simulator header links directly to the **User guide**. Lite is available from a collapsed alternative-interface note in the guide's **About AyFlux** section; the full site no longer displays a separate Lite button or slow-load pop-up.
 
+## Baseline comparison
+
+In the Concentration tab, choose **Save selected curve as baseline**, then change inputs. The dark dash-dot curve preserves the selected scenario’s median concentrations. Expand **Changed settings** to see the differences, or replace/clear the baseline. It is kept only for the current page session and is not included in configuration or data exports. Dose markers, shading and uncertainty bands refer to the current run. When durations differ, the chart shows both time ranges and the peak comparison notes the difference.
+
+Completed results for up to three configurations are reused in memory; new numerical inputs and fitting observations invalidate reuse. Charts below the visible area wait until you scroll near them. See [performance verification](docs/interface-performance.md) for the scope of the measurements.
+
 ## Get started
 
 **Use it online:** [ayflux.org](https://ayflux.org/) — no sign-in or app download is needed.

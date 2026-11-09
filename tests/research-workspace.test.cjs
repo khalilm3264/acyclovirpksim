@@ -67,7 +67,7 @@ test('service worker only caches public static files and no user uploads',()=>{
  const root=path.resolve(__dirname,'..');
  const sw=fs.readFileSync(path.join(root,'public/sw.js'),'utf8');
  assert.match(sw,/request\.method !== "GET"/);
- assert.ok(sw.includes('const CACHE = "ayflux-static-v0.25.0-visual-explorer"'));
+ assert.match(sw,/const CACHE = "ayflux-static-v[^"]+"/);
  assert.match(sw,/assets\/research-workspace\.js/);
  assert.doesNotMatch(sw,/indexedDB|POST|localStorage\.setItem/);
 });

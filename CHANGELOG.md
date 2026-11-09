@@ -2,6 +2,13 @@
 
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
+## Unreleased
+
+- Added a session-only frozen baseline for the selected scenario on all four concentration charts, with a changed-settings list and peak plasma comparison. Current dose markers, shading and uncertainty bands remain explicitly identified.
+- Reuse up to three completed result configurations, retain previously calculated scenarios, suppress duplicate numeric input/change calculations and cancel obsolete Worker jobs when replacement inputs validate.
+- Defer off-screen concentration and clearance charts until they approach the viewport, while retaining a fallback for browsers without IntersectionObserver.
+- Added cache, baseline and rendering regression coverage and desktop/mobile browser checks. No PK equations or saved configuration schema changed.
+
 ## [0.25.0] - 2026-11-08 (preview)
 
 - Added a dedicated visual explorer, accessible from Research tools with the current simulation settings.
