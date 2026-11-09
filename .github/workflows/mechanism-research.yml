@@ -17,8 +17,14 @@ jobs:
         run: |
           node research/validation/mechanism-sensitivity.cjs /tmp/mechanism-sensitivity.json
           cp /tmp/mechanism-sensitivity.json research/validation/mechanism-sensitivity-results.json
-      - name: Upload result
+      - name: Independent CAPD study check and unit tests
+        run: |
+          node --test tests/external-capd-research.test.cjs
+          node research/validation/external-capd-holdouts.cjs research/validation/external-capd-holdouts-results.json
+      - name: Upload research outputs
         uses: actions/upload-artifact@v4
         with:
           name: capd-cmmg-mechanisms
-          path: research/validation/mechanism-sensitivity-results.json
+          path: |
+            research/validation/mechanism-sensitivity-results.json
+            research/validation/external-capd-holdouts-results.json
