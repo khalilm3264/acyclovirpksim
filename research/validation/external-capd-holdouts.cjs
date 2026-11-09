@@ -77,7 +77,7 @@ function shah(){
     max_mass_balance_residual_mg:maxResidual,days});
   }
  }
- return {study:'Shah et al. 1986',doi:'10.1016/S0272-6386(86)80141-4',
+ return {study:'Shah et al. 1986',doi:'10.1016/S0272-6386(86)80193-7',
   evidence_type:'Single-patient CAPD summary + day-specific total effluent recovery',
   source,experiments};
 }
@@ -103,7 +103,7 @@ function burgess(){
    model_no_pd_terminal_half_life_h:r(sim.summary.modelHalfLife),
    max_mass_balance_residual_mg:maxResidual});
  }
- return {study:'Burgess & Gill 1990',doi:'10.1177/009127009003001104',
+ return {study:'Burgess & Gill 1990',doi:'10.1002/j.1552-4604.1990.tb03585.x',
   evidence_type:'Four-person IV CAPD group summary; group means not patient-level matched',
   source,experiments};
 }
