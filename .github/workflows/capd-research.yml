@@ -1,0 +1,37 @@
+name: CAPD research reproducibility
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/validation/**'
+      - 'public/assets/pk-engine.js'
+      - 'tests/capd-publication.test.cjs'
+      - '.github/workflows/capd-research.yml'
+  pull_request:
+    paths:
+      - 'research/validation/**'
+      - 'public/assets/pk-engine.js'
+      - 'tests/capd-publication.test.cjs'
+      - '.github/workflows/capd-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Test full-engine CAPD accounting and solver grid
+        run: node --test tests/capd-publication.test.cjs
+      - name: Generate numerical results
+        run: node research/validation/boelaert-capd.cjs research/validation/results
+      - name: Archive CAPD numerical results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ayflux-boelaert-capd
+          path: research/validation/results/
+          if-no-files-found: error

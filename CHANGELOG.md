@@ -4,6 +4,13 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+## [0.26.0] - 2026-11-09 (preview)
+
+- Added **Boelaert 1987 CAPD full-engine verification** via a reproducible research script and CI artifact for three prespecified patients, including actual exchange timing, model/drain mass accounting, ablation, and time-step checks.
+- Added scientific boundaries distinguishing author-fitted plasma estimates from original observed samples and descriptive concordance from independent clinical validation. The previous CAPD surrogate was not used for the full-engine results.
+- Preserved every pharmacokinetic parameter, dialysis equation, UI behavior, and saved configuration schema (2). CMMG CSF parameter uncertainty remains unresolved rather than being silently adjusted.
+- Continued the preceding unreleased cache/performance improvements under this release.
+
 - Added a session-only frozen baseline for the selected scenario on all four concentration charts, with a changed-settings list and peak plasma comparison. Current dose markers, shading and uncertainty bands remain explicitly identified.
 - Reuse up to three completed result configurations, retain previously calculated scenarios, suppress duplicate numeric input/change calculations and cancel obsolete Worker jobs when replacement inputs validate.
 - Defer off-screen concentration and clearance charts until they approach the viewport, while retaining a fallback for browsers without IntersectionObserver.
@@ -99,4 +106,5 @@ This changelog distinguishes the application version from the configuration sche
 [0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 
+[0.26.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
 [0.25.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
