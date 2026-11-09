@@ -62,11 +62,11 @@ function pd(){
   return concise;
  });
 }
-function simulateCSF(crcl,mg,interval,totalCount,ratio,lag){
+function simulateCSF(crcl,mg,interval,totalCount,ratio,lag,overrides={}){
  const c={...pk.DEFAULTS,route:'Valacyclovir oral',dosingMode:'repeat',
   dose:mg,every:interval,doseCount:totalCount,horizon:interval*totalCount,
   crcl,crclSource:'manual',renalMode:'constant',draws:1,variability:0,
-  csfMetRatio:ratio,csfMetLag:lag,weight:70,trackMassBalance:false};
+  csfMetRatio:ratio,csfMetLag:lag,weight:70,trackMassBalance:false,...overrides};
  const o=pk.single(c,pk.drawParams(c)[0],pk.scheduleFor('No dialysis',c),.125);
  const start=(totalCount-1)*interval;
  let area={plasma_acyclovir:0,csf_acyclovir:0,plasma_cmmg:0,csf_cmmg:0};
@@ -100,12 +100,21 @@ function csf(){
   panels[name]={reference:info,source_ratios:{
    acv:r4(info.reference_acyclovir_csf_auc_mghL/info.reference_acyclovir_plasma_auc_mghL),
    cmmg:r4(info.reference_cmmg_csf_auc_mghL/info.reference_cmmg_plasma_auc_mghL)},
-   experiments:[]};
+   experiments:[],formation_sensitivity:[]};
   for(const [ratio,lag] of [[.25,6],[.025,6],[.0125,6],[.05,6],[.025,2],[.025,12],[.025,24]]){
     const x=simulateCSF(crcl,info.oral_mg,info.interval_h,5,ratio,lag);
     x.cmmg_csf_auc_error_vs_published_pct=r4(pctDiff(x.csf_cmmg_auc_mghL,info.reference_cmmg_csf_auc_mghL));
     x.cmmg_plasma_auc_error_vs_published_pct=r4(pctDiff(x.plasma_cmmg_auc_mghL,info.reference_cmmg_plasma_auc_mghL));
     panels[name].experiments.push(x);
+  }
+  for(const ff of [.5,.75,1,1.25])for(const mr of [1,1.5]){
+   const x=simulateCSF(crcl,info.oral_mg,info.interval_h,5,.025,6,{formFactor:ff,metRenal:mr});
+   panels[name].formation_sensitivity.push({formFactor:ff,metRenal:mr,
+    acv_plasma_auc_mghL:x.plasma_acv_auc_mghL,
+    cmmg_plasma_auc_mghL:x.plasma_cmmg_auc_mghL,
+    cmmg_csf_auc_mghL:x.csf_cmmg_auc_mghL,
+    source_acyclovir_plasma_auc_mghL:info.reference_acyclovir_plasma_auc_mghL,
+    source_cmmg_plasma_auc_mghL:info.reference_cmmg_plasma_auc_mghL});
   }
  }
  return panels;
