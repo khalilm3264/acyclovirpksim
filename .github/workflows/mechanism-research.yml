@@ -1,0 +1,24 @@
+name: AyFlux mechanism hypothesis experiments
+on:
+  push:
+    branches: [research/capd-cmmg-mechanisms-20261109]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mechanism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Mechanism sensitivity run
+        run: |
+          node research/validation/mechanism-sensitivity.cjs /tmp/mechanism-sensitivity.json
+          cp /tmp/mechanism-sensitivity.json research/validation/mechanism-sensitivity-results.json
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: capd-cmmg-mechanisms
+          path: research/validation/mechanism-sensitivity-results.json
