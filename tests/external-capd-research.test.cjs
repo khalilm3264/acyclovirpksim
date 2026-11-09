@@ -47,3 +47,18 @@ test('External studies are only study-level references; CMMG 0.025 remains a res
   assert.ok(group.experiments.find(x=>x.cmmg_ratio_setting===.025).cmmg_csf_plasma_ratio<.03);
  }
 });
+
+test('Lindstrom source table uses one eligible sample per participant and preserves censor flags',()=>{
+ const audit=require('../research/validation/lindstrom-albumin-audit.cjs');
+ const records=audit.load();
+ assert.equal(records.length,21);
+ assert.equal(records.filter(x=>x.censored).length,10);
+ assert.equal(records.find(x=>x.subject===1).source_row,'1b');
+ assert.equal(records.find(x=>x.subject===19).qalb,162.4);
+ const r=audit.report();
+ assert.equal(r.analyses.length,6);
+ assert.equal(r.analyses.find(x=>x.specification==='detected').patients,11);
+ for(const s of r.analyses){
+  assert.ok(s.qalb_to_csf_cmmg_spearman>=-1&&s.qalb_to_csf_cmmg_spearman<=1);
+ }
+});
