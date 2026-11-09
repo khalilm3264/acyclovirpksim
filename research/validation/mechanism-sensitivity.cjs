@@ -133,4 +133,4 @@ if(require.main===module){
  if(output)fs.writeFileSync(output,JSON.stringify(all,null,2)+'\n');
  console.log(JSON.stringify(all));
 }
-module.exports={pd,csf};
+module.exports={pd,csf,simulateCSF};
