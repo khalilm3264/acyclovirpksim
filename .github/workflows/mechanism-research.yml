@@ -23,6 +23,8 @@ jobs:
           node research/validation/external-capd-holdouts.cjs research/validation/external-capd-holdouts-results.json
       - name: CSF albumin quotient observational audit
         run: node research/validation/lindstrom-albumin-audit.cjs research/validation/lindstrom-albumin-audit-results.json
+      - name: Renal cohort CMMG stress test
+        run: node research/validation/smith-renal-cohort-stress.cjs research/validation/smith-renal-cohort-stress-results.json
       - name: Upload research outputs
         uses: actions/upload-artifact@v4
         with:
@@ -31,3 +33,4 @@ jobs:
             research/validation/mechanism-sensitivity-results.json
             research/validation/external-capd-holdouts-results.json
             research/validation/lindstrom-albumin-audit-results.json
+            research/validation/smith-renal-cohort-stress-results.json
