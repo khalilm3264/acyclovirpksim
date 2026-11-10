@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.26.0-capd-research";
+const CACHE = "ayflux-static-v0.26.0-references-20261109";
 const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
