@@ -62,3 +62,16 @@ test('Lindstrom source table uses one eligible sample per participant and preser
   assert.ok(s.qalb_to_csf_cmmg_spearman>=-1&&s.qalb_to_csf_cmmg_spearman<=1);
  }
 });
+
+test('Smith renal cohort grid uses each reported CKD CrCl and preserves observed group benchmarks',()=>{
+ const transfer=require('../research/validation/smith-renal-cohort-stress.cjs');
+ const d=transfer.report();
+ assert.deepEqual(d.baseline.ckd_patient_crcl_mL_min,[17,30,31]);
+ assert.equal(d.candidate_grid.length,16);
+ assert.ok(d.baseline.ckd.errors.plasma_cmmg_auc_mghL.observed>0);
+ assert.ok(d.lowPartition.ckd.errors.csf_cmmg_auc_mghL.simulated < d.baseline.ckd.errors.csf_cmmg_auc_mghL.simulated);
+ for(const name of ['normal','ckd']){
+  assert.ok(Number.isFinite(d.baseline[name].mean_abs_log_error));
+  assert.ok(Number.isFinite(d.lowPartition[name].mean_abs_log_error));
+ }
+});
