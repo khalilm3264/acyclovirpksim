@@ -52,6 +52,7 @@
   <p>AyFlux uses a two-compartment model to describe how acyclovir distributes and is cleared over time. The central and peripheral compartments are mathematical simplifications, not direct maps of specific organs.</p>
   <p>Changing a parameter, such as assumed kidney clearance, changes the predicted curve. The result depends on the model and its inputs, not on measurements from a particular patient.</p>
 </section>
+<section class="card"><h2>Pediatric research model</h2><p>The <a href="/research/pediatric/">pediatric IV module</a> implements the final one-compartment equations from <a href="https://doi.org/10.1128/AAC.01426-20">Abdalla et al. (2020)</a>. It has separate assumptions, study-defined indexed eGFR units, and an explicitly qualified variability band. It does not extend the adult dialysis or metabolite model to children.</p></section>
 <section class="card" id="equations">
   <h2>AyFlux differential equations (implemented model)</h2>
   <p>The following expressions correspond to the core amount-state equations in <code>public/assets/pk-engine.js</code>. They describe how the educational model calculates concentrations; they are <strong>not</strong> equations fitted and validated against a clinical cohort. The simulator also handles treatment boundaries, oral dose events and optional dialysis exchanges.</p>

@@ -1,5 +1,11 @@
 # AyFlux changelog
 
+## Unreleased — pediatric research module
+
+- Add an isolated Abdalla (2020) IV pediatric model with weight/eGFR comparisons, conditional variability bands, accessible numeric results, and CSV export.
+- Add equation verification, independent RK4 and exposure checks, and reproducible fixtures. Population target-attainment and clinical validation remain unperformed.
+- Link the module from the guide and model methods; add reference [25].
+
 This changelog distinguishes the application version from the configuration schema and AGPL license.
 
 ## Unreleased

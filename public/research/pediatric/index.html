@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pediatric acyclovir research model | AyFlux</title><meta name="description" content="Explore body weight and renal function in the Abdalla pediatric IV acyclovir population model. Research use only.">
+<link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="style.css">
+<script src="model.js" defer></script><script src="view.js" defer></script></head><body><header class="site-header ay-header">
+  <div class="ay-header-brand">
+    <img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" alt="" width="42" height="42">
+    <div class="ay-title-stack">
+      <a class="brand ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a>
+      <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function, hemodialysis, peritoneal dialysis, and CRRT</p>
+    </div>
+  </div>
+  <a class="ay-guide-link" href="/">← Simulator</a>
+</header>
+
+<div class="shell"><nav class="guide-topics" aria-label="Research navigation"><a href="/learn/">User guide</a><a href="/learn/model-methods/">Model methods</a><span aria-current="page">Pediatric research</span></nav>
+<main><div class="page-intro"><span class="eyebrow">Research model · Abdalla 2020</span><h1>Pediatric acyclovir: size and kidney function</h1><p>Explore predicted plasma exposure after repeated IV infusions.</p></div>
+<div class="notice"><strong>Research use only, not for patient dosing.</strong> This separate published model has no dialysis, CMMG, CSF, or neonatal maturation component. Controls are restricted to ages 1–18 years and the study’s observed weight and eGFR ranges. These limits do not establish clinical validity.</div>
+<div class="layout"><section class="card"><h2>Simulation inputs</h2><form id="inputs" class="controls">
+<label>Age (years)<input id="age" type="number" min="1" max="18" step="any" value="4" required></label>
+<label>Weight (kg)<input id="weight" type="number" min="3.1" max="66" step="any" value="15" required></label>
+<label class="wide">Study-defined eGFR (mL/min/1.73 m²)<input id="egfr" type="number" min="56" max="399" step="any" value="164" required></label>
+<label>Dose (mg/kg)<input id="dose" type="number" min="0" max="30" step="any" value="10" required></label>
+<label>Interval (hours)<input id="interval" type="number" min="4" max="24" step="any" value="8" required></label>
+<label>Infusion (hours)<input id="infusion" type="number" min="0.25" max="4" step="any" value="1" required></label>
+<label>Number of doses<input id="doses" type="number" min="1" max="12" step="1" value="6" required></label>
+<label class="wide">Compare eGFR (mL/min/1.73 m²)<input id="compare" type="number" min="56" max="399" step="any" value="300" required></label>
+<button class="btn" type="submit">Update curves</button></form><p id="error" role="alert"></p><p class="status">Defaults are an illustrative experiment, not a suggested regimen. Age limits eligibility only; it does not change clearance.</p></section>
+<section class="card"><h2>Plasma acyclovir</h2><div class="legend"><span>Selected eGFR: typical curve</span><span class="band">Simulated 5th–95th percentiles</span><span class="comparison">Comparison eGFR: typical curve</span></div>
+<svg id="chart" class="chart" viewBox="0 0 820 360" role="img" aria-labelledby="chart-title chart-desc"><title id="chart-title">Predicted plasma acyclovir concentration</title><desc id="chart-desc">Concentrations in mg/L over time in hours. Numerical results appear in the table below.</desc></svg>
+<div id="metrics" class="metrics" aria-live="polite"></div><p id="status" class="status" aria-live="polite"></p>
+<p>The shaded range describes simulated between-person variability at the selected weight and eGFR. It is not a confidence interval or an individual prediction interval. It excludes parameter-estimation uncertainty and measurement error.</p>
+<details><summary>Concentration table and CSV</summary><button id="export" class="btn" type="button">Export CSV</button><div class="table-scroll"><table><caption>Predictions in mg/L; time in hours</caption><thead><tr><th>Time</th><th>Typical</th><th>5th</th><th>Median</th><th>95th</th><th>Comparison</th></tr></thead><tbody id="rows"></tbody></table></div></details></section></div>
+<section class="card"><h2>How this model works</h2><p class="formula">CL = 5.15 × (weight / 15)<sup>0.75</sup> × (eGFR / 164)<sup>0.658</sup> L/h<br>V = 16.2 × (weight / 15) L<br>dA/dt = infusion rate − (CL / V) × A; plasma concentration = A / V</p>
+<p>Each infusion is solved analytically and added to earlier doses. The orange curve changes eGFR only. Summary peak and trough values represent theoretical steady state; the graph begins with no drug and shows the selected finite course.</p>
+<p><strong>Renal-function definition:</strong> the paper used historical Schwartz coefficients (0.45 below age 2; 0.55 for ages 2–12 and females 13 or older; 0.7 for males 13 or older), multiplied by height in cm / serum creatinine in mg/dL. Enter that study-defined indexed eGFR directly. Adult Cockcroft–Gault values and absolute mL/min are not interchangeable with this input.</p>
+<details><summary>Reproduction assumptions and limits</summary><ul>
+<li>The final Table 2 equations normalize weight to 15 kg; the Methods text says 15.6 kg. This implementation follows Table 2.</li>
+<li>The variability simulation treats Table 2 values 0.389 and 0.434 as log-scale standard deviations for clearance and volume. Their covariance is not reported; independent effects are assumed. It uses 1,000 virtual individuals and a fixed seed.</li>
+<li>The study does not establish impaired-renal-function dosing. No extrapolation below eGFR 56, dialysis extension, or neonatal maturation claim is included. Age 1 year is a conservative interface restriction, not a study-derived cutoff.</li>
+<li>Only the IV component is implemented. Oral dose conventions and formulation effects require a separate reproduction review.</li>
+<li>Equation and numerical checks are not clinical validation. Individual patient data and the exact simulation covariate distribution were not available; the paper’s population target-attainment percentages and visual predictive checks have not been reproduced.</li>
+</ul></details></section>
+<section class="card"><h2>Source and verification</h2><p>Abdalla S et al. Population Pharmacokinetics of Intravenous and Oral Acyclovir and Oral Valacyclovir in Pediatric Population To Optimize Dosing Regimens. <em>Antimicrobial Agents and Chemotherapy</em>. 2020;64:e01426-20. <a href="https://doi.org/10.1128/AAC.01426-20">doi:10.1128/AAC.01426-20</a>.</p><p><a href="https://github.com/khalilm3264/acyclovirpksim/tree/research/pediatric-abdalla/research/pediatric">Reproduction notes and verification results</a></p></section>
+<noscript><div class="notice">Enable JavaScript to calculate curves. Model equations and limitations remain available above.</div></noscript></main>  <footer class="site-footer">
+    <span>© 2026 Muhammad Khalil · AyFlux · AGPLv3 <a class="cat-easter-egg" href="/cats/" title="A small surprise" aria-label="Meet the AyFlux cats">🐾</a></span>
+    <span>For educational use only · <a href="/learn/">Learning center</a> · <a href="/disclaimer/">Disclaimer</a> · <a href="/license/">License</a> · <a href="/cite/">Cite</a> · <a class="github-icon-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" title="AyFlux on GitHub" aria-label="AyFlux source code on GitHub"><img src="/github-mark.svg" width="19" height="19" alt=""></a></span>
+  </footer>
+</div></body></html>
