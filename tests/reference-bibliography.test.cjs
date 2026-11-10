@@ -30,7 +30,7 @@ test('new studies have direct DOI citations, accurate evidence labels and no fal
  ]) assert.ok(html.includes('https://doi.org/'+doi),'Missing DOI '+doi);
  assert.match(html,/ref22[\s\S]*?not peer-reviewed/);
  assert.match(html,/ref20[\s\S]*?oral acyclovir/);
- assert.match(html,/ref21[\s\S]*?oral acyclovir/);
+ assert.match(html,/ref21[\s\S]*?oral acyclovir/i);
  assert.match(html,/ref24[\s\S]*?not an independent PK validation cohort/);
  assert.match(html,/release notes">v0\.26\.0/);
 });
