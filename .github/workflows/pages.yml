@@ -45,6 +45,8 @@ jobs:
           node --check public/explore/model.js
           node --check public/explore/worker.js
           node --check public/explore/view.js
+          node --check public/research/pediatric/model.js
+          node --check public/research/pediatric/view.js
           node --check public/sw.js
           node --check public/assets/pk-engine.js
           node --check public/assets/simulator-ui.js
@@ -59,6 +61,7 @@ jobs:
           npx playwright install --with-deps chromium
           node scripts/check-script-markup.cjs
           node scripts/check-visualizations.cjs
+          node scripts/check-pediatric.cjs
 
   deploy-pages:
     if: github.event_name != 'pull_request'

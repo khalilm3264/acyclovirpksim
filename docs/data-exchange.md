@@ -82,3 +82,8 @@ The `ospsuite` R package can also **load and run genuine OSP `.pkml` models** an
 - Do not infer clinical dosing, efficacy, or toxicity from agreement between two models.
 
 For proposed schema changes or OSP import samples, open a GitHub issue using **synthetic or public data** and read [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+
+## Pediatric research CSV
+
+The separate pediatric IV page exports `ayflux-pediatric-abdalla-iv.csv`. Each row includes model DOI, IV route, age (eligibility only), weight, selected and comparison indexed eGFR, mg/kg dose, interval and infusion hours, dose count, ensemble size, seed, time, typical concentration, 5th/50th/95th simulated percentiles, and comparison concentration. Concentrations are mg/L. This format does not replace the adult simulator export schema and cannot be imported as a native OSP model.
