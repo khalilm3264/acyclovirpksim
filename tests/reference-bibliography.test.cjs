@@ -8,10 +8,10 @@ const html=read('public/index.html');
 const methods=read('public/learn/model-methods/index.html');
 const cite=read('public/cite/index.html');
 
-test('References [1]-[25] are sequential and have unique stable anchors',()=>{
+test('References [1]-[37] are sequential and have unique stable anchors',()=>{
  const ids=[...html.matchAll(/<li id="ref(\d+)"/g)].map(m=>Number(m[1]));
- assert.deepEqual(ids,Array.from({length:25},(_,i)=>i+1));
- for(let i=17;i<=25;i++){
+ assert.deepEqual(ids,Array.from({length:37},(_,i)=>i+1));
+ for(let i=17;i<=37;i++){
   const entry=html.match(new RegExp('<li id="ref'+i+'">([\\s\\S]*?)<\\/li>'))?.[1];
   assert.ok(entry,'Missing reference entry '+i);
   assert.match(entry,/https:\/\/doi\.org\//);

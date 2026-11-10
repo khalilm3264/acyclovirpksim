@@ -1,6 +1,8 @@
 # AyFlux changelog
 
 ## Unreleased — pediatric research module
+- Added a source-audited Abdalla/Zeng pediatric IV comparison, nine reproducible covariate scenarios, 12 bibliography entries, and explicit limitations for CAPD, CMMG, neonatal and CNS evidence.
+
 
 - Add an isolated Abdalla (2020) IV pediatric model with weight/eGFR comparisons, conditional variability bands, accessible numeric results, and CSV export.
 - Add equation verification, independent RK4 and exposure checks, and reproducible fixtures. Population target-attainment and clinical validation remain unperformed.

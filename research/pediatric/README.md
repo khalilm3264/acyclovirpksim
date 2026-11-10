@@ -27,3 +27,7 @@ The browser check exercises desktop/mobile layout, curve rendering, zero dose, C
 2. Obtain authorized deidentified data or a complete published simulation specification before attempting population-level replication.
 3. Assess an independently sourced neonatal model separately.
 4. Review pediatric extracorporeal-clearance evidence before designing a dialysis extension.
+
+## Cross-model evidence review
+
+See [evidence-review.md](evidence-review.md) for the supplied-paper audit and [model-comparison.json](model-comparison.json) for nine deterministic Abdalla/Zeng comparisons. Regenerate with `node research/pediatric/compare.cjs`.
