@@ -75,3 +75,23 @@ test('Smith renal cohort grid uses each reported CKD CrCl and preserves observed
   assert.ok(Number.isFinite(d.lowPartition[name].mean_abs_log_error));
  }
 });
+
+test('Lycke 2003 day-7 oral valacyclovir CSF study reference has paired plasma/CSF point values',()=>{
+ const cns=require('../research/validation/csf-acyclovir-cohorts.cjs');
+ const output=cns.runLycke();
+ assert.equal(output.observed.csf_2h_uM,2.5);
+ assert.equal(output.observed.csf_8h_uM,2.3);
+ assert.equal(output.observed.reported_csf_plasma_auc_ratio,.19);
+ for(const key of ['plasma_peak_uM','csf_2h_uM','csf_8h_uM','csf_plasma_auc_ratio'])
+  assert.ok(Number.isFinite(output.model[key]));
+ assert.ok(output.model.csf_plasma_auc_ratio>0);
+});
+test('Pouplin 2011 study day 20 is an explicit unsupported horizon, never silently extrapolated',()=>{
+ const cns=require('../research/validation/csf-acyclovir-cohorts.cjs');
+ const x=cns.runPouplin();
+ assert.deepEqual(x.comparisons.map(y=>y.day),[0,2,10]);
+ assert.equal(x.source_day20_not_simulated.day,20);
+ assert.equal(x.source_day20_not_simulated.csf_uM,3.5);
+ assert.ok(Number.isFinite(x.day2_to_day10_change.model_csf_percent));
+ assert.ok(x.day2_to_day10_change.observed_csf_percent<0);
+});
