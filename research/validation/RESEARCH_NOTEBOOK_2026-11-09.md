@@ -116,4 +116,4 @@ node research/validation/lindstrom-albumin-audit.cjs
 
 All above run against **the actual unchanged AyFlux v0.26.0 JS model** and need Node.js only. The GitHub Actions workflow uploads results files as artifacts. This is research work on a **draft PR**, not an app release or a journal submission.
 
-Related: [Full-engine Boelaert v0.26.0 results](RESULTS.md) · [Mechanism analysis](CAPD_CMMG_MECHANISM_REVIEW.md) · [Source audit CSV](data/lindstrom2019-first-eligible-observation.csv)
+Related: [Full-engine Boelaert v0.26.0 results](RESULTS.md) · [Mechanism analysis](CAPD_CMMG_MECHANISM_REVIEW.md) · [Parameter provenance](PARAMETER_PROVENANCE_AUDIT.md) · [Source audit CSV](data/lindstrom2019-first-eligible-observation.csv)
