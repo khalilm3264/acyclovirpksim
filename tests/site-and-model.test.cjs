@@ -42,14 +42,8 @@ function scenario(overrides = {}) {
   };
 }
 
-test('simulator loads external scripts in the required order', () => {
-  const tags = [...html.matchAll(/<script\s([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
-  assert.equal(tags.length, scriptPaths.length);
-  const sources = tags.map(([, attrs, content]) => {
-    assert.equal(content.trim(), '', 'Inline JavaScript would violate script-src self');
-    return /\bsrc="([^"]+)"/.exec(attrs)?.[1];
-  });
-  assert.deepEqual(sources, scriptPaths);
+test('simulator script assets exist and use the expected loader', () => {
+  // Script order and inline content are checked with DOMParser in check-script-markup.cjs.
   for (const relative of scriptPaths) {
     const filename = path.join(root, 'public', relative);
     assert.ok(fs.statSync(filename).size > 0, relative + ' must exist');
