@@ -50,8 +50,8 @@ $('generate').onclick=async()=>{
 };
 async function selectCell(i,j){if(!grid)return;const p=grid;selected={...p.config,[p.xKey]:p.xs[i],[p.yKey]:p.ys[j]};for(const b of $('map').querySelectorAll('button'))b.setAttribute('aria-pressed','false');$('map').querySelectorAll('tbody tr')[j].querySelectorAll('button')[i].setAttribute('aria-pressed','true');await showScenario(selected,p.mode,`${model.axes[p.xKey].label}: ${fmt(p.xs[i])}; ${model.axes[p.yKey].label}: ${fmt(p.ys[j])}`);}
 async function showScenario(c,mode,label){
- text('selection',label+' · '+mode);text('curveStatus','Calculating selected scenario…');$('time').disabled=true;raw=null;charts.dispose($('curve'));charts.dispose($('sankey'));$('amounts').replaceChildren();text('balance','');const token=request+1;
- try{const result=await compute('curve',{config:c,mode},'curveStatus');if(token!==request)return;raw=result;await charts.ensure();if(token!==request)return;drawCurve();$('time').max=raw.t.length-1;$('time').value=raw.t.length-1;$('time').disabled=false;drawSankey();text('curveStatus',`Nominal simulation over ${c.horizon} h. Peak plasma ${fmt(raw.summary.peak)} mg/L; AUC ${fmt(raw.summary.auc)} mg·h/L.`);}catch(e){text('curveStatus',e.message);}
+ text('selection',label+' · '+mode);text('curveStatus','Calculating selected scenario…');$('time').disabled=true;raw=null;charts.dispose($('trajectory'));text('trajectorySample','');charts.dispose($('curve'));charts.dispose($('sankey'));$('amounts').replaceChildren();text('balance','');const token=request+1;
+ try{const result=await compute('curve',{config:c,mode},'curveStatus');if(token!==request)return;raw=result;await charts.ensure();if(token!==request)return;drawCurve();$('time').max=raw.t.length-1;$('time').value=raw.t.length-1;$('time').disabled=false;drawTrajectory();drawSankey();text('curveStatus',`Nominal simulation over ${c.horizon} h. Peak plasma ${fmt(raw.summary.peak)} mg/L; AUC ${fmt(raw.summary.auc)} mg·h/L.`);}catch(e){text('curveStatus',e.message);}
 }
 $('baseline').onclick=()=>{cancel();showScenario(base,$('mode').value,'Starting settings');};
 function drawCurve(){
@@ -59,6 +59,28 @@ function drawCurve(){
   .map(([key,name,color,dash])=>charts.line(name,raw.t,raw.cols[key],color,2,dash));
  charts.draw($('curve'),charts.options(series,'Time (hours)','Concentration (mg/L)'));
 }
+function updateTrajectorySample(){
+ if(!raw||!$('trajectoryPanel').open)return;
+ const i=Number($('time').value),p=[raw.cols.plasma[i],raw.cols.csf[i],raw.t[i]];
+ text('trajectorySample',fmt(p[2])+' h · Plasma '+fmt(p[0])+' mg/L · CSF '+fmt(p[1])+' mg/L');
+ window.echarts?.getInstanceByDom($('trajectory'))?.setOption({series:[{id:'sample',data:[p]}]});
+}
+function drawTrajectory(){
+ if(!raw||!$('trajectoryPanel').open||!window.echarts)return;
+ const points=raw.t.map((t,i)=>[raw.cols.plasma[i],raw.cols.csf[i],t]);
+ const arrows=[];
+ for(let i=1;i<points.length;i+=Math.max(1,Math.floor(points.length/6))){
+  const a=points[i-1].slice(0,2),b=points[i].slice(0,2);
+  if(a[0]!==b[0]||a[1]!==b[1])arrows.push([{coord:a},{coord:b}]);
+ }
+ const series=[{name:'Trajectory',id:'path',type:'line',data:points,encode:{x:0,y:1},showSymbol:false,lineStyle:{color:'#176798'},markLine:{
+  symbol:['none','arrow'],symbolSize:8,silent:true,label:{show:false},lineStyle:{type:'solid',color:'#176798'},data:arrows}},
+  {id:'sample',name:'Selected time',type:'scatter',encode:{x:0,y:1},data:[],symbolSize:10,itemStyle:{color:'#ad501e'}}];
+ const option=charts.options(series,'Plasma acyclovir (mg/L)','CSF acyclovir (mg/L)');
+ option.tooltip={trigger:'item',renderMode:'richText',formatter:p=>fmt(p.value[2])+' h · Plasma '+fmt(p.value[0])+' mg/L · CSF '+fmt(p.value[1])+' mg/L'};
+ charts.draw($('trajectory'),option);updateTrajectorySample();
+}
+$('trajectoryPanel').addEventListener('toggle',drawTrajectory);
 const labels={central:'Central compartment',peripheral:'Peripheral compartment',depot:'Oral depot',pdFluid:'Remaining in PD fluid',kidney:'Renal elimination',other:'Other elimination',formed:'Converted to CMMG',hd:'Removed by HD',crrt:'Removed by CRRT',pdDrained:'PD drains / session ends'};
 const colors=['#256ba2','#618bb2','#729b91','#55aeb3','#9f835e','#8c8c94','#a478b4','#467d86','#5b9c7b','#bd8669'];
 function drawSankey(){if(!raw)return;const r=raw.accounting[+$('time').value];text('timeLabel',fmt(r.time)+' h');
@@ -71,7 +93,7 @@ function drawSankey(){if(!raw)return;const r=raw.accounting[+$('time').value];te
   data:[{name:'Input'},...parts.map(([k])=>({name:labels[k],itemStyle:{color:colors[entries.findIndex(([key])=>key===k)]}}))],
   links:parts.map(([k,value])=>({source:'Input',target:labels[k],value})),lineStyle:{color:'target',opacity:.6}}]});
 }
-$('time').oninput=drawSankey;
+$('time').oninput=()=>{drawSankey();updateTrajectorySample();};
 $('export').onclick=()=>{if(!grid)return;const rows=[[grid.xKey,grid.yKey,grid.metric,model.metrics[grid.metric].unit],...grid.ys.flatMap((y,j)=>grid.xs.map((x,i)=>[x,y,grid.z[j][i],model.metrics[grid.metric].unit]))];const u=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));const a=document.createElement('a');a.href=u;a.download='AyFlux-visual-explorer.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
 showScenario(base,$('mode').value,'Starting settings');
 })();

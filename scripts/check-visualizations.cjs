@@ -9,7 +9,18 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  await page.goto(url+'/explore/');await page.waitForFunction(()=>document.querySelector('#balance').textContent.includes('within tolerance'));
  assert.ok(!requests.some(u=>u.includes('echarts-gl')),'3D must stay lazy');
  await page.click('#generate');await page.waitForFunction(()=>document.querySelectorAll('#map tbody button').length===49);await page.locator('#map tbody button').nth(20).click();await page.waitForFunction(()=>document.querySelector('#balance').textContent.includes('within tolerance'));
+ await page.locator('#trajectoryPanel summary').click();
+ await page.waitForSelector('#trajectory canvas');
+ const matched=await page.evaluate(()=>{
+  const option=id=>echarts.getInstanceByDom(document.querySelector('#'+id)).getOption();
+  const [plasma,csf]=option('curve').series,path=option('trajectory').series[0];
+  return path.data.length===plasma.data.length&&path.markLine.data.length>0&&path.data.every(([x,y,t],i)=>
+   x===plasma.data[i][1]&&y===csf.data[i][1]&&t===plasma.data[i][0]);
+ });
+ assert.ok(matched,'Trajectory must preserve the time ordering and both concentrations');
  await page.locator('#time').fill('0');await page.locator('#time').dispatchEvent('input');assert.ok((await page.textContent('#balance')).includes('Input 0 mg'));
+ assert.match(await page.textContent('#trajectorySample'),/^0 h/);
+ assert.deepEqual(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#trajectory')).getOption().series[1].data[0]),[0,0,0]);
  assert.ok(!requests.some(u=>u.includes('/vendor/echarts-gl')));
  for(const kind of ['heatmap','surface']){
    await page.selectOption('#echartKind',kind);
@@ -81,7 +92,24 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  const vector=await vectorDownload;assert.equal(vector.suggestedFilename(),'ayflux-plasma-error.svg');
  const svg=fs.readFileSync(await vector.path(),'utf8');assert.match(svg,/<svg\b/);assert.match(svg,/Prediction error/);assert.doesNotMatch(svg,/<image\b/);
  await page.click('#clearMeasures');await page.waitForSelector('#holdoutFigure',{state:'hidden'});
- await page.click('[data-tab="research"]');await page.click('#runHeatmap');
+ await page.click('[data-tab="research"]');
+ for(const metric of ['auc','csfPeak','mPeak','mass']){
+  await page.selectOption('#tornadoMetric',metric);
+  if(metric==='mass'){await page.waitForSelector('#tornado',{state:'hidden'});assert.match(await page.textContent('#tornadoStatus'),/zero baseline/);continue;}
+  await page.waitForSelector('#tornado canvas');
+  assert.ok(await page.evaluate(metric=>{
+   const snapshot=window.AyFluxResearchBridge.snapshot(),s=window.RenalPKV7.sensitivity(snapshot.config,snapshot.primary);
+   const rows=s.outcomes.filter(r=>r.effects?.[metric]);
+   const opt=echarts.getInstanceByDom(document.querySelector('#tornado')).getOption();
+   let previous=Infinity;
+   return opt.yAxis[0].data.length===rows.length&&opt.yAxis[0].data.every((label,i)=>{
+    const effect=rows.find(r=>r.label===label).effects[metric],m=Math.max(Math.abs(effect.down),Math.abs(effect.up));
+    const matches=m<=previous&&opt.series[0].data[i]===effect.down&&opt.series[1].data[i]===effect.up;
+    previous=m;return matches;
+   });
+  },metric),'Tornado must rank and plot signed effects for '+metric);
+ }
+ await page.click('#runHeatmap');
  await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#heatmapPlot'))?.getOption().series[0].data.length===49);
  await page.locator('#ospFile').setInputFiles({name:'comparison.csv',mimeType:'text/csv',buffer:Buffer.from('Time,Concentration\n0,0\n1,5\n2,3\n')});
  await page.waitForFunction(()=>document.querySelector('#ospStatus').textContent.includes('rows loaded'));

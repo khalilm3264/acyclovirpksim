@@ -791,16 +791,47 @@ $('fitPublished').addEventListener('click',()=>{
 });
 $('resetPublished').addEventListener('click',()=>{c.vcScale=1;c.clearanceScale=1;benchmarkHtml();renderInputs();defer();researchStatus('Benchmark calibration multipliers reset to defaults.');});
 function pctPair(p){if(!p)return '—';return `${p.down>=0?'+':''}${p.down.toFixed(1)}% / ${p.up>=0?'+':''}${p.up.toFixed(1)}%`;}
+let sensitivityResult=null,tornadoRevision=0;
+async function drawTornado(){
+ const revision=++tornadoRevision,target=$('tornado'),status=$('tornadoStatus'),metric=$('tornadoMetric').value;
+ const rows=(sensitivityResult?.outcomes||[]).filter(r=>r.effects?.[metric]).sort((a,b)=>{
+  const magnitude=r=>Math.max(Math.abs(r.effects[metric].down),Math.abs(r.effects[metric].up));
+  return magnitude(b)-magnitude(a);
+ });
+ target.hidden=!rows.length;
+ if(!rows.length){
+  window.AyFluxCharts.dispose(target);
+  status.textContent=sensitivityResult?'Percentage change is undefined at a zero baseline outcome.':'';
+  return;
+ }
+ target.style.height=(100+rows.length*40)+'px';
+ status.textContent='Ranked by the larger absolute change in the selected outcome.';
+ try{
+  await window.AyFluxCharts.ensure();
+  if(revision!==tornadoRevision)return;
+  const series=[['down','−20% input','#2367a0'],['up','+20% input','#ba591d']].map(([key,name,color])=>({
+   name,type:'bar',itemStyle:{color},barMaxWidth:10,data:rows.map(r=>r.effects[metric][key])
+  }));
+  const extent=Math.max(1,...series.flatMap(s=>s.data.map(Math.abs)))*1.05;
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true},series,
+   legend:{top:0},grid:{top:36,bottom:48,left:target.clientWidth<500?112:200,right:18},
+   tooltip:{trigger:'axis',renderMode:'richText',confine:true,valueFormatter:v=>Number(v.toFixed(2))+'%'},
+   xAxis:{type:'value',min:-extent,max:extent,name:'Change from baseline (%)',nameLocation:'middle',nameGap:28,axisLabel:{formatter:v=>Number(v.toPrecision(3))}},
+   yAxis:{type:'category',inverse:true,data:rows.map(r=>r.label),axisLabel:{width:target.clientWidth<500?99:187,overflow:'break',fontSize:11}}});
+ }catch{status.textContent='Chart unavailable. Sensitivity estimates appear in the table.';}
+}
+$('tornadoMetric').addEventListener('change',drawTornado);
 function renderSensitivity(){
  if(!dataIsCurrent){$('sensitivityRows').innerHTML='<tr><td colspan="5">Updating model…</td></tr>';return;}
  try{
   const s=E.sensitivity(c,primary);
+  sensitivityResult=s;drawTornado();
   $('sensitivityRows').innerHTML=s.outcomes.map(d=>`<tr><td>${d.label}</td>${d.na?'<td colspan="4">Not applicable at a zero baseline</td>':
    ['auc','csfPeak','mPeak','mass'].map(k=>`<td>${pctPair(d.effects[k])}</td>`).join('')}</tr>`).join('');
   $('sensitivityCaption').textContent=`Nominal one-at-a-time analysis: each parameter decreased by 20% / increased by 20%, relative to the current ${primary} setting. Drug exposure results are deterministic; correlations and uncertainty are not represented.`;
- }catch(error){$('sensitivityRows').innerHTML=`<tr><td colspan="5">Sensitivity unavailable: check current settings.</td></tr>`;}
+ }catch(error){sensitivityResult=null;drawTornado();$('sensitivityRows').innerHTML=`<tr><td colspan="5">Sensitivity unavailable: check current settings.</td></tr>`;}
 }
-let researchRenderedRevision=-1,researchRenderedPrimary='';
+let researchRenderedRevision=-1,researchRenderedPrimary='',sensitivityMode='';
 function renderPdRxEditor(){
  if(!rxDraft.length&&c.pdRxRows.length)rxDraft=structuredClone(c.pdRxRows);
  if(!rxDraft.length)rxDraft=nominalRx();
@@ -811,7 +842,7 @@ function renderPdRxEditor(){
 }
 function renderResearch(){
  benchmarkHtml();
- if(resultsRevision!==researchRenderedRevision){renderSensitivity();researchRenderedRevision=resultsRevision;}
+ if(resultsRevision!==researchRenderedRevision||primary!==sensitivityMode){renderSensitivity();researchRenderedRevision=resultsRevision;sensitivityMode=primary;}
 }
 function downloadJSON(obj,name){
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}));
