@@ -53,6 +53,8 @@ jobs:
           node --check public/lite/lite.js
           node --check public/assets/lite-fallback.js
           node --check public/assets/simulator-worker.js
+      - name: Check sitemap coverage
+        run: python3 scripts/sitemap.py
       - name: Run AyFlux regression tests
         run: node --test tests/*.test.cjs
       - name: Browser-check explorer and XLSX export
@@ -129,3 +131,14 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
 
+      - name: Verify public sitemap and crawler discovery
+        run: |
+          for attempt in {1..6}; do
+            if curl -fsSL --max-time 15 https://ayflux.org/sitemap.xml -o /tmp/ayflux-live-sitemap.xml &&
+               cmp -s public/sitemap.xml /tmp/ayflux-live-sitemap.xml &&
+               curl -fsSL --max-time 15 https://ayflux.org/robots.txt | grep -Fx 'Sitemap: https://ayflux.org/sitemap.xml'; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
