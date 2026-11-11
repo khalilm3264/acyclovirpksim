@@ -21,8 +21,11 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
    for(const [index,point] of plotted.entries())assert.ok(Math.abs(point[2]-Number(cells[index].replaceAll(',','')))<0.00051);
    assert.ok(await page.locator('#echart canvas').count()>0);
  }
+ const surfaceId=await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#echart')).id);
  await page.selectOption('#echartKind','');
  assert.ok(await page.locator('#echart').isHidden());
+ await page.selectOption('#echartKind','surface');
+ assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#echart')).id),surfaceId);
  await page.click('#three');await page.waitForFunction(()=>document.querySelector('#surface').data?.[0]?.type==='surface',{},{timeout:60000});await page.click('#resetView');await page.click('#hideThree');
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await page.selectOption('#yKey','crcl');await page.click('#generate');await page.waitForFunction(()=>document.querySelector('#gridStatus').textContent.includes('different X and Y'));

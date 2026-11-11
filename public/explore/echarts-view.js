@@ -3,6 +3,7 @@ function createEChartsView(container, status, selectCell) {
   const downloads = new Map();
   let chart;
   let revision = 0;
+  let activeGrid, activeKind;
   const resize = new ResizeObserver(() => {
     if (chart && (chart.getWidth() !== container.clientWidth || chart.getHeight() !== container.clientHeight))
       chart.resize();
@@ -42,11 +43,26 @@ function createEChartsView(container, status, selectCell) {
     resize.disconnect();
     chart?.dispose();
     chart = null;
+    activeGrid = activeKind = null;
     container.hidden = true;
     status.textContent = '';
   }
 
   async function show(grid, kind) {
+    if (!kind && chart && grid === activeGrid) {
+      revision++;
+      resize.disconnect();
+      container.hidden = true;
+      status.textContent = '';
+      return;
+    }
+    if (chart && grid === activeGrid && kind === activeKind) {
+      container.hidden = false;
+      resize.observe(container);
+      const metric = window.AyFluxExplore.metrics[grid.metric];
+      status.textContent = metric.label+' ('+metric.unit+')';
+      return;
+    }
     close();
     if (!grid || !kind) return;
     const current = revision;
@@ -92,6 +108,8 @@ function createEChartsView(container, status, selectCell) {
         option.yAxis = {type:'category',data:grid.ys,name:yName};
       }
       chart.setOption(option);
+      activeGrid = grid;
+      activeKind = kind;
       chart.on('click', 'series', point => {
         const index = point.dataIndex;
         if (Number.isInteger(index) && index>=0 && index<data.length)
