@@ -105,3 +105,15 @@ test('research report protects PNG charts from printing across pages',()=>{
  assert.match(script,/chart\.getDataURL/);
 });
 
+
+test('held-out predictions interpolate each PK draw before weighting and exclude Fit rows',()=>{
+ const engine=require('../public/assets/pk-engine.js');
+ const raw=[{t:[0,4],cols:{plasma:[0,12]}},{t:[0,4],cols:{plasma:[8,4]}}];
+ const row={role:'holdout',time:1,analyte:'plasma',value:4};
+ const config={observations:[{...row,role:'fit'},row],assayCV:.1};
+ const first=engine.evaluateHoldouts(raw,config,[.8,.2]);
+ assert.equal(first.lines.length,1);
+ assert.equal(first.lines[0].predicted,3);
+ assert.equal(engine.evaluateHoldouts(raw,config,[.2,.8]).lines[0].predicted,7);
+ assert.equal(engine.evaluateHoldouts(raw,{...config,observations:[]},[.2,.8]).n,0);
+});

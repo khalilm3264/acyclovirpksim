@@ -521,7 +521,65 @@ $('runForecast').addEventListener('click',()=>{
  if (results?._validation?.forecast?.cutoff===c.forecastCutoff) renderForecast(results._validation.forecast);
 });
 $('revealForecast').addEventListener('click',()=>renderForecast(results?._validation?.forecast,true));
-function renderValidation(){if(!results)return;const v=results._validation;
+const analyteLabels={plasma:'Plasma acyclovir',csf:'CSF acyclovir',cmmg:'Plasma CMMG',csfCmmg:'CSF CMMG'};
+let holdoutRevision=0;
+function renderHoldoutFigure(){
+ const revision=++holdoutRevision;
+ const rows=results?._validation.lines||[],panel=$('holdoutFigure'),target=$('holdoutChart');
+ panel.hidden=!rows.length;
+ const charts=window.AyFluxCharts,button=$('holdoutSvg');
+ button.disabled=true;
+ if(!rows.length){charts.dispose(target);return;}
+ const select=$('holdoutAnalyte'),previous=select.value;
+ const analytes=Object.keys(analyteLabels).filter(key=>rows.some(row=>row.analyte===key));
+ select.replaceChildren(...analytes.map(key=>new Option(analyteLabels[key],key)));
+ if(analytes.includes(previous))select.value=previous;
+ const selected=rows.filter(row=>row.analyte===select.value);
+ const errors=selected.map(row=>row.predicted-row.observed);
+ const mean=values=>values.reduce((sum,v)=>sum+v,0)/values.length;
+ const fmt=v=>Number(v.toPrecision(4)).toString();
+ $('holdoutSummary').textContent=selected.length+' held out · Mean error '+fmt(mean(errors))+' mg/L · RMSE '+fmt(Math.sqrt(mean(errors.map(v=>v*v))))+' mg/L · 90% interval coverage '+selected.filter(row=>row.hit).length+'/'+selected.length;
+ $('holdoutData').replaceChildren(...selected.map((r,i)=>{
+  const tr=document.createElement('tr');
+  for(const v of [fmt(r.hour),fmt(r.observed),fmt(r.predicted),fmt(errors[i]),fmt(r.lo)+'–'+fmt(r.hi)])tr.insertCell().textContent=v;
+  return tr;
+ }));
+ const agreement=$('holdoutView').value==='agreement';
+ const limit=Math.max(1,...selected.map(r=>agreement?Math.max(r.observed,r.predicted):r.hour))*1.05;
+ const reference=charts.line(agreement?'Identity':'Zero error',[0,limit],agreement?[0,limit]:[0,0],'#637789',1.5,'dashed');
+ reference.silent=true;
+ const points={name:analyteLabels[select.value],type:'scatter',symbolSize:9,itemStyle:{color:'#12649a'},
+  data:selected.map((r,i)=>agreement?[r.observed,r.predicted]:[r.hour,errors[i]])};
+ const option=charts.options([reference,points],agreement?'Observed concentration (mg/L)':'Sampling time (h)',agreement?'Predicted concentration (mg/L)':'Prediction error (mg/L)');
+ option.xAxis.max=limit;
+ if(agreement){option.yAxis.min=0;option.yAxis.max=limit;}
+ option.title={text:analyteLabels[select.value],textStyle:{fontSize:14}};
+ option.tooltip={trigger:'item',renderMode:'richText',formatter:p=>{
+  const r=selected[p.dataIndex];
+  return r.hour+' h · Observed '+fmt(r.observed)+' mg/L\nPredicted '+fmt(r.predicted)+' mg/L · Error '+fmt(errors[p.dataIndex])+' mg/L';
+ }};
+ charts.ensure().then(()=>{
+  if(revision!==holdoutRevision||panel.hidden)return;
+  if(tab!=='validation'){validationSignature='';return;}
+  charts.draw(target,option);button.disabled=false;
+ }).catch(()=>{if(revision===holdoutRevision)target.textContent='Chart unavailable. See Figure data.';});
+}
+$('holdoutAnalyte').addEventListener('change',renderHoldoutFigure);
+$('holdoutView').addEventListener('change',renderHoldoutFigure);
+$('holdoutSvg').addEventListener('click',()=>{
+ const target=$('holdoutChart'),chart=window.echarts.getInstanceByDom(target);
+ if(!chart)return;
+ const option=chart.getOption();
+ option.toolbox=[{show:false}];option.animation=false;
+ const vector=window.echarts.init(null,null,{renderer:'svg',ssr:true,width:Math.max(720,chart.getWidth()),height:Math.max(400,chart.getHeight())});
+ try{
+  vector.setOption(option);
+  const url=URL.createObjectURL(new Blob([vector.renderToSVGString()],{type:'image/svg+xml'}));
+  const link=document.createElement('a');link.href=url;link.download='ayflux-'+$('holdoutAnalyte').value+'-'+$('holdoutView').value+'.svg';link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }finally{vector.dispose();}
+});
+function renderValidation(){renderHoldoutFigure();if(!results)return;const v=results._validation;
  renderForecast(v.forecast);
  $('fitScenario').textContent=v.fitMode;
  $('covFraction').textContent=v.n?`${(v.fraction*100).toFixed(0)}%`:'Not assessed';

@@ -405,7 +405,15 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
 <div class="timeline-actions"><button class="btn secondary" id="addMeasure">+ Add measurement</button><button class="btn" id="applyMeasures">Update model & evaluate</button><button class="btn secondary" id="clearMeasures">Clear measurements</button></div>
 <div id="measureWarning" class="warning hidden"></div><div id="validationResults" class="measure-stat">No observations entered. Coverage has not been assessed.</div>
 <p class="tip">Assessment requires <em>independent</em> held-out measurements. Fitted data cannot validate coverage. With only a few hold-outs the coverage percentage is statistically unstable. An assay-error CV is assumed; the actual laboratory error structure may differ.</p></div>
-<div class="card"><h2>Why upper uncertainty bands can be wide</h2><p>Small simulated clearance, high distribution volume, oral absorption variability, accumulated doses, and CSF/CMMG formation parameters produce right-skewed concentration distributions. A 5th–95th percentile band is not the same thing as ±10% error. If the effective sample size becomes very small, Bayesian reweighting is unreliable; acquire more observations or rerun a better-fitting model.</p></div><div class="card"><h2>Next measured concentration</h2>
+<div class="card" id="holdoutFigure" hidden>
+<h2>Held-out concentration diagnostics</h2>
+<label>Analyte <select id="holdoutAnalyte"></select></label>
+<label>Figure <select id="holdoutView"><option value="agreement">Observed versus predicted</option><option value="error">Prediction error over time</option></select></label>
+<div id="holdoutChart" class="chart big" role="img" aria-label="Held-out concentration diagnostic"></div>
+<p id="holdoutSummary"></p><p class="caption">Predictions are weighted median concentrations at each sampling time. Positive errors indicate overprediction.</p>
+<button class="btn secondary" id="holdoutSvg" type="button">Download SVG</button>
+<details><summary>Figure data</summary><div class="table-wrap"><table><thead><tr><th>Time (h)</th><th>Observed (mg/L)</th><th>Predicted (mg/L)</th><th>Error (mg/L)</th><th>90% predictive interval (mg/L)</th></tr></thead><tbody id="holdoutData"></tbody></table></div></details>
+</div><div class="card"><h2>Why upper uncertainty bands can be wide</h2><p>Small simulated clearance, high distribution volume, oral absorption variability, accumulated doses, and CSF/CMMG formation parameters produce right-skewed concentration distributions. A 5th–95th percentile band is not the same thing as ±10% error. If the effective sample size becomes very small, Bayesian reweighting is unreliable; acquire more observations or rerun a better-fitting model.</p></div><div class="card"><h2>Next measured concentration</h2>
 <p>Choose a cutoff after applying measurements. Both forecasts use the specified dosing schedule, dialysis schedule and renal profile. The updated forecast uses Fit rows through the cutoff. The first subsequent sampling time provides the evaluation target.</p>
 <label>Forecast cutoff (h) <input id="forecastCutoff" type="number" min="0" step="any" value="4"></label>
 <button class="btn" type="button" id="runForecast">Forecast next level</button>

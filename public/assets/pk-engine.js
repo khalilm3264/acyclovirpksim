@@ -520,7 +520,8 @@ function evaluateHoldouts(raw,c,weights){
   const pred=raw.map(one=>interp(one.t,one.cols[x.analyte],x.time));
   const measured=pred.map(y=>Math.max(0,y+norm()*Math.max(.1,c.assayCV*y)));
   const lo=weightedQuantile(measured,weights,.05),hi=weightedQuantile(measured,weights,.95),hit=x.value>=lo&&x.value<=hi;
-  covered+=+hit;lines.push({hour:x.time,analyte:x.analyte,observed:x.value,lo,hi,hit});
+  const predicted=weightedQuantile(pred,weights,.5);
+  covered+=+hit;lines.push({hour:x.time,analyte:x.analyte,observed:x.value,predicted,lo,hi,hit});
  }
  let n=hold.length,frac=n?covered/n:null,ci=null;
  if(n){let z=1.96,den=1+z*z/n,mid=(frac+z*z/(2*n))/den,rad=z*Math.sqrt(frac*(1-frac)/n+z*z/(4*n*n))/den;ci=[Math.max(0,mid-rad),Math.min(1,mid+rad)];}
