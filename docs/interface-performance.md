@@ -23,4 +23,4 @@ node --test tests/baseline-performance.test.cjs
 
 The regression suite covers invalidation after dose/coverage/observation/scenario changes, scenario retention, bounded eviction, obsolete results, duplicate input events, frozen baseline data, scroll-triggered plots and browsers without IntersectionObserver. `scripts/check-visualizations.cjs` additionally checks baseline capture/clear, cached-setting reuse, deferred charts and desktop/mobile page width in Chromium.
 
-Local browser launch was blocked by the executor's socket restriction. GitHub Actions runs the browser suite with the staged Plotly assets. No cold page-load or real input-to-paint timing is claimed by these local measurements.
+Local browser launch was blocked by the executor's socket restriction. GitHub Actions runs the browser suite with the staged chart assets. No cold page-load or real input-to-paint timing is claimed by these local measurements.

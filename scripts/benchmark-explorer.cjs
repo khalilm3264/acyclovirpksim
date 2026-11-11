@@ -20,7 +20,7 @@ async function main() {
   let browser;
   try {
     browser=await chromium.launch({args:['--enable-unsafe-swiftshader','--no-sandbox']});
-    const variants=baseline?['previous','current','plotly']:['current','plotly'];
+    const variants=baseline?['previous','current']:['current'];
     const measurements={};
     for(let trial=0;trial<5;trial++) {
       for(let i=0;i<variants.length;i++) {
@@ -37,12 +37,10 @@ async function main() {
           for(const phase of ['first','repeat']) {
             const ms=await page.evaluate(async variant=>{
               const byId=id=>document.getElementById(id);
-              const plotly=variant==='plotly';
               const start=performance.now();
-              if(plotly) byId('three').click();
-              else {byId('echartKind').value='surface';byId('echartKind').dispatchEvent(new Event('change'));}
+              byId('echartKind').value='surface';byId('echartKind').dispatchEvent(new Event('change'));
               const frame=()=>new Promise(resolve=>requestAnimationFrame(resolve));
-              while(plotly ? byId('resetView').hidden : !byId('echart').querySelector('canvas') || byId('echartStatus').textContent==='Loading chart…') {
+              while(!byId('echart').querySelector('canvas') || byId('echartStatus').textContent==='Loading chart…') {
                 if(performance.now()-start>20000)throw Error('Surface did not initialize');
                 await frame();
               }
@@ -50,8 +48,7 @@ async function main() {
               return performance.now()-start;
             },variant);
             (measurements[variant+' '+phase]??=[]).push(Math.round(ms));
-            if(variant==='plotly') await page.click('#hideThree');
-            else await page.selectOption('#echartKind','');
+            await page.selectOption('#echartKind','');
           }
         } finally {await page.close();}
       }

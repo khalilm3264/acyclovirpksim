@@ -1,5 +1,5 @@
 /*
- * AyFlux Lite — v2-style controls, canonical AyFlux PK model, native Canvas.
+ * AyFlux Lite — v2-style controls, canonical AyFlux PK model and chart fallback.
  * Copyright (C) 2026 Muhammad Khalil. SPDX-License-Identifier: AGPL-3.0-only
  * Deterministic educational simulator, not clinical validation.
  */
@@ -227,12 +227,32 @@
     table.appendChild(tr);
    }
   }
+  const charts=window.AyFluxCharts, rendered=new Map();
+  let interactive=false;
+  charts.ensure().then(()=>{interactive=true;requestPaint();}).catch(()=>{/* Use native canvas offline. */});
+  function paintChart(key){
+   const el=plots[key];
+   if(!interactive){draw(el.querySelector('canvas'),scenarios,key,config.horizon,active,visibility,hoverHour);return;}
+   const selected=scenarios.filter(s=>visibility.has(s.id)), selection=active+' '+selected.map(s=>s.id).join(' ');
+   const prior=rendered.get(key);
+   if(prior?.scenarios!==scenarios||prior.selection!==selection){
+    el.querySelector(':scope > canvas')?.remove();
+    const series=selected.map(s=>charts.line(s.label,s.time,s[key],s.color,s.id===active?3.2:2.1,s.dash.length?s.dash:'solid'));
+    const option=charts.options(series,'Time (hours)',SERIES[key].unit);
+    option.legend.show=false;option.toolbox.show=false;option.tooltip.showContent=false;
+    option.grid={left:53,right:15,top:14,bottom:48};option.xAxis.max=config.horizon;
+    charts.draw(el,option);rendered.set(key,{scenarios,selection});
+   }
+   const chart=window.echarts.getInstanceByDom(el);
+   if(Number.isFinite(hoverHour))chart.dispatchAction({type:'showTip',seriesIndex:0,dataIndex:closest(selected[0].time,hoverHour)});
+   else chart.dispatchAction({type:'hideTip'});
+  }
   function paint(){
    if(!scenarios.length||!config)return;
-   draw(plots.plasma,scenarios,"plasma",config.horizon,active,visibility,hoverHour);
-   draw(plots.cmmg,scenarios,"cmmg",config.horizon,active,visibility,hoverHour);
+   paintChart("plasma");
+   paintChart("cmmg");
    const clearance=$("clearanceDetails");
-   if(clearance?.open)draw(plots.clearance,scenarios,"clearance",config.horizon,active,visibility,hoverHour);
+   if(clearance?.open)paintChart("clearance");
    if(hover&&Number.isFinite(hoverHour)){
     const rows=scenarios.filter(s=>visibility.has(s.id)).map(s=>{
       const i=closest(s.time,hoverHour);

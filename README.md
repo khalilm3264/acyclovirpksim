@@ -53,7 +53,7 @@ Defaults resemble the legacy v2 example: 70 kg, CrCl 5 mL/min, 350 mg acyclovir 
 
 Lite deliberately excludes Monte Carlo uncertainty, CSF forecasts, Kt/V, famciclovir, fit-to-assay tools, external PK-Sim comparisons and advanced dialysis prescription tables. It retains a reference link for scientific limitations and does not replace the full simulator.
 
-**Performance:** the Lite HTML, JavaScript interface and shared PK engine total approximately **65 KB uncompressed**. Lite renders line charts with the browser's native Canvas API; it does **not** request Plotly or another charting library. The older self-contained Renal PK Lab v2 HTML bundled about 4.84 MB of Plotly despite a roughly 6.6 KB simulation engine. These sizes are not independently measured mobile loading times.
+Lite draws immediately with native Canvas while the interactive ECharts renderer loads. The Canvas view remains available offline.
 
 The full simulator header links directly to the **User guide**. Lite is available from a collapsed alternative-interface note in the guide's **About AyFlux** section; the full site no longer displays a separate Lite button or slow-load pop-up.
 
@@ -72,23 +72,19 @@ Completed results for up to three configurations are reused in memory; new numer
 ```bash
 git clone https://github.com/khalilm3264/acyclovirpksim.git
 cd acyclovirpksim
-python3 -m http.server 8000 --directory public
+npm install --no-save --ignore-scripts --no-audit --no-fund echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0 parse5@7.3.0
+node scripts/stage-visualizations.cjs
+node scripts/stage-poppins.cjs
+npx --yes http-server@14.1.1 public -a 127.0.0.1 -p 8000
 ```
 
-Open `http://localhost:8000` in your browser. To enable the optional interactive heatmap when developing locally, stage the pinned Cartesian asset first:
-
-```sh
-npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
-node scripts/stage-cartesian.cjs
-```
-
-The numerical heatmap table still works when the optional script is absent. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. You can run the dependency-free test suite with:
+Open http://localhost:8000. The numerical heatmap table still works when the optional script is absent. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. You can run the dependency-free test suite with:
 
 ```bash
 node --test tests/*.test.cjs
 ```
 
-The browser **loads Plotly Basic on demand when a standard chart needs drawing**, and loads Plotly Cartesian only when the interactive sensitivity heatmap is requested. The heavy Plotly Basic bundle is not a blocking initial script or service-worker precache; it is cached after first use, so offline full charts require one successful online rendering first. The pharmacokinetic engine and interface remain separate. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
+Charts share a self-hosted ECharts library. The explorer requests ECharts GL when a 3D surface is selected. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
 
 ## A guide to the interface
 

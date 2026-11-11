@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pediatric acyclovir research model | AyFlux</title><meta name="description" content="Explore body weight and renal function in the Abdalla pediatric IV acyclovir population model. Research use only.">
 <link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="style.css">
-<script src="model.js" defer></script><script src="view.js" defer></script></head><body><header class="site-header ay-header">
+<script src="/assets/charts.js" defer></script><script src="model.js" defer></script><script src="view.js" defer></script></head><body><header class="site-header ay-header">
   <div class="ay-header-brand">
     <img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" alt="" width="42" height="42">
     <div class="ay-title-stack">
@@ -27,7 +27,7 @@
 <label class="wide">Compare eGFR (mL/min/1.73 m²)<input id="compare" type="number" min="56" max="399" step="any" value="300" required></label>
 <button class="btn" type="submit">Update curves</button></form><p id="error" role="alert"></p><p class="status">Illustrative defaults. Age limits eligibility; weight and eGFR determine clearance.</p></section>
 <section class="card"><h2>Plasma acyclovir</h2><div class="legend"><span>Selected eGFR: typical curve</span><span class="band">Simulated 5th–95th percentiles</span><span class="comparison">Comparison eGFR: typical curve</span></div>
-<svg id="chart" class="chart" viewBox="0 0 820 360" role="img" aria-labelledby="chart-title chart-desc"><title id="chart-title">Predicted plasma acyclovir concentration</title><desc id="chart-desc">Concentrations in mg/L over time in hours. Numerical results appear in the table below.</desc></svg>
+<div id="chart" class="chart" style="height:360px" role="img" aria-label="Predicted plasma acyclovir concentrations. Numerical results follow in the table."></div>
 <div id="metrics" class="metrics" aria-live="polite"></div><p id="status" class="status" aria-live="polite"></p>
 <p>Shading shows simulated between-person variability, excluding parameter uncertainty and measurement error.</p>
 <details><summary>Concentration table and CSV</summary><button id="export" class="btn" type="button">Export CSV</button><div class="table-scroll"><table><caption>Predictions in mg/L; time in hours</caption><thead><tr><th>Time</th><th>Typical</th><th>5th</th><th>Median</th><th>95th</th><th>Comparison</th></tr></thead><tbody id="rows"></tbody></table></div></details></section></div>
