@@ -476,7 +476,45 @@ function validationErrors(){let errors=[];for(const [i,m] of measureDraft.entrie
  if(!Number.isFinite(m.value)||m.value<0||m.value>100000)errors.push(`Measurement ${i+1}: enter a valid nonnegative concentration`);
  }return errors;
 }
+function renderForecast(forecast, reveal=false) {
+ const output = $('forecastOutput');
+ output.replaceChildren();
+ $('revealForecast').hidden = !forecast?.targets.length || reveal;
+ if (!forecast) { $('forecastSummary').textContent=''; return; }
+ $('forecastCutoff').value=forecast.cutoff;
+ $('forecastSummary').textContent=forecast.targets.length
+   ? `Fitting measurements through ${forecast.cutoff} h: ${forecast.fitted}. Predictions are medians with 90% measurement intervals.`
+   : 'No applied measurement follows this cutoff.';
+ const labels={plasma:'Plasma acyclovir',csf:'CSF acyclovir',cmmg:'Plasma CMMG',csfCmmg:'CSF CMMG'};
+ for (const target of forecast.targets) {
+   const heading=document.createElement('h3');
+   heading.textContent=`${labels[target.analyte]} at ${target.time} h`;
+   output.append(heading);
+   for (const [label,interval] of [['Population',target.population],['Updated',target.updated]]) {
+     const line=document.createElement('p');
+     line.textContent=`${label}: ${interval.median.toFixed(2)} mg/L (${interval.lower.toFixed(2)}–${interval.upper.toFixed(2)}).`;
+     if (reveal) {
+       const error=interval.median-target.observed;
+       const covered=target.observed>=interval.lower && target.observed<=interval.upper;
+       line.textContent+=` Observed ${target.observed} mg/L. Predicted minus observed: ${error.toFixed(2)} mg/L. Observation ${covered?'inside':'outside'} interval.`;
+     }
+     output.append(line);
+   }
+ }
+}
+$('runForecast').addEventListener('click',()=>{
+ const field=$('forecastCutoff');
+ field.max=c.horizon;
+ field.required=true;
+ if (!field.reportValidity()) return;
+ c.forecastCutoff=field.valueAsNumber;
+ renderForecast(null);
+ calculate();
+ if (results?._validation?.forecast?.cutoff===c.forecastCutoff) renderForecast(results._validation.forecast);
+});
+$('revealForecast').addEventListener('click',()=>renderForecast(results?._validation?.forecast,true));
 function renderValidation(){if(!results)return;const v=results._validation;
+ renderForecast(v.forecast);
  $('fitScenario').textContent=v.fitMode;
  $('covFraction').textContent=v.n?`${(v.fraction*100).toFixed(0)}%`:'Not assessed';
  $('covCount').textContent=v.n?`${v.covered} of ${v.n} held-out measurements inside the 90% predictive interval`:'No independent held-out measurements';

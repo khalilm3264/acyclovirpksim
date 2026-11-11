@@ -41,6 +41,17 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  await page.locator('#baselinePanel').scrollIntoViewIfNeeded();
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  const download=page.waitForEvent('download',{timeout:60000});await page.selectOption('#csv','xlsx');const file=await download;assert.ok(file.suggestedFilename().endsWith('.xlsx'));const data=fs.readFileSync(await file.path());assert.equal(data.readUInt32LE(0),0x04034b50);
+ await page.click('[data-tab="validation"]');
+ await page.click('#clearMeasures');
+ await page.click('#addMeasure');
+ await page.fill('#measureRows input[data-mk="time"]','4');
+ await page.click('#addMeasure');
+ await page.click('#applyMeasures');
+ await page.click('#runForecast');
+ await page.waitForFunction(()=>document.querySelector('#forecastSummary').textContent.includes('Fitting measurements through 4 h: 1'));
+ assert.match(await page.textContent('#forecastOutput'), /at 12 h/);
+ await page.click('#revealForecast');
+ assert.match(await page.textContent('#forecastOutput'), /Predicted minus observed/);
  await page.click('[data-tab="research"]');await page.click('#openVisualExplorer');await page.waitForURL('**/explore/');assert.ok((await page.textContent('#source')).includes('copied'));
  assert.deepEqual(errors,[]);console.log('Desktop/mobile explorer, lazy 3D, cell selection, time slider, invalid inputs, snapshot transfer and XLSX download passed.');
  }finally{await browser.close();server.close();}})().catch(e=>{console.error(e);server.close();process.exitCode=1;});

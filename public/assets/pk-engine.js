@@ -468,6 +468,50 @@ function posterior(raw,c){
  const max=Math.max(...logw),unnorm=logw.map(x=>Math.exp(x-max)),z=unnorm.reduce((a,b)=>a+b,0),weights=unnorm.map(x=>x/z);
  return {weights,ess:1/weights.reduce((a,b)=>a+b*b,0),fitted:obs.length};
 }
+// CDF approximation for the Gaussian assay-error model used in posterior().
+function normalCdf(z) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const tail = Math.exp(-z*z/2) / Math.sqrt(2*Math.PI) * t *
+    (0.319381530 + t*(-0.356563782 + t*(1.781477937 + t*(-1.821255978 + t*1.330274429))));
+  return z >= 0 ? 1-tail : tail;
+}
+
+function forecastInterval(predictions, weights, assayCV) {
+  const sd = predictions.map(mean => Math.max(0.1, assayCV*mean));
+  const upperBound = Math.max(...predictions.map((mean,i) => mean+8*sd[i]));
+  function quantile(probability) {
+    let lo = 0, hi = upperBound;
+    for (let step=0; step<45; step++) {
+      const mid = (lo+hi)/2;
+      const cdf = predictions.reduce((sum,mean,i) =>
+        sum + weights[i]*normalCdf((mid-mean)/sd[i]), 0);
+      if (cdf < probability) lo = mid;
+      else hi = mid;
+    }
+    return (lo+hi)/2;
+  }
+  return {median:quantile(0.5), lower:quantile(0.05), upper:quantile(0.95)};
+}
+
+function nextForecast(raw, c) {
+  const cutoff = c.forecastCutoff;
+  if (!Number.isFinite(cutoff) || cutoff < 0 || cutoff > c.horizon) return null;
+  const observations = c.observations || [];
+  const earlier = observations.filter(row => row.role === 'fit' && row.time <= cutoff);
+  const future = observations.filter(row => row.time > cutoff && row.time <= c.horizon);
+  if (!future.length) return {cutoff, fitted:earlier.length, targets:[]};
+  const nextTime = Math.min(...future.map(row => row.time));
+  const updated = posterior(raw, {...c, observations:earlier});
+  const prior = raw.map(() => 1/raw.length);
+  const targets = future.filter(row => row.time === nextTime).map(row => {
+    const values = raw.map(one => interp(one.t, one.cols[row.analyte], nextTime));
+    return {analyte:row.analyte, time:nextTime, observed:row.value,
+      population:forecastInterval(values, prior, c.assayCV),
+      updated:forecastInterval(values, updated.weights, c.assayCV)};
+  });
+  return {cutoff, fitted:earlier.length, ess:updated.ess, targets};
+}
+
 function evaluateHoldouts(raw,c,weights){
  const hold=(c.observations||[]).filter(x=>x.role==='holdout');let covered=0,lines=[];
  const random=rng(873415),norm=()=>Math.sqrt(-2*Math.log(Math.max(1e-10,random())))*Math.cos(2*Math.PI*random());
@@ -504,7 +548,7 @@ function createSimulator(){
  let cached=null;
  return function simulateMany(c){
  c=effectiveConfig(c);
- const {requestedModes,coverage,observations,assayCV,fitMode,virus,showBands,showShades,showStudy,showIC50,...kinetics}=c;
+ const {forecastCutoff,requestedModes,coverage,observations,assayCV,fitMode,virus,showBands,showShades,showStudy,showIC50,...kinetics}=c;
  const key=JSON.stringify(kinetics);
  const selectedMode=MODES.includes(c.fitMode)?c.fitMode:'No dialysis';
  const chosen=Array.isArray(requestedModes)?requestedModes:MODES;
@@ -528,7 +572,7 @@ function createSimulator(){
    if(!cached.summaries[mode])cached.summaries[mode]=summarizeRaw(cached.rawByMode[mode],c,post.weights,mode,cached.rowsByMode[mode],cached.doses);
    out[mode]=cached.summaries[mode];
  }
- return {...out,_validation:{...evaluateHoldouts(cached.rawByMode[selectedMode],c,post.weights),ess:post.ess,fitted:post.fitted,draws:cached.draws,fitMode:selectedMode}};
+ return {...out,_validation:{forecast:nextForecast(cached.rawByMode[selectedMode],c),...evaluateHoldouts(cached.rawByMode[selectedMode],c,post.weights),ess:post.ess,fitted:post.fitted,draws:cached.draws,fitMode:selectedMode}};
  };
 }
 const simulateMany=createSimulator();
