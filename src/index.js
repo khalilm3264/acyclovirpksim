@@ -15,7 +15,7 @@ const securityHeaders = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
   "Content-Security-Policy":
-    "default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+    "default-src 'self'; script-src 'self' https://bzrcdn.openai.com; connect-src 'self' https://bzrcdn.openai.com https://bzr.openai.com; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://bzr.openai.com; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
   "X-XSS-Protection": "1; mode=block",
 };
 

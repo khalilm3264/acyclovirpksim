@@ -13,6 +13,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const html = read('public/index.html');
 const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
+  '/assets/measurement-pixel.js',
   './assets/charts.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
@@ -57,7 +58,7 @@ test('simulator script assets exist and use the expected loader', () => {
 test('worker Content Security Policy allows local scripts but not inline scripts', () => {
   const worker = read('src/index.js');
   const directive = /script-src ([^;]+);/.exec(worker)?.[1];
-  assert.equal(directive?.trim(), "'self'");
+  assert.equal(directive?.trim(), "'self' https://bzrcdn.openai.com");
   assert.doesNotMatch(directive, /unsafe-inline|unsafe-eval/);
   const markup = html;
   assert.doesNotMatch(markup, /\s(?:onclick|onchange|oninput|onload|onerror)\s*=/i);
