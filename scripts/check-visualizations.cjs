@@ -111,10 +111,18 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  }
  await page.click('#runHeatmap');
  await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#heatmapPlot'))?.getOption().series[0].data.length===49);
- await page.locator('#ospFile').setInputFiles({name:'comparison.csv',mimeType:'text/csv',buffer:Buffer.from('Time,Concentration\n0,0\n1,5\n2,3\n')});
+ await page.locator('#ospFile').setInputFiles(path.resolve(__dirname, '../interop/fixtures/ospsuite_aciclovir.csv'));
  await page.waitForFunction(()=>document.querySelector('#ospStatus').textContent.includes('rows loaded'));
+ await page.selectOption('#ospTimeColumn', 'Time [min]');
+ await page.selectOption('#ospValueColumn', 'Organism|PeripheralVenousBlood|Aciclovir|Plasma (Peripheral Venous Blood) [µmol/l]');
+ await page.selectOption('#ospTimeUnit', 'min');
+ await page.selectOption('#ospConcUnit', 'umol/L');
  await page.click('#ospCompare');
  await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#ospDifference'))?.getOption().series[0].data.length>0);
+ const imported = await page.evaluate(() => echarts.getInstanceByDom(document.querySelector('#ospPlot')).getOption().series[1].data);
+ assert.equal(imported.length, 491);
+ assert.equal(imported.at(-1)[0], 24);
+ assert.ok(Math.abs(imported[1][1] - 3.254674 * 225.21 / 1000) < 1e-9);
  await page.click('#ospClear');
  assert.equal(await page.evaluate(()=>!!echarts.getInstanceByDom(document.querySelector('#ospPlot'))),false);
  const popupPromise=page.waitForEvent('popup');await page.click('#printResearchReport');const popup=await popupPromise;
