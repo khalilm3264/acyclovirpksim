@@ -63,7 +63,20 @@ jobs:
           npx playwright install --with-deps chromium
           node scripts/check-script-markup.cjs
           node scripts/check-visualizations.cjs
+
           node scripts/check-pediatric.cjs
+
+      - name: Compare surface startup when the ECharts renderer changes
+        if: github.event_name == 'push'
+        env:
+          PREVIOUS_COMMIT: ${{ github.event.before }}
+        run: |
+          if [[ "$PREVIOUS_COMMIT" =~ ^[0-9a-f]{40}$ && "$PREVIOUS_COMMIT" != 0000000000000000000000000000000000000000 ]]; then
+            git fetch --depth=1 origin "$PREVIOUS_COMMIT"
+            if ! git diff --quiet "$PREVIOUS_COMMIT" HEAD -- public/explore/echarts-view.js && git show "$PREVIOUS_COMMIT:public/explore/echarts-view.js" > /tmp/previous-echarts-view.js; then
+              node scripts/benchmark-explorer.cjs /tmp/previous-echarts-view.js
+            fi
+          fi
 
   deploy-pages:
     if: github.event_name != 'pull_request'

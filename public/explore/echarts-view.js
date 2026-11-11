@@ -3,7 +3,19 @@ function createEChartsView(container, status, selectCell) {
   const downloads = new Map();
   let chart;
   let revision = 0;
-  const resize = new ResizeObserver(() => chart?.resize());
+  const resize = new ResizeObserver(() => {
+    if (chart && (chart.getWidth() !== container.clientWidth || chart.getHeight() !== container.clientHeight))
+      chart.resize();
+  });
+  let webglAvailable;
+  function supportsSurface() {
+    if (webglAvailable === undefined) {
+      const probe = document.createElement('canvas').getContext('webgl');
+      webglAvailable = Boolean(probe);
+      probe?.getExtension('WEBGL_lose_context')?.loseContext();
+    }
+    return webglAvailable;
+  }
 
   function load(file) {
     if (!downloads.has(file)) {
@@ -46,9 +58,7 @@ function createEChartsView(container, status, selectCell) {
       if (surface) {
         await load('echarts-gl-2.0.9.min.js');
         if (current !== revision) return;
-        const probe = document.createElement('canvas').getContext('webgl');
-        if (!probe) throw new Error('WebGL is unavailable. Select the 2D heatmap.');
-        probe.getExtension('WEBGL_lose_context')?.loseContext();
+        if (!supportsSurface()) throw new Error('WebGL is unavailable. Select the 2D heatmap.');
       }
       const model = window.AyFluxExplore;
       const metric = model.metrics[grid.metric];
@@ -72,7 +82,7 @@ function createEChartsView(container, status, selectCell) {
         series:[{type:kind,data,...(surface ? {dataShape:[grid.ys.length,grid.xs.length],shading:'color'} : {})}]
       };
       if (surface) {
-        option.grid3D = {viewControl:{projection:'perspective'}};
+        option.grid3D = {temporalSuperSampling:{enable:false},viewControl:{projection:'perspective'}};
         option.xAxis3D = {type:'value',name:xName,scale:true};
         option.yAxis3D = {type:'value',name:yName,scale:true};
         option.zAxis3D = {type:'value',name:metric.label+' ('+metric.unit+')',scale:true};
