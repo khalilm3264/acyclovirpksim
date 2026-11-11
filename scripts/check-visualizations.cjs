@@ -141,6 +141,15 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
   const o=await optionFor('ensembleChart');assert.equal(o.series[0].type,type);
   if(view==='matrix')assert.equal(o.series.length,16);
  }
+ await page.click('#itoStudy summary');
+ await page.waitForSelector('#itoPlot canvas');
+ const ito=await optionFor('itoPlot');
+ assert.equal(ito.series.length,1);
+ assert.equal(ito.series[0].type,'scatter');
+ assert.deepEqual(ito.series[0].data,[[0,14.1],[15,3],[39,0.5]]);
+ assert.deepEqual(ito.series[0].markArea.data.map(pair=>pair.map(end=>end.xAxis)),[[4.5,13],[18,48]]);
+ assert.equal(ito.yAxis[0].type,'log');
+ assert.deepEqual(await page.locator('#itoRows tr td:nth-child(2)').allTextContents(),['14.1','≈3.0','≈0.5']);
  await page.click('#runHeatmap');
  await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#heatmapPlot'))?.getOption().series[0].data.length===49);
  await page.locator('#ospFile').setInputFiles(path.resolve(__dirname, '../interop/fixtures/ospsuite_aciclovir.csv'));

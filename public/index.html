@@ -552,6 +552,16 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
  <div class="scroll"><table><thead><tr><th>Time from infusion start</th><th>Published mean ± SD (mg/L)</th><th>Model (mg/L)</th><th>Relative difference</th></tr></thead><tbody id="anuricRows"></tbody></table></div>
  <div class="timeline-actions"><button class="btn" id="fitPublished">Fit two PK parameters to label means</button><button class="btn secondary" id="resetPublished">Reset calibration</button></div>
  <p class="research-note">Fitting minimizes squared log errors for group mean peaks/troughs by adjusting central distribution volume and renal/nonrenal plasma clearance. The model cannot perfectly reproduce all published group means by a two-parameter linear fit. This is calibration against the same summary statistics shown above—not external validation, and not supported for individualized or dialysis prescribing.</p></div>
+ <div class="card">
+  <h2>Serum acyclovir during continuous hemodiafiltration</h2>
+  <p class="tip">Ito et al. (2025) followed one adult after admission with suspected acyclovir-associated encephalopathy. Time zero marks the admission sample. Shading indicates continuous hemodiafiltration (CHDF), with each interval labeled by dialysate flow. <a href="https://doi.org/10.1016/j.jiac.2025.102859">Ito et al., Figure 2</a></p>
+  <details id="itoStudy"><summary>View concentrations and CHDF intervals</summary>
+   <div id="itoPlot" class="chart" style="height:320px" role="img" aria-label="Three serum acyclovir measurements on a logarithmic scale, with two shaded CHDF intervals. Values are listed below."></div>
+   <p id="itoStatus" class="tip" role="status"></p>
+   <div class="scroll"><table><thead><tr><th>Time from admission (h)</th><th>Serum acyclovir (mg/L)</th><th>Source</th></tr></thead><tbody id="itoRows"></tbody></table></div>
+   <p class="tip" id="itoIntervals"></p>
+  </details>
+ </div>
  <div class="card"><h2>One-at-a-time sensitivity analysis</h2><p class="tip">Quantifies the influence of selected assumptions on drug exposure. The table shows percentage change in an output when the input is decreased by 20% / increased by 20%. Results use nominal parameter values, not fitted or posterior uncertainty bands.</p>
  <label>Outcome <select id="tornadoMetric"><option value="auc">Plasma AUC</option><option value="csfPeak">Peak CSF acyclovir</option><option value="mPeak">Peak plasma CMMG</option><option value="mass">Amount removed by dialysis</option></select></label>
  <details id="sweepPanel"><summary>One-parameter sensitivity curve</summary><label>Parameter <select id="sweepFactor"></select></label><div id="sweepChart" style="height:310px"></div><p id="sweepNote"></p></details>
