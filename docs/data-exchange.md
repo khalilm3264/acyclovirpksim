@@ -70,7 +70,7 @@ If the PK-Sim/MoBi CSV has different headers, inspect it with `names(read.csv("o
 
 The `ospsuite` R package can also **load and run genuine OSP `.pkml` models** and retrieve output values in R. See [OSPSuite-R](https://github.com/Open-Systems-Pharmacology/OSPSuite-R). AyFlux CSV can be compared to those R results after selecting an equivalent time/concentration series; it does not import into the underlying OSP model.
 
-**Not supported:** writing or importing native `.pkml`, `.pksim5`, or `.mbp3` models; replacing PBPK structures; assuming direct compatibility with `ospsuite::importResultsFromCSV()` (which expects its own results format). Direct CSV import into a PK-Sim/MoBi data repository may require column mapping or conversion and has **not** been verified for this exact AyFlux schema.
+For desktop import, use the AyFlux XLSX workbook. In MoBi 12 Update 3 on Windows, the saved project retained all 385 no-dialysis plasma acyclovir concentrations over 96 hours, with absolute differences below 0.000002 mg/L from the worksheet. For a workbook containing a molecular-weight column, clear any automatic assignment of that column to Error.
 
 ## Validation checklist
 
