@@ -24,7 +24,9 @@ function compute(kind,payload,status){
 }
 function cancel(){request++;worker?.terminate();worker=null;$('cancel').disabled=true;$('generate').disabled=false;text('gridStatus','Calculation cancelled.');text('curveStatus','Calculation cancelled.');}
 $('cancel').onclick=cancel;
-function clearGrid(){grid=null;$('map').replaceChildren();text('legend','');$('three').disabled=true;$('export').disabled=true;hide3D();}
+const optionalChart=createEChartsView($('echart'),$('echartStatus'),selectCell);
+$('echartKind').onchange=()=>optionalChart.show(grid,$('echartKind').value);
+function clearGrid(){optionalChart.close();$('echartKind').value='';$('echartKind').disabled=true;grid=null;$('map').replaceChildren();text('legend','');$('three').disabled=true;$('export').disabled=true;hide3D();}
 function hide3D(){if(window.Plotly&&$('surface').data)window.Plotly.purge('surface');$('surface').hidden=true;$('hideThree').hidden=true;$('resetView').hidden=true;text('threeStatus','');}
 $('hideThree').onclick=hide3D;
 function inputChanged(){cancel();clearGrid();text('gridStatus','Inputs changed. Generate a new map.');text('selection','Previous selected scenario remains below until a new scenario is selected.');}
@@ -40,7 +42,7 @@ function paintMap(){
 }
 $('generate').onclick=async()=>{
  $('generate').disabled=true;clearGrid();text('gridStatus','Preparing grid…');const token=request+1;
- try{const payload={config:base,mode:$('mode').value,xKey:$('xKey').value,yKey:$('yKey').value,xMin:+$('xMin').value,xMax:+$('xMax').value,yMin:+$('yMin').value,yMax:+$('yMax').value,count:+$('count').value,metric:$('metric').value};model.plan(payload);const result=await compute('grid',payload,'gridStatus');if(token!==request)return;grid=result;paintMap();$('three').disabled=false;$('export').disabled=false;text('gridStatus',`${grid.xs.length*grid.ys.length} scenarios over ${base.horizon} hours. Select a cell below.`);}
+ try{const payload={config:base,mode:$('mode').value,xKey:$('xKey').value,yKey:$('yKey').value,xMin:+$('xMin').value,xMax:+$('xMax').value,yMin:+$('yMin').value,yMax:+$('yMax').value,count:+$('count').value,metric:$('metric').value};model.plan(payload);const result=await compute('grid',payload,'gridStatus');if(token!==request)return;grid=result;paintMap();$('echartKind').disabled=false;$('three').disabled=false;$('export').disabled=false;text('gridStatus',`${grid.xs.length*grid.ys.length} scenarios over ${base.horizon} hours. Select a cell below.`);}
  catch(e){text('gridStatus',e.message);}finally{$('generate').disabled=false;}
 };
 async function selectCell(i,j){if(!grid)return;const p=grid;selected={...p.config,[p.xKey]:p.xs[i],[p.yKey]:p.ys[j]};for(const b of $('map').querySelectorAll('button'))b.setAttribute('aria-pressed','false');$('map').querySelectorAll('tbody tr')[j].querySelectorAll('button')[i].setAttribute('aria-pressed','true');await showScenario(selected,p.mode,`${model.axes[p.xKey].label}: ${fmt(p.xs[i])}; ${model.axes[p.yKey].label}: ${fmt(p.ys[j])}`);}

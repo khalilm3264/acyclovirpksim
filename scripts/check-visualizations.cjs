@@ -10,6 +10,19 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  assert.ok(!requests.some(u=>u.includes('plotly-full')),'3D must stay lazy');
  await page.click('#generate');await page.waitForFunction(()=>document.querySelectorAll('#map tbody button').length===49);await page.locator('#map tbody button').nth(20).click();await page.waitForFunction(()=>document.querySelector('#balance').textContent.includes('within tolerance'));
  await page.locator('#time').fill('0');await page.locator('#time').dispatchEvent('input');assert.ok((await page.textContent('#balance')).includes('Input 0 mg'));
+ assert.ok(!requests.some(u=>u.includes('/vendor/echarts')));
+ for(const kind of ['heatmap','surface']){
+   await page.selectOption('#echartKind',kind);
+   await page.waitForFunction(k=>window.echarts?.getInstanceByDom(document.querySelector('#echart'))?.getOption()?.series[0].type===k,kind);
+   const plotted=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#echart')).getOption().series[0].data);
+   assert.equal(plotted.length,49);
+   if(kind==='heatmap')assert.ok(!requests.some(u=>u.includes('/vendor/echarts-gl')));
+   const cells=await page.locator('#map tbody button').allTextContents();
+   for(const [index,point] of plotted.entries())assert.ok(Math.abs(point[2]-Number(cells[index].replaceAll(',','')))<0.00051);
+   assert.ok(await page.locator('#echart canvas').count()>0);
+ }
+ await page.selectOption('#echartKind','');
+ assert.ok(await page.locator('#echart').isHidden());
  await page.click('#three');await page.waitForFunction(()=>document.querySelector('#surface').data?.[0]?.type==='surface',{},{timeout:60000});await page.click('#resetView');await page.click('#hideThree');
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await page.selectOption('#yKey','crcl');await page.click('#generate');await page.waitForFunction(()=>document.querySelector('#gridStatus').textContent.includes('different X and Y'));

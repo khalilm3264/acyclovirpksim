@@ -8,3 +8,13 @@ fs.mkdirSync(path.join(root,'public/assets/vendor'),{recursive:true});
 fs.copyFileSync(path.join(pkg,'plotly.min.js'),path.join(root,'public/assets/vendor/plotly-full-3.3.1.min.js'));
 fs.copyFileSync(path.join(pkg,'LICENSE'),path.join(root,'public/assets/vendor/plotly-full-LICENSE.txt'));
 console.log('Staged optional Plotly 3D bundle; downloaded only when requested.');
+
+for (const [name,version] of [['echarts','5.6.0'],['echarts-gl','2.0.9']]) {
+  const directory=path.join(root,'node_modules',name);
+  const target=path.join(root,'public/assets/vendor');
+  if (require(path.join(directory,'package.json')).version !== version) throw Error('Unexpected '+name+' version');
+  fs.copyFileSync(path.join(directory,'dist',name+'.min.js'),path.join(target,name+'-'+version+'.min.js'));
+  for (const file of fs.readdirSync(directory).filter(file=>/^(license|notice)(\.|$)/i.test(file))) {
+    fs.copyFileSync(path.join(directory,file),path.join(target,name+'-'+file));
+  }
+}
