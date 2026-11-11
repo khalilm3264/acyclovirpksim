@@ -37,10 +37,27 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  assert.ok(await page.locator('#echart').isHidden());
  await page.selectOption('#echartKind','surface');
  assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#echart')).id),surfaceId);
+ await page.click('#gridFigurePanel summary');
+ const optionFor=id=>page.evaluate(id=>echarts.getInstanceByDom(document.getElementById(id)).getOption(),id);
+ for(const [kind,caption] of [['contours','Interpolated contour'],['difference','minus'],['time','first HD start'],['parallel','sampled scenarios']]){
+  await page.selectOption('#gridFigureKind',kind);
+  await page.waitForFunction(t=>document.querySelector('#gridFigureStatus').textContent.includes(t),caption);
+  const o=await optionFor('gridComparison');
+  if(kind==='time')assert.equal(o.series[0].data.length,9*49);
+  else if(kind==='parallel')assert.equal(o.series[0].data[0].length,6);
+  else assert.equal(o.series[0].data.length,49);
+ }
+ await page.click('#gridFigurePanel summary');
+ await page.click('#compartmentPanel summary');
+ await page.click('#playCompartments');await page.waitForFunction(()=>+document.querySelector('#time').value>0);
+ await page.click('#playCompartments');await page.click('#compartmentPanel summary');
  await page.click('#resetView');await page.selectOption('#echartKind','');
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await page.selectOption('#yKey','crcl');await page.click('#generate');await page.waitForFunction(()=>document.querySelector('#gridStatus').textContent.includes('different X and Y'));
  await page.addInitScript(()=>{window.simulationMessages=0;const post=Worker.prototype.postMessage;Worker.prototype.postMessage=function(...args){window.simulationMessages++;return post.apply(this,args);};});
+ await page.selectOption('#mode','Peritoneal dialysis');await page.click('#baseline');
+ await page.click('#exchangePanel summary');await page.waitForSelector('#exchangeFigure canvas');
+ assert.ok((await optionFor('exchangeFigure')).series[0].data.some(p=>p[1]>0));
  await page.goto(url+'/');await page.waitForFunction(()=>!document.querySelector('#csv').disabled,{},{timeout:60000});
  // The lowest concentration chart must remain deferred on mobile until scrolled near.
  assert.ok(await page.evaluate(()=>!window.echarts?.getInstanceByDom(document.querySelector('#csfCmmgChart'))?.getOption().series));

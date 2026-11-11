@@ -281,6 +281,7 @@ function drawNextPlot(){
  plotRunning=true;activePlot={where,signature:job.signature};
  Promise.resolve().then(()=>window.AyFluxCharts.draw(target,job.option))
  .then(()=>{
+  if(where==='plasmaChart'&&$('eventsPanel').open)window.AyFluxViews.timeline();
   const rect=target.getBoundingClientRect();
   chartStates.set(where,{signature:job.signature,width:rect.width,height:rect.height});
   if(document.documentElement.dataset.ayfluxReady!=='true'){
@@ -486,6 +487,7 @@ function validationErrors(){let errors=[];for(const [i,m] of measureDraft.entrie
 }
 function renderForecast(forecast, reveal=false) {
  const output = $('forecastOutput');
+ for(const el of output.querySelectorAll('.forecast-chart'))window.AyFluxCharts.dispose(el);
  output.replaceChildren();
  $('revealForecast').hidden = !forecast?.targets.length || reveal;
  if (!forecast) { $('forecastSummary').textContent=''; return; }
@@ -498,6 +500,14 @@ function renderForecast(forecast, reveal=false) {
    const heading=document.createElement('h3');
    heading.textContent=`${labels[target.analyte]} at ${target.time} h`;
    output.append(heading);
+   const figure=document.createElement('div');figure.className='forecast-chart';figure.style.height='260px';output.append(figure);
+   const intervals=[target.population,target.updated],names=['Population','Updated'];
+   const series=intervals.map((v,i)=>({name:names[i],type:'line',symbolSize:6,data:[[v.lower,i],[v.upper,i]],lineStyle:{width:3}}));
+   series.push({type:'scatter',name:'Median',symbol:'diamond',symbolSize:12,data:intervals.map((v,i)=>[v.median,i])});
+   if(reveal)series.push({name:'Observed',type:'scatter',symbol:'triangle',symbolSize:12,data:names.map((_,i)=>[target.observed,i])});
+   const option=window.AyFluxCharts.options(series,'Concentration (mg/L)','');
+   option.yAxis={type:'category',data:names};option.grid.left=82;option.tooltip.trigger='item';
+   window.AyFluxCharts.ensure().then(()=>{if(figure.isConnected)window.AyFluxCharts.draw(figure,option);}).catch(()=>{figure.hidden=true;});
    for (const [label,interval] of [['Population',target.population],['Updated',target.updated]]) {
      const line=document.createElement('p');
      line.textContent=`${label}: ${interval.median.toFixed(2)} mg/L (${interval.lower.toFixed(2)}–${interval.upper.toFixed(2)}).`;
@@ -579,7 +589,17 @@ $('holdoutSvg').addEventListener('click',()=>{
   setTimeout(()=>URL.revokeObjectURL(url),1000);
  }finally{vector.dispose();}
 });
-function renderValidation(){renderHoldoutFigure();if(!results)return;const v=results._validation;
+$('forecastHeld').onchange=()=>{
+ const at=Number($('forecastHeld').value);
+ if(!$('forecastHeld').value)return;
+ const previous=Math.max(0,...c.observations.filter(r=>r.time<at).map(r=>r.time));
+ $('forecastCutoff').value=previous;$('runForecast').click();
+};
+function renderValidation(){
+ const held=[...new Set(c.observations.filter(r=>r.role==='holdout'&&r.time>0).map(r=>r.time))].sort((a,b)=>a-b);
+ $('forecastHeldLabel').hidden=!held.length;
+ $('forecastHeld').replaceChildren(new Option('Select time',''),...held.map(t=>new Option(t+' h',t)));
+ renderHoldoutFigure();if(!results)return;const v=results._validation;
  renderForecast(v.forecast);
  $('fitScenario').textContent=v.fitMode;
  $('covFraction').textContent=v.n?`${(v.fraction*100).toFixed(0)}%`:'Not assessed';
@@ -813,11 +833,12 @@ async function drawTornado(){
    name,type:'bar',itemStyle:{color},barMaxWidth:10,data:rows.map(r=>r.effects[metric][key])
   }));
   const extent=Math.max(1,...series.flatMap(s=>s.data.map(Math.abs)))*1.05;
-  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true},series,
+  const tornado=window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true},series,
    legend:{top:0},grid:{top:36,bottom:48,left:target.clientWidth<500?112:200,right:18},
    tooltip:{trigger:'axis',renderMode:'richText',confine:true,valueFormatter:v=>Number(v.toFixed(2))+'%'},
    xAxis:{type:'value',min:-extent,max:extent,name:'Change from baseline (%)',nameLocation:'middle',nameGap:28,axisLabel:{formatter:v=>Number(v.toPrecision(3))}},
    yAxis:{type:'category',inverse:true,data:rows.map(r=>r.label),axisLabel:{width:target.clientWidth<500?99:187,overflow:'break',fontSize:11}}});
+  tornado.off('click');tornado.on('click',p=>window.AyFluxViews.selectFactor(p.name));
  }catch{status.textContent='Chart unavailable. Sensitivity estimates appear in the table.';}
 }
 $('tornadoMetric').addEventListener('change',drawTornado);
@@ -825,7 +846,7 @@ function renderSensitivity(){
  if(!dataIsCurrent){$('sensitivityRows').innerHTML='<tr><td colspan="5">Updating model…</td></tr>';return;}
  try{
   const s=E.sensitivity(c,primary);
-  sensitivityResult=s;drawTornado();
+  sensitivityResult=s;window.AyFluxViews.setFactors(s);drawTornado();
   $('sensitivityRows').innerHTML=s.outcomes.map(d=>`<tr><td>${d.label}</td>${d.na?'<td colspan="4">Not applicable at a zero baseline</td>':
    ['auc','csfPeak','mPeak','mass'].map(k=>`<td>${pctPair(d.effects[k])}</td>`).join('')}</tr>`).join('');
   $('sensitivityCaption').textContent=`Nominal one-at-a-time analysis: each parameter decreased by 20% / increased by 20%, relative to the current ${primary} setting. Drug exposure results are deterministic; correlations and uncertainty are not represented.`;

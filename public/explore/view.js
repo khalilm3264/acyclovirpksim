@@ -31,7 +31,7 @@ $('echartKind').onchange=async()=>{
  $('resetView').hidden=$('echartKind').value!=='surface'||$('echart').hidden;
 };
 $('resetView').onclick=()=>optionalChart.resetCamera();
-function clearGrid(){optionalChart.close();$('resetView').hidden=true;$('echartKind').value='';$('echartKind').disabled=true;grid=null;$('map').replaceChildren();text('legend','');$('export').disabled=true;}
+function clearGrid(){window.AyFluxExplorerFigures.newGrid(null);optionalChart.close();$('resetView').hidden=true;$('echartKind').value='';$('echartKind').disabled=true;grid=null;$('map').replaceChildren();text('legend','');$('export').disabled=true;}
 function inputChanged(){cancel();clearGrid();text('gridStatus','Inputs changed. Generate a new map.');text('selection','Previous selected scenario remains below until a new scenario is selected.');}
 for(const id of ['xKey','xMin','xMax','yKey','yMin','yMax','metric','count','mode'])$(id).addEventListener('change',inputChanged);
 function paintMap(){
@@ -45,13 +45,13 @@ function paintMap(){
 }
 $('generate').onclick=async()=>{
  $('generate').disabled=true;clearGrid();text('gridStatus','Preparing grid…');const token=request+1;
- try{const payload={config:base,mode:$('mode').value,xKey:$('xKey').value,yKey:$('yKey').value,xMin:+$('xMin').value,xMax:+$('xMax').value,yMin:+$('yMin').value,yMax:+$('yMax').value,count:+$('count').value,metric:$('metric').value};model.plan(payload);const result=await compute('grid',payload,'gridStatus');if(token!==request)return;grid=result;paintMap();$('echartKind').disabled=false;$('export').disabled=false;text('gridStatus',`${grid.xs.length*grid.ys.length} scenarios over ${base.horizon} hours. Select a cell below.`);}
+ try{const payload={config:base,mode:$('mode').value,xKey:$('xKey').value,yKey:$('yKey').value,xMin:+$('xMin').value,xMax:+$('xMax').value,yMin:+$('yMin').value,yMax:+$('yMax').value,count:+$('count').value,metric:$('metric').value};model.plan(payload);const result=await compute('grid',payload,'gridStatus');if(token!==request)return;grid=result;paintMap();window.AyFluxExplorerFigures.newGrid(grid);$('echartKind').disabled=false;$('export').disabled=false;text('gridStatus',`${grid.xs.length*grid.ys.length} scenarios over ${base.horizon} hours. Select a cell below.`);}
  catch(e){text('gridStatus',e.message);}finally{$('generate').disabled=false;}
 };
 async function selectCell(i,j){if(!grid)return;const p=grid;selected={...p.config,[p.xKey]:p.xs[i],[p.yKey]:p.ys[j]};for(const b of $('map').querySelectorAll('button'))b.setAttribute('aria-pressed','false');$('map').querySelectorAll('tbody tr')[j].querySelectorAll('button')[i].setAttribute('aria-pressed','true');await showScenario(selected,p.mode,`${model.axes[p.xKey].label}: ${fmt(p.xs[i])}; ${model.axes[p.yKey].label}: ${fmt(p.ys[j])}`);}
 async function showScenario(c,mode,label){
- text('selection',label+' · '+mode);text('curveStatus','Calculating selected scenario…');$('time').disabled=true;raw=null;charts.dispose($('trajectory'));text('trajectorySample','');charts.dispose($('curve'));charts.dispose($('sankey'));$('amounts').replaceChildren();text('balance','');const token=request+1;
- try{const result=await compute('curve',{config:c,mode},'curveStatus');if(token!==request)return;raw=result;await charts.ensure();if(token!==request)return;drawCurve();$('time').max=raw.t.length-1;$('time').value=raw.t.length-1;$('time').disabled=false;drawTrajectory();drawSankey();text('curveStatus',`Nominal simulation over ${c.horizon} h. Peak plasma ${fmt(raw.summary.peak)} mg/L; AUC ${fmt(raw.summary.auc)} mg·h/L.`);}catch(e){text('curveStatus',e.message);}
+ text('selection',label+' · '+mode);text('curveStatus','Calculating selected scenario…');$('time').disabled=true;raw=null;window.AyFluxExplorerFigures.setRaw(null);charts.dispose($('trajectory'));text('trajectorySample','');charts.dispose($('curve'));charts.dispose($('sankey'));$('amounts').replaceChildren();text('balance','');const token=request+1;
+ try{const result=await compute('curve',{config:c,mode},'curveStatus');if(token!==request)return;raw=result;await charts.ensure();if(token!==request)return;drawCurve();$('time').max=raw.t.length-1;$('time').value=raw.t.length-1;$('time').disabled=false;drawTrajectory();drawSankey();window.AyFluxExplorerFigures.setRaw(raw);text('curveStatus',`Nominal simulation over ${c.horizon} h. Peak plasma ${fmt(raw.summary.peak)} mg/L; AUC ${fmt(raw.summary.auc)} mg·h/L.`);}catch(e){text('curveStatus',e.message);}
 }
 $('baseline').onclick=()=>{cancel();showScenario(base,$('mode').value,'Starting settings');};
 function drawCurve(){
@@ -93,7 +93,7 @@ function drawSankey(){if(!raw)return;const r=raw.accounting[+$('time').value];te
   data:[{name:'Input'},...parts.map(([k])=>({name:labels[k],itemStyle:{color:colors[entries.findIndex(([key])=>key===k)]}}))],
   links:parts.map(([k,value])=>({source:'Input',target:labels[k],value})),lineStyle:{color:'target',opacity:.6}}]});
 }
-$('time').oninput=()=>{drawSankey();updateTrajectorySample();};
+$('time').oninput=()=>{drawSankey();updateTrajectorySample();window.AyFluxExplorerFigures.frame();};
 $('export').onclick=()=>{if(!grid)return;const rows=[[grid.xKey,grid.yKey,grid.metric,model.metrics[grid.metric].unit],...grid.ys.flatMap((y,j)=>grid.xs.map((x,i)=>[x,y,grid.z[j][i],model.metrics[grid.metric].unit]))];const u=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));const a=document.createElement('a');a.href=u;a.download='AyFlux-visual-explorer.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);};
 showScenario(base,$('mode').value,'Starting settings');
 })();

@@ -20,6 +20,7 @@ const scriptPaths = [
   './assets/model-integrity.js',
   './assets/osp-import.js',
   './assets/simulator-ui.js',
+  './assets/analysis-views.js',
   './assets/research-workspace.js',
   './assets/pwa-register.js',
 ];

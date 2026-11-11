@@ -363,7 +363,9 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
 <div class="card"><div class="topline"><h2>Compare modes on the same graph</h2><div class="export-actions"><div class="export-control"><select id="csv" class="export-picker" aria-label="Export results — choose a file format" title="Choose a file format to download"><option value="" selected>Export results…</option><option value="wide">Detailed results (.csv)</option><option value="tidy">R / OSP tidy (.csv)</option><option value="xlsx">PK-Sim / MoBi (.xlsx)</option></select></div></div></div><p class="tip">Choose overlays. <strong>Custom sequence</strong> represents one patient switching modalities; the other curves are separate counterfactual scenarios. Dialysis shading follows the primary scenario so windows do not become visually ambiguous. <a href="/learn/interoperability/">CSV and R guide</a>.</p><div class="scenarios" id="scenarioChecks"></div><p class="dose-key"><span class="dose-key-iv"></span> IV acyclovir administration <span class="dose-key-oral"></span> Oral valacyclovir administration (vertical dashed lines)</p><div class="keyline" id="shadeLegend"></div></div>
 <div class="card" id="baselinePanel"><div class="topline"><h2>Baseline comparison</h2><div class="timeline-actions"><button class="btn secondary" id="saveBaseline" type="button" disabled>Save selected curve as baseline</button> <button class="btn secondary" id="clearBaseline" type="button" disabled>Clear baseline</button></div></div><p class="tip" id="baselineStatus" role="status">Freeze the selected scenario, then change settings to compare concentration curves. The baseline lasts until cleared or this page is closed.</p><details id="baselineDetails" class="hidden"><summary>Changed settings</summary><ul id="baselineChanges" style="overflow-wrap:anywhere"></ul></details><p class="tip" id="baselineDelta"></p></div>
 <div class="primary-charts">
-<div class="card"><div class="topline"><h2>Plasma acyclovir</h2></div><div class="chart big" id="plasmaChart"></div><p class="caption">No validated therapeutic or toxic plasma acyclovir concentration has been established. Published steady-state IV peak and trough values are presented in Drug references <a class="source-id" href="#ref10">[10]</a>.</p></div>
+<div class="card"><div class="topline"><h2>Plasma acyclovir</h2></div><div class="chart big" id="plasmaChart"></div><details id="eventsPanel"><summary>Show event timeline</summary><div id="eventStrip" style="height:230px;contain:inline-size"></div></details>
+<details id="comparisonPanel"><summary>Scenario small multiples</summary><div id="multipleCharts"></div></details>
+<details id="removalPanel"><summary>Cumulative removal by pathway</summary><div id="mainRemoval" style="height:340px;contain:inline-size"></div><p id="removalNote">Nominal simulation for the primary scenario. Amounts are acyclovir equivalents.</p></details><p class="caption">No validated therapeutic or toxic plasma acyclovir concentration has been established. Published steady-state IV peak and trough values are presented in Drug references <a class="source-id" href="#ref10">[10]</a>.</p></div>
 <div class="card"><div class="topline"><h2>CSF acyclovir</h2></div><div class="chart big" id="csfChart"></div><p class="caption">No validated CSF acyclovir therapeutic threshold is established. The optional shaded IC₅₀ range represents cell-culture susceptibility, not a CNS efficacy target <a class="source-id" href="#ref11">[11]</a>.</p></div>
 </div>
 
@@ -416,6 +418,7 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
 </div><div class="card"><h2>Why upper uncertainty bands can be wide</h2><p>Small simulated clearance, high distribution volume, oral absorption variability, accumulated doses, and CSF/CMMG formation parameters produce right-skewed concentration distributions. A 5th–95th percentile band is not the same thing as ±10% error. If the effective sample size becomes very small, Bayesian reweighting is unreliable; acquire more observations or rerun a better-fitting model.</p></div><div class="card"><h2>Next measured concentration</h2>
 <p>Choose a cutoff after applying measurements. Both forecasts use the specified dosing schedule, dialysis schedule and renal profile. The updated forecast uses Fit rows through the cutoff. The first subsequent sampling time provides the evaluation target.</p>
 <label>Forecast cutoff (h) <input id="forecastCutoff" type="number" min="0" step="any" value="4"></label>
+<label id="forecastHeldLabel" hidden>Held-out sampling time <select id="forecastHeld"></select></label>
 <button class="btn" type="button" id="runForecast">Forecast next level</button>
 <p id="forecastSummary" role="status"></p><div id="forecastOutput"></div>
 <button class="btn secondary" type="button" id="revealForecast" hidden>Reveal observed level and errors</button></div></section>
@@ -509,6 +512,12 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
  <p class="tip" id="ospMetrics"></p>
 </div>
 <div class="card"><h2>Drug flow and 3D visual explorer</h2><p>Follow modeled drug amounts through a Sankey diagram, explore two-input heatmaps, and open an optional 3D response surface. Select a scenario to view its concentration curves.</p><a class="btn" id="openVisualExplorer" href="/explore/">Open visual explorer</a><p id="visualExplorerStatus" class="tip" role="status">Copies the current successfully simulated settings. Opens in a separate page.</p></div>
+<details class="card" id="ensemblePanel"><summary>Parameter draws and concentration distributions</summary>
+<p>Each point represents one unweighted prior draw for the primary scenario. Box plots compare scenarios at the selected hour using the same draws.</p>
+<label>Time (h) <input type="number" min="0" step="any" id="ensembleHour" value="12"></label><button class="btn" id="ensembleRun">Generate ensemble</button>
+<label>View <select id="ensembleView"><option value="scatter">Scatterplot</option><option value="matrix">Scatterplot matrix</option><option value="box">Box plots</option><option value="violin">Violin plots</option></select></label>
+<label>X <select id="ensembleX"></select></label><label>Y <select id="ensembleY"></select></label>
+<div id="ensembleChart" style="height:400px;contain:inline-size"></div><p id="ensembleStatus" role="status"></p></details>
 <div class="card" id="heatmapPanel">
  <h2>Two-parameter sensitivity heatmap</h2>
  <p class="tip">Exploratory deterministic sweep over residual creatinine clearance and intermittent hemodialysis clearance. Each cell reruns the <strong>same simulated dose schedule</strong>, with a single parameter set. Other settings are held fixed; the time window is capped at 96 hours for responsiveness. Not a dose selection chart.</p>
@@ -543,6 +552,7 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
  <p class="research-note">Fitting minimizes squared log errors for group mean peaks/troughs by adjusting central distribution volume and renal/nonrenal plasma clearance. The model cannot perfectly reproduce all published group means by a two-parameter linear fit. This is calibration against the same summary statistics shown above—not external validation, and not supported for individualized or dialysis prescribing.</p></div>
  <div class="card"><h2>One-at-a-time sensitivity analysis</h2><p class="tip">Quantifies the influence of selected assumptions on drug exposure. The table shows percentage change in an output when the input is decreased by 20% / increased by 20%. Results use nominal parameter values, not fitted or posterior uncertainty bands.</p>
  <label>Outcome <select id="tornadoMetric"><option value="auc">Plasma AUC</option><option value="csfPeak">Peak CSF acyclovir</option><option value="mPeak">Peak plasma CMMG</option><option value="mass">Amount removed by dialysis</option></select></label>
+ <details id="sweepPanel"><summary>One-parameter sensitivity curve</summary><label>Parameter <select id="sweepFactor"></select></label><div id="sweepChart" style="height:310px"></div><p id="sweepNote"></p></details>
  <div id="tornado" style="width:100%" role="img" aria-label="Sensitivity tornado plot"></div><p id="tornadoStatus" role="status"></p>
  <div class="scroll"><table><thead><tr><th>Parameter</th><th>Plasma AUC</th><th>Peak CSF acyclovir</th><th>Peak plasma CMMG</th><th>Dialysis removal</th></tr></thead><tbody id="sensitivityRows"></tbody></table></div><p id="sensitivityCaption" class="caption"></p>
  </div>
@@ -561,6 +571,7 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
 <script src="./assets/model-integrity.js"></script>
 <script src="./assets/osp-import.js"></script>
 <script src="./assets/simulator-ui.js"></script>
+<script src="./assets/analysis-views.js"></script>
 <script src="./assets/research-workspace.js"></script>
 <script src="./assets/pwa-register.js"></script>
 </body></html>
