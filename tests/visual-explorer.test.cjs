@@ -56,3 +56,30 @@ test('comparison maps and sampled distributions reproduce scenario outputs',()=>
  assert.equal(draws.points[0][3],draws.groups[0].values[0]);
  assert.equal(draws.points[0][3],pk.simulate(c,'No dialysis').plasma.median.at(-1));
 });
+
+test('ending observation retains PD fluid while prescribed session ends drain it once',()=>{
+ const config={...pk.DEFAULTS,crcl:0,dose:700,doseCount:1,draws:1,variability:0,trackMassBalance:true};
+ for(const pdMethod of ['manual','cycler']){
+  const c={...config,pdMethod,apdStart:0,horizon:10};
+  const hour=pdMethod==='manual'?10:1;
+  function run(horizon){
+   const scenario={...c,horizon};
+   return pk.single(scenario,pk.drawParams(scenario)[0],pk.scheduleFor('Peritoneal dialysis',scenario),.25);
+  }
+  const short=run(hour),long=run(24),expected=long.accounting.find(a=>a.time===hour);
+  assert.ok(expected.parts.pdFluid>0);
+  assert.equal(short.summary.endPdFluidMg,expected.parts.pdFluid);
+  assert.equal(short.summary.mass,expected.parts.pdDrained);
+  assert.ok(Math.abs(short.summary.massBalanceErrorMg)<.01);
+ }
+ for(const end of [5,6,9,12]){
+  const c={...config,horizon:9,schedule:[{type:'PD',start:0,end}],fitMode:'Custom sequence',requestedModes:['Custom sequence']};
+  const raw=pk.single(c,pk.drawParams(c)[0],pk.scheduleFor('Custom sequence',c),.25);
+  assert.equal(raw.summary.mass,raw.drains.reduce((sum,d)=>sum+d.mass,0));
+  assert.equal(raw.summary.endPdFluidMg>0,end>c.horizon);
+  assert.ok(Math.abs(raw.summary.massBalanceErrorMg)<.01);
+  const result=pk.createSimulator()(c)['Custom sequence'].summary;
+  assert.equal(result.mass.median,raw.summary.mass);
+  assert.equal(result.endPdFluidMg.median,raw.summary.endPdFluidMg);
+ }
+});
