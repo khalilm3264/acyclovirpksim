@@ -305,6 +305,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  let a=0,b=0,m=0,oralDepot=0,sc=0,sm=0,auc=0,csfAuc=0,mass=0,peak=0,csfPeak=0,mPeak=0;
  let administeredAcyclovirEqMg=0,systemicEliminationMg=0;
  const accounting=c.trackMassBalance?[]:null;
+ const drains=accounting?[]:null;
  const removed={kidney:0,other:0,formed:0,hd:0,crrt:0,pdDrained:0};
  let pdAmount=0,pdVol=c.pdVolume,pdKey=null,pdScheduledEnd=null;
  const mw=239.19/225.21;
@@ -318,7 +319,11 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  for(let i=0;i<tarr.length;i++){
   const t=tarr[i],currentPD=timeline.pdAt[i];
   const newKey=currentPD?currentPD.key:null;
-  if(pdKey!==newKey){if(accounting&&pdKey!==null)removed.pdDrained+=pdAmount;if(pdKey!==null&&t>=pdScheduledEnd-1e-8){mass+=pdAmount;}pdAmount=0;pdVol=currentPD?.fillL??c.pdVolume;pdKey=newKey;pdScheduledEnd=currentPD?currentPD.start+(currentPD.dwell??(currentPD.type==='CAPD'?c.capdDwell:c.apdDwell)):null;}
+  if(pdKey!==newKey){if(accounting&&pdKey!==null){
+   removed.pdDrained+=pdAmount;
+   const previous=timeline.pdAt[i-1];
+   drains.push({start:previous.start,end:t,mass:pdAmount,complete:t>=pdScheduledEnd-1e-8});
+  }if(pdKey!==null&&t>=pdScheduledEnd-1e-8){mass+=pdAmount;}pdAmount=0;pdVol=currentPD?.fillL??c.pdVolume;pdKey=newKey;pdScheduledEnd=currentPD?currentPD.start+(currentPD.dwell??(currentPD.type==='CAPD'?c.capdDwell:c.apdDwell)):null;}
   const absorbedDose=timeline.oralDose[i]*p.oralF;
   oralDepot+=absorbedDose;administeredAcyclovirEqMg+=absorbedDose;
   const C=a/p.vc,CM=m/p.vm,active=timeline.activeAt[i],isHD=active.active&&active.type==='HD',isCRRT=active.active&&active.type==='CRRT',dial=(isHD?p.hd:isCRRT?p.crrt:0);
@@ -369,7 +374,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  }
  // If the final dwell has not drained, drug remaining in the cavity is NOT counted as drained mass.
  const massBalanceErrorMg=administeredAcyclovirEqMg-(a+b+oralDepot+pdAmount+systemicEliminationMg+mass);
- return {...(accounting?{accounting}:{}),t:tarr,cols,summary:{peak,auc,csfPeak,csfAuc,mPeak,mass,modelHalfLife,endPlasma:a/p.vc,
+ return {...(accounting?{accounting,drains}:{}),t:tarr,cols,summary:{peak,auc,csfPeak,csfAuc,mPeak,mass,modelHalfLife,endPlasma:a/p.vc,
   administeredAcyclovirEqMg,massBalanceErrorMg}};
 }
 

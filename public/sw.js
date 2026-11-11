@@ -1,13 +1,13 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.26.0-sensitivity-trajectory-20261111";
+const CACHE = "ayflux-static-v0.26.0-visualization-suite-20261111";
 const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
  "/assets/pk-engine.js", "/assets/simulator-ui.js",
  "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
  "/assets/model-integrity.js", "/assets/research-workspace.js",
- "/assets/charts.js",
+ "/assets/charts.js", "/assets/analysis-views.js",
  "/lite/", "/lite/lite.js",
  "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",

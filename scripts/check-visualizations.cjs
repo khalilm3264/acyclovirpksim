@@ -37,10 +37,27 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  assert.ok(await page.locator('#echart').isHidden());
  await page.selectOption('#echartKind','surface');
  assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#echart')).id),surfaceId);
+ await page.click('#gridFigurePanel summary');
+ const optionFor=id=>page.evaluate(id=>echarts.getInstanceByDom(document.getElementById(id)).getOption(),id);
+ for(const [kind,caption] of [['contours','Interpolated contour'],['difference','minus'],['time','first HD start'],['parallel','sampled scenarios']]){
+  await page.selectOption('#gridFigureKind',kind);
+  await page.waitForFunction(t=>document.querySelector('#gridFigureStatus').textContent.includes(t),caption);
+  const o=await optionFor('gridComparison');
+  if(kind==='time')assert.equal(o.series[0].data.length,9*49);
+  else if(kind==='parallel')assert.equal(o.series[0].data[0].length,6);
+  else assert.equal(o.series[0].data.length,49);
+ }
+ await page.click('#gridFigurePanel summary');
+ await page.click('#compartmentPanel summary');
+ await page.click('#playCompartments');await page.waitForFunction(()=>+document.querySelector('#time').value>0);
+ await page.click('#playCompartments');await page.click('#compartmentPanel summary');
  await page.click('#resetView');await page.selectOption('#echartKind','');
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await page.selectOption('#yKey','crcl');await page.click('#generate');await page.waitForFunction(()=>document.querySelector('#gridStatus').textContent.includes('different X and Y'));
  await page.addInitScript(()=>{window.simulationMessages=0;const post=Worker.prototype.postMessage;Worker.prototype.postMessage=function(...args){window.simulationMessages++;return post.apply(this,args);};});
+ await page.selectOption('#mode','Peritoneal dialysis');await page.click('#baseline');
+ await page.click('#exchangePanel summary');await page.waitForSelector('#exchangeFigure canvas');
+ assert.ok((await optionFor('exchangeFigure')).series[0].data.some(p=>p[1]>0));
  await page.goto(url+'/');await page.waitForFunction(()=>!document.querySelector('#csv').disabled,{},{timeout:60000});
  // The lowest concentration chart must remain deferred on mobile until scrolled near.
  assert.ok(await page.evaluate(()=>!window.echarts?.getInstanceByDom(document.querySelector('#csfCmmgChart'))?.getOption().series));
@@ -67,6 +84,9 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  await page.setViewportSize({width:1280,height:900});
  await page.locator('#baselinePanel').scrollIntoViewIfNeeded();
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ for(const [panel,chart] of [['eventsPanel','eventStrip'],['comparisonPanel','multipleCharts'],['removalPanel','mainRemoval']]){
+  await page.click('#'+panel+' summary');await page.waitForSelector('#'+chart+' canvas');await page.click('#'+panel+' summary');
+ }
  const download=page.waitForEvent('download',{timeout:60000});await page.selectOption('#csv','xlsx');const file=await download;assert.ok(file.suggestedFilename().endsWith('.xlsx'));const data=fs.readFileSync(await file.path());assert.equal(data.readUInt32LE(0),0x04034b50);
  await page.click('[data-tab="validation"]');
  await page.click('#clearMeasures');
@@ -77,7 +97,10 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  await page.click('#runForecast');
  await page.waitForFunction(()=>document.querySelector('#forecastSummary').textContent.includes('Fitting measurements through 4 h: 1'));
  assert.match(await page.textContent('#forecastOutput'), /at 12 h/);
+ await page.waitForSelector('.forecast-chart canvas');
+ assert.ok(await page.evaluate(()=>!echarts.getInstanceByDom(document.querySelector('.forecast-chart')).getOption().series.some(s=>s.name==='Observed')));
  await page.click('#revealForecast');
+ await page.waitForFunction(()=>echarts.getInstanceByDom(document.querySelector('.forecast-chart'))?.getOption().series.some(s=>s.name==='Observed'));
  assert.match(await page.textContent('#forecastOutput'), /Predicted minus observed/);
  await page.selectOption('#measureRows select[data-mk="role"] >> nth=1','holdout');
  await page.click('#applyMeasures');
@@ -108,6 +131,15 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
     previous=m;return matches;
    });
   },metric),'Tornado must rank and plot signed effects for '+metric);
+ }
+ await page.selectOption('#tornadoMetric','auc');await page.click('#sweepPanel summary');
+ await page.waitForSelector('#sweepChart canvas');assert.ok((await optionFor('sweepChart')).series[0].data.length>=5);
+ await page.click('#ensemblePanel summary');await page.click('#ensembleRun');
+ await page.waitForSelector('#ensembleChart canvas');
+ for(const [view,type] of [['scatter','scatter'],['matrix','scatter'],['box','boxplot'],['violin','custom']]){
+  await page.selectOption('#ensembleView',view);
+  const o=await optionFor('ensembleChart');assert.equal(o.series[0].type,type);
+  if(view==='matrix')assert.equal(o.series.length,16);
  }
  await page.click('#runHeatmap');
  await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#heatmapPlot'))?.getOption().series[0].data.length===49);

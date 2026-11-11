@@ -12,6 +12,26 @@
    charts.ensure().then(()=>charts.draw($('chart'),charts.options(series,'Time (hours)','Plasma acyclovir (mg/L)')))
     .catch(error=>{$('error').textContent=error.message+' Results are available in the table.';});
   }
+  function drawMap(){
+   if(!last||!$('pediatricMapPanel').open)return;
+   const c=last.config,metric=$('pediatricMetric').value,fixed=$('pediatricConvention').value==='absolute';
+   const xs=[...new Set([3.1,5,10,15,25,40,55,66,c.weight])].sort((a,b)=>a-b);
+   const ys=[...new Set([56,80,120,164,200,250,300,350,399,c.egfr])].sort((a,b)=>a-b);
+   const data=[];
+   ys.forEach((egfr,j)=>xs.forEach((weight,i)=>{
+    const dose=fixed?c.dose*c.weight/weight:c.dose;
+    if(metric==='aucPerInterval'&&dose>30)return;
+    data.push([i,j,model.summary({...c,weight,egfr,dose:metric==='aucPerInterval'?dose:c.dose})[metric]]);
+   }));
+   const unit={cl:'L/h',halfLife:'h',aucPerInterval:'mg·h/L'}[metric];
+   const option=charts.heatmap(xs,ys,data,'Weight (kg)','eGFR (mL/min/1.73 m²)',unit);
+   option.series.push({type:'scatter',symbol:'diamond',symbolSize:13,itemStyle:{color:'#e26b21',borderWidth:1,borderColor:'#222'},tooltip:{show:false},data:[[xs.indexOf(c.weight),ys.indexOf(c.egfr)]]});
+   $('pediatricConvention').disabled=metric!=='aucPerInterval';
+   $('pediatricMapNote').textContent='Diamond: selected child. '+(metric!=='aucPerInterval'?'This outcome is independent of dose.':fixed?'Fixed '+Number((c.dose*c.weight).toFixed(2))+' mg. Blank cells exceed the model input limit of 30 mg/kg.':'Fixed '+c.dose+' mg/kg per dose.');
+   charts.ensure().then(()=>{if($('pediatricMapPanel').open)charts.draw($('pediatricMap'),option);}).catch(e=>{$('error').textContent=e.message;});
+  }
+  $('pediatricMapPanel').addEventListener('toggle',drawMap);
+  for(const id of ['pediatricMetric','pediatricConvention'])$(id).onchange=drawMap;
   function run(event) {
     if (event) event.preventDefault();
     try {
@@ -36,7 +56,7 @@
       $('rows').append(fragment);
       $('status').textContent = `Selected eGFR ${config.egfr}; comparison ${comparison.egfr} mL/min/1.73 m². ${config.doses} doses of ${(config.dose * config.weight).toFixed(1)} mg. Simulated band: 1,000 individuals, fixed seed 20261109.`;
       $('error').textContent = '';
-      last = { config, comparison, rows };
+      last = { config, comparison, rows };drawMap();
       $('export').disabled = false;
     } catch (error) {
       $('error').textContent = error.message;

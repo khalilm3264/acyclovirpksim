@@ -54,5 +54,16 @@
   observers.get(el)?.disconnect();observers.delete(el);
   root.echarts?.getInstanceByDom(el)?.dispose();
  }
- root.AyFluxCharts={ensure,line,band,options,draw,dispose};
+ function heatmap(xs,ys,data,xName,yName,unit,diverging=false){
+  const values=data.map(p=>p[2]).filter(Number.isFinite);
+  const extent=Math.max(1e-9,...values.map(Math.abs));
+  const min=diverging?-extent:Math.min(...values),max=diverging?extent:Math.max(...values);
+  return {animation:false,aria:{enabled:true},grid:{left:76,right:20,top:20,bottom:95},
+   tooltip:{renderMode:'richText',formatter:p=>xName+' '+xs[p.value[0]]+' · '+yName+' '+ys[p.value[1]]+'\n'+Number(p.value[2].toPrecision(5))+' '+unit},
+   xAxis:{type:'category',data:xs,name:xName,nameLocation:'middle',nameGap:30,axisLabel:{hideOverlap:true}},
+   yAxis:{type:'category',data:ys,name:yName,nameLocation:'middle',nameGap:48},
+   visualMap:{seriesIndex:0,dimension:2,min,max:max===min?min+1:max,left:'center',bottom:0,orient:'horizontal',inRange:{color:diverging?['#2166ac','#f5f5f5','#b35806']:['#edf5fa','#75b3d2','#124f79']}},
+   series:[{type:'heatmap',data}]};
+ }
+ root.AyFluxCharts={ensure,line,band,options,draw,dispose,heatmap};
 })(typeof window==='undefined'?globalThis:window);
