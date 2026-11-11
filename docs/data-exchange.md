@@ -70,7 +70,7 @@ If the PK-Sim/MoBi CSV has different headers, inspect it with `names(read.csv("o
 
 The `ospsuite` R package can also **load and run genuine OSP `.pkml` models** and retrieve output values in R. See [OSPSuite-R](https://github.com/Open-Systems-Pharmacology/OSPSuite-R). AyFlux CSV can be compared to those R results after selecting an equivalent time/concentration series; it does not import into the underlying OSP model.
 
-**Not supported:** writing or importing native `.pkml`, `.pksim5`, or `.mbp3` models; replacing PBPK structures; assuming direct compatibility with `ospsuite::importResultsFromCSV()` (which expects its own results format). Direct CSV import into a PK-Sim/MoBi data repository may require column mapping or conversion and has **not** been verified for this exact AyFlux schema.
+For desktop import, use the AyFlux XLSX workbook. In MoBi 12 Update 3 on Windows, the saved project retained all 385 no-dialysis plasma acyclovir concentrations over 96 hours, with absolute differences below 0.000002 mg/L from the worksheet. For a workbook containing a molecular-weight column, clear any automatic assignment of that column to Error.
 
 ## Validation checklist
 
@@ -87,3 +87,7 @@ For proposed schema changes or OSP import samples, open a GitHub issue using **s
 ## Pediatric research CSV
 
 The separate pediatric IV page exports `ayflux-pediatric-abdalla-iv.csv`. Each row includes model DOI, IV route, age (eligibility only), weight, selected and comparison indexed eGFR, mg/kg dose, interval and infusion hours, dose count, ensemble size, seed, time, typical concentration, 5th/50th/95th simulated percentiles, and comparison concentration. Concentrations are mg/L. This format does not replace the adult simulator export schema and cannot be imported as a native OSP model.
+
+## OSP aciclovir import test
+
+The browser regression uses the [OSPSuite-R SimResults.csv fixture](https://github.com/Open-Systems-Pharmacology/OSPSuite-R/blob/0618a72b8b26d8d1d3015488ff4311153f5093f1/inst/extdata/SimResults.csv), reproduced in `interop/fixtures/ospsuite_aciclovir.csv`. Select the peripheral venous plasma aciclovir output, minutes and µmol/L. The 491 samples span 0–24 h. At 1 minute, 3.254674 µmol/L corresponds to 0.732985 mg/L. This test checks file parsing, unit conversion and curve display.
