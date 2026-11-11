@@ -82,13 +82,13 @@ function setRaw(value){
 }
 function drawExchanges(){
  if(!raw||!$('exchangePanel').open)return;
- const drains=raw.drains.filter(d=>d.complete),target=$('exchangeFigure');
+ const drains=raw.drains,target=$('exchangeFigure');
  target.hidden=!drains.length;
- $('exchangeStatus').textContent=drains.length?drains.length+' completed exchanges. Hover for dwell start, drain time and mass.':'No completed PD exchanges in this scenario.';
+ $('exchangeStatus').textContent=drains.length?drains.length+' drain events. Hover for dwell duration and mass removed.':'No PD drains in the observed interval.';
  if(!drains.length)return;
  const s={type:'bar',name:'Drained amount',data:drains.map(d=>[d.end,d.mass]),barMaxWidth:22};
  const o=charts.options([s],'Drain time (h)','ACV equivalent (mg)');o.xAxis.max=raw.t.at(-1);o.tooltip={trigger:'item',renderMode:'richText',formatter:p=>{
-  const d=drains[p.dataIndex];return fmt(d.start)+'–'+fmt(d.end)+' h · '+fmt(d.mass)+' mg';
+  const d=drains[p.dataIndex];return fmt(d.start)+'–'+fmt(d.end)+' h · '+fmt(d.mass)+' mg · '+(d.complete?'scheduled drain':'early session drain');
  }};
  charts.draw(target,o);
 }

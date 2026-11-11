@@ -146,7 +146,7 @@ function validatePdRx(c){
  if(c.pdMethod==='cycler'&&rows.filter(x=>x.sessionStart==null).some(r=>r.start+r.dwell>c.apdHours+1e-8))errors.push('Cycler template exchanges must fit within configured cycler session duration');
  return [...new Set(errors)];
 }
-function validate(c,mode){let err=[];
+function validate(c,mode,allowWindowBeyondHorizon=false){let err=[];
  if(!Number.isFinite(c.weight)||c.weight<=0)err.push('weight must be positive');
  if(!Number.isFinite(c.horizon)||c.horizon>336||c.horizon<1)err.push('Simulation duration must be 1–336 hours');
  if(!ROUTES.includes(c.route))err.push('Unsupported medication route');
@@ -169,7 +169,7 @@ function validate(c,mode){let err=[];
   if(!Array.isArray(c.schedule))err.push('Custom timeline missing');else{
    let last=0;for(const [i,row] of c.schedule.slice().sort((a,b)=>a.start-b.start).entries()){
     if(!TYPES.includes(row.type))err.push(`Row ${i+1}: unsupported modality`);
-    if(!Number.isFinite(row.start)||!Number.isFinite(row.end)||row.start<0||row.end>c.horizon)err.push(`Row ${i+1}: enter hours within 0–${c.horizon}`);
+    if(!Number.isFinite(row.start)||!Number.isFinite(row.end)||row.start<0||(!allowWindowBeyondHorizon&&row.end>c.horizon))err.push(`Row ${i+1}: enter hours within 0–${c.horizon}`);
     if(row.end<=row.start)err.push(`Row ${i+1}: end must be after start (e.g. 36–32 is invalid)`);
     if(row.end-row.start>24+1e-8)err.push(`Row ${i+1}: maximum 24 hours per session; split longer continuous treatment into daily blocks`);
     if(row.start<last-1e-8)err.push(`Row ${i+1}: windows overlap; sequential transitions are allowed, concurrent modalities are not modeled`);
@@ -186,10 +186,10 @@ function scheduleFor(mode,c){if(mode==='No dialysis')return [];
  let rows=[];
  if(mode==='Intermittent HD'){for(let t=c.hdStart;t<c.horizon;t+=c.hdRepeat)rows.push({type:'HD',start:t,end:Math.min(c.horizon,t+c.hdDuration)});}
  else if(method==='APD'){for(let d=0;d<c.horizon/24+1;d++){let st=d*24+c.apdStart; // start within calendar day; do not truncate overnight
- if(st<c.horizon)rows.push({type:'APD',start:st,end:Math.min(c.horizon,st+c.apdHours)});
+ if(st<c.horizon)rows.push({type:'APD',start:st,end:st+c.apdHours});
  if(d===0&&c.apdStart>0){/* No carryover from a prior day at t=0; simulation starts with a new treatment calendar. */}}
  }
- else {for(let t=0;t<c.horizon;t+=24)rows.push({type:method,start:t,end:Math.min(c.horizon,t+24)});}
+ else {for(let t=0;t<c.horizon;t+=24)rows.push({type:method,start:t,end:method==='CAPD'?t+24:Math.min(c.horizon,t+24)});}
  return rows;}
 function scheduleError(c,mode){const errs=validate(c,mode);if(mode!=='Custom sequence')return errs;return errs;}
 function drawParams(c){let random=rng(), norm=()=>Math.sqrt(-2*Math.log(Math.max(1e-10,random())))*Math.cos(2*Math.PI*random());
@@ -319,11 +319,19 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
  for(let i=0;i<tarr.length;i++){
   const t=tarr[i],currentPD=timeline.pdAt[i];
   const newKey=currentPD?currentPD.key:null;
-  if(pdKey!==newKey){if(accounting&&pdKey!==null){
-   removed.pdDrained+=pdAmount;
-   const previous=timeline.pdAt[i-1];
-   drains.push({start:previous.start,end:t,mass:pdAmount,complete:t>=pdScheduledEnd-1e-8});
-  }if(pdKey!==null&&t>=pdScheduledEnd-1e-8){mass+=pdAmount;}pdAmount=0;pdVol=currentPD?.fillL??c.pdVolume;pdKey=newKey;pdScheduledEnd=currentPD?currentPD.start+(currentPD.dwell??(currentPD.type==='CAPD'?c.capdDwell:c.apdDwell)):null;}
+  if(pdKey!==newKey){
+   if(pdKey!==null){
+    mass+=pdAmount;
+    if(accounting){
+     removed.pdDrained+=pdAmount;
+     drains.push({start:timeline.pdAt[i-1].start,end:t,mass:pdAmount,complete:t>=pdScheduledEnd-1e-8});
+    }
+   }
+   pdAmount=0;
+   pdVol=currentPD?.fillL??c.pdVolume;
+   pdKey=newKey;
+   pdScheduledEnd=currentPD?currentPD.start+(currentPD.dwell??(currentPD.type==='CAPD'?c.capdDwell:c.apdDwell)):null;
+  }
   const absorbedDose=timeline.oralDose[i]*p.oralF;
   oralDepot+=absorbedDose;administeredAcyclovirEqMg+=absorbedDose;
   const C=a/p.vc,CM=m/p.vm,active=timeline.activeAt[i],isHD=active.active&&active.type==='HD',isCRRT=active.active&&active.type==='CRRT',dial=(isHD?p.hd:isCRRT?p.crrt:0);
@@ -347,16 +355,19 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
    const cc=A/p.vc,cp=B/p.vp,ex=p.q*(cc-cp),mem=pdTransfer(c,p,mid,cc,P,V,midPD),net=midDial*cc+mem.flux;
    const dA=ivRate+p.oralKa*D-(p.other+renalAt(kTime)+p.form)*cc-ex-net;
    const dB=ex,dM=p.form*cc*mw-(p.mn+metaboliteRenalAt(kTime)+(midDial+(midPD?p.pd:0))*c.metDial)*M/p.vm;
-   return [dA,dB,dM,-p.oralKa*D,mem.flux,mem.netVolume,...(accounting?[renalAt(kTime)*cc,p.other*cc,p.form*cc,midDial*cc]:[])];
+   return [dA,dB,dM,-p.oralKa*D,mem.flux,mem.netVolume,renalAt(kTime)*cc,p.other*cc,p.form*cc,midDial*cc];
   }
   let x=[a,b,m,oralDepot,pdAmount,pdVol];
   function stage(x,k,f){return x.map((v,j)=>v+f*step*k[j]);}
   const k1=rhs(...x,t),k2=rhs(...stage(x,k1,.5),mid),k3=rhs(...stage(x,k2,.5),mid),k4=rhs(...stage(x,k3,1),t+step);
+  const flux=j=>step*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6;
+  const kidney=flux(6),other=flux(7),formed=flux(8),dialysed=flux(9);
+  systemicEliminationMg+=kidney+other+formed;
+  mass+=dialysed;
   if(accounting){
-   const flux=j=>step*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6;
-   removed.kidney+=flux(6);removed.other+=flux(7);removed.formed+=flux(8);
-   if(midActive.type==='HD')removed.hd+=flux(9);
-   if(midActive.type==='CRRT')removed.crrt+=flux(9);
+   removed.kidney+=kidney;removed.other+=other;removed.formed+=formed;
+   if(midActive.type==='HD')removed.hd+=dialysed;
+   if(midActive.type==='CRRT')removed.crrt+=dialysed;
   }
   const y=x.map((v,j)=>v+step*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6);
   const na=Math.max(0,y[0]),nb=Math.max(0,y[1]),nm=Math.max(0,y[2]),nd=Math.max(0,y[3]);
@@ -365,17 +376,12 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   const nsc=Math.max(0,sc+step*(p.kp*(C+nextC)/2-sc)/c.csfLag),nsm=Math.max(0,sm+step*(p.km*(CM+nextM)/2-sm)/c.csfMetLag);
   auc+=step*(C+nextC)/2;csfAuc+=step*(sc+nsc)/2;
   administeredAcyclovirEqMg+=ivRate*step;
-  // Trapezoidal integral of linear concentration × time-varying renal clearance.
-  const elimAtStart=(p.other+renalAt(t)+p.form)*C;
-  const elimAtEnd=(p.other+renalAt(t+step)+p.form)*nextC;
-  systemicEliminationMg+=step*(elimAtStart+elimAtEnd)/2;
-  mass+=step*midDial*(C+nextC)/2;
   a=na;b=nb;m=nm;oralDepot=nd;sc=nsc;sm=nsm;
  }
  // If the final dwell has not drained, drug remaining in the cavity is NOT counted as drained mass.
  const massBalanceErrorMg=administeredAcyclovirEqMg-(a+b+oralDepot+pdAmount+systemicEliminationMg+mass);
  return {...(accounting?{accounting,drains}:{}),t:tarr,cols,summary:{peak,auc,csfPeak,csfAuc,mPeak,mass,modelHalfLife,endPlasma:a/p.vc,
-  administeredAcyclovirEqMg,massBalanceErrorMg}};
+  administeredAcyclovirEqMg,massBalanceErrorMg,endPdFluidMg:pdAmount}};
 }
 
 // Literature anchor: US IV acyclovir label, normal renal function, 1-hour infusions q8h.
@@ -565,10 +571,11 @@ function createSimulator(){
  }
  for(const mode of needed){
    if(cached.rawByMode[mode])continue;
-   const scenario=mode==='Custom sequence'?{...c,schedule:(c.schedule||[]).filter(r=>Number.isFinite(r.start)&&r.start<c.horizon).map(r=>({...r,end:Math.min(r.end,c.horizon)}))}:c;
-   const errs=scheduleError(scenario,mode);if(errs.length)throw Error(errs.join('; '));
+   const scenario=mode==='Custom sequence'?{...c,schedule:(c.schedule||[]).filter(r=>Number.isFinite(r.start)&&r.start<c.horizon)}:c;
+   const errs=validate(scenario,mode,true);if(errs.length)throw Error(errs.join('; '));
+   // Retain prescribed session ends for the solver when the displayed timeline is clipped.
    const rows=scheduleFor(mode,scenario),events=prepareEvents(scenario,rows,.25,cached.doses);
-   cached.rowsByMode[mode]=rows;
+   cached.rowsByMode[mode]=rows.map(r=>({...r,end:Math.min(r.end,c.horizon)}));
    cached.rawByMode[mode]=cached.params.map(q=>single(scenario,q,rows,.25,cached.doses,events));
  }
  const post=posterior(cached.rawByMode[selectedMode],c),summaryKey=JSON.stringify([c.coverage,post.weights]);
