@@ -37,7 +37,7 @@ AyFlux may be updated, interrupted, or withdrawn without notice. Features, calcu
 
 ## 6. Source code, licenses, and third-party material
 
-AyFlux source code is offered under the GNU Affero General Public License, version 3 (AGPLv3), as provided in the project's repository. Plotly and other third-party components are subject to their own applicable licenses. These Terms do not revoke rights granted under the relevant open-source licenses. Scientific papers, trademarks, images, and material linked from the site remain subject to their respective rights.
+AyFlux source code is offered under the GNU Affero General Public License, version 3 (AGPLv3), as provided in the project's repository. Apache ECharts and other third-party components are subject to their own applicable licenses. These Terms do not revoke rights granted under the relevant open-source licenses. Scientific papers, trademarks, images, and material linked from the site remain subject to their respective rights.
 
 Source repository: https://github.com/khalilm3264/acyclovirpksim
 

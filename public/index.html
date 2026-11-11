@@ -99,10 +99,7 @@ header h1{margin:0;line-height:1.25;font-size:clamp(19px,2.1vw,25px)}
    Includes dynamically created timeline and prescription rows, notices and tooltips. */
 html body :is(.shell, header, footer) *,
 html body :is(.shell, header, footer) *::before,
-html body :is(.shell, header, footer) *::after,
-html body .plotly .modebar,
-html body .plotly .modebar-btn,
-html body .plotly .hovertext rect {
+html body :is(.shell, header, footer) *::after {
   border-radius: 0 !important;
 }
 html body .shell input[type="checkbox"],
@@ -322,7 +319,7 @@ html body .shell .export-actions select.export-picker option{color:#263e52;backg
  html body .shell .export-actions .export-control{width:159px;height:34px}
 }
 
-/* Interactive Plotly heatmap with an accessible numeric-table alternative. */
+/* Interactive sensitivity heatmap with an accessible numeric-table alternative. */
 #heatmapPanel #heatmapPlot{height:360px;min-height:320px;max-width:100%}
 #heatmapPanel .heatmap-data{margin:8px 0}
 #heatmapPanel .heatmap-data summary{cursor:pointer;font-weight:700;color:#2d6084}
@@ -547,7 +544,7 @@ html body footer.site-footer .source-link{display:inline-flex;vertical-align:mid
 <footer class="site-footer"><span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a> <a class="cat-easter-egg" href="/cats/" title="A small surprise" aria-label="Meet the AyFlux cats">🐾</a></span><span>Educational use only · <a href="/disclaimer/">Disclaimer</a> · <a href="/license/">License</a> · <a href="/cite/">Cite</a> · <button type="button" class="footer-link" id="footerReferences">Methods and References</button> · <a href="/learn/">User guide</a> · <a class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md" title="AyFlux release notes">v0.26.0</a> · <span class="offline-status" id="connectivityStatus" aria-live="polite">Online</span> · <a class="source-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" aria-label="AyFlux source code on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a></span></footer>
 </div>
 
-<script src="./assets/plotly-loader.js"></script>
+<script src="./assets/charts.js"></script>
 <script src="./assets/pk-engine.js"></script>
 <script src="./assets/ayflux-exchange.js"></script>
 <script src="./assets/ayflux-version.js"></script>

@@ -183,14 +183,13 @@ function renderRenalProfileChart(){
  if(!chartNearViewport($('kidneyClearChart')))return;
  const signature=chartSignature('kidneyClear')+':dynamic';
  if(pendingPlots.get('kidneyClearChart')?.signature===signature||chartStates.get('kidneyClearChart')?.signature===signature)return;
- const d=results[primary],ll=layout('Acyclovir renal clearance (mL/min)');
- ll.yaxis2={title:{text:'Entered CrCl (mL/min)'},overlaying:'y',side:'right',showgrid:false,color:'#237d8c'};
- ll.margin={...ll.margin,r:68};
- const traces=[
- {x:d.time,y:d.kidneyClear.median,mode:'lines',type:'scatter',name:'Modeled renal acyclovir clearance',line:{color:'#0054e9',width:3},hovertemplate:'Time %{x:.2f} h<br>Renal acyclovir clearance %{y:.2f} mL/min<extra></extra>'},
- {x:d.time,y:d.time.map(t=>E.renalCrClAt(c,t)),yaxis:'y2',mode:'lines',type:'scatter',name:'User-entered CrCl',line:{color:'#237d8c',width:3,dash:'dash'},hovertemplate:'Time %{x:.2f} h<br>CrCl %{y:.2f} mL/min<extra></extra>'}
- ];
- pendingPlots.set('kidneyClearChart',{key:'kidneyClear',traces,layout:ll,signature});requestPlotFrame();
+ const d=results[primary],charts=window.AyFluxCharts;
+ const series=[charts.line('Modeled renal acyclovir clearance',d.time,d.kidneyClear.median,'#0054e9',3),
+  {...charts.line('User-entered CrCl',d.time,d.time.map(t=>E.renalCrClAt(c,t)),'#237d8c',3,'dashed'),yAxisIndex:1}];
+ const option=layout('Acyclovir renal clearance (mL/min)',c.horizon,series);
+ option.yAxis=[option.yAxis,{...option.yAxis,name:'Entered CrCl (mL/min)',splitLine:{show:false}}];
+ option.grid.right=72;
+ pendingPlots.set('kidneyClearChart',{key:'kidneyClear',option,signature});requestPlotFrame();
 }
 function renderInputs(){let keepAdvanced=$('advanced').open;
  $('patientControls').innerHTML=numericField('weight')+renalProfileControls()+renalInputs()+
@@ -240,7 +239,7 @@ function plotShade(rows){if(!c.showShades)return [];
  else shapes.push({...base,x0:r.start,x1:r.end,y0:.955,y1:1,fillcolor:rgba(typeColor(type),.42)});
  }return shapes;}
 function rgba(hex,alpha){return `rgba(${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)},${alpha})`;}
-const timeLabelCache=new WeakMap(),chartStates=new Map(),pendingPlots=new Map();
+const chartStates=new Map(),pendingPlots=new Map();
 function chartNearViewport(target){
  if(!target||!target.getClientRects().length)return false;
  if(typeof IntersectionObserver==='undefined')return true;
@@ -254,21 +253,17 @@ if(typeof IntersectionObserver!=='undefined'){
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
-function labelsFor(time){
- if(!timeLabelCache.has(time))timeLabelCache.set(time,time.map(timeLabel));
- return timeLabelCache.get(time);
-}
 function chartSignature(key){return JSON.stringify([resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
-let plotlyWait=null;
+let chartWait=null;
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
- if(!window.Plotly||typeof window.Plotly.react!=='function'){
-  if(!plotlyWait){
-   plotlyWait=window.AyFluxPlotly.ensure().then(()=>{
-    plotlyWait=null;
+ if(!window.echarts?.init){
+  if(!chartWait){
+   chartWait=window.AyFluxCharts.ensure().then(()=>{
+    chartWait=null;
     requestPlotFrame();
    }).catch(error=>{
-    plotlyWait=null;
+    chartWait=null;
     pendingPlots.clear();
     alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'.');
    });
@@ -284,7 +279,7 @@ function drawNextPlot(){
  const target=$(where);
  if(!dataIsCurrent||!chartNearViewport(target)){requestPlotFrame();return;}
  plotRunning=true;activePlot={where,signature:job.signature};
- Promise.resolve().then(()=>Plotly.react(target,job.traces,job.layout,{responsive:false,displaylogo:false,toImageButtonOptions:{format:'png',filename:'acyclovir_'+job.key,scale:2}}))
+ Promise.resolve().then(()=>window.AyFluxCharts.draw(target,job.option))
  .then(()=>{
   const rect=target.getBoundingClientRect();
   chartStates.set(where,{signature:job.signature,width:rect.width,height:rect.height});
@@ -304,20 +299,33 @@ function resizeVisibleCharts(){
    const rect=target.getBoundingClientRect();
    if(rect.width!==state.width||rect.height!==state.height){
     state.width=rect.width;state.height=rect.height;
-    Plotly.Plots.resize(target);
+    window.echarts?.getInstanceByDom(target)?.resize();
    }
   }
  });
 }
 window.addEventListener('resize',resizeVisibleCharts,{passive:true});
 if(typeof ResizeObserver!=='undefined')new ResizeObserver(resizeVisibleCharts).observe(document.querySelector('main'));
-function layout(unit,horizon=c.horizon){let ticks=[],texts=[],delta=horizon<=72?6:horizon<=168?12:24;if(window.innerWidth<650)delta=Math.max(delta,24);
- for(let t=0;t<=horizon+.01;t+=delta){ticks.push(t);texts.push(timeLabel(t));}
+function layout(unit,horizon,series){
+ const delta=window.innerWidth<650?Math.max(24,horizon<=72?6:horizon<=168?12:24):horizon<=72?6:horizon<=168?12:24;
  const yLabel=unit.includes('(mg/L)')?(unit.includes('CMMG')?(unit.includes('CSF')?'CSF CMMG (mg/L)':'Plasma CMMG (mg/L)'):unit.includes('dialysate')?'Dialysate acyclovir (mg/L)':unit.includes('CSF')?'CSF acyclovir (mg/L)':'Plasma acyclovir (mg/L)'):
   unit.includes('(mL/min')?'Clearance (mL/min)':unit.includes('(mg/hour)')?'Drug removal (mg/hour)':unit.includes('(mL/hour)')?'Ultrafiltration (mL/hour)':unit;
- return {autosize:true,paper_bgcolor:'#fff',plot_bgcolor:'#fff',margin:{l:window.innerWidth<650?76:87,r:9,t:12,b:78},font:{family:'Arial,Helvetica,sans-serif',size:11,color:'#35485b'},
- xaxis:{title:'Time (day · hour)',tickmode:'array',tickvals:ticks,ticktext:texts,tickangle:-28,range:[0,horizon],gridcolor:'#e5ebf0',zeroline:false},
- yaxis:{title:{text:yLabel,standoff:4,font:{size:11,color:'#24384b'}},side:'left',anchor:'x',ticklabelposition:'outside left',ticks:'outside',ticklen:5,tickcolor:'#64798b',showline:true,linecolor:'#64798b',automargin:true,gridcolor:'#e5ebf0',rangemode:'tozero',zeroline:false},shapes:plotShade(results[primary].rows).concat(results[primary].doses.filter(d=>d.amount>0).map(d=>({type:'line',xref:'x',yref:'paper',x0:d.time,x1:d.time,y0:0,y1:1,opacity:.72,line:{color:d.route==='Valacyclovir oral'?'#19856e':'#b54b28',width:1.35,dash:'dash'}}))),showlegend:true,legend:{orientation:'h',y:-.42,x:0},hovermode:'x unified'};}
+ const option=window.AyFluxCharts.options(series,'Time (day · hour)',yLabel);
+ option.grid.left=window.innerWidth<650?70:84;
+ Object.assign(option.xAxis,{max:horizon,interval:delta,axisLabel:{formatter:timeLabel,rotate:25,hideOverlap:true},nameGap:48});
+ option.tooltip.axisPointer={label:{formatter:p=>timeLabel(p.value)}};
+ const annotations={type:'line',data:[],silent:true,tooltip:{show:false},
+  markLine:{symbol:'none',silent:true,label:{show:false},data:results[primary].doses.filter(d=>d.amount>0).map(d=>({
+   xAxis:d.time,lineStyle:{color:d.route==='Valacyclovir oral'?'#19856e':'#b54b28',width:1.35,type:'dashed',opacity:.72}}))}};
+ option.series=[...series,annotations];
+ const shades=plotShade(results[primary].rows);
+ if(shades.length)option.series.push({type:'custom',silent:true,z:0,clip:true,
+  encode:{x:[0,1],y:[]},data:shades.map(s=>[s.x0,s.x1]),tooltip:{show:false},renderItem:(p,api)=>{
+   const s=shades[p.dataIndex],g=p.coordSys,x=api.coord([s.x0,0])[0],end=api.coord([s.x1,0])[0];
+   return {type:'rect',shape:{x,y:g.y+(1-s.y1)*g.height,width:end-x,height:(s.y1-s.y0)*g.height},style:{fill:s.fillcolor}};
+  }});
+ return option;
+}
 function curve(key,unit,where,ref=null){if(!results)return;
  if(!chartNearViewport($(where)))return;
  const signature=chartSignature(key);
@@ -326,26 +334,26 @@ function curve(key,unit,where,ref=null){if(!results)return;
     (chartStates.get(where)?.signature===signature&&activePlot?.where!==where)){
   pendingPlots.delete(where);return;
  }
- let traces=[];
- for(const m of modes){if(!visible.has(m)||!results[m])continue;let d=results[m],z=d[key],col=COLORS[m];
- if(m===primary&&c.showBands){traces.push({x:d.time,y:z.lower,mode:'lines',line:{width:0},hoverinfo:'skip',showlegend:false});traces.push({x:d.time,y:z.upper,mode:'lines',line:{width:0},fill:'tonexty',fillcolor:rgba(col,.17),name:`${Math.round(c.coverage*100)}% ${results._validation.fitted?"updated model":"unfitted model"} interval`,hoverinfo:'skip'});}
- traces.push({x:d.time,y:z.median,text:labelsFor(d.time),type:'scatter',mode:'lines',name:m+(m===primary?' (selected)':''),line:{color:col,width:m===primary?4.2:3.2,dash:LINE_DASH[m]},hovertemplate:`%{text}<br>%{y:.3f} ${unit}<extra>${m}</extra>`});}
- const comparison=baseline&&['plasma','csf','cmmg','csfCmmg'].includes(key);
- const ll=layout(unit,comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon);let v=null;
- if(comparison){
-  const d=baseline.data;
-  traces.push({x:d.time,y:d[key].median,text:labelsFor(d.time),type:'scatter',mode:'lines',name:'Baseline: '+baseline.primary,line:{color:'#303846',width:2.5,dash:'longdashdot'},hovertemplate:`%{text}<br>%{y:.3f} ${unit}<extra>Frozen baseline</extra>`});
-  ll.xaxis.range=[0,Math.max(c.horizon,baseline.config.horizon)];
+ const charts=window.AyFluxCharts,series=[];
+ const dash={solid:'solid',dash:'dashed',dot:'dotted',dashdot:[6,3,2,3],longdash:[10,4]};
+ for(const m of modes){
+  if(!visible.has(m)||!results[m])continue;
+  const d=results[m],z=d[key],color=COLORS[m];
+  if(m===primary&&c.showBands)series.push(charts.band(Math.round(c.coverage*100)+'% '+(results._validation.fitted?'updated':'unfitted')+' model interval',d.time,z.lower,z.upper,rgba(color,.17)));
+  series.push(charts.line(m+(m===primary?' (selected)':''),d.time,z.median,color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
  }
- if(key==='cmmg')v={value:E.MARKER,label:'Neurotoxicity-associated CMMG level: 2.58 mg/L [3]',color:'#cb496c'};
- else if(ref&&c.showStudy)v=ref;
- if(v){ll.shapes.push({type:'line',xref:'x',yref:'y',x0:0,x1:c.horizon,y0:v.value,y1:v.value,line:{color:v.color,width:2,dash:'dot'}});
- traces.push({x:[null],y:[null],mode:'lines',line:{color:v.color,dash:'dot'},name:v.label});}
- if(key==='csf'&&c.showIC50){const r=VIRUSES[c.virus];
- ll.shapes.push({type:'rect',xref:'x',yref:'y',x0:0,x1:c.horizon,y0:r.min,y1:r.max,fillcolor:'rgba(177,145,56,.12)',line:{width:0},layer:'below'});
- traces.push({x:[0,c.horizon],y:[r.min,r.max],mode:'markers',marker:{size:1,opacity:0},hoverinfo:'skip',showlegend:false});
- traces.push({x:[null],y:[null],mode:'lines',line:{color:'#a98a33',width:6},name:`${c.virus} in-vitro IC₅₀ range ${r.min}–${r.max} mg/L [11] (not a target)`});} 
- pendingPlots.set(where,{key,traces,layout:ll,signature});requestPlotFrame();
+ const comparison=baseline&&['plasma','csf','cmmg','csfCmmg'].includes(key);
+ const horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
+ if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,baseline.data[key].median,'#303846',2.5,[10,4,2,4]));
+ const marker=key==='cmmg'?{value:E.MARKER,label:'Neurotoxicity-associated CMMG level: 2.58 mg/L [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
+ if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
+ if(key==='csf'&&c.showIC50){
+  const r=VIRUSES[c.virus];
+  series.push(charts.band(c.virus+' in-vitro IC₅₀ range '+r.min+'–'+r.max+' mg/L [11]',[0,c.horizon],[r.min,r.min],[r.max,r.max],'rgba(177,145,56,.2)'));
+ }
+ const option=layout(unit,horizon,series);
+ option.toolbox.feature.saveAsImage.name='acyclovir_'+key;
+ pendingPlots.set(where,{key,option,signature});requestPlotFrame();
 }
 function baselineChanges(saved,config,selected){
  const changes=[];

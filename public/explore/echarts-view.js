@@ -68,7 +68,7 @@ function createEChartsView(container, status, selectCell) {
     const current = revision;
     status.textContent = 'Loading chart…';
     try {
-      await load('echarts-5.6.0.min.js');
+      await window.AyFluxCharts.ensure();
       if (current !== revision) return;
       const surface = kind === 'surface';
       if (surface) {
@@ -123,5 +123,5 @@ function createEChartsView(container, status, selectCell) {
       status.textContent = error.message;
     }
   }
-  return {show,close};
+  return {show,close,resetCamera(){if(activeKind==='surface')chart.setOption({grid3D:{viewControl:{alpha:20,beta:40,distance:200,center:[0,0,0]}}});}};
 }

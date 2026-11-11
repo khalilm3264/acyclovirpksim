@@ -72,17 +72,17 @@ test('service worker only caches public static files and no user uploads',()=>{
  assert.doesNotMatch(sw,/indexedDB|POST|localStorage\.setItem/);
 });
 
-test('research heatmap is interactive when Cartesian is staged and still has numeric fallback',()=>{
+test('research heatmap is interactive when ECharts is staged and still has numeric fallback',()=>{
  const fs=require('node:fs'),path=require('node:path'),root=path.resolve(__dirname,'..');
  const source=fs.readFileSync(path.join(root,'public/assets/research-workspace.js'),'utf8');
  const html=fs.readFileSync(path.join(root,'public/index.html'),'utf8');
  const workflow=fs.readFileSync(path.join(root,'.github/workflows/pages.yml'),'utf8');
  assert.match(html,/id="heatmapPlot"/);
  assert.match(html,/id="heatmapArea"/);
- assert.match(source,/loadCartesianForHeatmap/);
+ assert.match(source,/window\.AyFluxCharts\.ensure/);
  assert.match(source,/type:'heatmap'/);
  assert.match(source,/Interactive plot unavailable; numeric table shown/);
- assert.ok(workflow.includes('plotly.js-cartesian-dist-min@3.3.1'));
+ assert.ok(workflow.includes('echarts@5.6.0'));
 });
 test('research report protects PNG charts from printing across pages',()=>{
  const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
@@ -101,7 +101,7 @@ test('research report protects PNG charts from printing across pages',()=>{
  assert.match(html,/page-break-inside:avoid/);
  assert.equal((html.match(/class="report-figure"/g)||[]).length,3);
  assert.match(script,/await Promise\.all\(Array\.from\(popup\.document\.images/);
- assert.match(script,/Plotly\.newPlot\(target,/);
- assert.doesNotMatch(script,/Plotly\.toImage\(chart,\{/);
+ assert.match(script,/charts\.draw\(target,/);
+ assert.match(script,/chart\.getDataURL/);
 });
 

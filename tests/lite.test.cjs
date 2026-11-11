@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 const demo=()=>lite.compute(pk);
 
-test('Lite stays tiny and ships no Plotly or backend dependency',()=>{
+test('Lite ships a small Canvas fallback alongside interactive charts',()=>{
  const page=read('public/lite/index.html');
  const app=read('public/lite/lite.js');
  const engine=read('public/assets/pk-engine.js');
@@ -111,7 +111,7 @@ test('CSV export is complete, unit-labeled and generated locally',()=>{
  assert.doesNotMatch(csv,/\b(?:NaN|Infinity|undefined)\b/);
 });
 
-test('pointer interaction and nice-axis ticks are implemented without a chart library',()=>{
+test('pointer interaction and nice-axis ticks are implemented for the offline renderer',()=>{
  assert.equal(lite.closest([0,1,2,3],2.7),3);
  assert.equal(lite.closest([0,1,2,3],1.3),1);
  assert.ok(lite.ticks(0.01).max>0);

@@ -13,7 +13,7 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const html = read('public/index.html');
 const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
-  './assets/plotly-loader.js',
+  './assets/charts.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
   './assets/ayflux-version.js',
@@ -48,10 +48,9 @@ test('simulator script assets exist and use the expected loader', () => {
     const filename = path.join(root, 'public', relative);
     assert.ok(fs.statSync(filename).size > 0, relative + ' must exist');
   }
-  assert.ok(read('public/assets/vendor/plotly-basic-3.3.1.min.js').includes('plotly.js (basic'));
-  assert.ok(!html.includes('<script src="./assets/vendor/plotly-basic-3.3.1.min.js"'));
-  assert.ok(read('public/assets/plotly-loader.js').includes('script.async=true'));
-  assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxPlotly.ensure()'));
+  assert.ok(!html.includes('<script src="./assets/vendor/echarts-5.6.0.min.js"'));
+  assert.ok(read('public/assets/charts.js').includes('script.async=true'));
+  assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxCharts.ensure()'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.RenalPKV7'));
 });
 
@@ -133,7 +132,8 @@ test('public citations and license links resolve to actual files', () => {
   assert.ok(read('CITATION.cff').includes('cff-version: 1.2.0'));
   assert.equal(read('public/CITATION.cff'),read('CITATION.cff'));
   assert.equal(read('public/LICENSE.txt'),read('LICENSE'));
-  assert.ok(read('THIRD_PARTY_NOTICES.md').includes('MIT License'));
+  assert.equal(read('public/THIRD_PARTY_NOTICES.txt'),read('THIRD_PARTY_NOTICES.md'));
+  assert.ok(read('THIRD_PARTY_NOTICES.md').includes('ECharts GL'));
   assert.ok(!html.includes('id="ayfluxLicense"'));
   assert.ok(!html.includes('id="ayfluxCitation"'));
 });

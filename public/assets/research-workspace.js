@@ -56,22 +56,16 @@ async function renderExternal(){
  const simulation=snapshot.results[snapshot.primary];
  const model={time:simulation.time,concentration:simulation[key].median};
  const difference=importer.compareCurves(model,raw);
- await window.AyFluxPlotly.ensure();
+ await window.AyFluxCharts.ensure();
  const unitName=key==="plasma"?"Plasma acyclovir":key==="csf"?"CSF acyclovir":key==="cmmg"?"Plasma CMMG":"CSF CMMG";
- const layout={
-  margin:{l:69,r:16,t:38,b:52},paper_bgcolor:"#fff",plot_bgcolor:"#fff",showlegend:true,
-  title:{text:unitName+" — modeled curve comparison",font:{size:14}},
-  xaxis:{title:"Time since simulation start (hours)"},yaxis:{title:"Concentration (mg/L)"}
- };
- $('ospPlot').classList.remove("hidden");$('ospDifference').classList.remove("hidden");
- Plotly.react('ospPlot',[
-  {x:model.time,y:model.concentration,mode:"lines",type:"scatter",name:"AyFlux median",line:{color:"#0054e9",width:2}},
-  {x:raw.time,y:raw.concentration,mode:"lines",type:"scatter",name:"Imported model",line:{color:"#b45a24",width:2,dash:"dash"}}
- ],layout,{responsive:true,displaylogo:false});
- Plotly.react('ospDifference',[{
-   x:difference.points.map(p=>p.time),y:difference.points.map(p=>p.difference),
-   mode:"lines",type:"scatter",name:"AyFlux − import",line:{color:"#396e74",width:2}
-  }],{...layout,showlegend:false,title:{text:"Curve difference: AyFlux minus imported (mg/L)",font:{size:14}},yaxis:{title:"Difference (mg/L)"}},{responsive:true,displaylogo:false});
+ const charts=window.AyFluxCharts;
+ $('ospPlot').classList.remove('hidden');$('ospDifference').classList.remove('hidden');
+ const option=charts.options([charts.line('AyFlux median',model.time,model.concentration,'#0054e9'),
+  charts.line('Imported model',raw.time,raw.concentration,'#b45a24',2,'dashed')],'Time since simulation start (hours)','Concentration (mg/L)');
+ option.title={text:unitName+' comparison',textStyle:{fontSize:14}};
+ charts.draw($('ospPlot'),option);
+ const residual=charts.options([charts.line('AyFlux − import',difference.points.map(p=>p.time),difference.points.map(p=>p.difference),'#396e74')],'Time (hours)','Difference (mg/L)');
+ charts.draw($('ospDifference'),residual);
  const fix=v=>v.toPrecision(4);
  updateText("ospMetrics",difference.points.length+" overlapping samples · RMSE "+fix(difference.rmse)+" mg/L · MAE "+fix(difference.mae)+" mg/L · mean bias "+fix(difference.bias)+" mg/L. These are curve-to-curve discrepancies, not a clinical goodness-of-fit assessment.");
  updateText("ospStatus","Compared with AyFlux "+snapshot.primary+". Re-run comparison if the model settings change.");
@@ -82,27 +76,13 @@ $('ospCompare').addEventListener("click",async ()=>{
 });
 $('ospClear').addEventListener("click",()=>{
  $('ospFile').value="";externalTable=null;lastExternal=null;
- for(const id of ["ospPlot","ospDifference"]){const el=$(id);try{if(el&&el.data)Plotly.purge(el);}catch(_){}el.classList.add("hidden");}
+ for(const id of ["ospPlot","ospDifference"]){const el=$(id);window.AyFluxCharts.dispose(el);el.classList.add("hidden");}
  updateText("ospMetrics","");updateText("ospStatus","Import cleared; no file data were uploaded.");
 });
 window.addEventListener("ayflux:results-updated",()=>{
  if(lastExternal)updateText("ospStatus","AyFlux simulation changed. Click Compare curves to refresh the overlay.");
 });
 const pause=()=>new Promise(resolve=>setTimeout(resolve,0));
-// Only users who open the heatmap download the larger Cartesian trace bundle.
-let cartesianPromise=null;
-function loadCartesianForHeatmap(){
- if(cartesianPromise)return cartesianPromise;
- cartesianPromise=window.AyFluxPlotly.ensure().then(()=>new Promise((resolve,reject)=>{
-  const script=document.createElement('script');
-  script.src='/assets/vendor/plotly-cartesian-3.3.1.min.js';
-  script.async=true;
-  script.onload=()=>resolve(window.Plotly);
-  script.onerror=()=>reject(new Error('Optional heatmap bundle could not be loaded'));
-  document.head.append(script);
- })).catch(error=>{cartesianPromise=null;throw error;});
- return cartesianPromise;
-}
 $('runHeatmap').addEventListener("click",async ()=>{
  const button=$('runHeatmap');button.disabled=true;
  try{
@@ -147,21 +127,15 @@ $('runHeatmap').addEventListener("click",async ()=>{
   $('heatmapArea').replaceChildren(table);
   const label=metric==='auc'?'Plasma acyclovir AUC (mg·h/L)':'Peak plasma acyclovir (mg/L)';
   try{
-   const renderer=await loadCartesianForHeatmap();
+   await window.AyFluxCharts.ensure();
    const target=$('heatmapPlot');
    target.classList.remove('hidden');
-   await renderer.react(target,[{
-    type:'heatmap',x:xValues,y:yValues,z:values,
-    colorscale:[[0,'#edf3f6'],[0.33,'#b5d0df'],[0.66,'#6598b5'],[1,'#2b5f82']],
-    hovertemplate:'CrCl %{x} mL/min<br>HD clearance %{y} mL/min<br>'+label+': %{z:.3f}<extra></extra>',
-    colorbar:{title:{text:metric==='auc'?'mg·h/L':'mg/L',side:'right'},thickness:15},
-    xgap:2,ygap:2
-   }],{
-    margin:{l:74,r:68,t:32,b:70},paper_bgcolor:'#fff',plot_bgcolor:'#fff',
-    xaxis:{title:'Residual CrCl (mL/min)',tickmode:'array',tickvals:xValues},
-    yaxis:{title:'HD clearance (mL/min)',tickmode:'array',tickvals:yValues},
-    font:{color:'#28485e',size:11}
-   },{responsive:true,displaylogo:false});
+   window.AyFluxCharts.draw(target,{animation:false,grid:{left:70,right:22,top:16,bottom:96},
+    xAxis:{type:'category',data:xValues,name:'Residual CrCl (mL/min)',nameLocation:'middle',nameGap:28},
+    yAxis:{type:'category',data:yValues,name:'HD clearance (mL/min)',nameLocation:'middle',nameGap:42},
+    visualMap:{min:lo,max:hi===lo?lo+1:hi,orient:'horizontal',bottom:2,left:'center',inRange:{color:['#edf3f6','#6598b5','#2b5f82']}},
+    tooltip:{renderMode:'richText',formatter:({value:[i,j,v]})=>'CrCl '+xValues[i]+' mL/min, HD '+yValues[j]+' mL/min\n'+label+' '+v.toFixed(3)},
+    series:[{type:'heatmap',data:values.flatMap((row,j)=>row.map((v,i)=>[i,j,v]))}]});
    $('heatmapArea').parentElement.open=false;
    updateText('heatmapStatus','Interactive Cartesian heatmap ready (49 deterministic simulations). Hover for values; expand the numeric table for accessible data.');
   }catch(error){
@@ -215,27 +189,14 @@ async function renderReportChart(sim,key,label,color){
  document.body.append(target);
  const series=sim[key],time=sim.time;
  try{
-  await Plotly.newPlot(target,[
-   {x:time,y:series.lower,mode:'lines',type:'scatter',line:{width:0},
-    hoverinfo:'skip',showlegend:false},
-   {x:time,y:series.upper,mode:'lines',type:'scatter',line:{width:0},
-    fill:'tonexty',fillcolor:'rgba(46,96,132,0.14)',hoverinfo:'skip',
-    name:'Model interval',showlegend:true},
-   {x:time,y:series.median,mode:'lines',type:'scatter',
-    name:'Model median',line:{color,width:2.5}}
-  ],{
-   width:960,height:270,autosize:false,
-   margin:{l:72,r:23,t:30,b:54},
-   title:{text:label,font:{size:15,color:'#28485e'}},
-   xaxis:{title:'Time (hours)',color:'#34586c',tickfont:{size:11}},
-   yaxis:{title:'Concentration (mg/L)',color:'#34586c',rangemode:'tozero'},
-   font:{family:'Arial, sans-serif',color:'#28485e'},
-   paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',
-   legend:{orientation:'h',x:0.4,y:-0.29,font:{size:10}}
-  },{staticPlot:true,displayModeBar:false,responsive:false});
-  return await Plotly.toImage(target,{format:'png',width:960,height:270,scale:1.5});
+  const charts=window.AyFluxCharts;
+  const option=charts.options([charts.band('Model interval',time,series.lower,series.upper,'rgba(46,96,132,.18)'),
+   charts.line('Model median',time,series.median,color,2.5)],'Time (hours)','Concentration (mg/L)');
+  option.title={text:label,textStyle:{fontSize:15}};option.toolbox.show=false;
+  const chart=charts.draw(target,option);
+  return chart.getDataURL({type:'png',pixelRatio:1.5,backgroundColor:'#fff'});
  }finally{
-  try{Plotly.purge(target);}catch(_){}
+  window.AyFluxCharts.dispose(target);
   target.remove();
  }
 }
@@ -300,7 +261,7 @@ $('printResearchReport').addEventListener('click',async ()=>{
  updateText('reportStatus','Preparing print-ready chart images…');
  try{
   const snap=getSnapshot(),config=snap.config,sim=snap.results[snap.primary];
-  await window.AyFluxPlotly.ensure();
+  await window.AyFluxCharts.ensure();
   const values=[
    ['Release','v0.25.0 (research preview)'],['Scenario',snap.primary],
    ['Medication schedule',config.dosingMode==='custom'?'Custom doses':'Repeating regimen'],

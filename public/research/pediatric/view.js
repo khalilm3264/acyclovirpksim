@@ -3,33 +3,14 @@
 (() => {
   const model = window.AyFluxPediatric;
   const $ = id => document.getElementById(id);
-  const ns = 'http://www.w3.org/2000/svg';
-  let last = null;
-  function element(name, attrs, text) {
-    const node = document.createElementNS(ns, name);
-    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
-    if (text !== undefined) node.textContent = text;
-    return node;
-  }
-  function draw(rows) {
-    const svg = $('chart');
-    svg.querySelectorAll('g').forEach(node => node.remove());
-    const g = element('g', {}); svg.append(g);
-    const end = rows.at(-1).time;
-    const ymax = Math.max(1, ...rows.map(r => Math.max(r.p95, r.comparison))) * 1.1;
-    const x = t => 65 + 730 * t / end, y = c => 305 - 270 * c / ymax;
-    for (let i = 0; i <= 5; i++) {
-      const yy = y(ymax * i / 5);
-      g.append(element('line', { x1: 65, x2: 795, y1: yy, y2: yy, stroke: '#d7e2e9' }));
-      g.append(element('text', { x: 55, y: yy + 4, 'text-anchor': 'end' }, (ymax * i / 5).toFixed(1)));
-      g.append(element('text', { x: x(end * i / 5), y: 325, 'text-anchor': 'middle' }, (end * i / 5).toFixed(1)));
-    }
-    g.append(element('text', { x: 65, y: 20 }, 'Plasma acyclovir (mg/L)'));
-    g.append(element('text', { x: 430, y: 350, 'text-anchor': 'middle' }, 'Time (hours)'));
-    const points = (list, key) => list.map(r => `${x(r.time)},${y(r[key])}`).join(' ');
-    g.append(element('polygon', { points: points(rows, 'p95') + ' ' + points([...rows].reverse(), 'p05'), fill: '#c6dfed' }));
-    g.append(element('polyline', { points: points(rows, 'typical'), fill: 'none', stroke: '#0072b2', 'stroke-width': 2.5 }));
-    g.append(element('polyline', { points: points(rows, 'comparison'), fill: 'none', stroke: '#d55e00', 'stroke-width': 2.5, 'stroke-dasharray': '7 4' }));
+  let last=null;
+  const charts=window.AyFluxCharts;
+  function draw(rows){
+   const t=rows.map(r=>r.time),values=key=>rows.map(r=>r[key]);
+   const series=[charts.band('90% model interval',t,values('p05'),values('p95'),'#c6dfed'),
+    charts.line('Selected eGFR',t,values('typical'),'#0072b2'),charts.line('Comparison eGFR',t,values('comparison'),'#d55e00',2,'dashed')];
+   charts.ensure().then(()=>charts.draw($('chart'),charts.options(series,'Time (hours)','Plasma acyclovir (mg/L)')))
+    .catch(error=>{$('error').textContent=error.message+' Results are available in the table.';});
   }
   function run(event) {
     if (event) event.preventDefault();

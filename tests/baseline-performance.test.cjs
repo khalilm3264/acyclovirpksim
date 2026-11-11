@@ -35,8 +35,8 @@ test('numeric change after input does not schedule the same simulation twice',()
 function curveHarness(){
  const config={...E.DEFAULTS,draws:1,horizon:24,requestedModes:['No dialysis']},data=E.simulateMany(config),elements={};
  for(const [i,id] of ['plasmaChart','csfChart','cmmgChart','csfCmmgChart'].entries())elements[id]={getClientRects:()=>[{}],getBoundingClientRect:()=>({top:i<2?600:1400,bottom:i<2?900:1700})};
- const state={results:data,dataIsCurrent:true,resultsRevision:1,baselineRevision:0,primary:'No dialysis',modes:E.MODES,visible:new Set(['No dialysis']),c:config,baseline:null,DEFS:{dose:['Dose','mg']},presentationKeys:new Set(['showBands','virus']),COLORS:{'No dialysis':'#88949f'},LINE_DASH:{'No dialysis':'solid'},paletteMode:'standard',E,window:{innerHeight:900},IntersectionObserver:function(){},$:id=>elements[id],pendingPlots:new Map(),chartStates:new Map(),activePlot:null,labelsFor:t=>t,rgba:()=>'',layout:()=>({xaxis:{},shapes:[]}),requestPlotFrame(){},structuredClone};
- vm.createContext(state);vm.runInContext(section('function chartNearViewport(', "\nif(typeof IntersectionObserver")+section('function chartSignature(', 'let plotlyWait')+section('function curve(', 'function baselineChanges(')+section('function baselineChanges(', 'function renderBaseline('),state);
+ const state={results:data,dataIsCurrent:true,resultsRevision:1,baselineRevision:0,primary:'No dialysis',modes:E.MODES,visible:new Set(['No dialysis']),c:config,baseline:null,DEFS:{dose:['Dose','mg']},presentationKeys:new Set(['showBands','virus']),COLORS:{'No dialysis':'#88949f'},LINE_DASH:{'No dialysis':'solid'},paletteMode:'standard',E,window:{innerHeight:900},IntersectionObserver:function(){},$:id=>elements[id],pendingPlots:new Map(),chartStates:new Map(),activePlot:null,labelsFor:t=>t,rgba:()=>'',layout:(u,h,series)=>({toolbox:{feature:{saveAsImage:{}}},series}),requestPlotFrame(){},structuredClone};
+ vm.createContext(state);vm.runInContext(fs.readFileSync(require.resolve('../public/assets/charts.js'),'utf8'),state);vm.runInContext(section('function chartNearViewport(', "\nif(typeof IntersectionObserver")+section('function chartSignature(', 'let chartWait')+section('function curve(', 'function baselineChanges(')+section('function baselineChanges(', 'function renderBaseline('),state);
  return {state,elements,run:s=>vm.runInContext(s,state)};
 }
 test('off-screen charts defer traces; scrolling draws latest data and baseline stays frozen',()=>{
@@ -48,10 +48,10 @@ test('off-screen charts defer traces; scrolling draws latest data and baseline s
  assert.ok(run('baselineChanges(baseline,c,primary)').some(x=>x.includes('Dose: 700 → 725 mg')));
  state.c.showBands=false;assert.equal(run('baselineChanges(baseline,c,primary)').length,1);
  run("curve('plasma','mg/L','plasmaChart')");
- assert.equal(state.pendingPlots.get('plasmaChart').traces.find(t=>t.name.startsWith('Baseline:')).y[1],frozen);
+ assert.equal(state.pendingPlots.get('plasmaChart').option.series.find(t=>t.name.startsWith('Baseline:')).data[1][1],frozen);
  elements.cmmgChart.getBoundingClientRect=()=>({top:300,bottom:600});run("curve('cmmg','mg/L','cmmgChart')");assert.equal(state.pendingPlots.size,3);
  elements.csfCmmgChart.getClientRects=()=>[];run("curve('csfCmmg','mg/L','csfCmmgChart')");assert.equal(state.pendingPlots.size,3);
- run("baseline=null;baselineRevision++;curve('plasma','mg/L','plasmaChart')");assert.ok(!state.pendingPlots.get('plasmaChart').traces.some(t=>t.name?.startsWith('Baseline:')));
+ run("baseline=null;baselineRevision++;curve('plasma','mg/L','plasmaChart')");assert.ok(!state.pendingPlots.get('plasmaChart').option.series.some(t=>t.name?.startsWith('Baseline:')));
 });
 test('obsolete results cannot replace a newer accepted simulation',()=>{
  let accepted=0,started=0;

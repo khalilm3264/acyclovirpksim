@@ -6,7 +6,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const expectedSources = [
-  './assets/plotly-loader.js',
+  './assets/charts.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
   './assets/ayflux-version.js',
