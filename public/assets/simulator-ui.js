@@ -793,12 +793,49 @@ $('applyPdRx').addEventListener('click',()=>{
  $('pdRxErrors').textContent='';$('pdRxErrors').classList.add('hidden');pdStatusText(enabled?`Applied ${rxDraft.length} exchange-specific PD prescriptions.`:'Using uniform PD prescription.');
  renderInputs();defer();
 });
+let anuricDefault,anuricKey='';
+function renderAnuricComparison(){
+ const compare=$('compareAnuric').checked,key=JSON.stringify([compare,c.vcScale,c.clearanceScale]);
+ if(key===anuricKey)return;
+ anuricKey=key;
+ anuricDefault??=E.anuricStudy(E.DEFAULTS);
+ const same=c.vcScale===E.DEFAULTS.vcScale&&c.clearanceScale===E.DEFAULTS.clearanceScale;
+ const current=compare&&!same?E.anuricStudy(c):anuricDefault;
+ const difference=r=>(100*(r.modelMg/r.meanMg-1)).toFixed(1)+'%';
+ for(const th of document.querySelectorAll('.anuricCurrent'))th.hidden=!compare;
+ $('anuricRows').innerHTML=anuricDefault.rows.map((r,i)=>{
+  const cells=[r.hour+' h',r.meanMg.toFixed(2)+' ± '+r.sdMg.toFixed(2),r.modelMg.toFixed(2),difference(r)];
+  if(compare)cells.push(current.rows[i].modelMg.toFixed(2),difference(current.rows[i]));
+  return '<tr>'+cells.map(value=>'<td>'+value+'</td>').join('')+'</tr>';
+ }).join('');
+ $('anuricStatus').textContent=compare&&same?'Current and default parameters give identical curves.':'';
+ const charts=window.AyFluxCharts;
+ charts.ensure().then(()=>{
+  if(key!==anuricKey)return;
+  const series=[charts.line('Default model',anuricDefault.time,anuricDefault.plasma,'#0054e9')];
+  if(compare&&!same)series.push(charts.line('Current parameters',current.time,current.plasma,'#b45a24',2,'dashed'));
+  series.push({name:'Published mean ± SD',type:'custom',z:5,itemStyle:{color:'#222'},
+   dimensions:['Time (h)','Mean (mg/L)','Lower (mg/L)','Upper (mg/L)'],encode:{x:0,y:[1,2,3],tooltip:[1,2,3]},
+   data:anuricDefault.rows.map(r=>[r.hour,r.meanMg,r.meanMg-r.sdMg,r.meanMg+r.sdMg]),
+   renderItem:(_,api)=>{
+    const [x,y]=api.coord([api.value(0),api.value(1)]);
+    const low=api.coord([api.value(0),api.value(2)])[1],high=api.coord([api.value(0),api.value(3)])[1];
+    const line=(x1,y1,x2,y2)=>({type:'line',shape:{x1,y1,x2,y2},style:{stroke:'#222',lineWidth:1.5}});
+    return {type:'group',children:[line(x,low,x,high),line(x-4,low,x+4,low),line(x-4,high,x+4,high),
+     {type:'circle',shape:{cx:x,cy:y,r:4},style:{fill:'#222'}}]};
+   }});
+  const option=charts.options(series,'Time from infusion start (h)','Plasma acyclovir (mg/L)');
+  option.xAxis.max=24;
+  charts.draw($('anuricPlot'),option);
+ }).catch(()=>{if(key===anuricKey){anuricKey='';$('anuricStatus').textContent='Chart unavailable. See the concentration table below.';}});
+}
+$('compareAnuric').addEventListener('change',renderAnuricComparison);
 function benchmarkHtml(){
  const rows=E.benchmark(c);
  const fitActive=c.vcScale!==1||c.clearanceScale!==1;
  const sign=x=>`${x>=0?'+':''}${x.toFixed(1)}%`;
  $('benchmarkRows').innerHTML=rows.map(r=>`<tr><td>${r.mgkg} mg/kg IV q8h</td><td>${r.peak.toFixed(1)} / ${r.trough.toFixed(1)}</td><td>${r.modelPeak.toFixed(2)} / ${r.modelTrough.toFixed(2)}</td><td>${sign(r.errorPeakPct)} / ${sign(r.errorTroughPct)}</td><td>${r.n}</td></tr>`).join('');
- $('anuricRows').innerHTML=E.anuricBenchmark(c).map(r=>`<tr><td>${r.hour} h</td><td>${r.meanMg.toFixed(2)} ± ${r.sdMg.toFixed(2)}</td><td>${r.modelMg.toFixed(2)}</td><td>${(100*(r.modelMg/r.meanMg-1)).toFixed(1)}%</td></tr>`).join('');
+ renderAnuricComparison();
  $('benchmarkParams').textContent=`Nominal 70 kg, CrCl 95 mL/min, 1-hour infusions, 10 doses. Central volume ×${c.vcScale.toFixed(3)}, renal/nonrenal clearance ×${c.clearanceScale.toFixed(3)}. ${fitActive?'Modified from default values.':'Default parameters.'}`;
 }
 $('fitPublished').addEventListener('click',()=>{

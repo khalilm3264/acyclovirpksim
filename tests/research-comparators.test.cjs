@@ -55,3 +55,20 @@ test('AyFlux wordmark stays self-hosted and GitHub cat icon has an accessible li
  assert.ok(css.includes('poppins-latin-800-normal.woff2'));
  assert.ok(workflow.includes('@fontsource/poppins@5.3.0'));
 });
+
+test('anuric reconstruction keeps published observations fixed while calibration changes predictions',()=>{
+ const engine=require('../public/assets/pk-engine.js');
+ const baseline=engine.anuricStudy(engine.DEFAULTS);
+ const calibrated=engine.anuricStudy({...engine.DEFAULTS,vcScale:1.2,clearanceScale:0.7});
+ assert.deepEqual(baseline.rows.map(r=>[r.hour,r.mean,r.sd]),[[1,37.5,23.3],[8,10.3,2.9],[24,6.4,2.4]]);
+ for(const curve of [baseline,calibrated]){
+  assert.equal(curve.time[0],0);
+  assert.equal(curve.time.at(-1),24);
+  for(const row of curve.rows){
+   assert.equal(row.modelMg,curve.plasma[curve.time.indexOf(row.hour)]);
+   assert.equal(row.meanMg,row.mean*(225.21/1000));
+   assert.equal(row.sdMg,row.sd*(225.21/1000));
+  }
+ }
+ assert.notEqual(calibrated.rows[0].modelMg,baseline.rows[0].modelMg);
+});

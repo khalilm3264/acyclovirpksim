@@ -446,14 +446,18 @@ function sensitivity(c,mode){
 }
 
 
-function anuricBenchmark(c){
+function anuricStudy(c){
  const cfg={...DEFAULTS,vcScale:c.vcScale??1,clearanceScale:c.clearanceScale??1,
   weight:70,crcl:0,crclSource:'manual',dose:175,every:24,doseCount:1,horizon:24,route:'Acyclovir IV',
   dosingMode:'repeat',infusion:1,draws:1,variability:0,pdRxEnabled:false};
  const p=drawParams(cfg)[0],sim=single(cfg,p,[],.25,buildDoses(cfg));
  const convert=225.21/1000;
- return [{hour:1,mean:37.5,sd:23.3},{hour:8,mean:10.3,sd:2.9},{hour:24,mean:6.4,sd:2.4}]
+ const rows=[{hour:1,mean:37.5,sd:23.3},{hour:8,mean:10.3,sd:2.9},{hour:24,mean:6.4,sd:2.4}]
   .map(r=>({...r,meanMg:r.mean*convert,sdMg:r.sd*convert,modelMg:interp(sim.t,sim.cols.plasma,r.hour)}));
+ return {time:sim.t,plasma:sim.cols.plasma,rows};
+}
+function anuricBenchmark(c){
+ return anuricStudy(c).rows;
 }
 
 function summary(v,coverage){let a=quantile(v,0.5),z=(1-coverage)/2;return {median:a,lower:quantile(v,z),upper:quantile(v,1-z)};}
@@ -589,7 +593,7 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={renalCrClAt,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={renalCrClAt,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,anuricStudy,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -116,6 +116,15 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  const svg=fs.readFileSync(await vector.path(),'utf8');assert.match(svg,/<svg\b/);assert.match(svg,/Prediction error/);assert.doesNotMatch(svg,/<image\b/);
  await page.click('#clearMeasures');await page.waitForSelector('#holdoutFigure',{state:'hidden'});
  await page.click('[data-tab="research"]');
+ await page.waitForSelector('#anuricPlot canvas');
+ const study=await optionFor('anuricPlot');
+ assert.deepEqual(study.series.find(s=>s.type==='custom').data.map(row=>row[0]),[1,8,24]);
+ await page.check('#compareAnuric');
+ assert.equal(await page.locator('#anuricRows tr').first().locator('td').count(),6);
+ await page.click('#fitPublished');
+ await page.waitForFunction(()=>echarts.getInstanceByDom(document.getElementById('anuricPlot')).getOption().series.some(s=>s.name==='Current parameters'));
+ await page.click('#resetPublished');
+ await page.uncheck('#compareAnuric');
  for(const metric of ['auc','csfPeak','mPeak','mass']){
   await page.selectOption('#tornadoMetric',metric);
   if(metric==='mass'){await page.waitForSelector('#tornado',{state:'hidden'});assert.match(await page.textContent('#tornadoStatus'),/zero baseline/);continue;}
