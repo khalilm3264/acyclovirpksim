@@ -12,6 +12,11 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+- **Time above a level.** The simulation summary reports how many hours the selected scenario's median plasma curve is above a level you type in, in the current units. No default level is offered; it is a descriptive statistic, not a target.
+- **Fuller baseline comparison.** With a frozen baseline, the panel now lists baseline → current values and percent change for peak plasma, plasma AUC, peak CSF, peak CMMG and drug removed by dialysis.
+- **Kidney injury example.** The custom CrCl trajectory editor has a *Kidney injury mid-course* example: starting CrCl to the halfway point, a fall to one fifth by three quarters, then steady. It is illustrative and must be applied like any other edit.
+- The third-party measurement pixel is disabled (`ENABLED = false` in `public/assets/measurement-pixel.js`). Pages load the file but it requests nothing from other servers.
+
 - **Shareable links.** Research tools → Save / load → *Copy shareable link* puts the current scenario (settings that differ from the defaults, selected scenario, visible curves, colors and units) into the link itself, after `#s=`. Nothing is uploaded and browsers do not send that part of a link to servers. Opening a link runs the same full validation as a JSON import, removes the scenario from the address bar, and adds an entry to version history when it replaces existing settings. Links never contain measured concentrations.
 - **Concentration units.** A *Units* selector on the Concentration tab switches graphs, the summary and the dialysis comparison table between mg/L and µmol/L (acyclovir 225.21 g/mol, CMMG 239.19 g/mol). The simulation, CSV/XLSX exports, saved JSON, Model validation and Research tools stay in mg/L.
 

@@ -1,5 +1,8 @@
+// Third-party measurement pixel. Disabled for now: while ENABLED is false this file loads nothing
+// and contacts no other server. Set ENABLED to true to turn the pixel back on.
 (function (w, d) {
-  if (w.oaiq) return;
+  const ENABLED = false;
+  if (!ENABLED || w.oaiq) return;
 
   function queue() {
     queue.q.push(arguments);

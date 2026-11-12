@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.26.0-visualization-suite-20261112-share-links-units";
+const CACHE = "ayflux-static-v0.26.0-visualization-suite-20261112-exposure-tools";
 const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",

@@ -65,6 +65,26 @@ function unitText(text){return concUnit==='umol'?text.replaceAll('mg·h/L','µmo
 function shown(value,analyte){return analyte?value*unitFactor(analyte):value;}
 const CONCENTRATION_KEYS={plasma:'acyclovir',csf:'acyclovir',cmmg:'cmmg',csfCmmg:'cmmg'};
 function setConcUnit(value){concUnit=value==='umol'?'umol':'mg';const control=document.getElementById('concUnit');if(control)control.value=concUnit;}
+// Hours the curve spends above a level, with linear interpolation at each crossing. Descriptive only.
+function timeAbove(time,values,level){
+ let hours=0;
+ for(let i=1;i<time.length;i++){
+  const a=values[i-1],b=values[i],dt=time[i]-time[i-1];
+  if(!(dt>0)||!Number.isFinite(a)||!Number.isFinite(b))continue;
+  if(a>level&&b>level)hours+=dt;
+  else if(a>level!==b>level)hours+=dt*(Math.max(a,b)-level)/Math.abs(b-a);
+ }
+ return hours;
+}
+let aboveLevelMg=null;
+function renderTimeAbove(rewrite=false){
+ const output=$('timeAboveResult'),input=$('timeAboveLevel');if(!output||!input)return;
+ $('timeAboveUnit').textContent=unitLabel();
+ if(rewrite||document.activeElement!==input)input.value=aboveLevelMg===null?'':String(Number(shown(aboveLevelMg,'acyclovir').toPrecision(6)));
+ if(aboveLevelMg===null||!results?.[primary]){output.textContent='';return;}
+ const d=results[primary],span=d.time[d.time.length-1]-d.time[0],hours=timeAbove(d.time,d.plasma.median,aboveLevelMg);
+ output.textContent=`${hours.toFixed(1)} of ${span.toFixed(0)} hours (${span>0?Math.round(100*hours/span):0}%) for the median ${primary} curve.`;
+}
 function tableOpen(){return tab==='concentration'&&!!$('tablePanel')?.open;}
 function requestedModes(all=false){return all||tableOpen()?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
 function setBusy(busy){
@@ -168,6 +188,7 @@ function renalProfileControls(){
  <div class="renal-profile-grid"><span class="renal-heading">Time (h)</span><span class="renal-heading">CrCl (mL/min)</span><span></span></div>
  ${rows}
  <div class="renal-profile-actions"><button type="button" class="btn secondary small" id="renalAdd">+ Time point</button><button type="button" class="btn small" id="renalApply">Apply profile</button></div>
+ <p class="example-row"><span class="example-label">Load an example:</span><button class="example-chip" type="button" id="renalExample" title="Starting CrCl held to the halfway point, then falling to one fifth over the next quarter of the simulation and staying there">Kidney injury mid-course</button></p>
  <p class="tip">Linear change between points, with fixed endpoints. Hypothetical CrCl inputs, not a kidney recovery forecast.</p>
  <p id="renalProfileStatus" class="tip" role="status" aria-live="polite">${renalDirty?'Unapplied edits — click Apply profile.':'Current profile applied.'}</p>
  </div>`;
@@ -396,8 +417,13 @@ function renderBaseline(){
  $('baselineStatus').textContent='Frozen baseline: '+baseline.primary+'. Dark dash-dot lines show saved medians on the four concentration charts; shading, dose markers and uncertainty bands describe the current settings only.';
  const changes=baselineChanges(baseline,c,primary);
  for(const text of changes.length?changes:['No input settings changed.']){const li=document.createElement('li');li.textContent=text;$('baselineChanges').append(li);}
- const before=shown(baseline.data.summary.peak.median,'acyclovir'),after=shown(results[primary].summary.peak.median,'acyclovir'),delta=after-before;
- $('baselineDelta').textContent=`Peak plasma acyclovir: baseline ${before.toFixed(2)} → current ${after.toFixed(2)} ${unitLabel()} (${delta>=0?'+':''}${delta.toFixed(2)} ${unitLabel()}).`+(baseline.config.horizon!==c.horizon?' Simulation durations differ; peaks cover each run’s own duration.':'');
+ const rows=[['Peak plasma acyclovir','peak','mg/L',2,'acyclovir'],['Plasma acyclovir AUC','auc','mg·h/L',0,'acyclovir'],['Peak CSF acyclovir','csfPeak','mg/L',2,'acyclovir'],['Peak plasma CMMG','mPeak','mg/L',2,'cmmg'],['Removed by dialysis','mass','mg',0]];
+ const parts=rows.map(([label,key,unit,digits,analyte])=>{
+  const before=shown(baseline.data.summary[key].median,analyte),after=shown(results[primary].summary[key].median,analyte);
+  const change=before>0?` (${after>=before?'+':''}${Math.round(100*(after-before)/before)}%)`:'';
+  return `${label}: ${before.toFixed(digits)} → ${after.toFixed(digits)} ${analyte?unitText(unit):unit}${change}`;
+ });
+ $('baselineDelta').textContent='Baseline → current, median values. '+parts.join(' · ')+'.'+(baseline.config.horizon!==c.horizon?' Simulation durations differ; each value covers its own run.':'');
 }
 $('saveBaseline').addEventListener('click',()=>{
  if(!dataIsCurrent||!results?.[primary])return;
@@ -420,6 +446,7 @@ function renderNow(){if(!results||!dataIsCurrent)return;
  if(tab==='concentration'){renderChecks();renderBaseline();}
  const summarySignature=resultsRevision+':'+primary;
  if(tab==='concentration'&&metricsSignature!==summarySignature){showStats();metricsSignature=summarySignature;}
+ if(tab==='concentration')renderTimeAbove();
  if(tableOpen()&&tableRevision!==resultsRevision&&modes.every(m=>results[m])){table();tableRevision=resultsRevision;}
  if(tab==='validation'&&validationSignature!==summarySignature){renderValidation();validationSignature=summarySignature;}
  if(tab==='research'){renderResearch();}
@@ -651,6 +678,11 @@ function handleRenalRowChange(element){
  renalDirty=true;
  const status=$('renalProfileStatus');if(status)status.textContent='Edits not yet applied. Click Apply profile to update the graph.';
 }
+// Illustrative only: steady kidney function, then a fall to one fifth of the starting value that persists.
+function kidneyInjuryExample(start,horizon){
+ const round=value=>Number(value.toFixed(2)),low=round(Math.max(0,start*.2));
+ return [{time:0,crcl:round(start)},{time:round(horizon*.5),crcl:round(start)},{time:round(horizon*.75),crcl:low},{time:round(horizon),crcl:low}];
+}
 function addRenalPoint(){
  if(renalDraft.length>=24)return;
  let index=-1,width=0;
@@ -672,6 +704,7 @@ $('patientControls').addEventListener('change',e=>{
 });
 $('patientControls').addEventListener('click',e=>{
  if(e.target.id==='renalAdd')addRenalPoint();
+ else if(e.target.id==='renalExample'){renalDraft=kidneyInjuryExample(renalDraft[0]?.crcl??c.crcl,c.horizon);renalDirty=true;renderInputs();}
  else if(e.target.id==='renalApply')applyRenalDraft();
  else if(e.target.hasAttribute('data-renal-remove')){
   const index=Number(e.target.dataset.renalRemove);
@@ -692,7 +725,8 @@ document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
-$('concUnit').addEventListener('change',e=>{setConcUnit(e.target.value);metricsSignature='';tableRevision=-1;if(results)render();});
+$('timeAboveLevel').addEventListener('input',e=>{const value=e.target.valueAsNumber;aboveLevelMg=Number.isFinite(value)&&value>=0?value/unitFactor('acyclovir'):null;renderTimeAbove();});
+$('concUnit').addEventListener('change',e=>{setConcUnit(e.target.value);renderTimeAbove(true);metricsSignature='';tableRevision=-1;if(results)render();});
 $('tablePanel').addEventListener('toggle',()=>{if(!tableOpen())return;if(!dataIsCurrent||!results||modes.some(m=>!results[m]))calculate(true);else render();});
 document.querySelector('.ref-nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(!link)return;const target=document.querySelector(link.getAttribute('href'));if(!target)return;e.preventDefault();target.scrollIntoView({block:'start',behavior:'smooth'});});
 $('scheduleRows').addEventListener('input',e=>{let i=Number(e.target.dataset.index),key=e.target.dataset.field;if(!(key&&draft[i]))return;
