@@ -1,0 +1,46 @@
+<svg width="760" height="244" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" viewBox="0 0 760 244">
+<rect width="760" height="244" x="0" y="0" fill="#ffffff"></rect>
+<path d="M270.5 65L270.5 184" fill="none" pointer-events="visible" stroke="#e3e8ec" class="zr2-cls-8"></path>
+<path d="M501.5 65L501.5 184" fill="none" pointer-events="visible" stroke="#e3e8ec" class="zr2-cls-8"></path>
+<path d="M732.5 65L732.5 184" fill="none" pointer-events="visible" stroke="#e3e8ec" class="zr2-cls-8"></path>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:14px;font-family:sans-serif;" xml:space="preserve" y="7" transform="translate(501 217)" fill="#6E7079">Recovery (% of total dose) · logarithmic scale</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:13px;font-family:sans-serif;" xml:space="preserve" transform="translate(262 84.8333)" fill="#6E7079">subject 1 five-day CAPD recovery</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:13px;font-family:sans-serif;" xml:space="preserve" transform="translate(262 124.5)" fill="#6E7079">subject 4 five-day CAPD recovery</text>
+<text dominant-baseline="central" text-anchor="end" style="font-size:13px;font-family:sans-serif;" xml:space="preserve" transform="translate(262 164.1667)" fill="#6E7079">subject 5 five-day CAPD recovery</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:13px;font-family:sans-serif;" y="6.5" transform="translate(270 192)" fill="#6E7079">1</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:13px;font-family:sans-serif;" y="6.5" transform="translate(501 192)" fill="#6E7079">10</text>
+<text dominant-baseline="central" text-anchor="middle" style="font-size:13px;font-family:sans-serif;" y="6.5" transform="translate(732 192)" fill="#6E7079">100</text>
+<path d="M1 0A1 1 0 1 1 1 -0.1A1 1 0 0 1 1 0" transform="matrix(5.5,0,0,5.5,506.8457,84.8333)" fill="#0072B2" fill-opacity="0.8" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr2-cls-9"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.1A1 1 0 0 1 1 0" transform="matrix(5.5,0,0,5.5,531.8475,124.5)" fill="#0072B2" fill-opacity="0.8" ecmeta_series_index="0" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr2-cls-9"></path>
+<path d="M1 0A1 1 0 1 1 1 -0.1A1 1 0 0 1 1 0" transform="matrix(5.5,0,0,5.5,521.7681,164.1667)" fill="#0072B2" fill-opacity="0.8" ecmeta_series_index="0" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr2-cls-9"></path>
+<path d="M0 -1L1 0L0 1L-1 0Z" transform="matrix(6,0,0,6,526.5462,84.8333)" fill="#D55E00" fill-opacity="0.8" ecmeta_series_index="1" ecmeta_data_index="0" ecmeta_ssr_type="chart" class="zr2-cls-10"></path>
+<path d="M0 -1L1 0L0 1L-1 0Z" transform="matrix(6,0,0,6,509.1658,124.5)" fill="#D55E00" fill-opacity="0.8" ecmeta_series_index="1" ecmeta_data_index="1" ecmeta_ssr_type="chart" class="zr2-cls-10"></path>
+<path d="M0 -1L1 0L0 1L-1 0Z" transform="matrix(6,0,0,6,524.2572,164.1667)" fill="#D55E00" fill-opacity="0.8" ecmeta_series_index="1" ecmeta_data_index="2" ecmeta_ssr_type="chart" class="zr2-cls-10"></path>
+<path d="M-5 -5l225.3 0l0 24l-225.3 0Z" transform="translate(272.36 17)" fill="rgb(0,0,0)" fill-opacity="0" stroke="#ccc" stroke-width="0" class="zr2-cls-8"></path>
+<path d="M19.5 7A7 7 0 1 1 19.5 6.3A7 7 0 0 1 19.5 7" transform="translate(266.86 17)" fill="#0072B2" fill-opacity="0.8" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="legend" ecmeta_silent="true" class="zr2-cls-8"></path>
+<text dominant-baseline="central" text-anchor="start" style="font-size:14px;font-family:sans-serif;" x="30" y="7" transform="translate(266.86 17)" fill="#333">Published</text>
+<path d="M5.5 0l86.2 0l0 14l-86.2 0Z" transform="translate(266.86 17)" fill="none" pointer-events="visible" ecmeta_series_index="0" ecmeta_data_index="0" ecmeta_ssr_type="legend" class="zr2-cls-11"></path>
+<path d="M12.5 0L25 7L12.5 14L0 7Z" transform="translate(368.6 17)" fill="#D55E00" fill-opacity="0.8" ecmeta_series_index="1" ecmeta_data_index="1" ecmeta_ssr_type="legend" ecmeta_silent="true" class="zr2-cls-8"></path>
+<text dominant-baseline="central" text-anchor="start" style="font-size:14px;font-family:sans-serif;" xml:space="preserve" x="30" y="7" transform="translate(368.6 17)" fill="#333">AyFlux default</text>
+<path d="M0 0l119 0l0 14l-119 0Z" transform="translate(368.6 17)" fill="none" pointer-events="visible" ecmeta_series_index="1" ecmeta_data_index="1" ecmeta_ssr_type="legend" class="zr2-cls-11"></path>
+<style ><![CDATA[
+.zr2-cls-8:hover {
+pointer-events:none;
+}
+.zr2-cls-9:hover {
+cursor:pointer;
+fill:rgba(0,125,195,1);
+}
+.zr2-cls-10:hover {
+cursor:pointer;
+fill:rgba(234,103,0,1);
+}
+.zr2-cls-11:hover {
+cursor:pointer;
+fill:rgba(0,0,0,0);
+}
+
+]]>
+
+</style>
+</svg>
