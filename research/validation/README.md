@@ -39,3 +39,7 @@ Outputs are exploratory and should not be interpreted as independently validated
 - The PD model approximates membrane transport; it is not parameterized from this study's patient-specific exchange measurements.
 - The low CMMG CSF partition discrepancy highlighted by Smith et al. (2010) remains unresolved and is **not silently modified**.
 - No UI or simulation defaults are changed in this release. The saved JSON configuration schema stays version 2.
+
+## Serum and CSF after hemodialysis
+
+[Bataille case reconstruction](BATAILLE-CSF.md) compares paired post-dialysis serum and CSF measurements and a serum measurement following rechallenge across uncertain treatment and patient inputs.
