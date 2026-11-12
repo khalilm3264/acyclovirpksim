@@ -44,10 +44,10 @@ function paintMap(){
  });});$('map').replaceChildren(table);text('legend',`${a.label} (${a.unit}): ${fmt(min)} (lowest) to ${fmt(max)} (highest); the number in each cell is its value. Each cell is a simulated scenario.`);
  if(selected&&p.selectedCell)$('map').querySelectorAll('tbody tr')[p.selectedCell[1]]?.querySelectorAll('button')[p.selectedCell[0]]?.setAttribute('aria-pressed','true');
 }
-// Colorblind-safe toggle: same stored preference as the simulator; recolors without recomputing the grid.
-$('colorblindToggle').checked=charts.accessible();
-$('colorblindToggle').addEventListener('change',async event=>{
- charts.setAccessible(event.target.checked);
+// Graph colors setting: same stored preference as the simulator; recolors without recomputing the grid.
+$('graphColors').value=charts.accessible()?'accessible':'standard';
+$('graphColors').addEventListener('change',async event=>{
+ charts.setAccessible(event.target.value==='accessible');
  if(!grid)return;
  paintMap();
  const kind=$('echartKind').value;

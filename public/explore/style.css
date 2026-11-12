@@ -3,9 +3,4 @@
 #trajectoryPanel{min-width:0;max-width:100%}
 #trajectory{width:100%;min-width:0;max-width:100%;contain:inline-size;overflow:hidden}
 
-/* Header colorblind toggle, shared preference with the simulator. */
-.site-header.ay-header .ay-header-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.site-header.ay-header .ay-colorblind-toggle{display:inline-flex;align-items:center;gap:6px;min-height:33px;color:#f5f9fc;font-weight:600;font-size:12px;cursor:pointer;white-space:nowrap}
-.site-header.ay-header .ay-colorblind-toggle input{width:16px;height:16px;margin:0;padding:0;accent-color:#f0a37c}
-.site-header.ay-header .ay-colorblind-toggle:focus-within{outline:2px solid #fff;outline-offset:3px}
 .map button{font-weight:600}

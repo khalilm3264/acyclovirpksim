@@ -22,7 +22,6 @@ let paletteMode='standard',COLORS=PALETTES.standard;
 function setPalette(value){paletteMode=Object.prototype.hasOwnProperty.call(PALETTES,value)?value:'standard';COLORS=PALETTES[paletteMode];
  const accessible=paletteMode==='accessible';
  window.AyFluxCharts?.setAccessible?.(accessible);
- const toggle=document.getElementById('colorblindToggle');if(toggle)toggle.checked=accessible;
  if(typeof Event==='function')window.dispatchEvent?.(new Event('ayflux:palette'));}
 // Start from the colorblind-safe preference saved by the header toggle, if any.
 if(window.AyFluxCharts?.accessible?.())setPalette('accessible');
@@ -207,7 +206,7 @@ function renderInputs(){let keepAdvanced=$('advanced').open;
  group('Simulation window',['horizon']);
  $('modeControls').innerHTML=modalControls();
  $('modeHint').textContent=primary==='Custom sequence'?'Define sequential treatments in Treatment timeline.':'';
- $('advancedControls').innerHTML=`<div class="inputrow"><label for="colorPalette">Graph accessibility</label><select id="colorPalette"><option value="standard" ${paletteMode==='standard'?'selected':''}>High-contrast colors</option><option value="accessible" ${paletteMode==='accessible'?'selected':''}>Colorblind-friendly (Okabe–Ito)</option></select></div><div class="inputrow"><label for="virus">Virus susceptibility reference</label><select id="virus"><option value="VZV" ${c.virus==='VZV'?'selected':''}>Varicella-zoster virus (VZV)</option><option value="HSV-1" ${c.virus==='HSV-1'?'selected':''}>HSV-1</option><option value="HSV-2" ${c.virus==='HSV-2'?'selected':''}>HSV-2</option></select><p class="tip virus-note">Only the optional cell-culture IC₅₀ range changes with virus selection; PK predictions remain unchanged. This is not a therapeutic target. <a href="#ref11">[11]</a></p></div>`+group('CNS distribution',['csfRatio','csfLag','csfMetRatio','csfMetLag'])+
+ $('advancedControls').innerHTML=`<div class="inputrow"><label for="colorPalette">Graph colors</label><select id="colorPalette"><option value="standard" ${paletteMode==='standard'?'selected':''}>Standard</option><option value="accessible" ${paletteMode==='accessible'?'selected':''}>Colorblind-friendly</option></select><p class="tip">Colorblind-friendly uses Okabe–Ito curves and viridis heatmaps here and in the visual explorer.</p></div><div class="inputrow"><label for="virus">Virus susceptibility reference</label><select id="virus"><option value="VZV" ${c.virus==='VZV'?'selected':''}>Varicella-zoster virus (VZV)</option><option value="HSV-1" ${c.virus==='HSV-1'?'selected':''}>HSV-1</option><option value="HSV-2" ${c.virus==='HSV-2'?'selected':''}>HSV-2</option></select><p class="tip virus-note">Only the optional cell-culture IC₅₀ range changes with virus selection; PK predictions remain unchanged. This is not a therapeutic target. <a href="#ref11">[11]</a></p></div>`+group('CNS distribution',['csfRatio','csfLag','csfMetRatio','csfMetLag'])+
  group('CMMG model',['formFactor','metRenal','metDial'])+
  group('Uncertainty',c.dosingMode==='custom'||c.route==='Valacyclovir oral'?['valF','valKa','variability']:['variability'])+
  group('Peritoneal membrane',['pdSmallPore','pdSigma'])+group('Assay error',['assayCV'])+
@@ -680,7 +679,6 @@ $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
 $('tablePanel').addEventListener('toggle',()=>{if(!tableOpen())return;if(!dataIsCurrent||!results||modes.some(m=>!results[m]))calculate(true);else render();});
-$('colorblindToggle').addEventListener('change',e=>{setPalette(e.target.checked?'accessible':'standard');renderInputs();if(results)render();});
 document.querySelector('.ref-nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(!link)return;const target=document.querySelector(link.getAttribute('href'));if(!target)return;e.preventDefault();target.scrollIntoView({block:'start',behavior:'smooth'});});
 $('scheduleRows').addEventListener('input',e=>{let i=Number(e.target.dataset.index),key=e.target.dataset.field;if(!(key&&draft[i]))return;
  draft[i][key]=key==='type'?e.target.value:(e.target.value===''?NaN:Number(e.target.value));dirtyTimeline=true;timelineErrors(checkDraft());paintSchedule(draft);$('timelinePending').classList.remove('hidden');});
