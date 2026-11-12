@@ -90,3 +90,34 @@ test('HD timing sweep covers the window on a half-hour grid with one session ins
  const removed=start=>E.simulate({...base,hdStart:start},'Intermittent HD').summary.mass.median;
  assert.ok(removed(0)<removed(44));
 });
+
+test('accumulation ratio compares last-dose and first-dose peaks and needs two dose times',()=>{
+ const ratio=fn('function accumulationRatio(','// One-line plain-language','accumulationRatio');
+ const time=[0,1,2,3,4,5,6,7],values=[0,4,2,1,6,3,2,1];
+ assert.equal(ratio(time,values,[0,4]),1.5);
+ assert.equal(ratio(time,values,[4,0,4]),1.5,'order and duplicates do not matter');
+ assert.equal(ratio(time,values,[0]),null);
+ assert.equal(ratio(time,values,[]),null);
+ assert.equal(ratio(time,[0,0,0,0,0,0,0,0],[0,4]),null,'no division by a zero first peak');
+ // Real regimen: repeated IV doses with no kidney function accumulate; a single dose has no ratio.
+ const run=E.simulateMany({...E.DEFAULTS,draws:1,crcl:0,horizon:96,requestedModes:['No dialysis']})['No dialysis'];
+ assert.ok(ratio(run.time,run.plasma.median,run.doses.filter(d=>d.amount>0).map(d=>d.time))>1.5);
+ const single=E.simulateMany({...E.DEFAULTS,draws:1,doseCount:1,requestedModes:['No dialysis']})['No dialysis'];
+ assert.equal(ratio(single.time,single.plasma.median,single.doses.filter(d=>d.amount>0).map(d=>d.time)),null);
+});
+
+test('scenario description states dose per kg and never invents a recommendation',()=>{
+ const describe=fn('function describeScenario(','let aboveLevelMg','describeScenario');
+ assert.equal(describe(E.DEFAULTS,'No dialysis'),'70 kg · CrCl 95 mL/min · acyclovir IV 700 mg (10 mg/kg) every 8 h, up to 12 doses, 1-h infusion · 96 h simulated · no dialysis');
+ const oral=describe({...E.DEFAULTS,route:'Valacyclovir oral',dose:1000,weight:49.9,doseCount:1},'Intermittent HD');
+ assert.match(oral,/valacyclovir oral 1000 mg \(20\.04 mg\/kg\) every 8 h, up to 1 dose ·/);
+ assert.doesNotMatch(oral,/infusion/);
+ assert.match(oral,/intermittent HD: 4 h every 48 h from hour 24$/);
+ assert.match(describe({...E.DEFAULTS,dosingMode:'custom'},'CRRT'),/custom schedule of 3 doses · 96 h simulated · CRRT at 25 mL\/kg\/h effluent$/);
+ assert.match(describe({...E.DEFAULTS,renalMode:'profile',renalProfile:[{time:0,crcl:95},{time:96,crcl:19}]},'Peritoneal dialysis'),/CrCl 95 → 19 mL\/min \(custom trajectory\).*peritoneal dialysis$/);
+ const html=read('public/index.html');
+ for(const id of ['scenarioWords','accumulationResult','resetDefaults'])assert.ok(html.includes('id="'+id+'"'),id);
+ // Reset goes through version history like every other bulk change.
+ const reset=ui.slice(ui.indexOf("$('resetDefaults')"),ui.indexOf("$('scenarioNoteClose')"));
+ assert.ok(reset.indexOf('rememberVersion(')<reset.indexOf('applyVersion('));
+});

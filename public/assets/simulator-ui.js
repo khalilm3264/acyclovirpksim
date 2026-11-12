@@ -76,11 +76,39 @@ function timeAbove(time,values,level){
  }
  return hours;
 }
+// Peak after the last dose divided by peak after the first, on one curve. Null when there are fewer than two dose times.
+function accumulationRatio(time,values,doseTimes){
+ const starts=[...new Set(doseTimes.filter(Number.isFinite))].sort((a,b)=>a-b);
+ if(starts.length<2)return null;
+ const peak=(from,to)=>{let best=-Infinity;for(let i=0;i<time.length;i++)if(time[i]>=from&&time[i]<to&&values[i]>best)best=values[i];return best;};
+ const first=peak(starts[0],starts[1]),last=peak(starts[starts.length-1],Infinity);
+ return first>0&&Number.isFinite(last)?last/first:null;
+}
+// One-line plain-language description of the selected scenario, including mg/kg for repeat dosing.
+function describeScenario(config,mode){
+ const n=value=>String(Number(Number(value).toPrecision(4))),parts=[n(config.weight)+' kg'];
+ if(config.renalMode==='profile'&&config.renalProfile?.length){const p=config.renalProfile;parts.push('CrCl '+n(p[0].crcl)+' → '+n(p[p.length-1].crcl)+' mL/min (custom trajectory)');}
+ else parts.push('CrCl '+n(config.crcl)+' mL/min');
+ if(config.dosingMode==='custom')parts.push('custom schedule of '+config.customDoses.length+' dose'+(config.customDoses.length===1?'':'s'));
+ else{
+  const oral=config.route==='Valacyclovir oral';
+  parts.push((oral?'valacyclovir oral ':'acyclovir IV ')+n(config.dose)+' mg ('+n(config.dose/config.weight)+' mg/kg) every '+n(config.every)+' h, up to '+config.doseCount+' dose'+(config.doseCount===1?'':'s')+(oral?'':', '+n(config.infusion)+'-h infusion'));
+ }
+ parts.push(n(config.horizon)+' h simulated');
+ parts.push(mode==='Intermittent HD'?'intermittent HD: '+n(config.hdDuration)+' h every '+n(config.hdRepeat)+' h from hour '+n(config.hdStart):mode==='CRRT'?'CRRT at '+n(config.effluent)+' mL/kg/h effluent':mode==='Custom sequence'?'custom dialysis sequence ('+config.schedule.length+' session'+(config.schedule.length===1?'':'s')+')':mode.toLowerCase());
+ return parts.join(' · ');
+}
 let aboveLevelMg=null;
 function renderTimeAbove(rewrite=false){
  const output=$('timeAboveResult'),input=$('timeAboveLevel');if(!output||!input)return;
  $('timeAboveUnit').textContent=unitLabel();
  if(rewrite||document.activeElement!==input)input.value=aboveLevelMg===null?'':String(Number(shown(aboveLevelMg,'acyclovir').toPrecision(6)));
+ const words=$('scenarioWords'),accumulation=$('accumulationResult');
+ if(words)words.textContent=results?.[primary]?describeScenario(c,primary):'';
+ if(accumulation){
+  const run=results?.[primary],ratio=run?accumulationRatio(run.time,run.plasma.median,run.doses.filter(d=>d.amount>0).map(d=>d.time)):null;
+  accumulation.textContent=ratio===null?'':'Accumulation: the plasma peak after the last dose is '+ratio.toFixed(2)+'× the peak after the first dose (median curve).';
+ }
  if(aboveLevelMg===null||!results?.[primary]){output.textContent='';return;}
  const d=results[primary],span=d.time[d.time.length-1]-d.time[0],hours=timeAbove(d.time,d.plasma.median,aboveLevelMg);
  output.textContent=`${hours.toFixed(1)} of ${span.toFixed(0)} hours (${span>0?Math.round(100*hours/span):0}%) for the median ${primary} curve.`;
@@ -1131,6 +1159,12 @@ for(const scenario of guidedScenarios()){
  $('guidedButtons').append(button);
 }
 $('guidedButtons').addEventListener('click',e=>{const button=e.target.closest('[data-guided]');if(button)loadGuidedScenario(button.dataset.guided);});
+$('resetDefaults').addEventListener('click',()=>{
+ rememberVersion('Before reset to defaults');
+ applyVersion({config:{...structuredClone(E.DEFAULTS),observations:[]},primary:'No dialysis',visible:['No dialysis','Intermittent HD','Custom sequence'],palette:paletteMode,unit:concUnit});
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');showScenarioNote('','');
+ researchStatus('All settings reset to defaults. Use Undo last import to go back.');alertMessage('');defer();
+});
 $('scenarioNoteClose').addEventListener('click',()=>showScenarioNote('',''));
 $('undoImport').addEventListener('click',()=>restoreVersion(0));
 $('importHistoryList').addEventListener('click',e=>{const button=e.target.closest('[data-restore]');if(button)restoreVersion(Number(button.dataset.restore));});
