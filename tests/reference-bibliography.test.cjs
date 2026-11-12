@@ -8,10 +8,10 @@ const html=read('public/index.html');
 const methods=read('public/learn/model-methods/index.html');
 const cite=read('public/cite/index.html');
 
-test('References [1]-[37] are sequential and have unique stable anchors',()=>{
+test('References [1]-[42] are sequential and have unique stable anchors',()=>{
  const ids=[...html.matchAll(/<li id="ref(\d+)"/g)].map(m=>Number(m[1]));
- assert.deepEqual(ids,Array.from({length:37},(_,i)=>i+1));
- for(let i=17;i<=37;i++){
+ assert.deepEqual(ids,Array.from({length:42},(_,i)=>i+1));
+ for(let i=17;i<=42;i++){
   const entry=html.match(new RegExp('<li id="ref'+i+'">([\\s\\S]*?)<\\/li>'))?.[1];
   assert.ok(entry,'Missing reference entry '+i);
   assert.match(entry,/https:\/\/doi\.org\//);
@@ -24,11 +24,11 @@ test('new studies have direct DOI citations, accurate evidence labels and no fal
   '10.1093/jac/dkl067',
   '10.1093/jac/24.6.947',
   '10.1159/000188514',
-  '10.22541/au.173382487.72578057/v1',
+  '10.1002/bcp.70138',
   '10.12659/AJCR.911520',
   '10.1093/jac/dky568'
  ]) assert.ok(html.includes('https://doi.org/'+doi),'Missing DOI '+doi);
- assert.match(html,/ref22[\s\S]*?not peer-reviewed/);
+ assert.match(html.match(/<li id="ref22">.*?<\/li>/)[0], /66\.6 mg/);
  assert.match(html,/ref20[\s\S]*?oral acyclovir/);
  assert.match(html,/ref21[\s\S]*?oral acyclovir/i);
  assert.match(html,/ref24[\s\S]*?not an independent PK validation cohort/);
