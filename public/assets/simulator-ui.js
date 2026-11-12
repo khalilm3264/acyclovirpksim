@@ -19,7 +19,13 @@ const PALETTES={
 const LINE_DASH={'No dialysis':'solid','Intermittent HD':'dash','Peritoneal dialysis':'dot','CRRT':'dashdot','Custom sequence':'longdash'};
 const LEGEND_DASH={'No dialysis':'solid','Intermittent HD':'dashed','Peritoneal dialysis':'dotted','CRRT':'dashed','Custom sequence':'solid'};
 let paletteMode='standard',COLORS=PALETTES.standard;
-function setPalette(value){paletteMode=Object.prototype.hasOwnProperty.call(PALETTES,value)?value:'standard';COLORS=PALETTES[paletteMode];}
+function setPalette(value){paletteMode=Object.prototype.hasOwnProperty.call(PALETTES,value)?value:'standard';COLORS=PALETTES[paletteMode];
+ const accessible=paletteMode==='accessible';
+ window.AyFluxCharts?.setAccessible?.(accessible);
+ const toggle=document.getElementById('colorblindToggle');if(toggle)toggle.checked=accessible;
+ if(typeof Event==='function')window.dispatchEvent?.(new Event('ayflux:palette'));}
+// Start from the colorblind-safe preference saved by the header toggle, if any.
+if(window.AyFluxCharts?.accessible?.())setPalette('accessible');
 
 const DEFS={
 weight:['Body weight','kg',30,150,1],crcl:['Residual creatinine clearance','mL/min',0,140,1],dose:['Acyclovir IV dose','mg',0,2000,25],doseCount:['Total planned doses','doses',1,200,1],every:['Dose interval','hours',.25,48,.25],infusion:['Infusion duration','hours',.25,4,.25],horizon:['Simulation duration','hours',24,336,12],valF:['Oral acyclovir bioavailability [8]','fraction',.2,.8,.005],valKa:['Oral conversion/absorption rate (assumed)','1/hour',.3,5,.1],
@@ -49,7 +55,8 @@ function rememberResult(key,data){
 let renalDraft=structuredClone(c.renalProfile),renalDirty=false,renalProfileEdited=false;
 // Narrow read-only integration point for optional research workspace.
 window.AyFluxResearchBridge=Object.freeze({snapshot:()=>({results,config:structuredClone(c),primary,updated:dataIsCurrent,revision:resultsRevision})});
-function requestedModes(all=false){return all||tab==='table'?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
+function tableOpen(){return tab==='concentration'&&!!$('tablePanel')?.open;}
+function requestedModes(all=false){return all||tableOpen()?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
 function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
  document.querySelector('main').setAttribute('aria-busy',String(busy));
@@ -400,7 +407,7 @@ function renderNow(){if(!results||!dataIsCurrent)return;
  if(tab==='concentration'){renderChecks();renderBaseline();}
  const summarySignature=resultsRevision+':'+primary;
  if(tab==='concentration'&&metricsSignature!==summarySignature){showStats();metricsSignature=summarySignature;}
- if(tab==='table'&&tableRevision!==resultsRevision&&modes.every(m=>results[m])){table();tableRevision=resultsRevision;}
+ if(tableOpen()&&tableRevision!==resultsRevision&&modes.every(m=>results[m])){table();tableRevision=resultsRevision;}
  if(tab==='validation'&&validationSignature!==summarySignature){renderValidation();validationSignature=summarySignature;}
  if(tab==='research'){renderResearch();}
  if(tab==='concentration'){
@@ -448,8 +455,12 @@ function checkDraft(){return E.validate({...c,schedule:draft},'Custom sequence')
 function applyTimeline(){const errs=checkDraft();timelineErrors(errs);if(errs.length)return;
  c.schedule=structuredClone(draft);dirtyTimeline=false;$('timelinePending').classList.add('hidden');primary='Custom sequence';$('primary').value=primary;visible.add(primary);renderInputs();calculate();}
 function switchTab(next){if(next==='doses')next='timeline';tab=next;for(const btn of document.querySelectorAll('[data-tab]'))btn.classList.toggle('active',btn.dataset.tab===tab);
- for(const name of ['concentration','clearance','timeline','validation','reference','table','method','research'])$(name).classList.toggle('hidden',name!==tab);
- if(tab==='table'&&(!dataIsCurrent||!results||modes.some(m=>!results[m])))calculate(true);
+ // Drug reference and methods share one tab; legacy 'reference' and 'table' targets still resolve.
+ if(tab==='reference')tab='method';
+ if(tab==='table'){tab='concentration';$('tablePanel').open=true;}
+ for(const btn of document.querySelectorAll('[data-tab]'))btn.classList.toggle('active',btn.dataset.tab===tab);
+ for(const name of ['concentration','clearance','timeline','validation','reference','method','research'])$(name).classList.toggle('hidden',name!==tab&&!(name==='reference'&&tab==='method'));
+ if(tableOpen()&&(!dataIsCurrent||!results||modes.some(m=>!results[m])))calculate(true);
  else if(results)render();
  if(tab==='timeline'){renderSchedule();renderPdRxEditor();renderDoseRows();}
  if(tab==='research')renderResearch();resizeVisibleCharts();}
@@ -668,6 +679,9 @@ document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
+$('tablePanel').addEventListener('toggle',()=>{if(!tableOpen())return;if(!dataIsCurrent||!results||modes.some(m=>!results[m]))calculate(true);else render();});
+$('colorblindToggle').addEventListener('change',e=>{setPalette(e.target.checked?'accessible':'standard');renderInputs();if(results)render();});
+document.querySelector('.ref-nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(!link)return;const target=document.querySelector(link.getAttribute('href'));if(!target)return;e.preventDefault();target.scrollIntoView({block:'start',behavior:'smooth'});});
 $('scheduleRows').addEventListener('input',e=>{let i=Number(e.target.dataset.index),key=e.target.dataset.field;if(!(key&&draft[i]))return;
  draft[i][key]=key==='type'?e.target.value:(e.target.value===''?NaN:Number(e.target.value));dirtyTimeline=true;timelineErrors(checkDraft());paintSchedule(draft);$('timelinePending').classList.remove('hidden');});
 $('scheduleRows').addEventListener('click',e=>{const b=e.target.closest('[data-delete]');if(!b)return;draft.splice(Number(b.dataset.delete),1);dirtyTimeline=true;renderSchedule();});
@@ -870,6 +884,45 @@ function downloadJSON(obj,name){
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}));
  a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
+// Session-only version history for imports. Nothing is written to storage or sent anywhere.
+const importHistory=[],IMPORT_HISTORY_LIMIT=10;
+function currentVersion(){return {config:structuredClone(c),primary,visible:[...visible],palette:paletteMode};}
+function rememberVersion(label){
+ importHistory.unshift({label:String(label).slice(0,120),savedAt:new Date(),state:currentVersion()});
+ importHistory.length=Math.min(importHistory.length,IMPORT_HISTORY_LIMIT);
+ renderImportHistory();
+}
+function applyVersion(state){
+ Object.assign(c,structuredClone(state.config));setPalette(state.palette);primary=state.primary;
+ visible=new Set(state.visible);
+ draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
+ renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
+ measureDraft=structuredClone(c.observations);rxDraft=structuredClone(c.pdRxRows);
+ $('primary').value=primary;researchRenderedPrimary='';renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxRows();
+}
+function restoreVersion(index){
+ const entry=importHistory[index];if(!entry)return;
+ const restored=entry.state,label=entry.label,time=entry.savedAt.toLocaleTimeString();
+ importHistory.splice(index,1);
+ rememberVersion('Before restoring the '+time+' version');
+ applyVersion(restored);
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');
+ researchStatus('Restored the settings saved at '+time+' ('+label+'). Recalculating…');alertMessage('');defer();
+}
+function renderImportHistory(){
+ const list=$('importHistoryList');list.replaceChildren();
+ importHistory.forEach((entry,index)=>{
+  const item=document.createElement('li'),button=document.createElement('button');
+  item.textContent=entry.savedAt.toLocaleTimeString()+' — '+entry.label+' ('+entry.state.primary+')';
+  button.type='button';button.className='btn secondary';button.textContent='Restore';button.dataset.restore=String(index);
+  button.setAttribute('aria-label','Restore settings: '+entry.label);
+  item.append(button);list.append(item);
+ });
+ $('undoImport').disabled=!importHistory.length;
+ $('importHistoryCount').textContent=importHistory.length?'('+importHistory.length+' saved)':'(empty)';
+}
+$('undoImport').addEventListener('click',()=>restoreVersion(0));
+$('importHistoryList').addEventListener('click',e=>{const button=e.target.closest('[data-restore]');if(button)restoreVersion(Number(button.dataset.restore));});
 $('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
 $('saveConfig').addEventListener('click',()=>{
  const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
@@ -939,12 +992,8 @@ $('loadConfig').addEventListener('change',async e=>{
   const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
-  Object.assign(c,next);setPalette(importedPalette);primary=input.primary;
-  visible=new Set(input.visibleScenarios);
-  draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
-  renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
-  measureDraft=structuredClone(c.observations);rxDraft=structuredClone(c.pdRxRows);
-  $('primary').value=primary;researchRenderedPrimary='';renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxRows();
+  rememberVersion('Before importing '+file.name);
+  applyVersion({config:next,primary:input.primary,visible:input.visibleScenarios,palette:importedPalette});
   migratedPayload=migrating?converted:null;
   $('downloadMigrated').classList.toggle('hidden',!migratedPayload);
   const note=migrating?`Migrated schema 1 (Version ${String(input.appVersion??'unknown')}) to schema 2. ${input.appearance?'PK settings preserved.':'PK settings preserved; standard graph palette applied (not saved in this old file).'} Download the converted JSON to keep a reusable copy.`:'AyFlux configuration loaded. All parameters validated.';

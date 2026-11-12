@@ -103,6 +103,16 @@ $('runHeatmap').addEventListener("click",async ()=>{
    }
    values.push(row);
   }
+  lastHeatmap={values,metric,xValues,yValues};
+  await drawHeatmap(lastHeatmap);
+ }catch(error){updateText("heatmapStatus","Unable to produce heatmap: "+error.message);}
+ finally{button.disabled=false;}
+});
+let lastHeatmap=null;
+window.addEventListener('ayflux:palette',()=>{if(lastHeatmap)drawHeatmap(lastHeatmap).catch(()=>{});});
+async function drawHeatmap({values,metric,xValues,yValues}){
+ {
+  const charts=window.AyFluxCharts;
   const all=values.flat(),lo=Math.min(...all),hi=Math.max(...all);
   const table=document.createElement("table");table.id="heatmapTable";
   const caption=document.createElement("caption");caption.textContent=(metric==="auc"?"Plasma AUC (mg·h/L)":"Peak plasma concentration (mg/L)")+"; rows: HD clearance (mL/min), columns: CrCl (mL/min)";
@@ -115,9 +125,9 @@ $('runHeatmap').addEventListener("click",async ()=>{
    const tr=document.createElement("tr"),th=document.createElement("th");th.scope="row";th.textContent=String(yValues[j]);tr.append(th);
    row.forEach((value,i)=>{
     const td=document.createElement("td"),pct=hi===lo?0:(value-lo)/(hi-lo);
-    const shade=Math.round(244-110*pct);
-    td.style.backgroundColor="rgb("+shade+","+Math.round(248-72*pct)+","+Math.round(250-48*pct)+")";
-    td.style.color="#203c50";td.textContent=value.toFixed(value>=100?0:2);
+    const tone=charts.heatColorAt(pct);
+    td.style.backgroundColor=tone.fill;
+    td.style.color=tone.text;td.textContent=value.toFixed(value>=100?0:2);
     td.title="HD "+yValues[j]+" mL/min; CrCl "+xValues[i]+" mL/min";
     tr.append(td);
    });
@@ -133,9 +143,12 @@ $('runHeatmap').addEventListener("click",async ()=>{
    window.AyFluxCharts.draw(target,{animation:false,grid:{left:70,right:22,top:16,bottom:96},
     xAxis:{type:'category',data:xValues,name:'Residual CrCl (mL/min)',nameLocation:'middle',nameGap:28},
     yAxis:{type:'category',data:yValues,name:'HD clearance (mL/min)',nameLocation:'middle',nameGap:42},
-    visualMap:{min:lo,max:hi===lo?lo+1:hi,orient:'horizontal',bottom:2,left:'center',inRange:{color:['#edf3f6','#6598b5','#2b5f82']}},
+    visualMap:{min:lo,max:hi===lo?lo+1:hi,orient:'horizontal',bottom:2,left:'center',inRange:{color:charts.heatColors()}},
     tooltip:{renderMode:'richText',formatter:({value:[i,j,v]})=>'CrCl '+xValues[i]+' mL/min, HD '+yValues[j]+' mL/min\n'+label+' '+v.toFixed(3)},
-    series:[{type:'heatmap',data:values.flatMap((row,j)=>row.map((v,i)=>[i,j,v]))}]});
+    series:[{type:'heatmap',itemStyle:{borderColor:'#fff',borderWidth:1},
+     // Each cell label takes the dark or light text color that contrasts with its own fill.
+     data:values.flatMap((row,j)=>row.map((v,i)=>({value:[i,j,v],label:{color:charts.heatColorAt(hi===lo?0:(v-lo)/(hi-lo)).text}}))),
+     label:{show:true,fontSize:11,fontWeight:600,formatter:p=>{const v=p.value[2];return v>=100?v.toFixed(0):v.toFixed(1);}}}]});
    $('heatmapArea').parentElement.open=false;
    updateText('heatmapStatus','Interactive Cartesian heatmap ready (49 deterministic simulations). Hover for values; expand the numeric table for accessible data.');
   }catch(error){
@@ -143,9 +156,8 @@ $('runHeatmap').addEventListener("click",async ()=>{
    $('heatmapArea').parentElement.open=true;
    updateText('heatmapStatus','49 simulations completed. Interactive plot unavailable; numeric table shown. '+error.message);
   }
- }catch(error){updateText("heatmapStatus","Unable to produce heatmap: "+error.message);}
- finally{button.disabled=false;}
-});
+ }
+}
 $('runIntegrity').addEventListener("click",async ()=>{
  const button=$('runIntegrity');button.disabled=true;updateText("integrityStatus","Checking numerical consistency…");
  try{

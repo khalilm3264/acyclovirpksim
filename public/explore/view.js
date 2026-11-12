@@ -40,15 +40,26 @@ function paintMap(){
  const head=table.createTHead().insertRow();head.append(document.createElement('th'));
  for(const x of p.xs){const th=document.createElement('th');th.scope='col';th.textContent=fmt(x);head.append(th);}
  const body=table.createTBody();p.ys.forEach((y,j)=>{const tr=body.insertRow(),th=document.createElement('th');th.scope='row';th.textContent=fmt(y);tr.append(th);p.xs.forEach((x,i)=>{
-  const v=p.z[j][i],f=(v-min)/(max-min||1),button=document.createElement('button');button.textContent=fmt(v);button.style.backgroundColor=`hsl(205 60% ${96-f*65}%)`;button.style.color=f>.5?'white':'#18354a';button.setAttribute('aria-pressed','false');button.setAttribute('aria-label',`${model.axes[p.xKey].label} ${fmt(x)}, ${model.axes[p.yKey].label} ${fmt(y)}: ${a.label} ${fmt(v)} ${a.unit}`);button.onclick=()=>selectCell(i,j);tr.insertCell().append(button);
- });});$('map').replaceChildren(table);text('legend',`${a.label} (${a.unit}): pale ${fmt(min)} → dark ${fmt(max)}. Each cell is a simulated scenario.`);
+  const v=p.z[j][i],f=(v-min)/(max-min||1),button=document.createElement('button');button.textContent=fmt(v);const tone=charts.heatColorAt(f);button.style.backgroundColor=tone.fill;button.style.color=tone.text;button.setAttribute('aria-pressed','false');button.setAttribute('aria-label',`${model.axes[p.xKey].label} ${fmt(x)}, ${model.axes[p.yKey].label} ${fmt(y)}: ${a.label} ${fmt(v)} ${a.unit}`);button.onclick=()=>selectCell(i,j);tr.insertCell().append(button);
+ });});$('map').replaceChildren(table);text('legend',`${a.label} (${a.unit}): ${fmt(min)} (lowest) to ${fmt(max)} (highest); the number in each cell is its value. Each cell is a simulated scenario.`);
+ if(selected&&p.selectedCell)$('map').querySelectorAll('tbody tr')[p.selectedCell[1]]?.querySelectorAll('button')[p.selectedCell[0]]?.setAttribute('aria-pressed','true');
 }
+// Colorblind-safe toggle: same stored preference as the simulator; recolors without recomputing the grid.
+$('colorblindToggle').checked=charts.accessible();
+$('colorblindToggle').addEventListener('change',async event=>{
+ charts.setAccessible(event.target.checked);
+ if(!grid)return;
+ paintMap();
+ const kind=$('echartKind').value;
+ if(kind){optionalChart.close();await optionalChart.show(grid,kind);}
+ if($('gridFigurePanel').open&&!$('gridFigurePanel').hidden)$('gridFigureKind').onchange?.();
+});
 $('generate').onclick=async()=>{
  $('generate').disabled=true;clearGrid();text('gridStatus','Preparing grid…');const token=request+1;
  try{const payload={config:base,mode:$('mode').value,xKey:$('xKey').value,yKey:$('yKey').value,xMin:+$('xMin').value,xMax:+$('xMax').value,yMin:+$('yMin').value,yMax:+$('yMax').value,count:+$('count').value,metric:$('metric').value};model.plan(payload);const result=await compute('grid',payload,'gridStatus');if(token!==request)return;grid=result;paintMap();window.AyFluxExplorerFigures.newGrid(grid);$('echartKind').disabled=false;$('export').disabled=false;text('gridStatus',`${grid.xs.length*grid.ys.length} scenarios over ${base.horizon} hours. Select a cell below.`);}
  catch(e){text('gridStatus',e.message);}finally{$('generate').disabled=false;}
 };
-async function selectCell(i,j){if(!grid)return;const p=grid;selected={...p.config,[p.xKey]:p.xs[i],[p.yKey]:p.ys[j]};for(const b of $('map').querySelectorAll('button'))b.setAttribute('aria-pressed','false');$('map').querySelectorAll('tbody tr')[j].querySelectorAll('button')[i].setAttribute('aria-pressed','true');await showScenario(selected,p.mode,`${model.axes[p.xKey].label}: ${fmt(p.xs[i])}; ${model.axes[p.yKey].label}: ${fmt(p.ys[j])}`);}
+async function selectCell(i,j){if(!grid)return;const p=grid;selected={...p.config,[p.xKey]:p.xs[i],[p.yKey]:p.ys[j]};p.selectedCell=[i,j];for(const b of $('map').querySelectorAll('button'))b.setAttribute('aria-pressed','false');$('map').querySelectorAll('tbody tr')[j].querySelectorAll('button')[i].setAttribute('aria-pressed','true');await showScenario(selected,p.mode,`${model.axes[p.xKey].label}: ${fmt(p.xs[i])}; ${model.axes[p.yKey].label}: ${fmt(p.ys[j])}`);}
 async function showScenario(c,mode,label){
  text('selection',label+' · '+mode);text('curveStatus','Calculating selected scenario…');$('time').disabled=true;raw=null;window.AyFluxExplorerFigures.setRaw(null);charts.dispose($('trajectory'));text('trajectorySample','');charts.dispose($('curve'));charts.dispose($('sankey'));$('amounts').replaceChildren();text('balance','');const token=request+1;
  try{const result=await compute('curve',{config:c,mode},'curveStatus');if(token!==request)return;raw=result;await charts.ensure();if(token!==request)return;drawCurve();$('time').max=raw.t.length-1;$('time').value=raw.t.length-1;$('time').disabled=false;drawTrajectory();drawSankey();window.AyFluxExplorerFigures.setRaw(raw);text('curveStatus',`Nominal simulation over ${c.horizon} h. Peak plasma ${fmt(raw.summary.peak)} mg/L; AUC ${fmt(raw.summary.auc)} mg·h/L.`);}catch(e){text('curveStatus',e.message);}

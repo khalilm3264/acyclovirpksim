@@ -90,11 +90,11 @@ function createEChartsView(container, status, selectCell) {
         animation:false,
         tooltip:{renderMode:'richText',formatter:point => {
           const [x,y,value] = point.value;
-          return [xName+' '+(surface?x:grid.xs[x]), yName+' '+(surface?y:grid.ys[y]),
+          return [xName+' '+Number((surface?x:grid.xs[x]).toPrecision(4)), yName+' '+Number((surface?y:grid.ys[y]).toPrecision(4)),
             metric.label+' '+Number(value.toPrecision(5))+' '+metric.unit].join('\n');
         }},
         visualMap:{dimension:2,min,max:max===min?min+1:max,orient:'horizontal',left:'center',bottom:0,
-          inRange:{color:['#edf5fa','#76b3d3','#155383']}},
+          inRange:{color:window.AyFluxCharts.heatColors()}},
         series:[{type:kind,data,...(surface ? {dataShape:[grid.ys.length,grid.xs.length],shading:'color'} : {})}]
       };
       if (surface) {
@@ -103,9 +103,12 @@ function createEChartsView(container, status, selectCell) {
         option.yAxis3D = {type:'value',name:yName,scale:true};
         option.zAxis3D = {type:'value',name:metric.label+' ('+metric.unit+')',scale:true};
       } else {
-        option.grid = {left:60,right:22,top:35,bottom:78};
-        option.xAxis = {type:'category',data:grid.xs,name:xName,nameLocation:'middle',nameGap:28};
-        option.yAxis = {type:'category',data:grid.ys,name:yName};
+        // Grid points such as 46.666… are shown to four significant figures.
+        const tick = value => Number(Number(value).toPrecision(4)).toString();
+        option.grid = {left:72,right:22,top:35,bottom:78};
+        option.xAxis = {type:'category',data:grid.xs.map(tick),name:xName,nameLocation:'middle',nameGap:28};
+        option.yAxis = {type:'category',data:grid.ys.map(tick),name:yName,nameLocation:'middle',nameGap:52};
+        option.series[0].itemStyle = {borderColor:'#fff',borderWidth:1};
       }
       chart.setOption(option);
       activeGrid = grid;
