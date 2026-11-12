@@ -1,0 +1,17 @@
+name: Infrastructure Engineer
+role: engineer
+label: infra
+escalates_to: ceo
+
+required_tools:
+  - github                              # GitHub issue management
+  # Add repo-specific tools below:
+  # - mcp__cloudflare                   # Cloudflare Workers / Pages
+
+runtime:
+  model: sonnet                         # Config and pipeline work — moderate complexity
+  thinking_effort: medium
+  max_turns: 200
+  enable_chrome: false
+  timeout: 0
+  extra_args: []
