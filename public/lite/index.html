@@ -133,7 +133,7 @@ footer a{margin-left:7px}
 </details>
 <p id="liteStatus" role="status" aria-live="polite">Calculating…</p>
 <details><summary>Model assumptions and sources</summary>
-<p>Lite reuses the core AyFlux acyclovir/valacyclovir PK implementation and integrates each dosing and treatment boundary. It uses one nominal parameter draw, not a calibrated patient forecast. Default inputs mirror the older Renal PK Lab v2 example: 70 kg, CrCl 5 mL/min, acyclovir 350 mg IV every 24 hours, simulation 96 hours, HD at hour 24 for four hours, repeated every 48 hours; CRRT effluent 25 mL/kg/h. CAPD and APD now use the current AyFlux exploratory dialysate-transfer model, not v2's constant peritoneal clearances.</p>
+<p>Lite uses the AyFlux model with a single set of pharmacokinetic parameters. The default scenario spans 96 hours and assumes a body weight of 70 kg, CrCl of 5 mL/min, and 350 mg of intravenous acyclovir every 24 hours. In the HD scenario, four-hour sessions begin at hour 24 and repeat every 48 hours. The default CRRT effluent rate is 25 mL/kg/h. CAPD and APD use the same dialysate-transfer model as the full simulator.</p>
 <p>The CMMG CSF partition is not displayed here. Oral valacyclovir uses an assumed absorption model. PD and CMMG parameters have important uncertainties. For equations, references and evidence limitations, see <a href="/learn/model-methods/#equations">model methods</a>.</p>
 </details>
 </section>
