@@ -80,8 +80,10 @@ test('imports snapshot the replaced settings before applying, and restores are u
  const commit=ui.indexOf("rememberVersion('Before importing '+file.name);");
  assert.ok(commit>0);
  // Snapshot happens after every validation step and immediately before the single apply call.
- assert.ok(commit>ui.indexOf("Configuration fails model validation"));
- assert.match(ui.slice(commit,commit+200),/applyVersion\(\{config:next,primary:input\.primary,visible:input\.visibleScenarios,palette:importedPalette\}\);/);
+ // All validation lives in parseConfiguration, which the import calls before the snapshot.
+ assert.ok(ui.indexOf('parseConfiguration(input);\n  rememberVersion(')>0);
+ assert.ok(ui.slice(ui.indexOf('function parseConfiguration'),ui.indexOf('// ---------- Shareable links')).includes('Configuration fails model validation'));
+ assert.match(ui.slice(commit,commit+220),/applyVersion\(\{config:next,primary:input\.primary,visible:input\.visibleScenarios,palette:importedPalette,unit:concUnit\}\);/);
  const restore=ui.slice(ui.indexOf('function restoreVersion'),ui.indexOf('function renderImportHistory'));
  assert.ok(restore.indexOf('rememberVersion(')<restore.indexOf('applyVersion('),'restoring first saves the current settings');
  assert.match(ui,/IMPORT_HISTORY_LIMIT=10/);

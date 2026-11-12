@@ -12,6 +12,9 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+- **Shareable links.** Research tools → Save / load → *Copy shareable link* puts the current scenario (settings that differ from the defaults, selected scenario, visible curves, colors and units) into the link itself, after `#s=`. Nothing is uploaded and browsers do not send that part of a link to servers. Opening a link runs the same full validation as a JSON import, removes the scenario from the address bar, and adds an entry to version history when it replaces existing settings. Links never contain measured concentrations.
+- **Concentration units.** A *Units* selector on the Concentration tab switches graphs, the summary and the dialysis comparison table between mg/L and µmol/L (acyclovir 225.21 g/mol, CMMG 239.19 g/mol). The simulation, CSV/XLSX exports, saved JSON, Model validation and Research tools stay in mg/L.
+
 - Graph colors moved out of the page header and into settings: **Advanced settings → Graph colors** in the simulator and a **Graph colors** setting on the visual explorer. The stored preference is unchanged and still shared between the two pages.
 - The dialysis comparison table is now the last panel on the Concentration tab, titled **Dialysis comparison table** with a one-line description of its contents.
 
