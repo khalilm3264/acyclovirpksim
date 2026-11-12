@@ -12,6 +12,9 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+- Graph colors moved out of the page header and into settings: **Advanced settings → Graph colors** in the simulator and a **Graph colors** setting on the visual explorer. The stored preference is unchanged and still shared between the two pages.
+- The dialysis comparison table is now the last panel on the Concentration tab, titled **Dialysis comparison table** with a one-line description of its contents.
+
 - Graph navigation: click and drag zooms into a box by default (mouse or trackpad), double-click resets, and the toolbar adds pan, zoom in/out, undo and image download. Touch screens keep page scrolling and use the toolbar. A short hint above the graphs explains the controls.
 - Layout: the primary dialysis mode is now the first sidebar control; Research tools is the second tab from the right; Drug references and Methods and References are one **References & methods** tab; the comparison table is an on-demand panel under Concentration (all scenarios are still calculated only while it is open).
 - Smaller top notice with the same warnings; the "Why upper uncertainty bands can be wide" note is a short collapsed panel; example schedules load from compact chips.

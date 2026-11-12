@@ -64,9 +64,15 @@ test('page layout: primary mode first, merged reference tab, table under Concent
  assert.doesNotMatch(html,/<section id="table"/);
  const research=html.slice(html.indexOf('<section id="research"'),html.indexOf('id="status"'));
  assert.ok(research.lastIndexOf('<div class="card')===research.indexOf('<div class="card source-library" id="referenceLibraryPanel">'),'reference library is the last research card');
+ // Graph colors live in settings, not the header; the comparison table is the last Concentration panel.
+ assert.doesNotMatch(html.slice(html.indexOf('<header'),html.indexOf('</header>')),/colorblind|<input/i);
+ assert.match(read('public/assets/simulator-ui.js'),/<label for="colorPalette">Graph colors<\/label>/);
+ assert.ok(read('public/explore/index.html').includes('id="graphColors"'));
+ assert.match(concentration,/<\/details>\s*<\/section>\s*$/,'comparison table is at the bottom of Concentration');
+ assert.ok(concentration.indexOf('id="tablePanel"')>concentration.indexOf('id="csfCmmgChart"'));
  // The safety notice stays, in plain language, with a link to the limitations.
  assert.match(html,/<div class="notice"><strong>Educational simulation only\.<\/strong>[^<]*Do not use for prescribing, toxicity assessment, or dialysis decisions\. <a href="\/disclaimer\/">/);
- for(const id of ['colorblindToggle','undoImport','importHistoryList','presetSwitch','presetHD','oralIVPreset'])assert.ok(html.includes('id="'+id+'"'),id);
+ for(const id of ['undoImport','importHistoryList','presetSwitch','presetHD','oralIVPreset'])assert.ok(html.includes('id="'+id+'"'),id);
 });
 
 test('imports snapshot the replaced settings before applying, and restores are undoable',()=>{
