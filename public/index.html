@@ -590,7 +590,7 @@ html body .shell .time-above .accumulation:empty{display:none}
 <div id="ensembleChart" style="height:400px;contain:inline-size"></div><p id="ensembleStatus" role="status"></p></details>
 <div class="card" id="heatmapPanel">
  <h2>Two-parameter sensitivity heatmap</h2>
- <p class="tip">Exploratory deterministic sweep over residual creatinine clearance and intermittent hemodialysis clearance. Each cell reruns the <strong>same simulated dose schedule</strong>, with a single parameter set. Other settings are held fixed; the time window is capped at 96 hours for responsiveness. Not a dose selection chart.</p>
+ <p class="tip">Exploratory deterministic sweep over residual creatinine clearance and intermittent hemodialysis clearance. Each cell reruns the <strong>same simulated dose schedule</strong>, with a single parameter set. Other settings, including the full simulation duration, are held fixed. Not a dose selection chart.</p>
  <div class="research-inputs"><label>Output measure<select id="heatmapMetric"><option value="auc">Plasma acyclovir AUC (mg·h/L)</option><option value="peak">Peak plasma acyclovir (mg/L)</option></select></label></div>
  <div class="research-tools-actions"><button type="button" class="btn" id="runHeatmap">Generate 7 × 7 heatmap</button></div>
  <p class="research-status" id="heatmapStatus" role="status" aria-live="polite"></p>
@@ -598,7 +598,7 @@ html body .shell .time-above .accumulation:empty{display:none}
 </div>
 <div class="card" id="hdTimingPanel">
  <h2>Hemodialysis timing explorer</h2>
- <p class="tip">Moves <strong>one</strong> hemodialysis session of the current length across the simulation and reruns the current dose schedule each time, with a single nominal parameter set. It shows how the timing of a session relative to doses changes the drug removed and the exposure. Other settings are held fixed; the window is capped at 96 hours. Not a dialysis scheduling tool.</p>
+ <p class="tip">Moves <strong>one</strong> hemodialysis session of the current length across the simulation and reruns the current dose schedule each time, with a single nominal parameter set. It shows how the timing of a session relative to doses changes the drug removed and the exposure. Session start times cover the first 96 hours; the simulation keeps its full duration, kidney-function trajectory and dose schedule. Other settings are held fixed. Not a dialysis scheduling tool.</p>
  <div class="research-tools-actions"><button type="button" class="btn" id="runHdTiming">Sweep session start time</button></div>
  <p class="research-status" id="hdTimingStatus" role="status" aria-live="polite"></p>
  <div id="hdTimingPlot" class="research-plot hidden" role="img" aria-label="Acyclovir removed by one hemodialysis session and plasma exposure, by session start time"></div>

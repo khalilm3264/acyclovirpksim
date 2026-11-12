@@ -99,24 +99,27 @@ function describeScenario(config,mode){
  return parts.join(' · ');
 }
 let aboveLevelMg=null;
+// Summary-card readouts tied to results. They show only for current results and are cleared
+// while a calculation is pending or after one fails, so a stale value is never displayed.
 function renderTimeAbove(rewrite=false){
  const output=$('timeAboveResult'),input=$('timeAboveLevel');if(!output||!input)return;
  $('timeAboveUnit').textContent=unitLabel();
  if(rewrite||document.activeElement!==input)input.value=aboveLevelMg===null?'':String(Number(shown(aboveLevelMg,'acyclovir').toPrecision(6)));
- const words=$('scenarioWords'),accumulation=$('accumulationResult');
- if(words)words.textContent=results?.[primary]?describeScenario(c,primary):'';
+ const run=dataIsCurrent&&results?results[primary]:null,words=$('scenarioWords'),accumulation=$('accumulationResult');
+ if(words)words.textContent=run?describeScenario(c,primary):'';
  if(accumulation){
-  const run=results?.[primary],ratio=run?accumulationRatio(run.time,run.plasma.median,run.doses.filter(d=>d.amount>0).map(d=>d.time)):null;
+  const ratio=run?accumulationRatio(run.time,run.plasma.median,run.doses.filter(d=>d.amount>0).map(d=>d.time)):null;
   accumulation.textContent=ratio===null?'':'Accumulation: the plasma peak after the last dose is '+ratio.toFixed(2)+'× the peak after the first dose (median curve).';
  }
- if(aboveLevelMg===null||!results?.[primary]){output.textContent='';return;}
- const d=results[primary],span=d.time[d.time.length-1]-d.time[0],hours=timeAbove(d.time,d.plasma.median,aboveLevelMg);
+ if(aboveLevelMg===null||!run){output.textContent='';return;}
+ const span=run.time[run.time.length-1]-run.time[0],hours=timeAbove(run.time,run.plasma.median,aboveLevelMg);
  output.textContent=`${hours.toFixed(1)} of ${span.toFixed(0)} hours (${span>0?Math.round(100*hours/span):0}%) for the median ${primary} curve.`;
 }
 function tableOpen(){return tab==='concentration'&&!!$('tablePanel')?.open;}
 function requestedModes(all=false){return all||tableOpen()?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
 function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
+ if(typeof renderTimeAbove==='function')renderTimeAbove();
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
  $('saveBaseline').disabled=busy||!dataIsCurrent;

@@ -70,25 +70,83 @@ test('every guided scenario passes engine validation for each curve it shows, an
  assert.match(read('public/index.html'),/deliberately unadjusted illustrations, not recommendations/);
 });
 
-test('HD timing sweep covers the window on a half-hour grid with one session inside it',()=>{
+test('HD timing sweep keeps the full simulation and places exactly one session in the first 96 hours',()=>{
  const workspace=read('public/assets/research-workspace.js');
  const i=workspace.indexOf('function hdTimingPlan('),j=workspace.indexOf("$('runHdTiming')",i),context={};
- vm.runInNewContext(workspace.slice(i,j)+';this.plan=hdTimingPlan;',context);
- for(const [horizon,hdDuration] of [[96,4],[24,4],[336,6],[48,24],[24,24]]){
-  const plan=JSON.parse(JSON.stringify(context.plan({horizon,hdDuration})));
-  assert.equal(plan.horizon,Math.min(96,horizon));
+ vm.runInNewContext(workspace.slice(i,j)+';this.plan=hdTimingPlan;this.config=hdTimingConfig;',context);
+ const plain=value=>JSON.parse(JSON.stringify(value));
+ for(const [horizon,hdDuration] of [[96,4],[24,4],[336,6],[48,24],[24,24],[168,4]]){
+  const plan=plain(context.plan({horizon,hdDuration}));
+  assert.equal(plan.horizon,horizon,'the simulation duration is never shortened');
+  assert.equal(plan.window,Math.min(96,horizon));
   assert.equal(plan.starts[0],0);
   assert.ok(plan.starts.length>=1&&plan.starts.length<=193);
   if(plan.starts.length>1)assert.ok(plan.starts[1]-plan.starts[0]<=1,'no coarser than hourly');
-  for(const start of plan.starts){assert.ok(start+plan.duration<=plan.horizon+1e-9);assert.equal(start*2,Math.round(start*2));}
-  // The sweep's own settings must be valid for the engine at both ends.
-  for(const hdStart of [plan.starts[0],plan.starts.at(-1)])assert.deepEqual(E.validate({...E.DEFAULTS,horizon:plan.horizon,hdDuration:plan.duration,hdRepeat:168,hdStart,draws:1,variability:0},'Intermittent HD'),[]);
+  for(const start of plan.starts){
+   assert.ok(start+plan.duration<=plan.window+1e-9);assert.equal(start*2,Math.round(start*2));
+   const config=plain(context.config({...E.DEFAULTS,horizon,hdDuration},plan,start));
+   assert.equal(config.schedule.length,1);assert.equal(config.horizon,horizon);
+  }
+  for(const start of [plan.starts[0],plan.starts.at(-1)])assert.deepEqual(E.validate(plain(context.config({...E.DEFAULTS,horizon,hdDuration},plan,start)),'Custom sequence'),[]);
  }
- assert.match(workspace,/hdRepeat:168/);
- // A later session can only remove drug that is there: removal at hour 0 (before any dose is absorbed) is the minimum for the default regimen.
- const base={...E.DEFAULTS,draws:1,variability:0,horizon:96,hdRepeat:168,crcl:0};
- const removed=start=>E.simulate({...base,hdStart:start},'Intermittent HD').summary.mass.median;
+ // Regression: time-dependent inputs after hour 96 must survive. These two cases failed when the horizon was capped.
+ const injury={...E.DEFAULTS,route:'Valacyclovir oral',dose:1000,every:8,doseCount:21,horizon:168,renalMode:'profile',crclSource:'manual',
+  renalProfile:[{time:0,crcl:95},{time:84,crcl:95},{time:126,crcl:19},{time:168,crcl:19}]};
+ const lateDoses={...E.DEFAULTS,horizon:168,dosingMode:'custom',customDoses:[{time:0,route:'Acyclovir IV',amount:500,infusion:1},{time:120,route:'Acyclovir IV',amount:250,infusion:1},{time:160,route:'Valacyclovir oral',amount:1000}]};
+ for(const source of [injury,lateDoses]){
+  const plan=plain(context.plan(source));
+  assert.equal(plan.horizon,168);assert.equal(plan.starts.at(-1)+plan.duration,96);
+  for(const start of [0,plan.starts[Math.floor(plan.starts.length/2)],plan.starts.at(-1)]){
+   const config=plain(context.config(source,plan,start));
+   assert.deepEqual(E.validate(config,'Custom sequence'),[]);
+   assert.deepEqual(config.renalProfile,source.renalProfile);assert.deepEqual(config.customDoses,source.customDoses);
+   const summary=E.simulate(config,'Custom sequence').summary;
+   assert.ok(Number.isFinite(summary.mass.median)&&summary.mass.median>=0&&Number.isFinite(summary.auc.median));
+  }
+  // The old approach (shortening the horizon) is what the engine rejects.
+  assert.notDeepEqual(E.validate({...source,horizon:96},'Intermittent HD'),[]);
+ }
+ // One custom-sequence session is numerically the same as one intermittent HD session.
+ const base={...E.DEFAULTS,draws:1,variability:0,crclSource:'manual'},plan96=plain(context.plan(base));
+ const single=E.simulate(plain(context.config(base,plan96,30)),'Custom sequence').summary,repeat=E.simulate({...base,hdStart:30,hdRepeat:168},'Intermittent HD').summary;
+ assert.equal(single.mass.median,repeat.mass.median);assert.equal(single.auc.median,repeat.auc.median);
+ // In a long simulation the sweep still has one session, where repeating HD would add a second.
+ const long={...base,horizon:336};
+ assert.ok(E.simulate(plain(context.config(long,plain(context.plan(long)),30)),'Custom sequence').summary.mass.median<E.simulate({...long,hdStart:30,hdRepeat:168},'Intermittent HD').summary.mass.median);
+ assert.doesNotMatch(workspace,/horizon:Math\.min\(96/,'no tool shortens the simulation');
+ const base0={...base,crcl:0};
+ const removed=start=>E.simulate(plain(context.config(base0,plan96,start)),'Custom sequence').summary.mass.median;
  assert.ok(removed(0)<removed(44));
+});
+
+test('summary readouts never show values from stale results',()=>{
+ const elements={};
+ for(const id of ['timeAboveResult','timeAboveLevel','timeAboveUnit','scenarioWords','accumulationResult','calculationState','csv','saveBaseline','status'])elements[id]={textContent:'',value:'',disabled:false,classList:{toggle(){}}};
+ const run=E.simulateMany({...E.DEFAULTS,draws:1,requestedModes:['No dialysis']});
+ const context={E,results:run,primary:'No dialysis',c:{...E.DEFAULTS},dataIsCurrent:true,$:id=>elements[id],
+  document:{activeElement:null,getElementById:id=>elements[id]||null,querySelector:()=>({setAttribute(){}})}};
+ const a=ui.indexOf('const MOLAR_MASS='),b=ui.indexOf('function tableOpen(',a),s1=ui.indexOf('function setBusy('),s2=ui.indexOf('function calculationError(',s1);
+ vm.runInNewContext(ui.slice(a,b)+ui.slice(s1,s2)+';aboveLevelMg=2;this.render=renderTimeAbove;this.busy=setBusy;',context);
+ const shown=()=>[elements.timeAboveResult.textContent,elements.accumulationResult.textContent,elements.scenarioWords.textContent];
+ context.render();
+ assert.match(shown()[0],/^\d+\.\d of 96 hours \(\d+%\) for the median No dialysis curve\.$/);
+ assert.match(shown()[1],/^Accumulation:/);assert.match(shown()[2],/^70 kg/);
+ // A calculation starts: inputs changed, results are stale.
+ context.dataIsCurrent=false;context.c.dose=2000;context.busy(true);
+ assert.deepEqual(shown(),['','',''],'cleared while a calculation is pending');
+ // Typing a level while stale must not bring a value back.
+ context.render();assert.deepEqual(shown(),['','','']);
+ // The calculation fails: still stale, still blank.
+ context.busy(false);assert.deepEqual(shown(),['','','']);
+ // New results arrive.
+ context.dataIsCurrent=true;context.busy(false);
+ assert.match(shown()[0],/of 96 hours/);assert.match(shown()[2],/2000 mg/);
+ // Results exist but not for the selected scenario.
+ context.primary='CRRT';context.render();assert.deepEqual(shown(),['','','']);
+ // Every path that starts, fails or finishes a calculation goes through setBusy.
+ assert.match(ui,/function defer\(\)\{[^\n]*dataIsCurrent=false;setBusy\(true\)/);
+ assert.match(ui.slice(ui.indexOf('function calculationError('),ui.indexOf('function calculationError(')+400),/dataIsCurrent=false;setBusy\(false\)/);
+ assert.match(ui.slice(ui.indexOf('function calculate(forceAll'),ui.indexOf('function defer()')),/dataIsCurrent=false;[\s\S]*setBusy\(true\);startNextJob\(\);[\s\S]*calculationError\(error\)/);
 });
 
 test('accumulation ratio compares last-dose and first-dose peaks and needs two dose times',()=>{

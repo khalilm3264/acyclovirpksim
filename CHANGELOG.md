@@ -24,7 +24,7 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44). **No pharmacoki
 - **Accumulation ratio.** Plasma peak after the last dose relative to the peak after the first, for the median curve. (#44)
 - **Scenario description.** A one-line plain-language summary of the selected scenario above the summary tiles, including dose in mg/kg for repeat dosing. (#44)
 - **Guided scenarios.** Three teaching presets on Research tools that load a scenario, open the Concentration tab and show a dismissible note on what to look at. The regimens are deliberately unadjusted illustrations, not recommendations. (#44)
-- **Hemodialysis timing explorer.** Moves one HD session hourly across the first 96 hours, reruns the current dose schedule with nominal parameters, and plots drug removed and plasma AUC against session start time. (#44)
+- **Hemodialysis timing explorer.** Moves one HD session hourly across the first 96 hours and reruns the scenario with nominal parameters each time, plotting drug removed and plasma AUC against session start time. The simulation keeps its full duration, kidney-function trajectory and dose schedule. (#44)
 - **Kidney injury example** for the custom CrCl trajectory editor: steady to the halfway point, a fall to one fifth by three quarters, then steady. Illustrative only. (#43)
 - **Reset to defaults** on Research tools, undoable through version history. (#44)
 - **Colorblind-friendly graph colors** (Okabe–Ito curves, viridis heatmaps), shared between the simulator and the visual explorer. (#40, #41)
@@ -46,6 +46,7 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44). **No pharmacoki
 
 ### Fixed
 
+- The two-parameter sensitivity heatmap no longer shortens the simulation to 96 hours, which made it fail for custom dose schedules with later doses. (#44)
 - Visual explorer heatmap axis labels and tooltips are rounded; they previously showed values such as 46.666666666666664. (#40)
 - The event timeline strip stays in step with the plasma chart when zooming with the new controls. (#40)
 

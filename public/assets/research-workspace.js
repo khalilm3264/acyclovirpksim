@@ -87,7 +87,7 @@ $('runHeatmap').addEventListener("click",async ()=>{
  const button=$('runHeatmap');button.disabled=true;
  try{
   const snapshot=getSnapshot();
-  const config={...snapshot.config,crclSource:"manual",draws:1,variability:0,horizon:Math.min(96,snapshot.config.horizon)};
+  const config={...snapshot.config,crclSource:"manual",draws:1,variability:0};
   const xValues=[0,10,25,50,75,100,150],yValues=[0,25,50,75,100,150,200];
   const metric=$('heatmapMetric').value,values=[];
   for(let j=0;j<yValues.length;j++){
@@ -160,31 +160,38 @@ async function drawHeatmap({values,metric,xValues,yValues}){
 }
 // One HD session moved across the window; every point reruns the same dose schedule with nominal parameters.
 function hdTimingPlan(config){
- const horizon=Math.min(96,config.horizon),duration=Math.min(config.hdDuration,horizon),last=horizon-duration;
- // Hourly starts over a 96-hour window (never coarser), on a half-hour grid. A coarse step would alias against the dose interval.
+ // The simulation keeps its full duration, so kidney-function points and doses after hour 96 stay valid.
+ // Only the session start times are limited, to the first 96 hours.
+ const horizon=config.horizon,window=Math.min(96,horizon),duration=Math.min(config.hdDuration,24,window),last=window-duration;
+ // Hourly starts (never coarser), on a half-hour grid. A coarse step would alias against the dose interval.
  const step=Math.max(.5,Math.ceil(last/96*2)/2),starts=[];
  for(let start=0;start<=last+1e-9;start+=step)starts.push(Number(start.toFixed(2)));
- return {horizon,duration,starts};
+ return {horizon,window,duration,starts};
+}
+// Exactly one HD session, expressed as a custom sequence so it cannot repeat inside a long simulation.
+function hdTimingConfig(config,plan,start){
+ return {...config,crclSource:'manual',draws:1,variability:0,schedule:[{type:'HD',start,end:Number((start+plan.duration).toFixed(2))}]};
 }
 $('runHdTiming').addEventListener('click',async ()=>{
  const button=$('runHdTiming');button.disabled=true;
  try{
   const snapshot=getSnapshot();
   const plan=hdTimingPlan(snapshot.config);
-  // hdRepeat at its maximum keeps a single session inside the 96-hour window.
-  const config={...snapshot.config,crclSource:'manual',draws:1,variability:0,horizon:plan.horizon,hdDuration:plan.duration,hdRepeat:168};
-  const reference=pk.simulate(config,'No dialysis').summary;
+  const config=snapshot.config;
+  const problems=pk.validate(hdTimingConfig(config,plan,plan.starts[plan.starts.length-1]),'Custom sequence');
+  if(problems.length)throw Error(problems.slice(0,2).join('; '));
+  const reference=pk.simulate({...config,crclSource:'manual',draws:1,variability:0},'No dialysis').summary;
   const rows=[];
   for(const [index,start] of plan.starts.entries()){
    if(index%8===0){updateText('hdTimingStatus','Computing '+(index+1)+' of '+plan.starts.length+' session times…');await pause();}
-   const summary=pk.simulate({...config,hdStart:start},'Intermittent HD').summary;
+   const summary=pk.simulate(hdTimingConfig(config,plan,start),'Custom sequence').summary;
    const row={start,removed:summary.mass.median,auc:summary.auc.median,peak:summary.peak.median,cmmg:summary.mPeak.median};
    if(!Object.values(row).every(Number.isFinite))throw Error('Nonfinite model result in sweep.');
    rows.push(row);
   }
-  const doses=snapshot.results[snapshot.primary].doses.filter(d=>d.amount>0&&d.time<=plan.horizon).map(d=>d.time);
+  const doses=snapshot.results[snapshot.primary].doses.filter(d=>d.amount>0&&d.time<=plan.window).map(d=>d.time);
   const table=document.createElement('table'),head=table.createTHead().insertRow();
-  const caption=table.createCaption();caption.textContent='One '+plan.duration+'-hour HD session, by start time. Without dialysis: plasma AUC '+reference.auc.median.toFixed(0)+' mg·h/L.';
+  const caption=table.createCaption();caption.textContent='One '+plan.duration+'-hour HD session, by start time. Values cover the full '+plan.horizon+'-hour simulation. Without dialysis: plasma AUC '+reference.auc.median.toFixed(0)+' mg·h/L.';
   for(const label of ['Session start (h)','Acyclovir removed (mg)','Plasma AUC (mg·h/L)','Peak plasma (mg/L)','Peak CMMG (mg/L)']){const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);}
   const body=table.createTBody();
   for(const row of rows){const tr=body.insertRow();for(const text of [row.start,row.removed.toFixed(1),row.auc.toFixed(0),row.peak.toFixed(2),row.cmmg.toFixed(2)])tr.insertCell().textContent=String(text);}
@@ -196,9 +203,9 @@ $('runHdTiming').addEventListener('click',async ()=>{
    const charts=window.AyFluxCharts,target=$('hdTimingPlot');target.classList.remove('hidden');
    const option=charts.options([
     charts.line('Acyclovir removed by the session (mg)',rows.map(r=>r.start),rows.map(r=>r.removed),'#285a7b',3),
-    {...charts.line('Plasma AUC over the window (mg·h/L)',rows.map(r=>r.start),rows.map(r=>r.auc),'#b55b16',3,'dashed'),yAxisIndex:1}
+    {...charts.line('Plasma AUC over the simulation (mg·h/L)',rows.map(r=>r.start),rows.map(r=>r.auc),'#b55b16',3,'dashed'),yAxisIndex:1}
    ],'HD session start (hours from first dose)','Acyclovir removed (mg)');
-   option.xAxis.max=plan.horizon;option.grid.right=74;
+   option.xAxis.max=plan.window;option.grid.right=74;
    option.yAxis=[option.yAxis,{type:'value',name:'Plasma AUC (mg·h/L)',nameLocation:'middle',nameGap:52,min:0,splitLine:{show:false}}];
    option.dataZoom=option.dataZoom.filter(z=>z.id!=='ayNavY');option.toolbox.feature.dataZoom.yAxisIndex='none';
    option.series.push({type:'line',data:[],silent:true,tooltip:{show:false},markLine:{symbol:'none',silent:true,label:{show:false},lineStyle:{color:'#8a97a3',type:'dashed',width:1},data:doses.map(time=>({xAxis:time}))}});
