@@ -158,6 +158,61 @@ async function drawHeatmap({values,metric,xValues,yValues}){
   }
  }
 }
+// One HD session moved across the window; every point reruns the same dose schedule with nominal parameters.
+function hdTimingPlan(config){
+ const horizon=Math.min(96,config.horizon),duration=Math.min(config.hdDuration,horizon),last=horizon-duration;
+ // Hourly starts over a 96-hour window (never coarser), on a half-hour grid. A coarse step would alias against the dose interval.
+ const step=Math.max(.5,Math.ceil(last/96*2)/2),starts=[];
+ for(let start=0;start<=last+1e-9;start+=step)starts.push(Number(start.toFixed(2)));
+ return {horizon,duration,starts};
+}
+$('runHdTiming').addEventListener('click',async ()=>{
+ const button=$('runHdTiming');button.disabled=true;
+ try{
+  const snapshot=getSnapshot();
+  const plan=hdTimingPlan(snapshot.config);
+  // hdRepeat at its maximum keeps a single session inside the 96-hour window.
+  const config={...snapshot.config,crclSource:'manual',draws:1,variability:0,horizon:plan.horizon,hdDuration:plan.duration,hdRepeat:168};
+  const reference=pk.simulate(config,'No dialysis').summary;
+  const rows=[];
+  for(const [index,start] of plan.starts.entries()){
+   if(index%8===0){updateText('hdTimingStatus','Computing '+(index+1)+' of '+plan.starts.length+' session times…');await pause();}
+   const summary=pk.simulate({...config,hdStart:start},'Intermittent HD').summary;
+   const row={start,removed:summary.mass.median,auc:summary.auc.median,peak:summary.peak.median,cmmg:summary.mPeak.median};
+   if(!Object.values(row).every(Number.isFinite))throw Error('Nonfinite model result in sweep.');
+   rows.push(row);
+  }
+  const doses=snapshot.results[snapshot.primary].doses.filter(d=>d.amount>0&&d.time<=plan.horizon).map(d=>d.time);
+  const table=document.createElement('table'),head=table.createTHead().insertRow();
+  const caption=table.createCaption();caption.textContent='One '+plan.duration+'-hour HD session, by start time. Without dialysis: plasma AUC '+reference.auc.median.toFixed(0)+' mg·h/L.';
+  for(const label of ['Session start (h)','Acyclovir removed (mg)','Plasma AUC (mg·h/L)','Peak plasma (mg/L)','Peak CMMG (mg/L)']){const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);}
+  const body=table.createTBody();
+  for(const row of rows){const tr=body.insertRow();for(const text of [row.start,row.removed.toFixed(1),row.auc.toFixed(0),row.peak.toFixed(2),row.cmmg.toFixed(2)])tr.insertCell().textContent=String(text);}
+  $('hdTimingArea').replaceChildren(table);
+  const best=rows.reduce((a,b)=>b.removed>a.removed?b:a),worst=rows.reduce((a,b)=>b.removed<a.removed?b:a);
+  const summaryText=plan.starts.length+' simulations. Most drug removed when the session starts at hour '+best.start+' ('+best.removed.toFixed(0)+' mg); least at hour '+worst.start+' ('+worst.removed.toFixed(0)+' mg). Dashed lines mark dose times.';
+  try{
+   await window.AyFluxCharts.ensure();
+   const charts=window.AyFluxCharts,target=$('hdTimingPlot');target.classList.remove('hidden');
+   const option=charts.options([
+    charts.line('Acyclovir removed by the session (mg)',rows.map(r=>r.start),rows.map(r=>r.removed),'#285a7b',3),
+    {...charts.line('Plasma AUC over the window (mg·h/L)',rows.map(r=>r.start),rows.map(r=>r.auc),'#b55b16',3,'dashed'),yAxisIndex:1}
+   ],'HD session start (hours from first dose)','Acyclovir removed (mg)');
+   option.xAxis.max=plan.horizon;option.grid.right=74;
+   option.yAxis=[option.yAxis,{type:'value',name:'Plasma AUC (mg·h/L)',nameLocation:'middle',nameGap:52,min:0,splitLine:{show:false}}];
+   option.dataZoom=option.dataZoom.filter(z=>z.id!=='ayNavY');option.toolbox.feature.dataZoom.yAxisIndex='none';
+   option.series.push({type:'line',data:[],silent:true,tooltip:{show:false},markLine:{symbol:'none',silent:true,label:{show:false},lineStyle:{color:'#8a97a3',type:'dashed',width:1},data:doses.map(time=>({xAxis:time}))}});
+   option.toolbox.feature.saveAsImage.name='acyclovir_hd_timing';
+   charts.draw(target,option);
+   $('hdTimingArea').parentElement.open=false;
+   updateText('hdTimingStatus',summaryText);
+  }catch(error){
+   $('hdTimingPlot').classList.add('hidden');$('hdTimingArea').parentElement.open=true;
+   updateText('hdTimingStatus',summaryText+' Interactive plot unavailable; numeric table shown. '+error.message);
+  }
+ }catch(error){updateText('hdTimingStatus','Unable to run the timing sweep: '+error.message);}
+ finally{button.disabled=false;}
+});
 $('runIntegrity').addEventListener("click",async ()=>{
  const button=$('runIntegrity');button.disabled=true;updateText("integrityStatus","Checking numerical consistency…");
  try{

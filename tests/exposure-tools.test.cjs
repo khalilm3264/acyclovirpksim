@@ -49,3 +49,44 @@ test('exposure tools stay descriptive and the measurement pixel is off',()=>{
  vm.runInNewContext(pixel,{window:w,document:d});
  assert.deepEqual(calls,[]);assert.equal(w.oaiq,undefined);
 });
+
+test('every guided scenario passes engine validation for each curve it shows, and carries no measurements',()=>{
+ const context={E,structuredClone};
+ const i=ui.indexOf('function kidneyInjuryExample('),j=ui.indexOf('function addRenalPoint(',i),k=ui.indexOf('function guidedScenarios('),l=ui.indexOf('function showScenarioNote(',k);
+ vm.runInNewContext(ui.slice(i,j)+ui.slice(k,l)+';this.list=guidedScenarios();',context);
+ const list=JSON.parse(JSON.stringify(context.list));
+ assert.equal(list.length,3);
+ assert.equal(new Set(list.map(s=>s.id)).size,3);
+ for(const scenario of list){
+  assert.deepEqual(Object.keys(scenario.config).sort(),Object.keys(E.DEFAULTS).sort(),scenario.id+' has exactly the default keys');
+  assert.deepEqual(scenario.config.observations,[]);
+  assert.ok(scenario.visible.includes(scenario.primary));
+  for(const mode of scenario.visible){assert.ok(E.MODES.includes(mode));assert.deepEqual(E.validate(scenario.config,mode),[],scenario.id+' / '+mode);}
+  // Notes describe what to look at; they must not read as dosing advice.
+  assert.doesNotMatch(scenario.note,/\b(should|recommend|must|safe dose|target)\b/i,scenario.id);
+  const sim=E.simulateMany({...scenario.config,draws:1,requestedModes:[scenario.primary]})[scenario.primary];
+  assert.ok(sim.plasma.median.every(v=>Number.isFinite(v)&&v>=0));
+ }
+ assert.match(read('public/index.html'),/deliberately unadjusted illustrations, not recommendations/);
+});
+
+test('HD timing sweep covers the window on a half-hour grid with one session inside it',()=>{
+ const workspace=read('public/assets/research-workspace.js');
+ const i=workspace.indexOf('function hdTimingPlan('),j=workspace.indexOf("$('runHdTiming')",i),context={};
+ vm.runInNewContext(workspace.slice(i,j)+';this.plan=hdTimingPlan;',context);
+ for(const [horizon,hdDuration] of [[96,4],[24,4],[336,6],[48,24],[24,24]]){
+  const plan=JSON.parse(JSON.stringify(context.plan({horizon,hdDuration})));
+  assert.equal(plan.horizon,Math.min(96,horizon));
+  assert.equal(plan.starts[0],0);
+  assert.ok(plan.starts.length>=1&&plan.starts.length<=193);
+  if(plan.starts.length>1)assert.ok(plan.starts[1]-plan.starts[0]<=1,'no coarser than hourly');
+  for(const start of plan.starts){assert.ok(start+plan.duration<=plan.horizon+1e-9);assert.equal(start*2,Math.round(start*2));}
+  // The sweep's own settings must be valid for the engine at both ends.
+  for(const hdStart of [plan.starts[0],plan.starts.at(-1)])assert.deepEqual(E.validate({...E.DEFAULTS,horizon:plan.horizon,hdDuration:plan.duration,hdRepeat:168,hdStart,draws:1,variability:0},'Intermittent HD'),[]);
+ }
+ assert.match(workspace,/hdRepeat:168/);
+ // A later session can only remove drug that is there: removal at hour 0 (before any dose is absorbed) is the minimum for the default regimen.
+ const base={...E.DEFAULTS,draws:1,variability:0,horizon:96,hdRepeat:168,crcl:0};
+ const removed=start=>E.simulate({...base,hdStart:start},'Intermittent HD').summary.mass.median;
+ assert.ok(removed(0)<removed(44));
+});

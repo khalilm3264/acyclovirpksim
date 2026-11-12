@@ -12,6 +12,10 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+- **Guided scenarios** (Research tools): three teaching presets that load a scenario, open the Concentration tab and show a short dismissible note on what to look at: unadjusted IV dosing with no kidney function, oral valacyclovir with kidney injury mid-course, and one dose across three dialysis modalities. Current settings go to version history first. The regimens are illustrations, not recommendations.
+- **Hemodialysis timing explorer** (Research tools): moves one HD session across the first 96 hours and reruns the current dose schedule with nominal parameters at each start time, plotting drug removed by the session and plasma AUC, with a numeric table.
+- Reference [22] (Vasquez Vasquez et al.) now cites the peer-reviewed article, Br J Clin Pharmacol 2025;91(8):2469–2473, and keeps the preprint as a secondary link.
+
 - **Time above a level.** The simulation summary reports how many hours the selected scenario's median plasma curve is above a level you type in, in the current units. No default level is offered; it is a descriptive statistic, not a target.
 - **Fuller baseline comparison.** With a frozen baseline, the panel now lists baseline → current values and percent change for peak plasma, plasma AUC, peak CSF, peak CMMG and drug removed by dialysis.
 - **Kidney injury example.** The custom CrCl trajectory editor has a *Kidney injury mid-course* example: starting CrCl to the halfway point, a fall to one fifth by three quarters, then steady. It is illustrative and must be applied like any other edit.

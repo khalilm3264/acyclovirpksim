@@ -29,9 +29,12 @@ test('new studies have direct DOI citations, accurate evidence labels and no fal
   '10.1093/jac/dky568',
   '10.1097/00007691-199712000-00016',
   '10.1097/00007691-199910000-00005',
-  '10.1007/s00467-023-05881-6'
+  '10.1007/s00467-023-05881-6',
+  '10.1002/bcp.70138'
  ]) assert.ok(html.includes('https://doi.org/'+doi),'Missing DOI '+doi);
- assert.match(html,/ref22[\s\S]*?not peer-reviewed/);
+ // [22] is cited as the peer-reviewed 2025 article, with the preprint kept as a secondary link.
+ assert.match(html,/id="ref22">[^\n]*Br J Clin Pharmacol\. 2025;91\(8\):2469–2473[^\n]*10\.1002\/bcp\.70138[^\n]*earlier preprint/);
+ assert.doesNotMatch(html.match(/<li id="ref22">[\s\S]*?<\/li>/)[0],/not peer-reviewed/);
  assert.match(html,/ref20[\s\S]*?oral acyclovir/);
  assert.match(html,/ref21[\s\S]*?oral acyclovir/i);
  assert.match(html,/ref24[\s\S]*?not an independent PK validation cohort/);
