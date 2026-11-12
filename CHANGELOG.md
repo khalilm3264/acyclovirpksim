@@ -18,6 +18,8 @@ This changelog distinguishes the application version from the configuration sche
 - Save / load: every JSON import first stores the settings it replaces. **Undo last import** and a 10-entry **Version history** restore earlier settings; history lives only in the open tab and is never written to storage.
 - More colorful two-parameter heatmaps with value labels, and a **Colorblind-safe colors** toggle in the header (Okabe–Ito curves, viridis heatmaps). The preference is one browser flag shared with the visual explorer; the Advanced setting stays in step.
 - The published-study reference library is the last item on Research tools, styled as a source list.
+- Drug reference table regrouped by kidney function and modality (normal, intermittent HD, PD, CRRT, CNS/metabolite), with rows for oral valacyclovir bioavailability, oral acyclovir HD removal, CAPD peritoneal clearance and three CRRT studies. Added references [38]–[40] (Boulieu 1997, Bleyzac 1999, Collignon 2023).
+- Visual explorer: colorblind-safe toggle (shared preference), multi-hue grid and heatmap colors with contrast-checked cell text, and rounded heatmap axis labels and tooltips (previously long decimals such as 46.666666666666664).
 - No pharmacokinetic equation, parameter, export format or configuration schema (2) changed.
 
 ## [0.26.0] - 2026-11-09 (preview)
