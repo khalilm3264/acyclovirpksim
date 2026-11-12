@@ -12,6 +12,14 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+- Graph navigation: click and drag zooms into a box by default (mouse or trackpad), double-click resets, and the toolbar adds pan, zoom in/out, undo and image download. Touch screens keep page scrolling and use the toolbar. A short hint above the graphs explains the controls.
+- Layout: the primary dialysis mode is now the first sidebar control; Research tools is the second tab from the right; Drug references and Methods and References are one **References & methods** tab; the comparison table is an on-demand panel under Concentration (all scenarios are still calculated only while it is open).
+- Smaller top notice with the same warnings; the "Why upper uncertainty bands can be wide" note is a short collapsed panel; example schedules load from compact chips.
+- Save / load: every JSON import first stores the settings it replaces. **Undo last import** and a 10-entry **Version history** restore earlier settings; history lives only in the open tab and is never written to storage.
+- More colorful two-parameter heatmaps with value labels, and a **Colorblind-safe colors** toggle in the header (Okabe–Ito curves, viridis heatmaps). The preference is one browser flag shared with the visual explorer; the Advanced setting stays in step.
+- The published-study reference library is the last item on Research tools, styled as a source list.
+- No pharmacokinetic equation, parameter, export format or configuration schema (2) changed.
+
 ## [0.26.0] - 2026-11-09 (preview)
 
 - Added **Boelaert 1987 CAPD full-engine verification** via a reproducible research script and CI artifact for three prespecified patients, including actual exchange timing, model/drain mass accounting, ablation, and time-step checks.
