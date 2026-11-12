@@ -39,3 +39,7 @@ Outputs are exploratory and should not be interpreted as independently validated
 - The PD model approximates membrane transport; it is not parameterized from this study's patient-specific exchange measurements.
 - The low CMMG CSF partition discrepancy highlighted by Smith et al. (2010) remains unresolved and is **not silently modified**.
 - No UI or simulation defaults are changed in this release. The saved JSON configuration schema stays version 2.
+
+## Cross-study comparison
+
+Run `node research/validation/compare-benchmarks.cjs` to reproduce the [benchmark comparison](COMPARISON-RESULTS.md). It selects clearance and central-volume multipliers against two parent acyclovir samples, then applies them to serum, CSF, CMMG, urinary recovery and dialysis recovery endpoints in the other studies.
