@@ -179,3 +179,32 @@ test('scenario description states dose per kg and never invents a recommendation
  const reset=ui.slice(ui.indexOf("$('resetDefaults')"),ui.indexOf("$('scenarioNoteClose')"));
  assert.ok(reset.indexOf('rememberVersion(')<reset.indexOf('applyVersion('));
 });
+
+test('HD timing stops after a settings change during a yielded sweep',async()=>{
+ const workspace=read('public/assets/research-workspace.js');
+ const begin=workspace.indexOf('function hdTimingPlan(');
+ const end=workspace.indexOf("$('runIntegrity')",begin);
+ for(const change of [{updated:false,revision:1,primary:'No dialysis'},
+   {updated:true,revision:2,primary:'No dialysis'},
+   {updated:true,revision:1,primary:'CRRT'}]){
+  const elements={};
+  let handler,calls=0,current={updated:true,revision:1,primary:'No dialysis'};
+  for(const id of ['runHdTiming','hdTimingArea','hdTimingPlot','hdTimingStatus']){
+   elements[id]={disabled:false,textContent:'',replaceChildren(){this.cleared=true;},
+    classList:{add(){}},addEventListener(type,callback){handler=callback;}};
+  }
+  const snapshot={...current,config:{...E.DEFAULTS}};
+  const context={
+   $:id=>elements[id],bridge:{snapshot:()=>current},getSnapshot:()=>snapshot,
+   updateText:(id,text)=>{elements[id].textContent=text;},
+   pause:async()=>{current=change;},
+   pk:{validate:()=>[],simulate:()=>{calls++;return {summary:{auc:{median:100}}};}}
+  };
+  vm.runInNewContext(workspace.slice(begin,end),context);
+  await handler();
+  assert.equal(calls,1,'only the reference ran before the source scenario changed');
+  assert.match(elements.hdTimingStatus.textContent,/Settings changed/);
+  assert.equal(elements.hdTimingArea.cleared,true);
+  assert.equal(elements.runHdTiming.disabled,false);
+ }
+});

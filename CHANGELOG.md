@@ -46,6 +46,8 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44). **No pharmacoki
 
 ### Fixed
 
+- The HD timing explorer cancels an in-progress sweep when its source settings or selected scenario change, clearing the previous output. (#44)
+
 - The two-parameter sensitivity heatmap no longer shortens the simulation to 96 hours, which made it fail for custom dose schedules with later doses. (#44)
 - Visual explorer heatmap axis labels and tooltips are rounded; they previously showed values such as 46.666666666666664. (#40)
 - The event timeline strip stays in step with the plasma chart when zooming with the new controls. (#40)

@@ -172,8 +172,16 @@ function hdTimingPlan(config){
 function hdTimingConfig(config,plan,start){
  return {...config,crclSource:'manual',draws:1,variability:0,schedule:[{type:'HD',start,end:Number((start+plan.duration).toFixed(2))}]};
 }
+function cancelStaleHdTiming(snapshot){
+ const current=bridge.snapshot();
+ if(current.updated&&current.revision===snapshot.revision&&current.primary===snapshot.primary)return false;
+ $('hdTimingArea').replaceChildren();$('hdTimingPlot').classList.add('hidden');
+ updateText('hdTimingStatus','Settings changed. Run the timing sweep again.');
+ return true;
+}
 $('runHdTiming').addEventListener('click',async ()=>{
  const button=$('runHdTiming');button.disabled=true;
+ $('hdTimingArea').replaceChildren();$('hdTimingPlot').classList.add('hidden');
  try{
   const snapshot=getSnapshot();
   const plan=hdTimingPlan(snapshot.config);
@@ -184,11 +192,13 @@ $('runHdTiming').addEventListener('click',async ()=>{
   const rows=[];
   for(const [index,start] of plan.starts.entries()){
    if(index%8===0){updateText('hdTimingStatus','Computing '+(index+1)+' of '+plan.starts.length+' session times…');await pause();}
+   if(cancelStaleHdTiming(snapshot))return;
    const summary=pk.simulate(hdTimingConfig(config,plan,start),'Custom sequence').summary;
    const row={start,removed:summary.mass.median,auc:summary.auc.median,peak:summary.peak.median,cmmg:summary.mPeak.median};
    if(!Object.values(row).every(Number.isFinite))throw Error('Nonfinite model result in sweep.');
    rows.push(row);
   }
+  if(cancelStaleHdTiming(snapshot))return;
   const doses=snapshot.results[snapshot.primary].doses.filter(d=>d.amount>0&&d.time<=plan.window).map(d=>d.time);
   const table=document.createElement('table'),head=table.createTHead().insertRow();
   const caption=table.createCaption();caption.textContent='One '+plan.duration+'-hour HD session, by start time. Values cover the full '+plan.horizon+'-hour simulation. Without dialysis: plasma AUC '+reference.auc.median.toFixed(0)+' mg·h/L.';
@@ -200,6 +210,7 @@ $('runHdTiming').addEventListener('click',async ()=>{
   const summaryText=plan.starts.length+' simulations. Most drug removed when the session starts at hour '+best.start+' ('+best.removed.toFixed(0)+' mg); least at hour '+worst.start+' ('+worst.removed.toFixed(0)+' mg). Dashed lines mark dose times.';
   try{
    await window.AyFluxCharts.ensure();
+   if(cancelStaleHdTiming(snapshot))return;
    const charts=window.AyFluxCharts,target=$('hdTimingPlot');target.classList.remove('hidden');
    const option=charts.options([
     charts.line('Acyclovir removed by the session (mg)',rows.map(r=>r.start),rows.map(r=>r.removed),'#285a7b',3),
