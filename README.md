@@ -33,15 +33,36 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 
 | Explore | Current tools |
 | --- | --- |
-| **Kidney function** | Constant CrCl or an optional user-drawn, piecewise-linear CrCl trajectory; independent renal clearance terms for acyclovir and CMMG |
-| **Renal replacement therapy** | Intermittent hemodialysis, peritoneal dialysis, CRRT and custom sequential schedules |
-| **Drug administration** | IV acyclovir infusions and oral valacyclovir, with repeat or custom dose timelines |
-| **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and estimated peaks |
-| **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity and model consistency checks |
-| **Data exchange** | Detailed or tidy CSV exports, configuration JSON, optional independent **mrgsolve** and **OSPSuite-R** comparison scripts, and local PK-Sim/MoBi **results** CSV overlays |
-| **Reports and access** | Print-formatted PDF report with scenario-specific charts and page breaks, literature benchmark examples and offline static app caching where supported |
+| **Kidney function** | Constant CrCl or a user-drawn, piecewise-linear CrCl trajectory, with a kidney-injury example; independent renal clearance terms for acyclovir and CMMG |
+| **Renal replacement therapy** | Intermittent hemodialysis, peritoneal dialysis, CRRT and custom sequential schedules; a dialysis comparison table across all modes; a hemodialysis timing explorer |
+| **Drug administration** | IV acyclovir infusions and oral valacyclovir, with repeat or custom dose timelines and dose shown in mg/kg |
+| **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and peaks, in mg/L or µmol/L |
+| **Descriptive statistics** | Time above a level you choose, accumulation ratio, and baseline → current comparison with percent change |
+| **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity heatmaps and model consistency checks |
+| **Teaching** | Guided scenarios with notes on what to look at, example schedules, and a grouped drug reference table with 40 sources |
+| **Saving and sharing** | Shareable links, configuration JSON with undo and version history, detailed or tidy CSV, PK-Sim/MoBi **results** XLSX |
+| **Research comparisons** | Optional **mrgsolve** and **OSPSuite-R** scripts, local PK-Sim/MoBi results CSV overlays, a pediatric model comparison and published benchmarks |
+| **Reports and access** | Print-formatted PDF report, colorblind-friendly colors, keyboard-usable controls and offline caching where supported |
 
 **What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
+
+## What's new since 0.26.0
+
+These are merged and live at [ayflux.org](https://ayflux.org/) but not yet tagged as a release. None of them changes a model equation, parameter or default. Full details are in the [changelog](CHANGELOG.md#unreleased).
+
+- **Zoom like Plotly:** drag a box on any graph, double-click to reset; pan, zoom and download from the toolbar.
+- **Shareable links:** send someone a scenario as a link. The settings live in the link; nothing is uploaded.
+- **mg/L ↔ µmol/L:** switch units for graphs, summary and comparison table.
+- **Guided scenarios:** three teaching presets with a note on what to look at.
+- **Hemodialysis timing explorer:** see how the start time of one session changes drug removed.
+- **Time above a level, accumulation ratio and a fuller baseline comparison.**
+- **Undo and version history** for imports, links, guided scenarios and resets.
+- **Expanded drug reference:** grouped by modality, with CRRT sources added.
+- **Privacy:** the third-party measurement pixel is switched off.
+
+## Privacy
+
+Simulations run in your browser. Configurations, measurements, CSV files and reports are not sent to a server. A shareable link carries its scenario after the `#`, a part of the address that browsers do not transmit, and never includes measured concentrations. The site's third-party measurement pixel is currently disabled. Do not enter identifiable patient data.
 
 ## AyFlux Lite — a compact, v2-inspired alternative
 
@@ -57,9 +78,12 @@ Lite draws immediately with native Canvas while the interactive ECharts renderer
 
 The full simulator header links directly to the **User guide**. Lite is available from a collapsed alternative-interface note in the guide's **About AyFlux** section; the full site no longer displays a separate Lite button or slow-load pop-up.
 
-## Baseline comparison
+## Comparing scenarios
 
-In the Concentration tab, choose **Save selected curve as baseline**, then change inputs. The dark dash-dot curve preserves the selected scenario’s median concentrations. Expand **Changed settings** to see the differences, or replace/clear the baseline. It is kept only for the current page session and is not included in configuration or data exports. Dose markers, shading and uncertainty bands refer to the current run. When durations differ, the chart shows both time ranges and the peak comparison notes the difference.
+- **Overlays:** tick dialysis modes on the Concentration tab to draw them as separate what-if curves.
+- **Baseline:** choose **Save selected curve as baseline**, then change inputs. A dark dash-dot curve keeps the saved medians, **Changed settings** lists what differs, and the panel reports baseline → current values with percent change for peak plasma, AUC, peak CSF, peak CMMG and drug removed by dialysis. The baseline lasts for the page session and is not exported.
+- **Dialysis comparison table:** the last panel on the Concentration tab lists the same outcomes for every mode. Opening it calculates all modes.
+- **Guided scenarios:** Research tools has three presets that set this up for you.
 
 Completed results for up to three configurations are reused in memory; new numerical inputs and fitting observations invalidate reuse. Charts below the visible area wait until you scroll near them. See [performance verification](docs/interface-performance.md) for the scope of the measurements.
 
@@ -88,10 +112,17 @@ Charts share a self-hosted ECharts library. The explorer requests ECharts GL whe
 
 ## A guide to the interface
 
-1. **Patient and medication:** set body mass, residual CrCl or a kidney-function trajectory, dosing, and the simulation horizon.
-2. **Dialysis scenario:** select no dialysis, HD, PD, CRRT or a custom schedule. The graph overlays are hypothetical counterfactual comparisons; a custom schedule follows a single simulated switching timeline.
-3. **Concentration and clearance:** explore plasma, CSF, CMMG, and time-resolved dialysis/renal clearance results, with clearly labeled units.
-4. **Research tools:** inspect model assumptions, compare a local OSP results CSV, export data, run numerical diagnostics and create a printable research summary.
+The sidebar holds the inputs; six tabs hold the results.
+
+| Where | What you do there |
+| --- | --- |
+| **Sidebar** | Pick the dialysis scenario first, then body weight, kidney function, drug, dose and duration. Advanced settings holds model parameters, uncertainty options and graph colors. |
+| **Concentration** | Read the scenario description and summary, choose units, overlay modes, freeze a baseline, and view plasma, CSF and CMMG curves. The dialysis comparison table is at the bottom. |
+| **Clearance & sessions** | Kidney function over time, dialysis clearance and drug removal. |
+| **Custom timeline** | Build a sequence of dialysis sessions, PD exchanges and individual doses. |
+| **Model validation** | Enter measured concentrations to reweight the model and check held-out points. |
+| **Research tools** | Guided scenarios, save/load/share, heatmaps, HD timing explorer, diagnostics, benchmarks and the PDF report. |
+| **References & methods** | Drug reference table, model methods and the numbered bibliography. |
 
 For deeper explanations, see [Dialysis](https://ayflux.org/learn/dialysis/), [Model methods and limits](https://ayflux.org/learn/model-methods/) and the [CSV/R/OSP exchange guide](docs/data-exchange.md).
 
@@ -127,7 +158,10 @@ Scientific changes should include the units, equations or assumptions changed, p
 | --- | --- |
 | [`public/index.html`](public/index.html) | Responsive simulator interface |
 | [`public/assets/pk-engine.js`](public/assets/pk-engine.js) | Model equations, dialysis state and numerical integration |
-| [`public/assets/simulator-ui.js`](public/assets/simulator-ui.js) | Form validation, plots, scenarios and configuration handling |
+| [`public/assets/simulator-ui.js`](public/assets/simulator-ui.js) | Form validation, plots, scenarios, units, shareable links and configuration handling |
+| [`public/assets/charts.js`](public/assets/charts.js) | Shared chart options, zoom controls and color palettes |
+| [`public/explore/`](public/explore/) / [`public/research/`](public/research/) | Visual explorer and pediatric research module |
+| [`research/`](research/) | Reproducible validation scripts and benchmark write-ups |
 | [`public/assets/osp-import.js`](public/assets/osp-import.js) / [`ayflux-exchange.js`](public/assets/ayflux-exchange.js) | Unit-aware results import/export |
 | [`public/assets/research-workspace.js`](public/assets/research-workspace.js) | Diagnostic, sensitivity and research comparison tools |
 | [`src/index.js`](src/index.js) | Cloudflare Worker headers and static routing |

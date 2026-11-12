@@ -1,41 +1,57 @@
-# AyFlux changelog
+# Changelog
 
-## Unreleased — pediatric research module
-- Added a source-audited Abdalla/Zeng pediatric IV comparison, nine reproducible covariate scenarios, 12 bibliography entries, and explicit limitations for CAPD, CMMG, neonatal and CNS evidence.
+All notable changes to AyFlux are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) with a `preview` label while the project is pre-1.0.
 
+Three things are versioned separately:
 
-- Add an isolated Abdalla (2020) IV pediatric model with weight/eGFR comparisons, conditional variability bands, accessible numeric results, and CSV export.
-- Add equation verification, independent RK4 and exposure checks, and reproducible fixtures. Population target-attainment and clinical validation remain unperformed.
-- Link the module from the guide and model methods; add reference [25].
+- **Application version** (this file, `public/assets/ayflux-version.js`, `CITATION.cff`).
+- **Configuration schema** for saved JSON files, currently **2**. It changes only when saved files would stop loading.
+- **License**, AGPL-3.0-only.
 
-This changelog distinguishes the application version from the configuration schema and AGPL license.
+Every entry states whether pharmacokinetic equations, parameters or defaults changed. If an entry does not say so, they did not.
 
-## Unreleased
+## [Unreleased]
 
-- **Guided scenarios** (Research tools): three teaching presets that load a scenario, open the Concentration tab and show a short dismissible note on what to look at: unadjusted IV dosing with no kidney function, oral valacyclovir with kidney injury mid-course, and one dose across three dialysis modalities. Current settings go to version history first. The regimens are illustrations, not recommendations.
-- **Hemodialysis timing explorer** (Research tools): moves one HD session across the first 96 hours and reruns the current dose schedule with nominal parameters at each start time, plotting drug removed by the session and plasma AUC, with a numeric table.
-- Reference [22] (Vasquez Vasquez et al.) now cites the peer-reviewed article, Br J Clin Pharmacol 2025;91(8):2469–2473, and keeps the preprint as a secondary link.
+Changes merged to `main` since 0.26.0 (pull requests #40–#44). **No pharmacokinetic equation, parameter, default, export format or configuration schema changed.**
 
-- **Time above a level.** The simulation summary reports how many hours the selected scenario's median plasma curve is above a level you type in, in the current units. No default level is offered; it is a descriptive statistic, not a target.
-- **Fuller baseline comparison.** With a frozen baseline, the panel now lists baseline → current values and percent change for peak plasma, plasma AUC, peak CSF, peak CMMG and drug removed by dialysis.
-- **Kidney injury example.** The custom CrCl trajectory editor has a *Kidney injury mid-course* example: starting CrCl to the halfway point, a fall to one fifth by three quarters, then steady. It is illustrative and must be applied like any other edit.
-- The third-party measurement pixel is disabled (`ENABLED = false` in `public/assets/measurement-pixel.js`). Pages load the file but it requests nothing from other servers.
+### Added
 
-- **Shareable links.** Research tools → Save / load → *Copy shareable link* puts the current scenario (settings that differ from the defaults, selected scenario, visible curves, colors and units) into the link itself, after `#s=`. Nothing is uploaded and browsers do not send that part of a link to servers. Opening a link runs the same full validation as a JSON import, removes the scenario from the address bar, and adds an entry to version history when it replaces existing settings. Links never contain measured concentrations.
-- **Concentration units.** A *Units* selector on the Concentration tab switches graphs, the summary and the dialysis comparison table between mg/L and µmol/L (acyclovir 225.21 g/mol, CMMG 239.19 g/mol). The simulation, CSV/XLSX exports, saved JSON, Model validation and Research tools stay in mg/L.
+- **Graph navigation.** Click and drag zooms into a box by default with a mouse or trackpad; double-click resets. The toolbar adds pan, zoom in/out, undo and image download, and Shift + scroll zooms the time axis. Touch screens keep page scrolling and use the toolbar. (#40)
+- **Version history for imports.** Every JSON import, shared link, guided scenario and reset first stores the settings it replaces. *Undo last import* and a 10-entry history restore them. History lives only in the open tab. (#40, #42, #44)
+- **Shareable links.** *Copy shareable link* puts the scenario into the link itself after `#s=`. Nothing is uploaded; opening a link runs the same validation as a JSON import and removes the scenario from the address bar. Links never contain measured concentrations. Format documented in `docs/data-exchange.md`. (#42)
+- **Concentration units.** A *Units* selector switches graphs, the summary and the dialysis comparison table between mg/L and µmol/L (acyclovir 225.21 g/mol, CMMG 239.19 g/mol). The simulation, exports, saved files, Model validation and Research tools stay in mg/L. (#42)
+- **Time above a level.** Hours the selected scenario's median plasma curve is above a level you enter. No default level is offered; it is a descriptive statistic, not a target. (#43)
+- **Accumulation ratio.** Plasma peak after the last dose relative to the peak after the first, for the median curve. (#44)
+- **Scenario description.** A one-line plain-language summary of the selected scenario above the summary tiles, including dose in mg/kg for repeat dosing. (#44)
+- **Guided scenarios.** Three teaching presets on Research tools that load a scenario, open the Concentration tab and show a dismissible note on what to look at. The regimens are deliberately unadjusted illustrations, not recommendations. (#44)
+- **Hemodialysis timing explorer.** Moves one HD session hourly across the first 96 hours, reruns the current dose schedule with nominal parameters, and plots drug removed and plasma AUC against session start time. (#44)
+- **Kidney injury example** for the custom CrCl trajectory editor: steady to the halfway point, a fall to one fifth by three quarters, then steady. Illustrative only. (#43)
+- **Reset to defaults** on Research tools, undoable through version history. (#44)
+- **Colorblind-friendly graph colors** (Okabe–Ito curves, viridis heatmaps), shared between the simulator and the visual explorer. (#40, #41)
+- **CRRT evidence.** Drug reference rows and references [38]–[40]: Boulieu 1997 (adult CVVHD), Bleyzac 1999 (CRRT variability), Collignon 2023 (pediatric CVVHDF). The first two are cited at abstract level and say so. (#40)
+- **Pediatric research module.** An isolated Abdalla (2020) IV pediatric model with weight/eGFR comparisons, conditional variability bands, accessible numeric results and CSV export; a source-audited Abdalla/Zeng comparison with nine reproducible covariate scenarios and 12 bibliography entries; equation verification with independent RK4 and exposure checks. Population target-attainment and clinical validation remain unperformed.
 
-- Graph colors moved out of the page header and into settings: **Advanced settings → Graph colors** in the simulator and a **Graph colors** setting on the visual explorer. The stored preference is unchanged and still shared between the two pages.
-- The dialysis comparison table is now the last panel on the Concentration tab, titled **Dialysis comparison table** with a one-line description of its contents.
+### Changed
 
-- Graph navigation: click and drag zooms into a box by default (mouse or trackpad), double-click resets, and the toolbar adds pan, zoom in/out, undo and image download. Touch screens keep page scrolling and use the toolbar. A short hint above the graphs explains the controls.
-- Layout: the primary dialysis mode is now the first sidebar control; Research tools is the second tab from the right; Drug references and Methods and References are one **References & methods** tab; the comparison table is an on-demand panel under Concentration (all scenarios are still calculated only while it is open).
-- Smaller top notice with the same warnings; the "Why upper uncertainty bands can be wide" note is a short collapsed panel; example schedules load from compact chips.
-- Save / load: every JSON import first stores the settings it replaces. **Undo last import** and a 10-entry **Version history** restore earlier settings; history lives only in the open tab and is never written to storage.
-- More colorful two-parameter heatmaps with value labels, and a **Colorblind-safe colors** toggle in the header (Okabe–Ito curves, viridis heatmaps). The preference is one browser flag shared with the visual explorer; the Advanced setting stays in step.
-- The published-study reference library is the last item on Research tools, styled as a source list.
-- Drug reference table regrouped by kidney function and modality (normal, intermittent HD, PD, CRRT, CNS/metabolite), with rows for oral valacyclovir bioavailability, oral acyclovir HD removal, CAPD peritoneal clearance and three CRRT studies. Added references [38]–[40] (Boulieu 1997, Bleyzac 1999, Collignon 2023).
-- Visual explorer: colorblind-safe toggle (shared preference), multi-hue grid and heatmap colors with contrast-checked cell text, and rounded heatmap axis labels and tooltips (previously long decimals such as 46.666666666666664).
-- No pharmacokinetic equation, parameter, export format or configuration schema (2) changed.
+- **Layout.** The primary dialysis mode is the first sidebar control. Research tools is the second tab from the right. Drug references and Methods and References are one **References & methods** tab with jump links. (#40)
+- **Dialysis comparison table** is the last panel on the Concentration tab instead of its own tab; all scenarios are still calculated only while it is open. (#40, #41)
+- **Baseline comparison** lists baseline → current values and percent change for peak plasma, plasma AUC, peak CSF, peak CMMG and drug removed by dialysis. It previously showed peak plasma only. (#43)
+- **Drug reference table** is grouped by kidney function and modality: normal, intermittent HD, PD, CRRT, CNS/metabolite. (#40)
+- **Heatmaps** use multi-hue colors with value labels; cell text is chosen to keep at least 4.5:1 contrast. (#40)
+- Shorter top notice with the same warnings and limitations link. Example schedules load from compact chips. The "Why upper uncertainty bands can be wide" note is a collapsed panel. (#40)
+- Graph colors are chosen under **Advanced settings → Graph colors** and on the visual explorer's Scenario card, not in the page header. (#41)
+- The published-study reference library is the last item on Research tools, styled as a source list. (#40)
+- Import validation lives in one function used by file imports and shared links. File import behavior is unchanged. (#42)
+- Reference [22] (Vasquez Vasquez et al.) cites the peer-reviewed article, Br J Clin Pharmacol 2025;91(8):2469–2473, and keeps the preprint as a secondary link. (#44)
+
+### Fixed
+
+- Visual explorer heatmap axis labels and tooltips are rounded; they previously showed values such as 46.666666666666664. (#40)
+- The event timeline strip stays in step with the plasma chart when zooming with the new controls. (#40)
+
+### Security and privacy
+
+- The third-party measurement pixel is disabled (`ENABLED = false` in `public/assets/measurement-pixel.js`). Pages load the file but it requests nothing from other servers. (#43)
 
 ## [0.26.0] - 2026-11-09 (preview)
 
@@ -131,13 +147,13 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
-[0.24.2]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.24.1]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.24.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-
-[0.26.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.25.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
+[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/4d9879d...main
+[0.26.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0260---2026-11-09-preview
+[0.25.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0250---2026-11-08-preview
+[0.24.2]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0242---2026-11-08-preview
+[0.24.1]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0241---2026-11-08-preview
+[0.24.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0240---2026-11-08-preview
+[0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0230---2026-11-08-preview
+[0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0220---2026-11-07-preview
+[0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0210---2026-11-07-preview
+[0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0200---2026-11-07-preview

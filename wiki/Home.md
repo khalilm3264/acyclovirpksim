@@ -20,7 +20,7 @@ AyFlux is an open-source, browser-based **educational acyclovir and valacyclovir
 
 AyFlux includes IV acyclovir, oral valacyclovir (with an exploratory first-order absorption model), plasma/peripheral drug distribution, CMMG formation, simplified CSF effects, residual kidney clearance, and modeled dialysis drug removal. Research tools include Monte Carlo bands, Bayesian reweighting against user-entered observations, parameter sweeps, CSV exports and local CSV overlays.
 
-Version 0.21.0 adds an optional **time-varying CrCl trajectory** and a compact CSV format selector. Changing CrCl over time means specifying a hypothetical kidney function path; AyFlux does not predict acute kidney injury or recovery from creatinine alone.
+Since 0.26.0 the simulator also has shareable links, a mg/L ↔ µmol/L selector, guided teaching scenarios, a hemodialysis timing explorer, descriptive statistics (time above a level, accumulation ratio) and undo for imports; see the [changelog](https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#unreleased). Version 0.21.0 added an optional **time-varying CrCl trajectory** and a compact CSV format selector. Changing CrCl over time means specifying a hypothetical kidney function path; AyFlux does not predict acute kidney injury or recovery from creatinine alone.
 
 ## Community
 

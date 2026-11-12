@@ -2,6 +2,26 @@
 
 This is a **living plan**, not a promise of release dates, clinical utility, or completion. The priority is scientific transparency, reliable numerical behavior, and a compact interface.
 
+## Delivered since 0.26.0 (unreleased)
+
+- Graph zoom and pan controls, concentration units, shareable links, undo and version history
+- Guided scenarios, hemodialysis timing explorer, time above a level, accumulation ratio, fuller baseline comparison
+- Drug reference table grouped by modality, with CRRT sources [38]–[40]
+
+None of these changed a model equation, parameter or default. See the [changelog](https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#unreleased).
+
+## Candidates raised during the November 2026 literature review
+
+| Priority | Item | Why | Blocked on |
+| --- | --- | --- | --- |
+| P0 | Review CMMG behavior at CrCl 0 without dialysis | The unadjusted guided scenario reaches a median peak plasma CMMG near 162 mg/L in 96 hours, about 60 times the 2.58 mg/L reference level. CMMG has no elimination path in that state. | Scientific review of the CMMG elimination terms |
+| P1 | Published case library | Load a reported case and overlay its measured levels: Ito 2025 (CHDF), Vasquez Vasquez 2025 (HD with dialysate recovery), Boulieu 1997 (CVVHD), Moyses Neto 2026 (cycler PD) | Full-text access; only abstracts reviewed so far |
+| P1 | Adult population-model comparison | An adult two-compartment model with CrCl on clearance (Infect Drug Resist 2022;15:53–62) would mirror the existing pediatric comparison | Full-text review of population and covariates |
+| P1 | Valacyclovir in hemodialysis benchmark | Hara 2008 measured valacyclovir, acyclovir and CMMG in 18 HD patients after 1,000 mg | Not yet in the bibliography |
+| P2 | Body-weight scalar | Turner 2016: ideal-weight dosing underexposes obese patients | Design decision on how weight enters volumes and clearance |
+| P2 | Prolonged or continuous infusion | Reported in pediatric and neonatal CRRT cases | Infusion input is capped at 4 hours |
+| P2 | SLED / prolonged intermittent dialysis | No acyclovir data found; would be labeled extrapolation | Scientific review |
+
 ## v0.21.0 preview additions
 
 - An optional user-entered CrCl time trajectory, interpolated into the acyclovir and CMMG renal elimination models
@@ -41,7 +61,7 @@ The CrCl trajectory is a **hypothetical model input**, never a prediction of kid
 - **PD:** refine per-exchange dwell/fill, membrane mass balance and dialysate concentration comparisons using public measurements.
 - **CMMG and CNS:** explicitly separate observed exposure–toxicity associations from speculative CNS model assumptions; assess parameter identifiability.
 - **Open Systems Pharmacology:** explore whether a mapping to OSP models is scientifically meaningful. Native PK-Sim/MoBi import/export is **not currently supported**.
-- **Educational case library:** synthetic examples illustrating how parameter changes alter modeled concentrations, without dosing recommendations.
+- **Educational case library:** three guided scenarios now exist on Research tools. Further synthetic examples, and published cases with measured levels, are listed under the November 2026 candidates above.
 
 ## Validation criteria before any clinical claims
 
