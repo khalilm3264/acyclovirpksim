@@ -54,6 +54,17 @@ function rememberResult(key,data){
 let renalDraft=structuredClone(c.renalProfile),renalDirty=false,renalProfileEdited=false;
 // Narrow read-only integration point for optional research workspace.
 window.AyFluxResearchBridge=Object.freeze({snapshot:()=>({results,config:structuredClone(c),primary,updated:dataIsCurrent,revision:resultsRevision})});
+// Display units for concentrations. Simulation, exports and saved files always stay in mg/L.
+// A message that must survive the next successful calculation (for example a rejected shared link).
+let pendingNotice='';
+const MOLAR_MASS={acyclovir:225.21,cmmg:239.19};
+let concUnit='mg';
+function unitFactor(analyte){return concUnit==='umol'?1000/MOLAR_MASS[analyte]:1;}
+function unitLabel(){return concUnit==='umol'?'µmol/L':'mg/L';}
+function unitText(text){return concUnit==='umol'?text.replaceAll('mg·h/L','µmol·h/L').replaceAll('mg/L','µmol/L'):text;}
+function shown(value,analyte){return analyte?value*unitFactor(analyte):value;}
+const CONCENTRATION_KEYS={plasma:'acyclovir',csf:'acyclovir',cmmg:'cmmg',csfCmmg:'cmmg'};
+function setConcUnit(value){concUnit=value==='umol'?'umol':'mg';const control=document.getElementById('concUnit');if(control)control.value=concUnit;}
 function tableOpen(){return tab==='concentration'&&!!$('tablePanel')?.open;}
 function requestedModes(all=false){return all||tableOpen()?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
 function setBusy(busy){
@@ -69,7 +80,7 @@ function calculationError(error){
  $('status').textContent='Simulation not updated: invalid settings';
 }
 function acceptResults(data){
- results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();
+ results=data;resultsRevision++;dataIsCurrent=true;alertMessage(pendingNotice);pendingNotice='';setBusy(false);render();
  window.dispatchEvent(new Event('ayflux:results-updated'));
  if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();}
 }
@@ -259,7 +270,7 @@ if(typeof IntersectionObserver!=='undefined'){
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
-function chartSignature(key){return JSON.stringify([resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
+function chartSignature(key){return JSON.stringify([concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
 let chartWait=null;
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
@@ -342,23 +353,26 @@ function curve(key,unit,where,ref=null){if(!results)return;
   pendingPlots.delete(where);return;
  }
  const charts=window.AyFluxCharts,series=[];
+ const analyte=CONCENTRATION_KEYS[key],factor=analyte?unitFactor(analyte):1,scale=values=>factor===1?values:values.map(v=>v*factor);
  const dash={solid:'solid',dash:'dashed',dot:'dotted',dashdot:[6,3,2,3],longdash:[10,4]};
  for(const m of modes){
   if(!visible.has(m)||!results[m])continue;
   const d=results[m],z=d[key],color=COLORS[m];
-  if(m===primary&&c.showBands)series.push(charts.band(Math.round(c.coverage*100)+'% '+(results._validation.fitted?'updated':'unfitted')+' model interval',d.time,z.lower,z.upper,rgba(color,.17)));
-  series.push(charts.line(m+(m===primary?' (selected)':''),d.time,z.median,color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
+  if(m===primary&&c.showBands)series.push(charts.band(Math.round(c.coverage*100)+'% '+(results._validation.fitted?'updated':'unfitted')+' model interval',d.time,scale(z.lower),scale(z.upper),rgba(color,.17)));
+  series.push(charts.line(m+(m===primary?' (selected)':''),d.time,scale(z.median),color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
  }
  const comparison=baseline&&['plasma','csf','cmmg','csfCmmg'].includes(key);
  const horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
- if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,baseline.data[key].median,'#303846',2.5,[10,4,2,4]));
- const marker=key==='cmmg'?{value:E.MARKER,label:'Neurotoxicity-associated CMMG level: 2.58 mg/L [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
+ if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,scale(baseline.data[key].median),'#303846',2.5,[10,4,2,4]));
+ const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
  if(key==='csf'&&c.showIC50){
   const r=VIRUSES[c.virus];
-  series.push(charts.band(c.virus+' in-vitro IC₅₀ range '+r.min+'–'+r.max+' mg/L [11]',[0,c.horizon],[r.min,r.min],[r.max,r.max],'rgba(177,145,56,.2)'));
+  const low=r.min*factor,high=r.max*factor,text=v=>concUnit==='umol'?Number(v.toPrecision(3)):v;
+  series.push(charts.band(c.virus+' in-vitro IC₅₀ range '+text(low)+'–'+text(high)+' '+unitLabel()+' [11]',[0,c.horizon],[low,low],[high,high],'rgba(177,145,56,.2)'));
  }
  const option=layout(unit,horizon,series);
+ if(analyte&&option.yAxis?.name)option.yAxis.name=unitText(option.yAxis.name);
  option.toolbox.feature.saveAsImage.name='acyclovir_'+key;
  pendingPlots.set(where,{key,option,signature});requestPlotFrame();
 }
@@ -382,8 +396,8 @@ function renderBaseline(){
  $('baselineStatus').textContent='Frozen baseline: '+baseline.primary+'. Dark dash-dot lines show saved medians on the four concentration charts; shading, dose markers and uncertainty bands describe the current settings only.';
  const changes=baselineChanges(baseline,c,primary);
  for(const text of changes.length?changes:['No input settings changed.']){const li=document.createElement('li');li.textContent=text;$('baselineChanges').append(li);}
- const before=baseline.data.summary.peak.median,after=results[primary].summary.peak.median,delta=after-before;
- $('baselineDelta').textContent=`Peak plasma acyclovir: baseline ${before.toFixed(2)} → current ${after.toFixed(2)} mg/L (${delta>=0?'+':''}${delta.toFixed(2)} mg/L).`+(baseline.config.horizon!==c.horizon?' Simulation durations differ; peaks cover each run’s own duration.':'');
+ const before=shown(baseline.data.summary.peak.median,'acyclovir'),after=shown(results[primary].summary.peak.median,'acyclovir'),delta=after-before;
+ $('baselineDelta').textContent=`Peak plasma acyclovir: baseline ${before.toFixed(2)} → current ${after.toFixed(2)} ${unitLabel()} (${delta>=0?'+':''}${delta.toFixed(2)} ${unitLabel()}).`+(baseline.config.horizon!==c.horizon?' Simulation durations differ; peaks cover each run’s own duration.':'');
 }
 $('saveBaseline').addEventListener('click',()=>{
  if(!dataIsCurrent||!results?.[primary])return;
@@ -394,12 +408,12 @@ $('clearBaseline').addEventListener('click',()=>{
  baseline=null;baselineRevision++;$('saveBaseline').textContent='Save selected curve as baseline';render();
 });
 function showStats(){let d=results[primary].summary;
- let arr=[['Peak plasma acyclovir',d.peak,'mg/L',1,'#ed766b'],['Plasma acyclovir AUC',d.auc,'mg·h/L',0,'#8660c1'],['Peak CSF acyclovir',d.csfPeak,'mg/L',1,'#179b89'],['CSF acyclovir AUC',d.csfAuc,'mg·h/L',0,'#d59c37'],['Peak plasma CMMG',d.mPeak,'mg/L',2,'#cb5891'],['Acyclovir removed by dialysis',d.mass,'mg',0,'#3976bd'],['Plasma at simulation end',d.endPlasma,'mg/L',2,'#315d74']];
+ let arr=[['Peak plasma acyclovir',d.peak,'mg/L',1,'#ed766b','acyclovir'],['Plasma acyclovir AUC',d.auc,'mg·h/L',0,'#8660c1','acyclovir'],['Peak CSF acyclovir',d.csfPeak,'mg/L',1,'#179b89','acyclovir'],['CSF acyclovir AUC',d.csfAuc,'mg·h/L',0,'#d59c37','acyclovir'],['Peak plasma CMMG',d.mPeak,'mg/L',2,'#cb5891','cmmg'],['Acyclovir removed by dialysis',d.mass,'mg',0,'#3976bd'],['Plasma at simulation end',d.endPlasma,'mg/L',2,'#315d74','acyclovir']];
  if(d.endPdFluidMg.upper>0)arr.push(['Acyclovir remaining in PD fluid',d.endPdFluidMg,'mg',1,'#3976bd']);
- $('metrics').innerHTML=arr.map(([label,v,unit,dig,color])=>`<div class="metric" style="--tone:${color}"><div class="key">${label}</div><div class="val">${v.median.toFixed(dig)} <span style="font-size:11px">${unit}</span></div><div class="sub">${results._validation.fitted?"Updated":"Unfitted"} ${Math.round(c.coverage*100)}% model interval: ${v.lower.toFixed(dig)}–${v.upper.toFixed(dig)} ${unit}</div></div>`).join('');}
-function table(){const cols=[['peak','Peak plasma acyclovir (mg/L)',1],['auc','Plasma acyclovir AUC (mg·h/L)',0],['csfPeak','Peak CSF acyclovir (mg/L)',1],['csfAuc','CSF acyclovir AUC (mg·h/L)',0],['mPeak','Peak plasma CMMG (mg/L)',2],['mass','Acyclovir removed by dialysis (mg)',0],['endPdFluidMg','Acyclovir remaining in PD fluid (mg)',1],['endPlasma','Plasma acyclovir at end (mg/L)',2]];
- let rows=`<table><thead><tr><th>Modality</th>${cols.map(x=>`<th>${x[1]}</th>`).join('')}</tr></thead><tbody>`;
- for(let m of modes){let d=results[m].summary;rows+=`<tr><td style="font-weight:800;color:${COLORS[m]}">${m}</td>${cols.map(([id,_,n])=>`<td>${d[id].median.toFixed(n)} <span style="color:#8b8593">[${d[id].lower.toFixed(n)}–${d[id].upper.toFixed(n)}]</span></td>`).join('')}</tr>`;} $('resultTable').innerHTML=rows+'</tbody></table>';}
+ $('metrics').innerHTML=arr.map(([label,v,unit,dig,color,analyte])=>{const u=analyte?unitText(unit):unit,f=x=>shown(x,analyte).toFixed(dig);return `<div class="metric" style="--tone:${color}"><div class="key">${label}</div><div class="val">${f(v.median)} <span style="font-size:11px">${u}</span></div><div class="sub">${results._validation.fitted?"Updated":"Unfitted"} ${Math.round(c.coverage*100)}% model interval: ${f(v.lower)}–${f(v.upper)} ${u}</div></div>`;}).join('');}
+function table(){const cols=[['peak','Peak plasma acyclovir (mg/L)',1,'acyclovir'],['auc','Plasma acyclovir AUC (mg·h/L)',0,'acyclovir'],['csfPeak','Peak CSF acyclovir (mg/L)',1,'acyclovir'],['csfAuc','CSF acyclovir AUC (mg·h/L)',0,'acyclovir'],['mPeak','Peak plasma CMMG (mg/L)',2,'cmmg'],['mass','Acyclovir removed by dialysis (mg)',0],['endPdFluidMg','Acyclovir remaining in PD fluid (mg)',1],['endPlasma','Plasma acyclovir at end (mg/L)',2,'acyclovir']];
+ let rows=`<table><thead><tr><th>Modality</th>${cols.map(x=>`<th>${x[3]?unitText(x[1]):x[1]}</th>`).join('')}</tr></thead><tbody>`;
+ for(let m of modes){let d=results[m].summary;rows+=`<tr><td style="font-weight:800;color:${COLORS[m]}">${m}</td>${cols.map(([id,_,n,analyte])=>`<td>${shown(d[id].median,analyte).toFixed(n)} <span style="color:#8b8593">[${shown(d[id].lower,analyte).toFixed(n)}–${shown(d[id].upper,analyte).toFixed(n)}]</span></td>`).join('')}</tr>`;} $('resultTable').innerHTML=rows+'</tbody></table>';}
 let metricsSignature='',tableRevision=-1,validationSignature='';
 function render(){if(!renderFrame)renderFrame=requestAnimationFrame(()=>{renderFrame=0;renderNow();});}
 function renderNow(){if(!results||!dataIsCurrent)return;
@@ -678,6 +692,7 @@ document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
+$('concUnit').addEventListener('change',e=>{setConcUnit(e.target.value);metricsSignature='';tableRevision=-1;if(results)render();});
 $('tablePanel').addEventListener('toggle',()=>{if(!tableOpen())return;if(!dataIsCurrent||!results||modes.some(m=>!results[m]))calculate(true);else render();});
 document.querySelector('.ref-nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(!link)return;const target=document.querySelector(link.getAttribute('href'));if(!target)return;e.preventDefault();target.scrollIntoView({block:'start',behavior:'smooth'});});
 $('scheduleRows').addEventListener('input',e=>{let i=Number(e.target.dataset.index),key=e.target.dataset.field;if(!(key&&draft[i]))return;
@@ -884,14 +899,14 @@ function downloadJSON(obj,name){
 }
 // Session-only version history for imports. Nothing is written to storage or sent anywhere.
 const importHistory=[],IMPORT_HISTORY_LIMIT=10;
-function currentVersion(){return {config:structuredClone(c),primary,visible:[...visible],palette:paletteMode};}
+function currentVersion(){return {config:structuredClone(c),primary,visible:[...visible],palette:paletteMode,unit:concUnit};}
 function rememberVersion(label){
  importHistory.unshift({label:String(label).slice(0,120),savedAt:new Date(),state:currentVersion()});
  importHistory.length=Math.min(importHistory.length,IMPORT_HISTORY_LIMIT);
  renderImportHistory();
 }
 function applyVersion(state){
- Object.assign(c,structuredClone(state.config));setPalette(state.palette);primary=state.primary;
+ Object.assign(c,structuredClone(state.config));setPalette(state.palette);setConcUnit(state.unit||concUnit);metricsSignature='';tableRevision=-1;primary=state.primary;
  visible=new Set(state.visible);
  draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
  renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
@@ -919,21 +934,8 @@ function renderImportHistory(){
  $('undoImport').disabled=!importHistory.length;
  $('importHistoryCount').textContent=importHistory.length?'('+importHistory.length+' saved)':'(empty)';
 }
-$('undoImport').addEventListener('click',()=>restoreVersion(0));
-$('importHistoryList').addEventListener('click',e=>{const button=e.target.closest('[data-restore]');if(button)restoreVersion(Number(button.dataset.restore));});
-$('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
-$('saveConfig').addEventListener('click',()=>{
- const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
- downloadJSON(data,'ayflux_simulation_v0.25.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
-});
-$('loadConfig').addEventListener('change',async e=>{
- const file=e.target.files?.[0];if(!file)return;
- migratedPayload=null;$('downloadMigrated').classList.add('hidden');
- try{
-  if(file.size>1000000)throw Error('File is too large (maximum 1 MB). No settings were changed.');
-  let input;
-  try{input=JSON.parse(await file.text());}
-  catch(_){throw Error('This is not valid JSON. Export a configuration using Save configuration (JSON).');}
+// Validates a configuration object completely before anything is applied. Used by file imports and shared links.
+function parseConfiguration(input){
   if(!input||typeof input!=='object'||Array.isArray(input)||input.format!=='acyclovir-pk-simulator')
     throw Error('This file is not an AyFlux simulation configuration. No settings were changed.');
   if(input.schemaVersion!==1&&input.schemaVersion!==2)
@@ -990,8 +992,91 @@ $('loadConfig').addEventListener('change',async e=>{
   const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
+  return {next,primary:input.primary,visible:[...input.visibleScenarios],palette:importedPalette,migrating,converted};
+}
+// ---------- Shareable links ----------
+// The whole scenario travels in the URL fragment (#s=…), which browsers never send to a server.
+// Only settings that differ from the defaults are included; measured concentrations are never included.
+const SHARE_PREFIX='#s=',SHARE_LIMIT=6000;
+function encodeShare(text){
+ const bytes=new TextEncoder().encode(text);let binary='';for(const b of bytes)binary+=String.fromCharCode(b);
+ return btoa(binary).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
+}
+function decodeShare(code){
+ if(!/^[A-Za-z0-9_-]+$/.test(code))throw Error('The link is damaged or incomplete.');
+ const binary=atob(code.replaceAll('-','+').replaceAll('_','/'));
+ return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(binary,ch=>ch.charCodeAt(0)));
+}
+function shareLink(){
+ const changed={};
+ for(const key of Object.keys(E.DEFAULTS)){
+  if(key==='observations')continue;
+  if(JSON.stringify(c[key])!==JSON.stringify(E.DEFAULTS[key]))changed[key]=c[key];
+ }
+ const code=encodeShare(JSON.stringify({v:1,c:changed,p:primary,s:[...visible],a:paletteMode,u:concUnit}));
+ if(code.length>SHARE_LIMIT)throw Error('This scenario is too large for a link. Use Save configuration (JSON) instead.');
+ return location.origin+location.pathname+SHARE_PREFIX+code;
+}
+function readShare(hash){
+ let data;
+ try{data=JSON.parse(decodeShare(hash.slice(SHARE_PREFIX.length)));}catch(_){throw Error('The link is damaged or incomplete.');}
+ if(!data||typeof data!=='object'||Array.isArray(data)||data.v!==1||!data.c||typeof data.c!=='object'||Array.isArray(data.c))throw Error('The link is not an AyFlux scenario link.');
+ if(Object.prototype.hasOwnProperty.call(data.c,'observations'))throw Error('Links cannot carry measurements.');
+ const parsed=parseConfiguration({format:'acyclovir-pk-simulator',schemaVersion:2,config:{...structuredClone(E.DEFAULTS),...data.c},primary:data.p,visibleScenarios:data.s,appearance:{palette:data.a}});
+ if(data.u!==undefined&&data.u!=='mg'&&data.u!=='umol')throw Error('Unrecognized concentration unit.');
+ return {config:parsed.next,primary:parsed.primary,visible:parsed.visible,palette:parsed.palette,unit:data.u||'mg'};
+}
+function openSharedLink(initial){
+ if(!location.hash.startsWith(SHARE_PREFIX))return false;
+ const hash=location.hash;
+ // Remove the scenario from the address bar straight away so it is not bookmarked, re-applied, or read by later scripts.
+ try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}
+ try{
+  const state=readShare(hash);
+  if(!initial)rememberVersion('Before opening a shared link');
+  applyVersion(state);
+  migratedPayload=null;$('downloadMigrated').classList.add('hidden');
+  sharedNotice='Scenario loaded from a shared link. All settings were validated; measurements are never included in links.';
+  researchStatus(sharedNotice);
+  if(!initial){alertMessage('');defer();}
+  return true;
+ }catch(error){
+  sharedNotice='';
+  const message='Shared link not loaded: '+error.message+' Default settings are shown.';
+  researchStatus(message,true);alertMessage(message);if(initial)pendingNotice=message;
+  return false;
+ }
+}
+let sharedNotice='';
+window.addEventListener('hashchange',()=>openSharedLink(false));
+$('copyShareLink').addEventListener('click',async()=>{
+ const field=$('shareLinkField');
+ try{
+  const link=shareLink();
+  field.value=link;field.classList.remove('hidden');
+  let copied=false;
+  try{await navigator.clipboard.writeText(link);copied=true;}catch(_){field.focus();field.select();}
+  researchStatus((copied?'Link copied. ':'Select and copy the link below. ')+'It contains this scenario’s settings (not measurements) inside the link itself; nothing is uploaded. Anyone with the link can open the same scenario.');
+ }catch(error){field.classList.add('hidden');researchStatus(error.message,true);}
+});
+$('undoImport').addEventListener('click',()=>restoreVersion(0));
+$('importHistoryList').addEventListener('click',e=>{const button=e.target.closest('[data-restore]');if(button)restoreVersion(Number(button.dataset.restore));});
+$('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
+$('saveConfig').addEventListener('click',()=>{
+ const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
+ downloadJSON(data,'ayflux_simulation_v0.25.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
+});
+$('loadConfig').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');
+ try{
+  if(file.size>1000000)throw Error('File is too large (maximum 1 MB). No settings were changed.');
+  let input;
+  try{input=JSON.parse(await file.text());}
+  catch(_){throw Error('This is not valid JSON. Export a configuration using Save configuration (JSON).');}
+  const {next,palette:importedPalette,migrating,converted}=parseConfiguration(input);
   rememberVersion('Before importing '+file.name);
-  applyVersion({config:next,primary:input.primary,visible:input.visibleScenarios,palette:importedPalette});
+  applyVersion({config:next,primary:input.primary,visible:input.visibleScenarios,palette:importedPalette,unit:concUnit});
   migratedPayload=migrating?converted:null;
   $('downloadMigrated').classList.toggle('hidden',!migratedPayload);
   const note=migrating?`Migrated schema 1 (Version ${String(input.appVersion??'unknown')}) to schema 2. ${input.appearance?'PK settings preserved.':'PK settings preserved; standard graph palette applied (not saved in this old file).'} Download the converted JSON to keep a reusable copy.`:'AyFlux configuration loaded. All parameters validated.';
@@ -1004,6 +1089,7 @@ $('loadConfig').addEventListener('change',async e=>{
  finally{e.target.value='';}
 });
 
+openSharedLink(true);
 $('primary').value=primary;renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxEditor();calculate();
 })();
 
