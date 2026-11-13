@@ -73,7 +73,8 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44, #61, #63 and #67
 
 ### Security and privacy
 
-- The third-party measurement pixel is disabled (`ENABLED = false` in `public/assets/measurement-pixel.js`). Pages load the file but it requests nothing from other servers. (#43)
+- The third-party measurement pixel is removed. It was disabled in #43 but every page still loaded `measurement-pixel.js`, and the Worker's Content Security Policy still allowed its two external hosts. The script, its tag on each page and those policy entries are gone, so the policy now allows same-origin scripts and connections only.
+- The Cloudflare deploy action is pinned to a commit instead of a moving tag, because that step receives the Cloudflare API token.
 
 ## [0.26.0] - 2026-11-09 (preview)
 
