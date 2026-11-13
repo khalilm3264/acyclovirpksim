@@ -94,7 +94,7 @@ function accumulationRatio(time,values,doseTimes){
 function describeScenario(config,mode){
  const n=value=>String(Number(Number(value).toPrecision(4))),parts=[n(config.weight)+' kg'];
  if(config.renalMode==='profile'&&config.renalProfile?.length){const p=config.renalProfile;parts.push('CrCl '+n(p[0].crcl)+' → '+n(p[p.length-1].crcl)+' mL/min (custom trajectory)');}
- else parts.push('CrCl '+n(config.crcl)+' mL/min');
+ else{const of=(typeof window!=='undefined'&&window.RenalPKV7?.cgWeightOf)||null,alt=config.crclSource==='estimated'&&config.cgWeight&&config.cgWeight!=='actual'&&of&&of(config)!==config.weight;parts.push('CrCl '+n(config.crcl)+' mL/min'+(alt?' (Cockcroft–Gault, '+config.cgWeight+' body weight)':''));}
  if(config.dosingMode==='custom')parts.push('custom schedule of '+config.customDoses.length+' dose'+(config.customDoses.length===1?'':'s'));
  else{
   const oral=config.route==='Valacyclovir oral';
@@ -261,6 +261,36 @@ function modalControls(){if(primary==='No dialysis')return '';
  (types.has('HD')?group('HD parameters',['hdCl']):'')+
  (types.has('PD')?pdGroup():'')+(types.has('CRRT')?CRRT():'');
 }
+// Height is optional. With it, AyFlux shows BMI, ideal and adjusted body weight, and Cockcroft–Gault can use them.
+let heightUnit='cm';
+const n3=v=>String(Number(Number(v).toPrecision(3)));
+function bodySizeText(){
+ const s=E.bodySize(c);
+ if(!s)return 'Optional. Enter height to see BMI, ideal and adjusted body weight.';
+ return 'BMI '+s.bmi.toFixed(1)+' kg/m² · ideal body weight '+n3(s.ideal)+' kg · adjusted '+n3(s.adjusted)+' kg.'+
+  (s.bmi>=30?' The model itself scales from actual weight and has no obesity-specific adjustment; that is untested in obesity.':'');
+}
+function heightControl(){
+ const shown=c.height?(heightUnit==='in'?c.height/2.54:c.height):'';
+ return `<div class="inputrow"><label for="heightValue">Height (optional)</label><div class="threshold-entry"><input id="heightValue" type="number" min="0" step="any" inputmode="decimal" value="${shown===''?'':Number(shown.toFixed(1))}" placeholder="—"> <select id="heightUnit" aria-label="Height unit"><option value="cm" ${heightUnit==='cm'?'selected':''}>cm</option><option value="in" ${heightUnit==='in'?'selected':''}>in</option></select></div><p class="tip" id="bodySizeTip">${bodySizeText()}</p></div>`+
+  (c.height&&(c.crclSource!=='estimated'||c.renalMode==='profile')?`<div class="inputrow"><label for="sizeSex">Sex (for ideal body weight)</label><select id="sizeSex"><option value="male" ${c.sex==='male'?'selected':''}>Male</option><option value="female" ${c.sex==='female'?'selected':''}>Female</option></select></div>`:'');
+}
+function cgWeightControl(){
+ const s=E.bodySize(c),used=E.cgWeightOf(c),opt=(v,t)=>`<option value="${v}" ${c.cgWeight===v?'selected':''}>${t}</option>`;
+ const note=!s?'Enter height above to use ideal or adjusted weight.':c.weight<=s.ideal&&c.cgWeight!=='actual'?'Actual weight is at or below ideal weight, so actual weight is used.':'Using '+n3(used)+' kg.'+(s.bmi>=30&&c.cgWeight==='actual'?' BMI is 30 or above: many hospital protocols use ideal or adjusted weight here.':'');
+ return `<div class="inputrow"><label for="cgWeight">Weight used for the estimate</label><select id="cgWeight" ${s?'':'disabled'}>${opt('actual','Actual body weight')}${opt('ideal','Ideal body weight')}${opt('adjusted','Adjusted body weight')}</select><p class="tip" id="cgWeightTip">${note}</p></div>`;
+}
+// Dose per kg by each body weight, shown under the medication inputs for weight-based IV dosing.
+function doseWeightText(){
+ if(c.dosingMode!=='repeat')return '';
+ const s=E.bodySize(c),base=n3(c.dose)+' mg = '+n3(c.dose/c.weight)+' mg/kg of actual weight';
+ return s?base+' · '+n3(c.dose/s.ideal)+' mg/kg ideal · '+n3(c.dose/s.adjusted)+' mg/kg adjusted.':base+'.';
+}
+function refreshBodySize(){
+ const a=$('bodySizeTip'),b=$('doseWeightTip'),g=$('cgWeight');
+ if(a)a.textContent=bodySizeText();if(b)b.textContent=doseWeightText();
+ if(g)g.closest('.inputrow').outerHTML=cgWeightControl();
+}
 function renalInputs(){
  const method=`<div class="inputrow"><label for="crclSource">Creatinine clearance input</label><select id="crclSource"><option value="manual" ${c.crclSource==='manual'?'selected':''}>Enter CrCl</option><option value="estimated" ${c.crclSource==='estimated'?'selected':''}>Estimate (Cockcroft–Gault)</option></select></div>`;
  if(c.renalMode==='profile')return '';
@@ -269,8 +299,9 @@ function renalInputs(){
  return method+`<div class="inputrow"><label for="cgAge">Age (years)</label><input id="cgAge" type="number" min="18" max="120" step="1" value="${c.age}" class="cg-field"></div>`+
  `<div class="inputrow"><label for="cgSex">Sex coefficient for Cockcroft–Gault</label><select id="cgSex"><option value="male" ${c.sex==='male'?'selected':''}>Male</option><option value="female" ${c.sex==='female'?'selected':''}>Female (×0.85)</option></select></div>`+
  `<div class="inputrow"><label for="cgScr">Serum creatinine (mg/dL)</label><input id="cgScr" type="number" min="0.1" max="25" step="0.01" value="${c.scr}" class="cg-field"></div>`+
+ cgWeightControl()+
  `<div class="calculated">Estimated CrCl: <strong id="cgOutput">${Number.isFinite(estimated)?estimated.toFixed(1):'—'} mL/min</strong></div>`+
- `<p class="tip">Uses actual weight. Estimates may be unreliable in acute kidney injury, dialysis, and altered muscle mass. Use measured clearance when available. <a class="source-id" href="#ref13">[13]</a></p>`;
+ `<p class="tip">Estimates may be unreliable in acute kidney injury, dialysis, and altered muscle mass. Use measured clearance when available. <a class="source-id" href="#ref13">[13]</a></p>`;
 }
 function renalProfileControls(){
  const dynamic=c.renalMode==='profile';
@@ -326,12 +357,12 @@ function renderRenalProfileChart(){
  pendingPlots.set('kidneyClearChart',{key:'kidneyClear',option,signature});requestPlotFrame();
 }
 function renderInputs(){let keepAdvanced=$('advanced').open;
- $('patientControls').innerHTML=numericField('weight')+renalProfileControls()+renalInputs()+
+ $('patientControls').innerHTML=numericField('weight')+heightControl()+renalProfileControls()+renalInputs()+
  `<h2>Medication</h2><div class="inputrow"><label for="dosingMode">Dosing schedule</label><select id="dosingMode"><option value="repeat" ${c.dosingMode==='repeat'?'selected':''}>Repeat dose</option><option value="custom" ${c.dosingMode==='custom'?'selected':''}>Custom oral / IV schedule</option></select></div>`+
  (c.dosingMode==='repeat'?`<div class="inputrow"><label for="route">Drug and route</label><select id="route"><option value="Acyclovir IV" ${c.route==='Acyclovir IV'?'selected':''}>Acyclovir — IV</option><option value="Valacyclovir oral" ${c.route==='Valacyclovir oral'?'selected':''}>Valacyclovir — oral</option></select></div>`:'')+
  (c.dosingMode==='repeat'?['dose','every','doseCount'].concat(c.route==='Valacyclovir oral'?[]:['infusion']).map(numericField).join(''):
  `<button class="btn secondary" id="openDoses">Edit medication schedule</button><div class="advisory" id="customDoseSummary"></div>`)+
- medicationTools()+
+ `<p class="tip" id="doseWeightTip">${doseWeightText()}</p>`+medicationTools()+
  group('Simulation window',['horizon']);
  $('modeControls').innerHTML=modalControls();
  $('modeHint').textContent=primary==='Custom sequence'?'Define sequential treatments in Treatment timeline.':'';
@@ -651,9 +682,16 @@ $('clearBaseline').addEventListener('click',()=>{
  baseline=null;baselineRevision++;$('saveBaseline').textContent='Save selected curve as baseline';render();
 });
 function showStats(){let d=results[primary].summary;
- let arr=[['Peak plasma acyclovir',d.peak,'mg/L',1,'#ed766b','acyclovir'],['Plasma acyclovir AUC',d.auc,'mg·h/L',0,'#8660c1','acyclovir'],['Peak CSF acyclovir',d.csfPeak,'mg/L',1,'#179b89','acyclovir'],['CSF acyclovir AUC',d.csfAuc,'mg·h/L',0,'#d59c37','acyclovir'],['Peak plasma CMMG',d.mPeak,'mg/L',2,'#cb5891','cmmg'],['Acyclovir removed by dialysis',d.mass,'mg',0,'#3976bd'],['Plasma at simulation end',d.endPlasma,'mg/L',2,'#315d74','acyclovir']];
- if(d.endPdFluidMg.upper>0)arr.push(['Acyclovir remaining in PD fluid',d.endPdFluidMg,'mg',1,'#3976bd']);
- $('metrics').innerHTML=arr.map(([label,v,unit,dig,color,analyte])=>{const u=analyte?unitText(unit):unit,f=x=>shown(x,analyte).toFixed(dig);return `<div class="metric" style="--tone:${color}"><div class="key">${label}</div><div class="val">${f(v.median)} <span style="font-size:11px">${u}</span></div><div class="sub">${results._validation.fitted?"Updated":"Unfitted"} ${Math.round(c.coverage*100)}% model interval: ${f(v.lower)}–${f(v.upper)} ${u}</div></div>`;}).join('');}
+ // Plasma acyclovir first: it is the level with published reference values. The trough comes from the median curve.
+ const reg=window.AyFluxRegimens,m=reg?reg.metrics(results[primary],E.buildDoses(E.effectiveConfig(c)),c.horizon):null;
+ const main=[['Peak plasma acyclovir',d.peak,'mg/L',1,'#ed766b','acyclovir'],['Plasma acyclovir AUC',d.auc,'mg·h/L',0,'#8660c1','acyclovir']];
+ const other=[['Peak CSF acyclovir',d.csfPeak,'mg/L',1,'#179b89','acyclovir'],['CSF acyclovir AUC',d.csfAuc,'mg·h/L',0,'#d59c37','acyclovir'],['Peak plasma CMMG',d.mPeak,'mg/L',2,'#cb5891','cmmg'],['Acyclovir removed by dialysis',d.mass,'mg',0,'#3976bd'],['Plasma at simulation end',d.endPlasma,'mg/L',2,'#315d74','acyclovir']];
+ if(d.endPdFluidMg.upper>0)other.push(['Acyclovir remaining in PD fluid',d.endPdFluidMg,'mg',1,'#3976bd']);
+ const kind=results._validation.fitted?"Updated":"Unfitted",pct=Math.round(c.coverage*100);
+ const card=cls=>([label,v,unit,dig,color,analyte])=>{const u=analyte?unitText(unit):unit,f=x=>shown(x,analyte).toFixed(dig);return `<div class="metric ${cls}" style="--tone:${color}"><div class="key">${label}</div><div class="val">${f(v.median)} <span style="font-size:11px">${u}</span></div><div class="sub">${kind} ${pct}% model interval: ${f(v.lower)}–${f(v.upper)} ${u}</div></div>`;};
+ const trough=m&&m.trough!==null?`<div class="metric primary" id="troughMetric" style="--tone:#315d74"><div class="key">Plasma acyclovir trough</div><div class="val">${shown(m.trough,'acyclovir').toFixed(2)} <span style="font-size:11px">${unitText('mg/L')}</span></div><div class="sub">Median curve at hour ${Number(m.troughTime.toFixed(1))}, just before the last dose</div></div>`:'';
+ $('metrics').innerHTML='<div class="metric-group">Plasma acyclovir · start here</div>'+main.map(card('primary')).join('')+trough+
+  '<div class="metric-group">Other outputs</div>'+other.map(card('minor')).join('');}
 function table(){const cols=[['peak','Peak plasma acyclovir (mg/L)',1,'acyclovir'],['auc','Plasma acyclovir AUC (mg·h/L)',0,'acyclovir'],['csfPeak','Peak CSF acyclovir (mg/L)',1,'acyclovir'],['csfAuc','CSF acyclovir AUC (mg·h/L)',0,'acyclovir'],['mPeak','Peak plasma CMMG (mg/L)',2,'cmmg'],['mass','Acyclovir removed by dialysis (mg)',0],['endPdFluidMg','Acyclovir remaining in PD fluid (mg)',1],['endPlasma','Plasma acyclovir at end (mg/L)',2,'acyclovir']];
  let rows=`<table><thead><tr><th>Modality</th>${cols.map(x=>`<th>${x[3]?unitText(x[1]):x[1]}</th>`).join('')}</tr></thead><tbody>`;
  for(let m of modes){let d=results[m].summary;rows+=`<tr><td style="font-weight:800;color:${COLORS[m]}">${m}</td>${cols.map(([id,_,n,analyte])=>`<td>${shown(d[id].median,analyte).toFixed(n)} <span style="color:#8b8593">[${shown(d[id].lower,analyte).toFixed(n)}–${shown(d[id].upper,analyte).toFixed(n)}]</span></td>`).join('')}</tr>`;} $('resultTable').innerHTML=rows+'</tbody></table>';}
@@ -701,6 +739,7 @@ function defer(){refreshLabelAdjust();pendingCsvExport=false;++calculationVersio
 function updateParam(target){let id=target.dataset.k;if(!id)return;let value=Number(target.value);if(target.value.trim()===''||!Number.isFinite(value))return;
  const def=fieldDef(id);if(value<def[2]||value>def[3]){if(target.dataset.role==='number')target.setCustomValidity(`Use ${def[2]}–${def[3]}`);return;}target.setCustomValidity?.('');if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
  const same=document.querySelectorAll(`[data-k="${id}"]`);for(const el of same)if(el!==target)el.value=value;
+ if((id==='weight'||id==='dose')&&typeof refreshBodySize==='function')refreshBodySize();
  if((id==='csfRatio'||id==='csfMetRatio')&&$('csfBarrier'))$('csfBarrier').closest('.inputrow').outerHTML=csfBarrierControl();
  defer();}
 function renderSchedule(){const rows=draft;
@@ -937,9 +976,11 @@ $('enableRenalProfile').addEventListener('click',()=>{
 $('patientControls').addEventListener('change',e=>{if(e.target.id==='crclSource'){c.crclSource=e.target.value;if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='cgSex'){c.sex=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='route'){c.route=e.target.value;c.dose=c.route==='Valacyclovir oral'?1000:700;renderInputs();defer();}else if(e.target.id==='dosingMode'){c.dosingMode=e.target.value;renderInputs();defer();if(c.dosingMode==='custom')switchTab('doses');}});
 $('patientControls').addEventListener('input',e=>{if(e.target.id==='cgAge'||e.target.id==='cgScr'){const v=Number(e.target.value);if(!Number.isFinite(v)||e.target.value==='')return;if(e.target.id==='cgAge')c.age=v;else c.scr=v;c.crcl=calculatedCrCl();const target=$('cgOutput');if(target)target.textContent=Number.isFinite(c.crcl)?c.crcl.toFixed(1)+' mL/min':'—';defer();}});
 $('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');else if(e.target.id==='labelAdjust')applyLabelAdjustment();});
-$('patientControls').addEventListener('change',e=>{if(e.target.id==='csfBarrier'){const p=E.CSF_BARRIER[e.target.value];if(p){c.csfRatio=p.csfRatio;c.csfMetRatio=p.csfMetRatio;renderInputs();defer();}return;}if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}else if(e.target.id==='labelBsa'){const value=e.target.valueAsNumber;if(e.target.value!==''&&(!Number.isFinite(value)||value<=0)){e.target.setCustomValidity('Enter a positive body surface area in m²');c.labelBsa=0;refreshLabelAdjust();return;}e.target.setCustomValidity('');c.labelBsa=e.target.value===''?0:value;refreshLabelAdjust();}});
+$('patientControls').addEventListener('change',e=>{if(e.target.id==='heightUnit'){heightUnit=e.target.value;renderInputs();return;}if(e.target.id==='heightValue'){const raw=e.target.valueAsNumber,cm=e.target.value===''?0:(heightUnit==='in'?raw*2.54:raw);if(cm!==0&&(!Number.isFinite(cm)||cm<120||cm>230)){e.target.setCustomValidity('Enter a height from 120 to 230 cm (47 to 90 in), or leave it empty');e.target.reportValidity();return;}e.target.setCustomValidity('');c.height=cm;if(!cm)c.cgWeight='actual';if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();return;}if(e.target.id==='sizeSex'){c.sex=e.target.value;renderInputs();return;}if(e.target.id==='cgWeight'){c.cgWeight=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();return;}if(e.target.id==='csfBarrier'){const p=E.CSF_BARRIER[e.target.value];if(p){c.csfRatio=p.csfRatio;c.csfMetRatio=p.csfMetRatio;renderInputs();defer();}return;}if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}else if(e.target.id==='labelBsa'){const value=e.target.valueAsNumber;if(e.target.value!==''&&(!Number.isFinite(value)||value<=0)){e.target.setCustomValidity('Enter a positive body surface area in m²');c.labelBsa=0;refreshLabelAdjust();return;}e.target.setCustomValidity('');c.labelBsa=e.target.value===''?0:value;refreshLabelAdjust();}});
 $('modeControls').addEventListener('click',e=>{if(e.target.id==='showPdRx'){switchTab('timeline');$('pdRxPanel').scrollIntoView({block:'start',behavior:'smooth'});}});
 $('primary').addEventListener('change',e=>{primary=e.target.value;renderInputs();defer();});
+// Start-here strip: dismissal is remembered per browser when storage is available.
+{const strip=$('startHere');if(strip){let seen=false;try{seen=localStorage.getItem('ayflux-start-here')==='dismissed';}catch{}if(seen)strip.classList.add('hidden');$('startHereClose').addEventListener('click',()=>{strip.classList.add('hidden');try{localStorage.setItem('ayflux-start-here','dismissed');}catch{}});}}
 document.querySelector('aside').addEventListener('input',e=>{if(e.target.dataset.k)updateParam(e.target);});
 document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='colorPalette'){setPalette(e.target.value);renderInputs();if(results)render();}else if(e.target.id==='virus'){c.virus=e.target.value;renderInputs();if(results)render();}else if(e.target.id==='pdMethod'){c.pdMethod=e.target.value;renderInputs();researchRenderedPrimary='';defer();}else if(e.target.id==='draws'){c.draws=+e.target.value;defer();}else if(e.target.id==='coverage'){c.coverage=+e.target.value;defer();}else if(e.target.dataset.toggle){c[e.target.dataset.toggle]=e.target.checked;if(results)render();}else if(e.target.dataset.k)updateParam(e.target);});
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
@@ -1201,10 +1242,12 @@ function parseConfiguration(input){
   if(!src||typeof src!=='object'||Array.isArray(src))throw Error('Configuration data is missing. No settings were changed.');
   const next=structuredClone(E.DEFAULTS);
   const required=Object.keys(next),number=x=>typeof x==='number'&&Number.isFinite(x);
-  const missing=required.filter(key=>!['renalMode','renalProfile','probenecid','labelBsa'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
+  // Settings added after schema 2 shipped; older files without them load with the defaults.
+  const OPTIONAL_KEYS=['renalMode','renalProfile','probenecid','labelBsa','height','cgWeight'];
+  const missing=required.filter(key=>!OPTIONAL_KEYS.includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
   if(missing.length)throw Error('Configuration is incomplete (missing '+missing.slice(0,4).join(', ')+'). No settings were changed.');
   for(const key of required){
-   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile','probenecid','labelBsa'].includes(key))continue;
+   if(!Object.prototype.hasOwnProperty.call(src,key)&&OPTIONAL_KEYS.includes(key))continue;
    const v=src[key];
    if(['schedule','customDoses','observations','pdRxRows','renalProfile'].includes(key)){
     if(!Array.isArray(v)||v.length>(key==='renalProfile'?24:key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
@@ -1221,6 +1264,8 @@ function parseConfiguration(input){
    }else{
     if(typeof v!==typeof next[key]||!['number','string','boolean'].includes(typeof v))throw Error('Invalid parameter type: '+key);
     if(typeof v==='number'&&!Number.isFinite(v))throw Error('Non-finite parameter: '+key);
+    if(key==='height'&&v!==0&&(v<120||v>230))throw Error('height is outside the supported range (120–230 cm, or 0 for not entered).');
+    if(key==='cgWeight'&&!['actual','ideal','adjusted'].includes(v))throw Error('Invalid Cockcroft–Gault weight choice.');
     if(typeof v==='number'&&DEFS[key]){
       const [, , min,max]=fieldDef(key);
       if(v<min||v>max)throw Error(`${key} is outside the supported range (${min}–${max}).`);
@@ -1376,6 +1421,9 @@ function loadStudy(id){
  researchStatus('Loaded the '+study.short+' regimen for comparison.');
  showScenarioNote('Published study: '+study.label,study.note+' Use Undo last import in Research tools to return to your previous settings.');
  renderStudyStatus();switchTab('concentration');defer();
+ // Bring the plasma graph into view when the study was loaded from elsewhere (for example the evidence scorecard).
+ const card=$('plasmaChart')?.closest('.card'),box=card?.getBoundingClientRect();
+ if(box&&(box.bottom<80||box.top>window.innerHeight-80))card.scrollIntoView({block:'start'});
 }
 // Published studies with measured concentrations, then teaching cases that have none.
 if(STUDIES)for(const [label,list] of [['Measured concentrations',STUDIES.STUDIES],['Teaching cases (no measured levels)',STUDIES.CASES||[]]]){

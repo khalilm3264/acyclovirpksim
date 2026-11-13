@@ -208,3 +208,19 @@ test('blood-brain barrier presets: intact matches DEFAULTS, damaged raises only 
  const peak=(r,k)=>Math.max(...r.cols[k]);
  assert.ok(peak(b,'csf')/peak(a,'csf')>1.2&&peak(b,'csfCmmg')/peak(a,'csfCmmg')>4);
 });
+
+test('body size and Cockcroft-Gault weight choice: Devine ideal weight, adjusted weight, fallbacks',()=>{
+ const pk=require('../public/assets/pk-engine.js');
+ const man={age:60,sex:'male',scr:1.2,weight:120,height:177.8}; // 70 in
+ const s=pk.bodySize(man);
+ assert.ok(Math.abs(s.ideal-73)<1e-9&&Math.abs(s.adjusted-(73+.4*47))<1e-9&&Math.abs(s.bmi-120/1.778**2)<1e-9);
+ assert.ok(Math.abs(pk.bodySize({sex:'female',weight:60,height:152.4}).ideal-45.5)<1e-9);
+ assert.equal(pk.bodySize({sex:'male',weight:80,height:0}),null);
+ const cg=w=>(140-60)*w/(72*1.2);
+ assert.ok(Math.abs(pk.cockcroftGault(man)-cg(120))<1e-9,'default is actual weight');
+ assert.ok(Math.abs(pk.cockcroftGault({...man,cgWeight:'ideal'})-cg(73))<1e-9);
+ assert.ok(Math.abs(pk.cockcroftGault({...man,cgWeight:'adjusted'})-cg(91.8))<1e-9);
+ assert.ok(Math.abs(pk.cockcroftGault({...man,cgWeight:'ideal',height:0})-cg(120))<1e-9,'no height: actual weight');
+ assert.ok(Math.abs(pk.cockcroftGault({...man,weight:60,cgWeight:'ideal'})-cg(60))<1e-9,'below ideal weight: actual weight');
+ assert.equal(pk.DEFAULTS.height,0);assert.equal(pk.DEFAULTS.cgWeight,'actual');
+});
