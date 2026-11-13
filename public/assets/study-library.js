@@ -20,7 +20,7 @@
   {id:4,sex:'male',age:49,weight:59,dose:142,values:[19.3,2.3,22,3.0]},
   {id:5,sex:'female',age:39,weight:48,dose:122,values:[26.2,2.5,28.8,2.9]}];
  const CAPD_ROWS=[[0,4],[4,4],[8,4],[12,12]].map(([start,dwell])=>({sessionStart:null,start,dwell,fill:2,glucose:1.36,uf:null}));
- const boelaert=b=>({id:'boelaert-'+b.id,legend:'Boelaert pt '+b.id+' fitted',short:'Boelaert 1987 CAPD, patient '+b.id,
+ const boelaert=b=>({id:'boelaert-'+b.id,sampleKinds:['peak','trough','peak','trough'],sampleKindSource:'author-fitted',legend:'Boelaert pt '+b.id+' fitted',short:'Boelaert 1987 CAPD, patient '+b.id,
   label:'Boelaert 1987: IV acyclovir on CAPD, patient '+b.id,ref:'ref6',cite:'[6]',n:1,pointsLabel:'author-fitted peaks and troughs',
   group:'dialysis',mode:'Peritoneal dialysis',regimen:b.dose+' mg IV daily ×5, CAPD 4/4/4/12 h dwells, CrCl 0',
   config:{age:b.age,sex:b.sex,weight:b.weight,crcl:0,crclSource:'manual',renalMode:'constant',route:'Acyclovir IV',dosingMode:'repeat',
@@ -43,15 +43,15 @@
    ref:'ref1',cite:'[1]',n:6,statistic:'mean',mode:'No dialysis',config:iv(70,0,175,24,1,24),points:LASKIN_ANURIC,
    regimen:'2.5 mg/kg IV over 1 h, single dose, CrCl 0',
    note:'Six anuric hemodialysis patients received 2.5 mg/kg IV over 1 hour, sampled before their next dialysis session. Weight is a nominal 70 kg and CrCl is set to 0; neither is patient-matched. Published means were converted from µmol/L at 225.21 g/mol.'},
-  {id:'label-5',pointsLabel:'published means',legend:'Label 5 mg/kg means',label:'US IV label: 5 mg/kg every 8 hours, steady state',short:'US label 5 mg/kg q8h (steady state)',
+  {id:'label-5',sampleKinds:['peak','trough'],sampleKindSource:'reported',pointsLabel:'published means',legend:'Label 5 mg/kg means',label:'US IV label: 5 mg/kg every 8 hours, steady state',short:'US label 5 mg/kg q8h (steady state)',
    ref:'ref10',cite:'[10]',n:8,statistic:'mean',mode:'No dialysis',config:iv(70,95,350,8,10,80),points:[[73,9.8],[80,0.7]],
    regimen:'5 mg/kg IV over 1 h every 8 h',
    note:'The label reports a mean steady-state peak and trough for 8 adults with normal kidney function. AyFlux places them at the end of the tenth infusion (hour 73) and just before an eleventh dose (hour 80). Weight and CrCl are nominal assumptions.'},
-  {id:'label-10',pointsLabel:'published means',legend:'Label 10 mg/kg means',label:'US IV label: 10 mg/kg every 8 hours, steady state',short:'US label 10 mg/kg q8h (steady state)',
+  {id:'label-10',sampleKinds:['peak','trough'],sampleKindSource:'reported',pointsLabel:'published means',legend:'Label 10 mg/kg means',label:'US IV label: 10 mg/kg every 8 hours, steady state',short:'US label 10 mg/kg q8h (steady state)',
    ref:'ref10',cite:'[10]',n:7,statistic:'mean',mode:'No dialysis',config:iv(70,95,700,8,10,80),points:[[73,22.9],[80,1.9]],
    regimen:'10 mg/kg IV over 1 h every 8 h',
    note:'The label reports a mean steady-state peak and trough for 7 adults with normal kidney function. AyFlux places them at the end of the tenth infusion (hour 73) and just before an eleventh dose (hour 80). Weight and CrCl are nominal assumptions.'},
-  {id:'kacirova',legend:'Kacirova 2022 measured',short:'Kacirova 2022, one patient (with CMMG)',label:'Kacirova 2022: IV acyclovir, paired acyclovir and CMMG levels',
+  {id:'kacirova',sampleKinds:['trough',null],cmmgSampleKinds:['trough',null],sampleKindSource:'reported',legend:'Kacirova 2022 measured',short:'Kacirova 2022, one patient (with CMMG)',label:'Kacirova 2022: IV acyclovir, paired acyclovir and CMMG levels',
    ref:'ref42',cite:'[42]',n:1,pointsLabel:'measured concentrations',mode:'No dialysis',regimen:'750 mg IV q8h ×6, then 850 mg; estimated CrCl',
    config:{age:36,sex:'male',weight:86,scr:87/88.4,crclSource:'estimated',renalMode:'constant',dosingMode:'custom',customDoses:KACIROVA_DOSES,horizon:72},
    points:[[64,1.7],[65+25/60,8.9]],cmmgPoints:[[64,0.27],[65+25/60,0.64]],
@@ -78,6 +78,32 @@
  function pointsOf(study){
   return study.points.map(([time,observed])=>({analyte:'plasma',time,observed}))
    .concat((study.cmmgPoints||[]).map(([time,observed])=>({analyte:'cmmg',time,observed})));
+ }
+ // Peak or trough for each point, aligned with pointsOf(), only where the source calls the sample
+ // a peak or a trough (Boelaert's are values the authors derived from their own curve fits).
+ // null means the source does not label that sample.
+ function kindsOf(study){
+  const plasma=study.points.map((_,i)=>study.sampleKinds?.[i]??null);
+  return plasma.concat((study.cmmgPoints||[]).map((_,i)=>study.cmmgSampleKinds?.[i]??null));
+ }
+ // Residuals for the residuals view: predicted ÷ observed for every published point (1 = agreement,
+ // below 1 = AyFlux underpredicts), labelled peak or trough where the source does so, and a
+ // per-study summary. Uses the nominal predictions already in each score.
+ function residuals(scores){
+  const points=[],studies=[];
+  scores.forEach((score,index)=>{
+   const study=find(score.id),kinds=kindsOf(study);
+   const rows=score.rows.map((r,i)=>({study:study.id,index,analyte:r.analyte,time:r.time,observed:r.observed,predicted:r.predicted,
+    ratio:r.predicted/r.observed,kind:kinds[i]??null,kindSource:kinds[i]?study.sampleKindSource||'reported':null}));
+   points.push(...rows);
+   const ratios=rows.map(r=>r.ratio).sort((a,b)=>a-b),mid=ratios.length>>1;
+   const median=ratios.length%2?ratios[mid]:Math.sqrt(ratios[mid-1]*ratios[mid]);
+   const below=rows.filter(r=>r.ratio<1).length,above=rows.filter(r=>r.ratio>1).length;
+   studies.push({id:study.id,short:study.short,cite:study.cite,mode:study.mode,total:rows.length,median,min:ratios[0],max:ratios[ratios.length-1],
+    direction:below===rows.length?'below':above===rows.length?'above':'mixed',
+    peaks:rows.filter(r=>r.kind==='peak'),troughs:rows.filter(r=>r.kind==='trough')});
+  });
+  return {points,studies};
  }
  // One row per published point for the CSV export, in mg/L.
  function csv(scores,calibration={}){
@@ -123,6 +149,6 @@
   const gmr=Math.exp(rows.reduce((sum,row)=>sum+Math.log(row.predicted/row.observed),0)/rows.length);
   return {id:study.id,rows,gmr,inside:rows.filter(row=>row.inside).length,total:rows.length,coverage:config.coverage};
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,csv,summarize};
+ return {STUDIES,find,configFor,matches,score,interp,pointsOf,kindsOf,residuals,csv,summarize};
 });
 

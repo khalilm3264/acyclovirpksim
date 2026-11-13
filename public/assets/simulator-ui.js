@@ -1447,6 +1447,55 @@ async function drawScorecardFigure(){
    yAxis:{type:'log',min:lo,max:hi,name:'AyFlux nominal prediction (mg/L)',nameLocation:'middle',nameGap:46}});
   status.textContent='Points above the solid line are overpredicted, points below underpredicted. Dashed lines mark twofold error.';
  }catch{status.textContent='Figure unavailable. The table and CSV contain the same values.';}
+ drawResidualFigure();
+}
+// Residuals view: predicted ÷ observed for each published point, grouped by study, with a
+// horizontal line at 1 and peak/trough samples marked where the source labels them.
+async function drawResidualFigure(){
+ const target=$('residualFigure'),status=$('residualStatus'),body=$('residualRows');
+ if(!target||!body||!scorecardScores.length)return;
+ const res=STUDIES.residuals(scorecardScores),count=res.studies.length,two=v=>v.toFixed(2),h=v=>String(Number(v.toFixed(2)));
+ const listed=list=>list.length?list.map(p=>two(p.ratio)+' at '+h(p.time)+' h'+(p.analyte==='cmmg'?' (CMMG)':'')).join('; '):'—';
+ const direction={below:'All below 1 (underpredicted)',above:'All above 1 (overpredicted)',mixed:'Mixed'};
+ body.replaceChildren(...res.studies.map(s=>{
+  const tr=document.createElement('tr'),cell=text=>{const td=document.createElement('td');td.textContent=text;tr.append(td);};
+  cell(s.short+' '+s.cite);cell(String(s.total));cell(two(s.median));cell(two(s.min)+'–'+two(s.max));cell(direction[s.direction]);
+  const fitted=STUDIES.find(s.id).sampleKindSource==='author-fitted'?' (author-fitted)':'';
+  cell(listed(s.peaks)+(s.peaks.length?fitted:''));cell(listed(s.troughs)+(s.troughs.length?fitted:''));
+  return tr;
+ }));
+ // Spread points from one study across a small band around its column so none overlap exactly.
+ const offsets=new Map();
+ for(const s of res.studies){const own=res.points.filter(p=>p.study===s.id);own.forEach((p,k)=>offsets.set(p,own.length>1?(k/(own.length-1)-0.5)*0.5:0));}
+ const kindName={peak:'peak',trough:'trough'};
+ const item=p=>{
+  const study=STUDIES.find(p.study),kind=p.kind?'Reported '+kindName[p.kind]+(p.kindSource==='author-fitted'?' (author-fitted)':''):'Sample';
+  const text=study.short+' '+study.cite+'\n'+kind+', '+(p.analyte==='cmmg'?'CMMG':'acyclovir')+' at '+h(p.time)+' h\nObserved '+Number(p.observed.toPrecision(3))+' mg/L, predicted '+Number(p.predicted.toPrecision(3))+' mg/L\nPredicted ÷ observed '+two(p.ratio);
+  return {value:[p.index+offsets.get(p),p.ratio,text],symbol:p.kind?'triangle':'circle',symbolRotate:p.kind==='trough'?180:0};
+ };
+ const group=(name,color,test,size)=>({name,type:'scatter',symbolSize:size,itemStyle:{color,borderColor:'#fff',borderWidth:1},data:res.points.filter(test).map(item)});
+ const series=[
+  group('Reported peak','#ba591d',p=>p.analyte==='plasma'&&p.kind==='peak',13),
+  group('Reported trough','#2367a0',p=>p.analyte==='plasma'&&p.kind==='trough',13),
+  group('Other acyclovir sample','#5b6670',p=>p.analyte==='plasma'&&!p.kind,9),
+  group('CMMG sample','#6b3fa0',p=>p.analyte==='cmmg',11)
+ ].filter(s=>s.data.length);
+ const ratios=res.points.map(p=>p.ratio),lo=Math.min(0.1,10**Math.floor(Math.log10(Math.min(...ratios)))),hi=Math.max(10,10**Math.ceil(Math.log10(Math.max(...ratios))));
+ const guide=(name,y,type,width)=>({name,type:'line',silent:true,showSymbol:false,tooltip:{show:false},itemStyle:{color:'#3d4650'},lineStyle:{color:'#3d4650',width,type},data:[[-0.5,y],[count-0.5,y]]});
+ series.push(guide('Predicted = observed (1)',1,'solid',2),guide('Twofold',2,'dashed',1),{...guide('Twofold',0.5,'dashed',1),name:'Twofold '});
+ const labels=res.studies.map(s=>STUDIES.find(s.id).legend);
+ body.closest('table')?.setAttribute('aria-describedby','residualStatus');
+ const below=ratios.filter(r=>r<1).length,above=ratios.filter(r=>r>1).length,narrow=target.clientWidth<600;
+ try{
+  await window.AyFluxCharts.ensure();
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true,label:{description:'Predicted divided by observed concentration for '+ratios.length+' published points from '+count+' comparison scenarios, log scale. A horizontal line marks 1. '+below+' points are below 1 and '+above+' above.'}},series,
+   legend:{bottom:0,data:series.map(s=>s.name).filter(n=>n!=='Twofold ')},grid:{top:16,left:64,right:20,bottom:narrow?225:150},
+   tooltip:{trigger:'item',confine:true,formatter:p=>p.data?.value?.[2]||''},
+   xAxis:{type:'value',min:-0.5,max:count-0.5,splitLine:{show:false},axisTick:{customValues:labels.map((_,i)=>i)},
+    axisLabel:{customValues:labels.map((_,i)=>i),rotate:narrow?65:35,fontSize:narrow?10:11,formatter:v=>labels[Math.round(v)]||''}},
+   yAxis:{type:'log',min:lo,max:hi,name:'Predicted ÷ observed',nameLocation:'middle',nameGap:42,axisLine:{show:true,onZero:false},axisLabel:{formatter:v=>String(Number(v.toPrecision(2)))}}});
+  status.textContent=below+' of '+ratios.length+' points are below 1 (underpredicted) and '+above+' above (overpredicted). Same nominal predictions as the scorecard and its CSV.';
+ }catch{status.textContent='Figure unavailable. The table below lists the same ratios.';}
 }
 $('scorecardCsv').addEventListener('click',()=>{
  if(!scorecardScores.length)return;

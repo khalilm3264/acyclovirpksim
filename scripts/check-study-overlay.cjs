@@ -65,6 +65,22 @@ async function main(){
   const figure=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#scorecardFigure')).getOption());
   assert.equal(figure.xAxis[0].type,'log');
   assert.equal(figure.series.filter(s=>s.type==='scatter').reduce((n,s)=>n+s.data.length,0),pointCount);
+  // Residuals view: one point per published value, a line at predicted ÷ observed = 1,
+  // and peak/trough markers only where the source labels the sample.
+  await page.locator('#residualFigure').scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#residualFigure')),null,{timeout:60000});
+  const residual=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#residualFigure')).getOption());
+  const unity=residual.series.find(s=>s.name==='Predicted = observed (1)');
+  assert.ok(unity&&unity.data.every(p=>p[1]===1)&&unity.lineStyle.type==='solid');
+  const residualPoints=residual.series.filter(s=>s.type==='scatter').flatMap(s=>s.data);
+  assert.equal(residualPoints.length,pointCount);
+  const peaks=residual.series.find(s=>s.name==='Reported peak').data,troughs=residual.series.find(s=>s.name==='Reported trough').data;
+  assert.equal(peaks.length,8);assert.equal(troughs.length,9);
+  assert.ok(troughs.every(p=>p.symbolRotate===180)&&peaks.every(p=>p.symbol==='triangle'&&p.symbolRotate===0));
+  assert.equal(await page.locator('#residualRows tr').count(),count);
+  assert.match(await page.textContent('#residualRows'),/All below 1 \(underpredicted\)/);
+  assert.match(await page.textContent('#residualRows'),/\(author-fitted\)/);
+  assert.match(await page.textContent('#residualStatus'),/points are below 1/);
   const [download]=await Promise.all([page.waitForEvent('download'),page.click('#scorecardCsv')]);
   const csv=fs.readFileSync(await download.path(),'utf8').trim().split('\n');
   assert.equal(csv.length,1+pointCount);
