@@ -5,16 +5,168 @@ const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'../public');
 const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));if(!file.startsWith(root+path.sep)&&file!==root){res.writeHead(403);return res.end();}if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');if(!fs.existsSync(file)){res.writeHead(404);return res.end();}res.setHeader('Content-Type',({'.js':'application/javascript','.css':'text/css','.html':'text/html','.svg':'image/svg+xml','.woff2':'font/woff2'})[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);});
 (async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const url='http://127.0.0.1:'+server.address().port;const browser=await chromium.launch({args:['--no-sandbox','--enable-unsafe-swiftshader']});try{
- const page=await browser.newPage();const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
+ const page=await browser.newPage({serviceWorkers:'block'});const errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
  await page.goto(url+'/explore/');await page.waitForFunction(()=>document.querySelector('#balance').textContent.includes('within tolerance'));
- assert.ok(!requests.some(u=>u.includes('plotly-full')),'3D must stay lazy');
+ assert.ok(!requests.some(u=>u.includes('echarts-gl')),'3D must stay lazy');
  await page.click('#generate');await page.waitForFunction(()=>document.querySelectorAll('#map tbody button').length===49);await page.locator('#map tbody button').nth(20).click();await page.waitForFunction(()=>document.querySelector('#balance').textContent.includes('within tolerance'));
+ await page.locator('#trajectoryPanel summary').click();
+ await page.waitForSelector('#trajectory canvas');
+ const matched=await page.evaluate(()=>{
+  const option=id=>echarts.getInstanceByDom(document.querySelector('#'+id)).getOption();
+  const [plasma,csf]=option('curve').series,path=option('trajectory').series[0];
+  return path.data.length===plasma.data.length&&path.markLine.data.length>0&&path.data.every(([x,y,t],i)=>
+   x===plasma.data[i][1]&&y===csf.data[i][1]&&t===plasma.data[i][0]);
+ });
+ assert.ok(matched,'Trajectory must preserve the time ordering and both concentrations');
  await page.locator('#time').fill('0');await page.locator('#time').dispatchEvent('input');assert.ok((await page.textContent('#balance')).includes('Input 0 mg'));
- await page.click('#three');await page.waitForFunction(()=>document.querySelector('#surface').data?.[0]?.type==='surface',{},{timeout:60000});await page.click('#resetView');await page.click('#hideThree');
+ assert.match(await page.textContent('#trajectorySample'),/^0 h/);
+ assert.deepEqual(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#trajectory')).getOption().series[1].data[0]),[0,0,0]);
+ assert.ok(!requests.some(u=>u.includes('/vendor/echarts-gl')));
+ for(const kind of ['heatmap','surface']){
+   await page.selectOption('#echartKind',kind);
+   await page.waitForFunction(k=>window.echarts?.getInstanceByDom(document.querySelector('#echart'))?.getOption()?.series[0].type===k,kind);
+   const plotted=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#echart')).getOption().series[0].data);
+   assert.equal(plotted.length,49);
+   if(kind==='heatmap')assert.ok(!requests.some(u=>u.includes('/vendor/echarts-gl')));
+   const cells=await page.locator('#map tbody button').allTextContents();
+   for(const [index,point] of plotted.entries())assert.ok(Math.abs(point[2]-Number(cells[index].replaceAll(',','')))<0.00051);
+   assert.ok(await page.locator('#echart canvas').count()>0);
+ }
+ const surfaceId=await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#echart')).id);
+ await page.selectOption('#echartKind','');
+ assert.ok(await page.locator('#echart').isHidden());
+ await page.selectOption('#echartKind','surface');
+ assert.equal(await page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#echart')).id),surfaceId);
+ await page.click('#gridFigurePanel summary');
+ const optionFor=id=>page.evaluate(id=>echarts.getInstanceByDom(document.getElementById(id)).getOption(),id);
+ for(const [kind,caption] of [['contours','Interpolated contour'],['difference','minus'],['time','first HD start'],['parallel','sampled scenarios']]){
+  await page.selectOption('#gridFigureKind',kind);
+  await page.waitForFunction(t=>document.querySelector('#gridFigureStatus').textContent.includes(t),caption);
+  const o=await optionFor('gridComparison');
+  if(kind==='time')assert.equal(o.series[0].data.length,9*49);
+  else if(kind==='parallel')assert.equal(o.series[0].data[0].length,6);
+  else assert.equal(o.series[0].data.length,49);
+ }
+ await page.click('#gridFigurePanel summary');
+ await page.click('#compartmentPanel summary');
+ await page.click('#playCompartments');await page.waitForFunction(()=>+document.querySelector('#time').value>0);
+ await page.click('#playCompartments');await page.click('#compartmentPanel summary');
+ await page.click('#resetView');await page.selectOption('#echartKind','');
  await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  await page.selectOption('#yKey','crcl');await page.click('#generate');await page.waitForFunction(()=>document.querySelector('#gridStatus').textContent.includes('different X and Y'));
+ await page.addInitScript(()=>{window.simulationMessages=0;const post=Worker.prototype.postMessage;Worker.prototype.postMessage=function(...args){window.simulationMessages++;return post.apply(this,args);};});
+ await page.selectOption('#mode','Peritoneal dialysis');await page.click('#baseline');
+ await page.click('#exchangePanel summary');await page.waitForSelector('#exchangeFigure canvas');
+ assert.ok((await optionFor('exchangeFigure')).series[0].data.some(p=>p[1]>0));
  await page.goto(url+'/');await page.waitForFunction(()=>!document.querySelector('#csv').disabled,{},{timeout:60000});
+ // The lowest concentration chart must remain deferred on mobile until scrolled near.
+ assert.ok(await page.evaluate(()=>!window.echarts?.getInstanceByDom(document.querySelector('#csfCmmgChart'))?.getOption().series));
+ const originalDose=await page.inputValue('#num_dose');
+ await page.click('#saveBaseline');
+ await page.fill('#num_dose',String(Number(originalDose)+25));
+ await page.waitForFunction(()=>window.AyFluxResearchBridge.snapshot().updated);
+ await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
+ await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption().series?.some(t=>t.name?.startsWith('Baseline:')));
+ const frozen=await page.evaluate(()=>window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption().series.find(t=>t.name?.startsWith('Baseline:')).data.slice());
+ assert.ok((await page.textContent('#baselineChanges')).includes('dose'));
+ const jobs=await page.evaluate(()=>window.simulationMessages);
+ await page.fill('#num_dose',originalDose);
+ await page.waitForFunction(()=>window.AyFluxResearchBridge.snapshot().updated);
+ assert.equal(await page.evaluate(()=>window.simulationMessages),jobs,'revisiting cached settings must avoid Worker transfer');
+ await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
+ assert.deepEqual(await page.evaluate(()=>window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption().series.find(t=>t.name?.startsWith('Baseline:')).data.slice()),frozen);
+ await page.locator('#csfCmmgChart').scrollIntoViewIfNeeded();
+ await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#csfCmmgChart'))?.getOption().series?.some(t=>t.name?.startsWith('Baseline:')));
+ await page.click('#clearBaseline');
+ await page.locator('#csfCmmgChart').scrollIntoViewIfNeeded();
+ await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#csfCmmgChart'))?.getOption().series&&!window.echarts?.getInstanceByDom(document.querySelector('#csfCmmgChart'))?.getOption().series.some(t=>t.name?.startsWith('Baseline:')));
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await page.setViewportSize({width:1280,height:900});
+ await page.locator('#baselinePanel').scrollIntoViewIfNeeded();
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ for(const [panel,chart] of [['eventsPanel','eventStrip'],['comparisonPanel','multipleCharts'],['removalPanel','mainRemoval']]){
+  await page.click('#'+panel+' summary');await page.waitForSelector('#'+chart+' canvas');await page.click('#'+panel+' summary');
+ }
  const download=page.waitForEvent('download',{timeout:60000});await page.selectOption('#csv','xlsx');const file=await download;assert.ok(file.suggestedFilename().endsWith('.xlsx'));const data=fs.readFileSync(await file.path());assert.equal(data.readUInt32LE(0),0x04034b50);
- await page.click('[data-tab="research"]');await page.click('#openVisualExplorer');await page.waitForURL('**/explore/');assert.ok((await page.textContent('#source')).includes('copied'));
+ await page.click('[data-tab="validation"]');
+ await page.click('#clearMeasures');
+ await page.click('#addMeasure');
+ await page.fill('#measureRows input[data-mk="time"]','4');
+ await page.click('#addMeasure');
+ await page.click('#applyMeasures');
+ await page.click('#runForecast');
+ await page.waitForFunction(()=>document.querySelector('#forecastSummary').textContent.includes('Fitting measurements through 4 h: 1'));
+ assert.match(await page.textContent('#forecastOutput'), /at 12 h/);
+ await page.waitForSelector('.forecast-chart canvas');
+ assert.ok(await page.evaluate(()=>!echarts.getInstanceByDom(document.querySelector('.forecast-chart')).getOption().series.some(s=>s.name==='Observed')));
+ await page.click('#revealForecast');
+ await page.waitForFunction(()=>echarts.getInstanceByDom(document.querySelector('.forecast-chart'))?.getOption().series.some(s=>s.name==='Observed'));
+ assert.match(await page.textContent('#forecastOutput'), /Predicted minus observed/);
+ await page.selectOption('#measureRows select[data-mk="role"] >> nth=1','holdout');
+ await page.click('#applyMeasures');
+ await page.waitForFunction(()=>!document.querySelector('#holdoutSvg').disabled&&!document.querySelector('#holdoutFigure').hidden);
+ const expected=await page.evaluate(()=>window.AyFluxResearchBridge.snapshot().results._validation.lines[0]);
+ const plotted=()=>page.evaluate(()=>echarts.getInstanceByDom(document.querySelector('#holdoutChart')).getOption().series.find(s=>s.type==='scatter').data);
+ assert.deepEqual(await plotted(),[[expected.observed,expected.predicted]]);
+ await page.selectOption('#holdoutView','error');
+ assert.deepEqual(await plotted(),[[expected.hour,expected.predicted-expected.observed]]);
+ const vectorDownload=page.waitForEvent('download');
+ await page.click('#holdoutSvg');
+ const vector=await vectorDownload;assert.equal(vector.suggestedFilename(),'ayflux-plasma-error.svg');
+ const svg=fs.readFileSync(await vector.path(),'utf8');assert.match(svg,/<svg\b/);assert.match(svg,/Prediction error/);assert.doesNotMatch(svg,/<image\b/);
+ await page.click('#clearMeasures');await page.waitForSelector('#holdoutFigure',{state:'hidden'});
+ await page.click('[data-tab="research"]');
+ for(const metric of ['auc','csfPeak','mPeak','mass']){
+  await page.selectOption('#tornadoMetric',metric);
+  if(metric==='mass'){await page.waitForSelector('#tornado',{state:'hidden'});assert.match(await page.textContent('#tornadoStatus'),/zero baseline/);continue;}
+  await page.waitForSelector('#tornado canvas');
+  assert.ok(await page.evaluate(metric=>{
+   const snapshot=window.AyFluxResearchBridge.snapshot(),s=window.RenalPKV7.sensitivity(snapshot.config,snapshot.primary);
+   const rows=s.outcomes.filter(r=>r.effects?.[metric]);
+   const opt=echarts.getInstanceByDom(document.querySelector('#tornado')).getOption();
+   let previous=Infinity;
+   return opt.yAxis[0].data.length===rows.length&&opt.yAxis[0].data.every((label,i)=>{
+    const effect=rows.find(r=>r.label===label).effects[metric],m=Math.max(Math.abs(effect.down),Math.abs(effect.up));
+    const matches=m<=previous&&opt.series[0].data[i]===effect.down&&opt.series[1].data[i]===effect.up;
+    previous=m;return matches;
+   });
+  },metric),'Tornado must rank and plot signed effects for '+metric);
+ }
+ await page.selectOption('#tornadoMetric','auc');await page.click('#sweepPanel summary');
+ await page.waitForSelector('#sweepChart canvas');assert.ok((await optionFor('sweepChart')).series[0].data.length>=5);
+ await page.click('#ensemblePanel summary');await page.click('#ensembleRun');
+ await page.waitForSelector('#ensembleChart canvas');
+ for(const [view,type] of [['scatter','scatter'],['matrix','scatter'],['box','boxplot'],['violin','custom']]){
+  await page.selectOption('#ensembleView',view);
+  const o=await optionFor('ensembleChart');assert.equal(o.series[0].type,type);
+  if(view==='matrix')assert.equal(o.series.length,16);
+ }
+ await page.click('#runHeatmap');
+ await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#heatmapPlot'))?.getOption().series[0].data.length===49);
+ await page.locator('#ospFile').setInputFiles(path.resolve(__dirname, '../interop/fixtures/ospsuite_aciclovir.csv'));
+ await page.waitForFunction(()=>document.querySelector('#ospStatus').textContent.includes('rows loaded'));
+ await page.selectOption('#ospTimeColumn', 'Time [min]');
+ await page.selectOption('#ospValueColumn', 'Organism|PeripheralVenousBlood|Aciclovir|Plasma (Peripheral Venous Blood) [µmol/l]');
+ await page.selectOption('#ospTimeUnit', 'min');
+ await page.selectOption('#ospConcUnit', 'umol/L');
+ await page.click('#ospCompare');
+ await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#ospDifference'))?.getOption().series[0].data.length>0);
+ const imported = await page.evaluate(() => echarts.getInstanceByDom(document.querySelector('#ospPlot')).getOption().series[1].data);
+ assert.equal(imported.length, 491);
+ assert.equal(imported.at(-1)[0], 24);
+ assert.ok(Math.abs(imported[1][1] - 3.254674 * 225.21 / 1000) < 1e-9);
+ await page.click('#ospClear');
+ assert.equal(await page.evaluate(()=>!!echarts.getInstanceByDom(document.querySelector('#ospPlot'))),false);
+ const popupPromise=page.waitForEvent('popup');await page.click('#printResearchReport');const popup=await popupPromise;
+ await popup.waitForFunction(()=>document.querySelectorAll('.report-figure img').length>=3&&[...document.images].every(i=>i.naturalWidth>0));
+ await popup.close();
+ await page.click('#openVisualExplorer');await page.waitForURL('**/explore/');assert.ok((await page.textContent('#source')).includes('copied'));
+ await page.goto(url+'/lite/');
+ await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#acvChart'))?.getOption().series.length===5);
+ await page.route('**/echarts-5.6.0.min.js',r=>r.abort());
+ await page.reload();await page.waitForSelector('#acvChart > canvas');
+ await page.waitForFunction(()=>document.querySelector('#liteResults').children.length===5);
+ assert.ok(await page.evaluate(()=>document.querySelector('#acvChart > canvas').width>300));
+ assert.ok(!requests.some(u=>/plotly/i.test(u)));
  assert.deepEqual(errors,[]);console.log('Desktop/mobile explorer, lazy 3D, cell selection, time slider, invalid inputs, snapshot transfer and XLSX download passed.');
  }finally{await browser.close();server.close();}})().catch(e=>{console.error(e);server.close();process.exitCode=1;});

@@ -1,0 +1,465 @@
+{
+  "seed": 20261110,
+  "gridSize": 441,
+  "replicates": 24,
+  "assayCV": 0.05,
+  "design": "Uniform discrete prior on clearance and central-volume scale factors (0.6–1.4); only renal and other clearance are scaled. All other parameters fixed. Six noisy fit samples, three noise-free latent holdout times. Same-model, on-grid recovery; not external validation or full-model identifiability.",
+  "cases": [
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 0,
+      "clearance": {
+        "median": 0.84,
+        "lower": 0.8,
+        "upper": 0.88
+      },
+      "volume": {
+        "median": 1.2,
+        "lower": 1.12,
+        "upper": 1.28
+      },
+      "ess": 9.771424816521602,
+      "holdoutRMSE": 0.1645712062967697
+    },
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 1,
+      "clearance": {
+        "median": 0.84,
+        "lower": 0.8,
+        "upper": 0.88
+      },
+      "volume": {
+        "median": 1.24,
+        "lower": 1.1600000000000001,
+        "upper": 1.3199999999999998
+      },
+      "ess": 9.879682572724443,
+      "holdoutRMSE": 0.11129377939672619
+    },
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 2,
+      "clearance": {
+        "median": 0.8,
+        "lower": 0.8,
+        "upper": 0.84
+      },
+      "volume": {
+        "median": 1.2,
+        "lower": 1.12,
+        "upper": 1.28
+      },
+      "ess": 9.797309982864927,
+      "holdoutRMSE": 0.07404114621266372
+    },
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 3,
+      "clearance": {
+        "median": 0.8,
+        "lower": 0.76,
+        "upper": 0.8
+      },
+      "volume": {
+        "median": 1.12,
+        "lower": 1.04,
+        "upper": 1.2
+      },
+      "ess": 9.273844511009848,
+      "holdoutRMSE": 0.0324307768148573
+    },
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 4,
+      "clearance": {
+        "median": 0.8,
+        "lower": 0.76,
+        "upper": 0.84
+      },
+      "volume": {
+        "median": 1.28,
+        "lower": 1.1600000000000001,
+        "upper": 1.3599999999999999
+      },
+      "ess": 9.43734759710131,
+      "holdoutRMSE": 0.06630507648039657
+    },
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 5,
+      "clearance": {
+        "median": 0.76,
+        "lower": 0.76,
+        "upper": 0.8
+      },
+      "volume": {
+        "median": 1.1600000000000001,
+        "lower": 1.08,
+        "upper": 1.24
+      },
+      "ess": 9.843522487441655,
+      "holdoutRMSE": 0.04009497117186046
+    },
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 6,
+      "clearance": {
+        "median": 0.8,
+        "lower": 0.76,
+        "upper": 0.84
+      },
+      "volume": {
+        "median": 1.1600000000000001,
+        "lower": 1.08,
+        "upper": 1.24
+      },
+      "ess": 8.704594385184011,
+      "holdoutRMSE": 0.01161420367133441
+    },
+    {
+      "truth": {
+        "clearance": 0.8,
+        "volume": 1.2
+      },
+      "replicate": 7,
+      "clearance": {
+        "median": 0.8,
+        "lower": 0.76,
+        "upper": 0.8
+      },
+      "volume": {
+        "median": 1.24,
+        "lower": 1.1600000000000001,
+        "upper": 1.3199999999999998
+      },
+      "ess": 10.528999142486027,
+      "holdoutRMSE": 0.10562094299835795
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 0,
+      "clearance": {
+        "median": 1.2,
+        "lower": 1.1600000000000001,
+        "upper": 1.28
+      },
+      "volume": {
+        "median": 0.8,
+        "lower": 0.72,
+        "upper": 0.84
+      },
+      "ess": 9.966763749209168,
+      "holdoutRMSE": 0.012956434378770742
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 1,
+      "clearance": {
+        "median": 1.2,
+        "lower": 1.1600000000000001,
+        "upper": 1.28
+      },
+      "volume": {
+        "median": 0.8,
+        "lower": 0.72,
+        "upper": 0.84
+      },
+      "ess": 9.36385950034566,
+      "holdoutRMSE": 0.03217264674465788
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 2,
+      "clearance": {
+        "median": 1.2,
+        "lower": 1.1600000000000001,
+        "upper": 1.28
+      },
+      "volume": {
+        "median": 0.8,
+        "lower": 0.72,
+        "upper": 0.88
+      },
+      "ess": 11.576101110653086,
+      "holdoutRMSE": 0.0016413033432451688
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 3,
+      "clearance": {
+        "median": 1.2,
+        "lower": 1.1600000000000001,
+        "upper": 1.24
+      },
+      "volume": {
+        "median": 0.88,
+        "lower": 0.8,
+        "upper": 0.9199999999999999
+      },
+      "ess": 10.758730067904809,
+      "holdoutRMSE": 0.0556902626137108
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 4,
+      "clearance": {
+        "median": 1.28,
+        "lower": 1.24,
+        "upper": 1.3599999999999999
+      },
+      "volume": {
+        "median": 0.88,
+        "lower": 0.8,
+        "upper": 0.96
+      },
+      "ess": 12.50578781112104,
+      "holdoutRMSE": 0.07721287944429633
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 5,
+      "clearance": {
+        "median": 1.2,
+        "lower": 1.12,
+        "upper": 1.24
+      },
+      "volume": {
+        "median": 0.72,
+        "lower": 0.6799999999999999,
+        "upper": 0.8
+      },
+      "ess": 10.14461518988045,
+      "holdoutRMSE": 0.043425526726178124
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 6,
+      "clearance": {
+        "median": 1.2,
+        "lower": 1.1600000000000001,
+        "upper": 1.28
+      },
+      "volume": {
+        "median": 0.84,
+        "lower": 0.76,
+        "upper": 0.9199999999999999
+      },
+      "ess": 11.014577202891992,
+      "holdoutRMSE": 0.013891588630253254
+    },
+    {
+      "truth": {
+        "clearance": 1.2,
+        "volume": 0.8
+      },
+      "replicate": 7,
+      "clearance": {
+        "median": 1.24,
+        "lower": 1.2,
+        "upper": 1.3199999999999998
+      },
+      "volume": {
+        "median": 0.84,
+        "lower": 0.76,
+        "upper": 0.9199999999999999
+      },
+      "ess": 13.844267107360906,
+      "holdoutRMSE": 0.05652224671536458
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 0,
+      "clearance": {
+        "median": 1,
+        "lower": 0.96,
+        "upper": 1.04
+      },
+      "volume": {
+        "median": 1.04,
+        "lower": 0.96,
+        "upper": 1.12
+      },
+      "ess": 11.062358045787697,
+      "holdoutRMSE": 0.005823467391315601
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 1,
+      "clearance": {
+        "median": 1,
+        "lower": 0.96,
+        "upper": 1.04
+      },
+      "volume": {
+        "median": 1.04,
+        "lower": 0.96,
+        "upper": 1.1600000000000001
+      },
+      "ess": 10.261200502760914,
+      "holdoutRMSE": 0.04906901277149989
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 2,
+      "clearance": {
+        "median": 1,
+        "lower": 0.96,
+        "upper": 1.08
+      },
+      "volume": {
+        "median": 1.04,
+        "lower": 0.96,
+        "upper": 1.12
+      },
+      "ess": 11.72091920039551,
+      "holdoutRMSE": 0.009678517508445285
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 3,
+      "clearance": {
+        "median": 1,
+        "lower": 0.96,
+        "upper": 1.04
+      },
+      "volume": {
+        "median": 1,
+        "lower": 0.9199999999999999,
+        "upper": 1.08
+      },
+      "ess": 10.318115906050327,
+      "holdoutRMSE": 0.008233494863235297
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 4,
+      "clearance": {
+        "median": 1,
+        "lower": 0.96,
+        "upper": 1.04
+      },
+      "volume": {
+        "median": 0.96,
+        "lower": 0.88,
+        "upper": 1.04
+      },
+      "ess": 9.904119915724358,
+      "holdoutRMSE": 0.04840779800678126
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 5,
+      "clearance": {
+        "median": 0.96,
+        "lower": 0.9199999999999999,
+        "upper": 1
+      },
+      "volume": {
+        "median": 1,
+        "lower": 0.9199999999999999,
+        "upper": 1.08
+      },
+      "ess": 9.55784724900635,
+      "holdoutRMSE": 0.0943163246066494
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 6,
+      "clearance": {
+        "median": 0.96,
+        "lower": 0.9199999999999999,
+        "upper": 1
+      },
+      "volume": {
+        "median": 1.04,
+        "lower": 0.96,
+        "upper": 1.1600000000000001
+      },
+      "ess": 10.976863152767798,
+      "holdoutRMSE": 0.14089223366504044
+    },
+    {
+      "truth": {
+        "clearance": 1,
+        "volume": 1
+      },
+      "replicate": 7,
+      "clearance": {
+        "median": 1,
+        "lower": 0.96,
+        "upper": 1.04
+      },
+      "volume": {
+        "median": 1,
+        "lower": 0.9199999999999999,
+        "upper": 1.08
+      },
+      "ess": 10.878320287364067,
+      "holdoutRMSE": 0.014614013461055116
+    }
+  ]
+}

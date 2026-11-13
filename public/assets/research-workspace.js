@@ -56,22 +56,16 @@ async function renderExternal(){
  const simulation=snapshot.results[snapshot.primary];
  const model={time:simulation.time,concentration:simulation[key].median};
  const difference=importer.compareCurves(model,raw);
- await window.AyFluxPlotly.ensure();
+ await window.AyFluxCharts.ensure();
  const unitName=key==="plasma"?"Plasma acyclovir":key==="csf"?"CSF acyclovir":key==="cmmg"?"Plasma CMMG":"CSF CMMG";
- const layout={
-  margin:{l:69,r:16,t:38,b:52},paper_bgcolor:"#fff",plot_bgcolor:"#fff",showlegend:true,
-  title:{text:unitName+" — modeled curve comparison",font:{size:14}},
-  xaxis:{title:"Time since simulation start (hours)"},yaxis:{title:"Concentration (mg/L)"}
- };
- $('ospPlot').classList.remove("hidden");$('ospDifference').classList.remove("hidden");
- Plotly.react('ospPlot',[
-  {x:model.time,y:model.concentration,mode:"lines",type:"scatter",name:"AyFlux median",line:{color:"#0054e9",width:2}},
-  {x:raw.time,y:raw.concentration,mode:"lines",type:"scatter",name:"Imported model",line:{color:"#b45a24",width:2,dash:"dash"}}
- ],layout,{responsive:true,displaylogo:false});
- Plotly.react('ospDifference',[{
-   x:difference.points.map(p=>p.time),y:difference.points.map(p=>p.difference),
-   mode:"lines",type:"scatter",name:"AyFlux − import",line:{color:"#396e74",width:2}
-  }],{...layout,showlegend:false,title:{text:"Curve difference: AyFlux minus imported (mg/L)",font:{size:14}},yaxis:{title:"Difference (mg/L)"}},{responsive:true,displaylogo:false});
+ const charts=window.AyFluxCharts;
+ $('ospPlot').classList.remove('hidden');$('ospDifference').classList.remove('hidden');
+ const option=charts.options([charts.line('AyFlux median',model.time,model.concentration,'#0054e9'),
+  charts.line('Imported model',raw.time,raw.concentration,'#b45a24',2,'dashed')],'Time since simulation start (hours)','Concentration (mg/L)');
+ option.title={text:unitName+' comparison',textStyle:{fontSize:14}};
+ charts.draw($('ospPlot'),option);
+ const residual=charts.options([charts.line('AyFlux − import',difference.points.map(p=>p.time),difference.points.map(p=>p.difference),'#396e74')],'Time (hours)','Difference (mg/L)');
+ charts.draw($('ospDifference'),residual);
  const fix=v=>v.toPrecision(4);
  updateText("ospMetrics",difference.points.length+" overlapping samples · RMSE "+fix(difference.rmse)+" mg/L · MAE "+fix(difference.mae)+" mg/L · mean bias "+fix(difference.bias)+" mg/L. These are curve-to-curve discrepancies, not a clinical goodness-of-fit assessment.");
  updateText("ospStatus","Compared with AyFlux "+snapshot.primary+". Re-run comparison if the model settings change.");
@@ -82,32 +76,18 @@ $('ospCompare').addEventListener("click",async ()=>{
 });
 $('ospClear').addEventListener("click",()=>{
  $('ospFile').value="";externalTable=null;lastExternal=null;
- for(const id of ["ospPlot","ospDifference"]){const el=$(id);try{if(el&&el.data)Plotly.purge(el);}catch(_){}el.classList.add("hidden");}
+ for(const id of ["ospPlot","ospDifference"]){const el=$(id);window.AyFluxCharts.dispose(el);el.classList.add("hidden");}
  updateText("ospMetrics","");updateText("ospStatus","Import cleared; no file data were uploaded.");
 });
 window.addEventListener("ayflux:results-updated",()=>{
  if(lastExternal)updateText("ospStatus","AyFlux simulation changed. Click Compare curves to refresh the overlay.");
 });
 const pause=()=>new Promise(resolve=>setTimeout(resolve,0));
-// Only users who open the heatmap download the larger Cartesian trace bundle.
-let cartesianPromise=null;
-function loadCartesianForHeatmap(){
- if(cartesianPromise)return cartesianPromise;
- cartesianPromise=window.AyFluxPlotly.ensure().then(()=>new Promise((resolve,reject)=>{
-  const script=document.createElement('script');
-  script.src='/assets/vendor/plotly-cartesian-3.3.1.min.js';
-  script.async=true;
-  script.onload=()=>resolve(window.Plotly);
-  script.onerror=()=>reject(new Error('Optional heatmap bundle could not be loaded'));
-  document.head.append(script);
- })).catch(error=>{cartesianPromise=null;throw error;});
- return cartesianPromise;
-}
 $('runHeatmap').addEventListener("click",async ()=>{
  const button=$('runHeatmap');button.disabled=true;
  try{
   const snapshot=getSnapshot();
-  const config={...snapshot.config,crclSource:"manual",draws:1,variability:0,horizon:Math.min(96,snapshot.config.horizon)};
+  const config={...snapshot.config,crclSource:"manual",draws:1,variability:0};
   const xValues=[0,10,25,50,75,100,150],yValues=[0,25,50,75,100,150,200];
   const metric=$('heatmapMetric').value,values=[];
   for(let j=0;j<yValues.length;j++){
@@ -123,6 +103,16 @@ $('runHeatmap').addEventListener("click",async ()=>{
    }
    values.push(row);
   }
+  lastHeatmap={values,metric,xValues,yValues};
+  await drawHeatmap(lastHeatmap);
+ }catch(error){updateText("heatmapStatus","Unable to produce heatmap: "+error.message);}
+ finally{button.disabled=false;}
+});
+let lastHeatmap=null;
+window.addEventListener('ayflux:palette',()=>{if(lastHeatmap)drawHeatmap(lastHeatmap).catch(()=>{});});
+async function drawHeatmap({values,metric,xValues,yValues}){
+ {
+  const charts=window.AyFluxCharts;
   const all=values.flat(),lo=Math.min(...all),hi=Math.max(...all);
   const table=document.createElement("table");table.id="heatmapTable";
   const caption=document.createElement("caption");caption.textContent=(metric==="auc"?"Plasma AUC (mg·h/L)":"Peak plasma concentration (mg/L)")+"; rows: HD clearance (mL/min), columns: CrCl (mL/min)";
@@ -135,9 +125,9 @@ $('runHeatmap').addEventListener("click",async ()=>{
    const tr=document.createElement("tr"),th=document.createElement("th");th.scope="row";th.textContent=String(yValues[j]);tr.append(th);
    row.forEach((value,i)=>{
     const td=document.createElement("td"),pct=hi===lo?0:(value-lo)/(hi-lo);
-    const shade=Math.round(244-110*pct);
-    td.style.backgroundColor="rgb("+shade+","+Math.round(248-72*pct)+","+Math.round(250-48*pct)+")";
-    td.style.color="#203c50";td.textContent=value.toFixed(value>=100?0:2);
+    const tone=charts.heatColorAt(pct);
+    td.style.backgroundColor=tone.fill;
+    td.style.color=tone.text;td.textContent=value.toFixed(value>=100?0:2);
     td.title="HD "+yValues[j]+" mL/min; CrCl "+xValues[i]+" mL/min";
     tr.append(td);
    });
@@ -147,21 +137,18 @@ $('runHeatmap').addEventListener("click",async ()=>{
   $('heatmapArea').replaceChildren(table);
   const label=metric==='auc'?'Plasma acyclovir AUC (mg·h/L)':'Peak plasma acyclovir (mg/L)';
   try{
-   const renderer=await loadCartesianForHeatmap();
+   await window.AyFluxCharts.ensure();
    const target=$('heatmapPlot');
    target.classList.remove('hidden');
-   await renderer.react(target,[{
-    type:'heatmap',x:xValues,y:yValues,z:values,
-    colorscale:[[0,'#edf3f6'],[0.33,'#b5d0df'],[0.66,'#6598b5'],[1,'#2b5f82']],
-    hovertemplate:'CrCl %{x} mL/min<br>HD clearance %{y} mL/min<br>'+label+': %{z:.3f}<extra></extra>',
-    colorbar:{title:{text:metric==='auc'?'mg·h/L':'mg/L',side:'right'},thickness:15},
-    xgap:2,ygap:2
-   }],{
-    margin:{l:74,r:68,t:32,b:70},paper_bgcolor:'#fff',plot_bgcolor:'#fff',
-    xaxis:{title:'Residual CrCl (mL/min)',tickmode:'array',tickvals:xValues},
-    yaxis:{title:'HD clearance (mL/min)',tickmode:'array',tickvals:yValues},
-    font:{color:'#28485e',size:11}
-   },{responsive:true,displaylogo:false});
+   window.AyFluxCharts.draw(target,{animation:false,grid:{left:70,right:22,top:16,bottom:96},
+    xAxis:{type:'category',data:xValues,name:'Residual CrCl (mL/min)',nameLocation:'middle',nameGap:28},
+    yAxis:{type:'category',data:yValues,name:'HD clearance (mL/min)',nameLocation:'middle',nameGap:42},
+    visualMap:{min:lo,max:hi===lo?lo+1:hi,orient:'horizontal',bottom:2,left:'center',inRange:{color:charts.heatColors()}},
+    tooltip:{renderMode:'richText',formatter:({value:[i,j,v]})=>'CrCl '+xValues[i]+' mL/min, HD '+yValues[j]+' mL/min\n'+label+' '+v.toFixed(3)},
+    series:[{type:'heatmap',itemStyle:{borderColor:'#fff',borderWidth:1},
+     // Each cell label takes the dark or light text color that contrasts with its own fill.
+     data:values.flatMap((row,j)=>row.map((v,i)=>({value:[i,j,v],label:{color:charts.heatColorAt(hi===lo?0:(v-lo)/(hi-lo)).text}}))),
+     label:{show:true,fontSize:11,fontWeight:600,formatter:p=>{const v=p.value[2];return v>=100?v.toFixed(0):v.toFixed(1);}}}]});
    $('heatmapArea').parentElement.open=false;
    updateText('heatmapStatus','Interactive Cartesian heatmap ready (49 deterministic simulations). Hover for values; expand the numeric table for accessible data.');
   }catch(error){
@@ -169,7 +156,79 @@ $('runHeatmap').addEventListener("click",async ()=>{
    $('heatmapArea').parentElement.open=true;
    updateText('heatmapStatus','49 simulations completed. Interactive plot unavailable; numeric table shown. '+error.message);
   }
- }catch(error){updateText("heatmapStatus","Unable to produce heatmap: "+error.message);}
+ }
+}
+// One HD session moved across the window; every point reruns the same dose schedule with nominal parameters.
+function hdTimingPlan(config){
+ // The simulation keeps its full duration, so kidney-function points and doses after hour 96 stay valid.
+ // Only the session start times are limited, to the first 96 hours.
+ const horizon=config.horizon,window=Math.min(96,horizon),duration=Math.min(config.hdDuration,24,window),last=window-duration;
+ // Hourly starts (never coarser), on a half-hour grid. A coarse step would alias against the dose interval.
+ const step=Math.max(.5,Math.ceil(last/96*2)/2),starts=[];
+ for(let start=0;start<=last+1e-9;start+=step)starts.push(Number(start.toFixed(2)));
+ return {horizon,window,duration,starts};
+}
+// Exactly one HD session, expressed as a custom sequence so it cannot repeat inside a long simulation.
+function hdTimingConfig(config,plan,start){
+ return {...config,crclSource:'manual',draws:1,variability:0,schedule:[{type:'HD',start,end:Number((start+plan.duration).toFixed(2))}]};
+}
+function cancelStaleHdTiming(snapshot){
+ const current=bridge.snapshot();
+ if(current.updated&&current.revision===snapshot.revision&&current.primary===snapshot.primary)return false;
+ $('hdTimingArea').replaceChildren();$('hdTimingPlot').classList.add('hidden');
+ updateText('hdTimingStatus','Settings changed. Run the timing sweep again.');
+ return true;
+}
+$('runHdTiming').addEventListener('click',async ()=>{
+ const button=$('runHdTiming');button.disabled=true;
+ $('hdTimingArea').replaceChildren();$('hdTimingPlot').classList.add('hidden');
+ try{
+  const snapshot=getSnapshot();
+  const plan=hdTimingPlan(snapshot.config);
+  const config=snapshot.config;
+  const problems=pk.validate(hdTimingConfig(config,plan,plan.starts[plan.starts.length-1]),'Custom sequence');
+  if(problems.length)throw Error(problems.slice(0,2).join('; '));
+  const reference=pk.simulate({...config,crclSource:'manual',draws:1,variability:0},'No dialysis').summary;
+  const rows=[];
+  for(const [index,start] of plan.starts.entries()){
+   if(index%8===0){updateText('hdTimingStatus','Computing '+(index+1)+' of '+plan.starts.length+' session times…');await pause();}
+   if(cancelStaleHdTiming(snapshot))return;
+   const summary=pk.simulate(hdTimingConfig(config,plan,start),'Custom sequence').summary;
+   const row={start,removed:summary.mass.median,auc:summary.auc.median,peak:summary.peak.median,cmmg:summary.mPeak.median};
+   if(!Object.values(row).every(Number.isFinite))throw Error('Nonfinite model result in sweep.');
+   rows.push(row);
+  }
+  if(cancelStaleHdTiming(snapshot))return;
+  const doses=snapshot.results[snapshot.primary].doses.filter(d=>d.amount>0&&d.time<=plan.window).map(d=>d.time);
+  const table=document.createElement('table'),head=table.createTHead().insertRow();
+  const caption=table.createCaption();caption.textContent='One '+plan.duration+'-hour HD session, by start time. Values cover the full '+plan.horizon+'-hour simulation. Without dialysis: plasma AUC '+reference.auc.median.toFixed(0)+' mg·h/L.';
+  for(const label of ['Session start (h)','Acyclovir removed (mg)','Plasma AUC (mg·h/L)','Peak plasma (mg/L)','Peak CMMG (mg/L)']){const th=document.createElement('th');th.scope='col';th.textContent=label;head.append(th);}
+  const body=table.createTBody();
+  for(const row of rows){const tr=body.insertRow();for(const text of [row.start,row.removed.toFixed(1),row.auc.toFixed(0),row.peak.toFixed(2),row.cmmg.toFixed(2)])tr.insertCell().textContent=String(text);}
+  $('hdTimingArea').replaceChildren(table);
+  const best=rows.reduce((a,b)=>b.removed>a.removed?b:a),worst=rows.reduce((a,b)=>b.removed<a.removed?b:a);
+  const summaryText=plan.starts.length+' simulations. Most drug removed when the session starts at hour '+best.start+' ('+best.removed.toFixed(0)+' mg); least at hour '+worst.start+' ('+worst.removed.toFixed(0)+' mg). Dashed lines mark dose times.';
+  try{
+   await window.AyFluxCharts.ensure();
+   if(cancelStaleHdTiming(snapshot))return;
+   const charts=window.AyFluxCharts,target=$('hdTimingPlot');target.classList.remove('hidden');
+   const option=charts.options([
+    charts.line('Acyclovir removed by the session (mg)',rows.map(r=>r.start),rows.map(r=>r.removed),'#285a7b',3),
+    {...charts.line('Plasma AUC over the simulation (mg·h/L)',rows.map(r=>r.start),rows.map(r=>r.auc),'#b55b16',3,'dashed'),yAxisIndex:1}
+   ],'HD session start (hours from first dose)','Acyclovir removed (mg)');
+   option.xAxis.max=plan.window;option.grid.right=74;
+   option.yAxis=[option.yAxis,{type:'value',name:'Plasma AUC (mg·h/L)',nameLocation:'middle',nameGap:52,min:0,splitLine:{show:false}}];
+   option.dataZoom=option.dataZoom.filter(z=>z.id!=='ayNavY');option.toolbox.feature.dataZoom.yAxisIndex='none';
+   option.series.push({type:'line',data:[],silent:true,tooltip:{show:false},markLine:{symbol:'none',silent:true,label:{show:false},lineStyle:{color:'#8a97a3',type:'dashed',width:1},data:doses.map(time=>({xAxis:time}))}});
+   option.toolbox.feature.saveAsImage.name='acyclovir_hd_timing';
+   charts.draw(target,option);
+   $('hdTimingArea').parentElement.open=false;
+   updateText('hdTimingStatus',summaryText);
+  }catch(error){
+   $('hdTimingPlot').classList.add('hidden');$('hdTimingArea').parentElement.open=true;
+   updateText('hdTimingStatus',summaryText+' Interactive plot unavailable; numeric table shown. '+error.message);
+  }
+ }catch(error){updateText('hdTimingStatus','Unable to run the timing sweep: '+error.message);}
  finally{button.disabled=false;}
 });
 $('runIntegrity').addEventListener("click",async ()=>{
@@ -215,27 +274,14 @@ async function renderReportChart(sim,key,label,color){
  document.body.append(target);
  const series=sim[key],time=sim.time;
  try{
-  await Plotly.newPlot(target,[
-   {x:time,y:series.lower,mode:'lines',type:'scatter',line:{width:0},
-    hoverinfo:'skip',showlegend:false},
-   {x:time,y:series.upper,mode:'lines',type:'scatter',line:{width:0},
-    fill:'tonexty',fillcolor:'rgba(46,96,132,0.14)',hoverinfo:'skip',
-    name:'Model interval',showlegend:true},
-   {x:time,y:series.median,mode:'lines',type:'scatter',
-    name:'Model median',line:{color,width:2.5}}
-  ],{
-   width:960,height:270,autosize:false,
-   margin:{l:72,r:23,t:30,b:54},
-   title:{text:label,font:{size:15,color:'#28485e'}},
-   xaxis:{title:'Time (hours)',color:'#34586c',tickfont:{size:11}},
-   yaxis:{title:'Concentration (mg/L)',color:'#34586c',rangemode:'tozero'},
-   font:{family:'Arial, sans-serif',color:'#28485e'},
-   paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',
-   legend:{orientation:'h',x:0.4,y:-0.29,font:{size:10}}
-  },{staticPlot:true,displayModeBar:false,responsive:false});
-  return await Plotly.toImage(target,{format:'png',width:960,height:270,scale:1.5});
+  const charts=window.AyFluxCharts;
+  const option=charts.options([charts.band('Model interval',time,series.lower,series.upper,'rgba(46,96,132,.18)'),
+   charts.line('Model median',time,series.median,color,2.5)],'Time (hours)','Concentration (mg/L)');
+  option.title={text:label,textStyle:{fontSize:15}};option.toolbox.show=false;
+  const chart=charts.draw(target,option);
+  return chart.getDataURL({type:'png',pixelRatio:1.5,backgroundColor:'#fff'});
  }finally{
-  try{Plotly.purge(target);}catch(_){}
+  window.AyFluxCharts.dispose(target);
   target.remove();
  }
 }
@@ -300,7 +346,7 @@ $('printResearchReport').addEventListener('click',async ()=>{
  updateText('reportStatus','Preparing print-ready chart images…');
  try{
   const snap=getSnapshot(),config=snap.config,sim=snap.results[snap.primary];
-  await window.AyFluxPlotly.ensure();
+  await window.AyFluxCharts.ensure();
   const values=[
    ['Release','v0.25.0 (research preview)'],['Scenario',snap.primary],
    ['Medication schedule',config.dosingMode==='custom'?'Custom doses':'Repeating regimen'],

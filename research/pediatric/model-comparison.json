@@ -1,0 +1,225 @@
+{
+  "sources": [
+    "10.1128/AAC.01426-20",
+    "10.1128/AAC.01138-08"
+  ],
+  "interpretation": "Typical IV predictions at equal numerical indexed renal inputs, not equal physiologic renal function. Different renal estimators and populations; no patient validation, random effects, or efficacy targets. Peaks and troughs are theoretical steady state.",
+  "rows": [
+    {
+      "weightKg": 10,
+      "indexedRenalMlMin173": 90,
+      "zengRenalLHourM2": 3.1213872832369947,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 2.5601363970339226,
+        "v": 10.8,
+        "halfLife": 2.9240588738632813,
+        "ssPeak": 9.699613022457553,
+        "ssTrough": 1.8454780052579498,
+        "aucPerInterval": 39.0604188573141
+      },
+      "zeng": {
+        "cl": 1.9650369682731001,
+        "v": 3.7551020408163267,
+        "halfLife": 1.3245747710253724,
+        "ssPeak": 21.054362308321924,
+        "ssTrough": 0.5401127073847847,
+        "aucPerInterval": 50.889627836305436
+      }
+    },
+    {
+      "weightKg": 10,
+      "indexedRenalMlMin173": 120,
+      "zengRenalLHourM2": 4.1618497109826595,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 3.0936614999124155,
+        "v": 10.8,
+        "halfLife": 2.4197830144827885,
+        "ssPeak": 8.956719117870364,
+        "ssTrough": 1.2059323689090322,
+        "aucPerInterval": 32.32415699094135
+      },
+      "zeng": {
+        "cl": 2.2755662339211282,
+        "v": 3.7551020408163267,
+        "halfLife": 1.1438200978319442,
+        "ssPeak": 20.12953510728081,
+        "ssTrough": 0.2894524835798084,
+        "aucPerInterval": 43.945106281387204
+      }
+    },
+    {
+      "weightKg": 10,
+      "indexedRenalMlMin173": 160,
+      "zengRenalLHourM2": 5.5491329479768785,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 3.738371708292042,
+        "v": 10.8,
+        "halfLife": 2.0024733050067804,
+        "ssPeak": 8.350370541972435,
+        "ssTrough": 0.7402903642264523,
+        "aucPerInterval": 26.749613950424212
+      },
+      "zeng": {
+        "cl": 2.6351675660904523,
+        "v": 3.7551020408163267,
+        "halfLife": 0.9877316440139393,
+        "ssPeak": 19.20681318058551,
+        "ssTrough": 0.14127725222523826,
+        "aucPerInterval": 37.94825091459383
+      }
+    },
+    {
+      "weightKg": 19.6,
+      "indexedRenalMlMin173": 90,
+      "zengRenalLHourM2": 3.1213872832369947,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 4.240871930531567,
+        "v": 21.168,
+        "halfLife": 3.459793117651117,
+        "ssPeak": 10.50600606608861,
+        "ssTrough": 2.5845266084381247,
+        "aucPerInterval": 46.216910864231785
+      },
+      "zeng": {
+        "cl": 3.255088334692278,
+        "v": 7.360000000000001,
+        "halfLife": 1.5672580048134017,
+        "ssPeak": 22.16591982757532,
+        "ssTrough": 1.0026875138932139,
+        "aucPerInterval": 60.213419682366
+      }
+    },
+    {
+      "weightKg": 19.6,
+      "indexedRenalMlMin173": 120,
+      "zengRenalLHourM2": 4.1618497109826595,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 5.124657511507934,
+        "v": 21.168,
+        "halfLife": 2.8631258742938934,
+        "ssPeak": 9.609019000485352,
+        "ssTrough": 1.764805103175178,
+        "aucPerInterval": 38.246458335969244
+      },
+      "zeng": {
+        "cl": 3.7694807896493776,
+        "v": 7.360000000000001,
+        "halfLife": 1.3533861912573177,
+        "ssPeak": 21.19232784663248,
+        "ssTrough": 0.5877434183059222,
+        "aucPerInterval": 51.99655096749575
+      }
+    },
+    {
+      "weightKg": 19.6,
+      "indexedRenalMlMin173": 160,
+      "zengRenalLHourM2": 5.5491329479768785,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 6.1926214798386745,
+        "v": 21.168,
+        "halfLife": 2.369358367189457,
+        "ssPeak": 8.883211859781872,
+        "ssTrough": 1.146069914777085,
+        "aucPerInterval": 31.65057005956483
+      },
+      "zeng": {
+        "cl": 4.365161237591713,
+        "v": 7.360000000000001,
+        "halfLife": 1.1686998420557226,
+        "ssPeak": 20.264238840942355,
+        "ssTrough": 0.31892790110351743,
+        "aucPerInterval": 44.90097600796401
+      }
+    },
+    {
+      "weightKg": 40,
+      "indexedRenalMlMin173": 90,
+      "zengRenalLHourM2": 3.1213872832369947,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 7.241159228420728,
+        "v": 43.2,
+        "halfLife": 4.135243716594851,
+        "ssPeak": 11.544953361886511,
+        "ssTrough": 3.5712383665580716,
+        "aucPerInterval": 55.239774099987386
+      },
+      "zeng": {
+        "cl": 5.557963862192656,
+        "v": 15.020408163265307,
+        "halfLife": 1.8732316055613183,
+        "ssPeak": 23.47502914319654,
+        "ssTrough": 1.7607588287274019,
+        "aucPerInterval": 71.96880187022252
+      }
+    },
+    {
+      "weightKg": 40,
+      "indexedRenalMlMin173": 120,
+      "zengRenalLHourM2": 4.1618497109826595,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 8.750196101135261,
+        "v": 43.2,
+        "halfLife": 3.42208995708161,
+        "ssPeak": 10.4486998691638,
+        "ssTrough": 2.531018286421186,
+        "aucPerInterval": 45.713261208866335
+      },
+      "zeng": {
+        "cl": 6.436273260179054,
+        "v": 15.020408163265307,
+        "halfLife": 1.6176058952688555,
+        "ssPeak": 22.38592014486446,
+        "ssTrough": 1.1150720019315206,
+        "aucPerInterval": 62.147765303064865
+      }
+    },
+    {
+      "weightKg": 40,
+      "indexedRenalMlMin173": 160,
+      "zengRenalLHourM2": 5.5491329479768785,
+      "doseMgKg": 10,
+      "intervalHours": 8,
+      "infusionHours": 1,
+      "abdalla": {
+        "cl": 10.573711942116963,
+        "v": 43.2,
+        "halfLife": 2.8319249062306646,
+        "ssPeak": 9.562721131940659,
+        "ssTrough": 1.7238141593154555,
+        "aucPerInterval": 37.829666836934464
+      },
+      "zeng": {
+        "cl": 7.453379422181634,
+        "v": 15.020408163265307,
+        "halfLife": 1.3968634869495868,
+        "ssPeak": 21.396853598933713,
+        "ssTrough": 0.6634684530653423,
+        "aucPerInterval": 53.6669311117558
+      }
+    }
+  ]
+}

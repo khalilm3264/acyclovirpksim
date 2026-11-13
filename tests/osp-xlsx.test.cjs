@@ -10,4 +10,19 @@ test('XLSX rejects missing, nonfinite or misaligned simulation values',()=>{
  assert.throws(()=>xlsx.workbook({},['missing']));const r=fixture();r['A & B'].plasma.median[1]=NaN;assert.throws(()=>xlsx.workbook(r,['A & B']));r['A & B'].plasma.median=[];assert.throws(()=>xlsx.workbook(r,['A & B']));
 });
 
-test('export includes numeric molecular weights for both analytes',()=>{const text=new TextDecoder().decode(xlsx.workbook(fixture(),['A & B']));assert.match(text,/Molecular Weight \[g\/mol\]/);assert.match(text,/<c r="I2"><v>225\.21<\/v><\/c>/);assert.match(text,/<c r="I2"><v>239\.19<\/v><\/c>/);});
+test('each curve sheet exports only time and its matching median as numeric cells', () => {
+ const curves = fixture();
+ const keys = ['plasma', 'csf', 'cmmg', 'csfCmmg'];
+ keys.forEach((key, i) => { curves['A & B'][key].median = [i + 0.25, i + 1.75]; });
+ const xml = new TextDecoder().decode(xlsx.workbook(curves, ['A & B']));
+ const sheets = [...xml.matchAll(/<worksheet .*?<\/worksheet>/gs)].map(match => match[0]);
+ assert.equal(sheets.length, keys.length);
+ sheets.forEach((sheet, i) => {
+  const rows = [...sheet.matchAll(/<row r="\d+">(.*?)<\/row>/gs)].map(match => match[1]);
+  const headers = [...rows[0].matchAll(/<t[^>]*>(.*?)<\/t>/g)].map(match => match[1]);
+  assert.deepEqual(headers, ['Time [h]', 'Concentration [mg/l]', 'Scenario', 'Molecule', 'Compartment', 'Data type', 'Statistic', 'Software']);
+  assert.deepEqual(rows.slice(1).map(row => [...row.matchAll(/<v>(.*?)<\/v>/g)].map(match => Number(match[1]))),
+   curves['A & B'].time.map((t, j) => [t, curves['A & B'][keys[i]].median[j]]));
+  assert.ok(sheet.includes('autoFilter ref="A1:H3"'));
+ });
+});

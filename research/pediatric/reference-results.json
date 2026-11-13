@@ -1,0 +1,216 @@
+{
+  "source": "10.1128/AAC.01426-20",
+  "status": "Equation reproduction only; generated model outputs, not measured clinical data",
+  "scenarios": [
+    {
+      "input": {
+        "name": "reference",
+        "age": 4,
+        "weight": 15,
+        "egfr": 164,
+        "dose": 10,
+        "interval": 8,
+        "infusion": 1,
+        "doses": 6
+      },
+      "summary": {
+        "cl": 5.15,
+        "v": 16.2,
+        "halfLife": 2.180385305839051,
+        "ssPeak": 8.60855626051527,
+        "ssTrough": 0.9300173665482772,
+        "aucPerInterval": 29.126213592233007
+      },
+      "concentrations": [
+        {
+          "time_h": 0,
+          "plasma_mg_L": 0
+        },
+        {
+          "time_h": 0.5,
+          "plasma_mg_L": 4.280432525644203
+        },
+        {
+          "time_h": 1,
+          "plasma_mg_L": 7.931806195128721
+        },
+        {
+          "time_h": 2,
+          "plasma_mg_L": 5.771774328375559
+        },
+        {
+          "time_h": 4,
+          "plasma_mg_L": 3.0562145450235265
+        },
+        {
+          "time_h": 8,
+          "plasma_mg_L": 0.8569053028554391
+        },
+        {
+          "time_h": 9,
+          "plasma_mg_L": 8.555354464866753
+        },
+        {
+          "time_h": 16,
+          "plasma_mg_L": 0.9242697600522127
+        },
+        {
+          "time_h": 24,
+          "plasma_mg_L": 0.9295655261984767
+        },
+        {
+          "time_h": 40,
+          "plasma_mg_L": 0.9300145741267342
+        },
+        {
+          "time_h": 41,
+          "plasma_mg_L": 8.60855422854089
+        },
+        {
+          "time_h": 48,
+          "plasma_mg_L": 0.9300171470258154
+        }
+      ]
+    },
+    {
+      "input": {
+        "name": "higher_egfr",
+        "age": 4,
+        "weight": 15,
+        "egfr": 300,
+        "dose": 10,
+        "interval": 8,
+        "infusion": 1,
+        "doses": 6
+      },
+      "summary": {
+        "cl": 7.662769511942612,
+        "v": 16.2,
+        "halfLife": 1.4653950255936146,
+        "ssPeak": 7.5490062771587265,
+        "ssTrough": 0.2753651317385073,
+        "aucPerInterval": 19.575167929326515
+      },
+      "concentrations": [
+        {
+          "time_h": 0,
+          "plasma_mg_L": 0
+        },
+        {
+          "time_h": 0.5,
+          "plasma_mg_L": 4.122887566451643
+        },
+        {
+          "time_h": 1,
+          "plasma_mg_L": 7.377419778457733
+        },
+        {
+          "time_h": 2,
+          "plasma_mg_L": 4.597044009316022
+        },
+        {
+          "time_h": 4,
+          "plasma_mg_L": 1.7849538541205625
+        },
+        {
+          "time_h": 8,
+          "plasma_mg_L": 0.26910617034880613
+        },
+        {
+          "time_h": 9,
+          "plasma_mg_L": 7.545106170912219
+        },
+        {
+          "time_h": 16,
+          "plasma_mg_L": 0.2752228675475749
+        },
+        {
+          "time_h": 24,
+          "plasma_mg_L": 0.27536189811893985
+        },
+        {
+          "time_h": 40,
+          "plasma_mg_L": 0.27536513006789537
+        },
+        {
+          "time_h": 41,
+          "plasma_mg_L": 7.549006276117729
+        },
+        {
+          "time_h": 48,
+          "plasma_mg_L": 0.27536513170053484
+        }
+      ]
+    },
+    {
+      "input": {
+        "name": "higher_weight",
+        "age": 4,
+        "weight": 30,
+        "egfr": 164,
+        "dose": 10,
+        "interval": 8,
+        "infusion": 1,
+        "doses": 6
+      },
+      "summary": {
+        "cl": 8.66123307711326,
+        "v": 32.4,
+        "halfLife": 2.5929297191511833,
+        "ssPeak": 9.210100945329751,
+        "ssTrough": 1.4177154680427408,
+        "aucPerInterval": 34.63710043697245
+      },
+      "concentrations": [
+        {
+          "time_h": 0,
+          "plasma_mg_L": 0
+        },
+        {
+          "time_h": 0.5,
+          "plasma_mg_L": 4.333565500391869
+        },
+        {
+          "time_h": 1,
+          "plasma_mg_L": 8.124943874573237
+        },
+        {
+          "time_h": 2,
+          "plasma_mg_L": 6.219047822878924
+        },
+        {
+          "time_h": 4,
+          "plasma_mg_L": 3.6436021530037204
+        },
+        {
+          "time_h": 8,
+          "plasma_mg_L": 1.2506766946786363
+        },
+        {
+          "time_h": 9,
+          "plasma_mg_L": 9.082245032001246
+        },
+        {
+          "time_h": 16,
+          "plasma_mg_L": 1.3980345430363252
+        },
+        {
+          "time_h": 24,
+          "plasma_mg_L": 1.415396612358475
+        },
+        {
+          "time_h": 40,
+          "plasma_mg_L": 1.4176832773628396
+        },
+        {
+          "time_h": 41,
+          "plasma_mg_L": 9.210076305728439
+        },
+        {
+          "time_h": 48,
+          "plasma_mg_L": 1.4177116752565255
+        }
+      ]
+    }
+  ]
+}

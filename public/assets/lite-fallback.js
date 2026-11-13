@@ -2,7 +2,7 @@
  * AyFlux full-site slow-load escape hatch.
  * Copyright (C) 2026 Muhammad Khalil — SPDX-License-Identifier: AGPL-3.0-only.
  *
- * This is intentionally async and independent of Plotly, workers and all model
+ * This is intentionally async and independent of external chart scripts, workers and all model
  * calculations. It NEVER redirects automatically or touches existing settings.
  */
 (function(){
@@ -21,7 +21,7 @@
   const label=document.createElement("strong");
   label.textContent="Still loading?";
   const text=document.createElement("p");
-  text.textContent="Open the fixed-scenario quick view without Plotly or extra controls.";
+  text.textContent="Open the fixed-scenario quick view with basic controls.";
   const links=document.createElement("div");
   links.className="lite-fallback-actions";
   const link=document.createElement("a");

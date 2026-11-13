@@ -13,13 +13,15 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const html = read('public/index.html');
 const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
-  './assets/plotly-loader.js',
+  '/assets/measurement-pixel.js',
+  './assets/charts.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
   './assets/ayflux-version.js',
   './assets/model-integrity.js',
   './assets/osp-import.js',
   './assets/simulator-ui.js',
+  './assets/analysis-views.js',
   './assets/research-workspace.js',
   './assets/pwa-register.js',
 ];
@@ -42,29 +44,22 @@ function scenario(overrides = {}) {
   };
 }
 
-test('simulator loads external scripts in the required order', () => {
-  const tags = [...html.matchAll(/<script\s([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
-  assert.equal(tags.length, scriptPaths.length);
-  const sources = tags.map(([, attrs, content]) => {
-    assert.equal(content.trim(), '', 'Inline JavaScript would violate script-src self');
-    return /\bsrc="([^"]+)"/.exec(attrs)?.[1];
-  });
-  assert.deepEqual(sources, scriptPaths);
+test('simulator script assets exist and use the expected loader', () => {
+  // Script order and inline content are checked with DOMParser in check-script-markup.cjs.
   for (const relative of scriptPaths) {
     const filename = path.join(root, 'public', relative);
     assert.ok(fs.statSync(filename).size > 0, relative + ' must exist');
   }
-  assert.ok(read('public/assets/vendor/plotly-basic-3.3.1.min.js').includes('plotly.js (basic'));
-  assert.ok(!html.includes('<script src="./assets/vendor/plotly-basic-3.3.1.min.js"'));
-  assert.ok(read('public/assets/plotly-loader.js').includes('script.async=true'));
-  assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxPlotly.ensure()'));
+  assert.ok(!html.includes('<script src="./assets/vendor/echarts-5.6.0.min.js"'));
+  assert.ok(read('public/assets/charts.js').includes('script.async=true'));
+  assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxCharts.ensure()'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.RenalPKV7'));
 });
 
 test('worker Content Security Policy allows local scripts but not inline scripts', () => {
   const worker = read('src/index.js');
   const directive = /script-src ([^;]+);/.exec(worker)?.[1];
-  assert.equal(directive?.trim(), "'self'");
+  assert.equal(directive?.trim(), "'self' https://bzrcdn.openai.com");
   assert.doesNotMatch(directive, /unsafe-inline|unsafe-eval/);
   const markup = html;
   assert.doesNotMatch(markup, /\s(?:onclick|onchange|oninput|onload|onerror)\s*=/i);
@@ -139,7 +134,8 @@ test('public citations and license links resolve to actual files', () => {
   assert.ok(read('CITATION.cff').includes('cff-version: 1.2.0'));
   assert.equal(read('public/CITATION.cff'),read('CITATION.cff'));
   assert.equal(read('public/LICENSE.txt'),read('LICENSE'));
-  assert.ok(read('THIRD_PARTY_NOTICES.md').includes('MIT License'));
+  assert.equal(read('public/THIRD_PARTY_NOTICES.txt'),read('THIRD_PARTY_NOTICES.md'));
+  assert.ok(read('THIRD_PARTY_NOTICES.md').includes('ECharts GL'));
   assert.ok(!html.includes('id="ayfluxLicense"'));
   assert.ok(!html.includes('id="ayfluxCitation"'));
 });
@@ -190,9 +186,9 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(index.includes('id="printResearchReport"'));
  assert.ok(ui.includes('window.AyFluxResearchBridge'));
  assert.ok(index.includes('/manifest.webmanifest'));
- assert.ok(read('public/sw.js').includes('ayflux-static-v0.25.0'));
+ assert.ok(read('public/sw.js').includes('ayflux-static-v0.26.0'));
  assert.ok(read('public/manifest.webmanifest').includes('AyFlux'));
- assert.ok(read('CITATION.cff').includes('version: "0.25.0"'));
+ assert.ok(read('CITATION.cff').includes('version: "0.26.0"'));
  assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
- assert.ok(read('CHANGELOG.md').includes('[0.25.0]'));
+ assert.ok(read('CHANGELOG.md').includes('[0.26.0]'));
 });

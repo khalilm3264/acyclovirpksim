@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<script defer src="/assets/measurement-pixel.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plasma sampling and parameter recovery | AyFlux</title>
+<link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="style.css"><script defer src="/assets/charts.js"></script><script defer src="view.js"></script></head>
+<body><div class="shell"><main><p><a href="/learn/">← AyFlux user guide</a></p>
+<h1>Plasma sampling and parameter recovery</h1>
+<p>Three sampling schedules use subsets of the same six simulated plasma concentrations. Select a synthetic adult to compare estimated peak concentration, exposure and total systemic clearance after one IV infusion.</p>
+<section class="card"><label>Synthetic adult <select id="patient"><option value="0">Lower clearance, larger central volume</option><option value="1">Higher clearance, smaller central volume</option><option value="2">Reference clearance and volume</option></select></label>
+<fieldset><legend>Curves shown</legend><label><input type="checkbox" checked value="0"> Late sample (12 h)</label> <label><input type="checkbox" checked value="1"> Early and late (1, 12 h)</label> <label><input type="checkbox" checked value="2"> All six samples</label></fieldset>
+<p>Lines show pointwise posterior medians. Circles show the six simulated measurements. The 12-hour sample represents a pre-dose trough for an assumed 12-hour interval.</p>
+<div id="chart" style="height:320px" aria-label="Estimated plasma acyclovir and synthetic samples"></div><p id="status" role="status"></p>
+<div class="scroll"><table><caption>Median and central 90% interval for each estimate</caption><thead><tr><th>Sampling schedule</th><th>Peak (mg/L)</th><th>AUC₀–₁₆ (mg·h/L)</th><th>Clearance (L/h)</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section class="card"><h2>Experimental design</h2><p>Each 70 kg adult receives 700 mg of IV acyclovir over one hour at a creatinine clearance of 95 mL/min without dialysis. Measurements at 0.5, 1, 2, 4, 8 and 12 hours include simulated Gaussian assay error (5% CV with a minimum SD of 0.1 mg/L).</p><p>The fit reweights 441 candidate pairs of clearance and central-volume scale factors. Metabolite formation clearance and other model parameters are fixed. Each example uses the first noise realization for its parameter pair in the seeded recovery experiment. Interval widths describe parameter uncertainty within this model and grid.</p><a href="https://github.com/khalilm3264/acyclovirpksim/tree/main/research/verification">Reproducible methods and source code</a></section></main></div></body></html>

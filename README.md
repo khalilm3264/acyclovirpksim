@@ -13,6 +13,7 @@
 <p align="center">
   <a href="https://ayflux.org/"><strong>Open simulator</strong></a> ·
   <a href="https://ayflux.org/learn/">User guide</a> ·
+  <a href="https://ayflux.org/references/">References</a> ·
   <a href="wiki/Roadmap.md">Development roadmap</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="https://ayflux.org/cite/">Cite AyFlux</a>
@@ -21,11 +22,15 @@
 <p align="center">
   <a href="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml"><img alt="Build and tests" src="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: AGPL-3.0-only" src="https://img.shields.io/badge/license-AGPL--3.0--only-315f7b"></a>
-  <a href="CHANGELOG.md"><img alt="Version 0.25.0 preview" src="https://img.shields.io/badge/version-0.25.0_preview-326f79"></a>
+  <a href="CHANGELOG.md"><img alt="Version 0.26.0 preview" src="https://img.shields.io/badge/version-0.26.0_preview-326f79"></a>
 </p>
 
 > [!IMPORTANT]
 > **Educational simulation only.** AyFlux is **not** a validated clinical decision-support system. Modeled plasma, CSF and CMMG concentrations must not be used to prescribe medication, select dialysis prescriptions, determine treatment efficacy, diagnose neurotoxicity or make other patient-care decisions.
+
+## Current status
+
+The application and software citation identify **v0.26.0 preview**. Main also includes subsequent merged interface and research additions; **v0.27.0 is planned**, not yet released. Use an exact commit when reproducing work from main. See [release tracking #55](https://github.com/khalilm3264/acyclovirpksim/issues/55).
 
 ## What does AyFlux do?
 
@@ -33,15 +38,46 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 
 | Explore | Current tools |
 | --- | --- |
-| **Kidney function** | Constant CrCl or an optional user-drawn, piecewise-linear CrCl trajectory; independent renal clearance terms for acyclovir and CMMG |
-| **Renal replacement therapy** | Intermittent hemodialysis, peritoneal dialysis, CRRT and custom sequential schedules |
-| **Drug administration** | IV acyclovir infusions and oral valacyclovir, with repeat or custom dose timelines |
-| **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and estimated peaks |
-| **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity and model consistency checks |
-| **Data exchange** | Detailed or tidy CSV exports, configuration JSON, optional independent **mrgsolve** and **OSPSuite-R** comparison scripts, and local PK-Sim/MoBi **results** CSV overlays |
-| **Reports and access** | Print-formatted PDF report with scenario-specific charts and page breaks, literature benchmark examples and offline static app caching where supported |
+| **Kidney function** | Constant CrCl or a user-drawn, piecewise-linear CrCl trajectory, with a kidney-injury example; independent renal clearance terms for acyclovir and CMMG |
+| **Renal replacement therapy** | Intermittent hemodialysis, peritoneal dialysis, CRRT and custom sequential schedules; a dialysis comparison table across all modes; a hemodialysis timing explorer |
+| **Drug administration** | IV acyclovir infusions and oral valacyclovir, with repeat or custom dose timelines and dose shown in mg/kg |
+| **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and peaks, in mg/L or µmol/L |
+| **Descriptive statistics** | Time above a level you choose, accumulation ratio, and baseline → current comparison with percent change |
+| **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity heatmaps and model consistency checks |
+| **Teaching** | Guided scenarios with notes on what to look at, example schedules, and a grouped drug reference table with 40 sources |
+| **Saving and sharing** | Shareable links, configuration JSON with undo and version history, detailed or tidy CSV, PK-Sim/MoBi **results** XLSX |
+| **Research comparisons** | Optional **mrgsolve** and **OSPSuite-R** scripts, local PK-Sim/MoBi results CSV overlays, a pediatric model comparison and published benchmarks |
+| **Reports and access** | Print-formatted PDF report, colorblind-friendly colors, keyboard-usable controls and offline caching where supported |
 
 **What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
+
+## What's new since 0.26.0
+
+These are merged and live at [ayflux.org](https://ayflux.org/) but not yet tagged as a release. None of them changes a model equation, parameter or default. Full details are in the [changelog](CHANGELOG.md#unreleased).
+
+- **Zoom like Plotly:** drag a box on any graph, double-click to reset; pan, zoom and download from the toolbar.
+- **Shareable links:** send someone a scenario as a link. The settings live in the link; nothing is uploaded.
+- **mg/L ↔ µmol/L:** switch units for graphs, summary and comparison table.
+- **Guided scenarios:** three teaching presets with a note on what to look at.
+- **Hemodialysis timing explorer:** see how the start time of one session changes drug removed.
+- **Time above a level, accumulation ratio and a fuller baseline comparison.**
+- **Undo and version history** for imports, links, guided scenarios and resets.
+- **Expanded drug reference:** grouped by modality, with CRRT sources added.
+- **Privacy:** the third-party measurement pixel is switched off.
+
+## Research pages
+
+- [Pediatric IV acyclovir](https://ayflux.org/research/pediatric/): separate Abdalla model with covariate and Zeng comparisons; [source-specific evidence review](https://ayflux.org/research/pediatric/evidence).
+- [Sampling and parameter recovery](https://ayflux.org/research/sampling/): synthetic experiments with different plasma sampling schedules.
+- [Visual explorer](https://ayflux.org/explore/): mass accounting, parameter grids, sensitivity and optional 3D surfaces.
+- [Published-evidence comparisons](research/validation/): source-specific CAPD, HD, CRRT, serum and CSF reconstructions and their limitations.
+- [Complete bibliography](https://ayflux.org/references/): stable source numbers, publication details, DOI links and evidence notes.
+
+These resources evaluate different questions; pediatric, neonatal, CNS and dialysis applicability must be assessed against each source and model.
+
+## Privacy
+
+Simulations run in your browser. Configurations, measurements, CSV files and reports are not sent to a server. A shareable link carries its scenario after the `#`, a part of the address that browsers do not transmit, and never includes measured concentrations. The site's third-party measurement pixel is currently disabled. Do not enter identifiable patient data.
 
 ## AyFlux Lite — a compact, v2-inspired alternative
 
@@ -53,9 +89,18 @@ Defaults resemble the legacy v2 example: 70 kg, CrCl 5 mL/min, 350 mg acyclovir 
 
 Lite deliberately excludes Monte Carlo uncertainty, CSF forecasts, Kt/V, famciclovir, fit-to-assay tools, external PK-Sim comparisons and advanced dialysis prescription tables. It retains a reference link for scientific limitations and does not replace the full simulator.
 
-**Performance:** the Lite HTML, JavaScript interface and shared PK engine total approximately **65 KB uncompressed**. Lite renders line charts with the browser's native Canvas API; it does **not** request Plotly or another charting library. The older self-contained Renal PK Lab v2 HTML bundled about 4.84 MB of Plotly despite a roughly 6.6 KB simulation engine. These sizes are not independently measured mobile loading times.
+Lite draws immediately with native Canvas while the interactive ECharts renderer loads. The Canvas view remains available offline.
 
 The full simulator header links directly to the **User guide**. Lite is available from a collapsed alternative-interface note in the guide's **About AyFlux** section; the full site no longer displays a separate Lite button or slow-load pop-up.
+
+## Comparing scenarios
+
+- **Overlays:** tick dialysis modes on the Concentration tab to draw them as separate what-if curves.
+- **Baseline:** choose **Save selected curve as baseline**, then change inputs. A dark dash-dot curve keeps the saved medians, **Changed settings** lists what differs, and the panel reports baseline → current values with percent change for peak plasma, AUC, peak CSF, peak CMMG and drug removed by dialysis. The baseline lasts for the page session and is not exported.
+- **Dialysis comparison table:** the last panel on the Concentration tab lists the same outcomes for every mode. Opening it calculates all modes.
+- **Guided scenarios:** Research tools has three presets that set this up for you.
+
+Completed results for up to three configurations are reused in memory; new numerical inputs and fitting observations invalidate reuse. Charts below the visible area wait until you scroll near them. See [performance verification](docs/interface-performance.md) for the scope of the measurements.
 
 ## Get started
 
@@ -66,30 +111,33 @@ The full simulator header links directly to the **User guide**. Lite is availabl
 ```bash
 git clone https://github.com/khalilm3264/acyclovirpksim.git
 cd acyclovirpksim
-python3 -m http.server 8000 --directory public
+npm install --no-save --ignore-scripts --no-audit --no-fund echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0 parse5@7.3.0
+node scripts/stage-visualizations.cjs
+node scripts/stage-poppins.cjs
+npx --yes http-server@14.1.1 public -a 127.0.0.1 -p 8000
 ```
 
-Open `http://localhost:8000` in your browser. To enable the optional interactive heatmap when developing locally, stage the pinned Cartesian asset first:
-
-```sh
-npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1
-node scripts/stage-cartesian.cjs
-```
-
-The numerical heatmap table still works when the optional script is absent. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. You can run the dependency-free test suite with:
+Open http://localhost:8000. The numerical heatmap table remains an accessible alternative to the visual grid. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. After staging the dependencies, run the regression suite with:
 
 ```bash
 node --test tests/*.test.cjs
 ```
 
-The browser **loads Plotly Basic on demand when a standard chart needs drawing**, and loads Plotly Cartesian only when the interactive sensitivity heatmap is requested. The heavy Plotly Basic bundle is not a blocking initial script or service-worker precache; it is cached after first use, so offline full charts require one successful online rendering first. The pharmacokinetic engine and interface remain separate. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
+Charts share a self-hosted ECharts library. The explorer requests ECharts GL when a 3D surface is selected. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
 
 ## A guide to the interface
 
-1. **Patient and medication:** set body mass, residual CrCl or a kidney-function trajectory, dosing, and the simulation horizon.
-2. **Dialysis scenario:** select no dialysis, HD, PD, CRRT or a custom schedule. The graph overlays are hypothetical counterfactual comparisons; a custom schedule follows a single simulated switching timeline.
-3. **Concentration and clearance:** explore plasma, CSF, CMMG, and time-resolved dialysis/renal clearance results, with clearly labeled units.
-4. **Research tools:** inspect model assumptions, compare a local OSP results CSV, export data, run numerical diagnostics and create a printable research summary.
+The sidebar holds the inputs; six tabs hold the results.
+
+| Where | What you do there |
+| --- | --- |
+| **Sidebar** | Pick the dialysis scenario first, then body weight, kidney function, drug, dose and duration. Advanced settings holds model parameters, uncertainty options and graph colors. |
+| **Concentration** | Read the scenario description and summary, choose units, overlay modes, freeze a baseline, and view plasma, CSF and CMMG curves. The dialysis comparison table is at the bottom. |
+| **Clearance & sessions** | Kidney function over time, dialysis clearance and drug removal. |
+| **Custom timeline** | Build a sequence of dialysis sessions, PD exchanges and individual doses. |
+| **Model validation** | Enter measured concentrations to reweight the model and check held-out points. |
+| **Research tools** | Guided scenarios, save/load/share, heatmaps, HD timing explorer, diagnostics, benchmarks and the PDF report. |
+| **References & methods** | Drug reference table, model methods and the numbered bibliography. |
 
 For deeper explanations, see [Dialysis](https://ayflux.org/learn/dialysis/), [Model methods and limits](https://ayflux.org/learn/model-methods/) and the [CSV/R/OSP exchange guide](docs/data-exchange.md).
 
@@ -102,7 +150,7 @@ AyFlux is a **teaching model with exploratory parameters**, not a fitted, extern
 - [Roadmap and planned scientific work](wiki/Roadmap.md) · [Verification plan](wiki/Release-Plan.md)
 - [Wiki-ready pages](wiki/Home.md) · [How to publish to the GitHub Wiki](docs/wiki-publishing.md)
 
-The `wiki/` directory contains the reviewed wiki source pages. GitHub's separate **Wiki** tab is not automatically updated by changes to this repository.
+The `wiki/` directory contains the version-controlled wiki source. GitHub stores the live Wiki separately; follow the [publishing instructions](docs/wiki-publishing.md) to synchronize it. See the [repository maintenance plan](docs/repository-maintenance.md) for PR dependencies and review priorities.
 
 ## Independent model comparisons
 
@@ -125,11 +173,16 @@ Scientific changes should include the units, equations or assumptions changed, p
 | --- | --- |
 | [`public/index.html`](public/index.html) | Responsive simulator interface |
 | [`public/assets/pk-engine.js`](public/assets/pk-engine.js) | Model equations, dialysis state and numerical integration |
-| [`public/assets/simulator-ui.js`](public/assets/simulator-ui.js) | Form validation, plots, scenarios and configuration handling |
+| [`public/assets/simulator-ui.js`](public/assets/simulator-ui.js) | Form validation, plots, scenarios, units, shareable links and configuration handling |
+| [`public/assets/charts.js`](public/assets/charts.js) | Shared chart options, zoom controls and color palettes |
+| [`public/explore/`](public/explore/) / [`public/research/`](public/research/) | Visual explorer and pediatric research module |
+| [`research/`](research/) | Reproducible validation scripts and benchmark write-ups |
 | [`public/assets/osp-import.js`](public/assets/osp-import.js) / [`ayflux-exchange.js`](public/assets/ayflux-exchange.js) | Unit-aware results import/export |
 | [`public/assets/research-workspace.js`](public/assets/research-workspace.js) | Diagnostic, sensitivity and research comparison tools |
 | [`src/index.js`](src/index.js) | Cloudflare Worker headers and static routing |
-| [`tests/`](tests/) | Dependency-free regression and scientific consistency checks |
+| [`public/assets/charts.js`](public/assets/charts.js) | Shared ECharts rendering and interaction layer |
+| [`public/research/`](public/research/) / [`research/`](research/) | Research pages, source reviews and reproducible experiments |
+| [`tests/`](tests/) | Regression and scientific consistency checks |
 | [`wiki/`](wiki/) / [`docs/`](docs/) | Roadmap, model exchange, deployment and contributor documentation |
 
 ## License, citations and contact

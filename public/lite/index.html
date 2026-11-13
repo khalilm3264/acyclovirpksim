@@ -1,9 +1,11 @@
 <!doctype html>
 <html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<script defer src="/assets/measurement-pixel.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#28485e">
 <title>AyFlux Lite — Fast renal PK simulator</title>
-<meta name="description" content="Fast browser-based acyclovir renal PK exploration with adjustable patient, medication, HD, CAPD, APD and CRRT inputs. Native charts and CSV; no heavy charting library.">
+<meta name="description" content="Fast browser-based acyclovir renal PK exploration with adjustable patient, medication, HD, CAPD, APD and CRRT inputs. Interactive charts and CSV export.">
 <link rel="canonical" href="https://ayflux.org/lite/">
 <style>
 :root{font:13px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#273f54;background:#f4f7f9}
@@ -74,7 +76,7 @@ footer a{margin-left:7px}
 @media(max-width:1050px){.layout{grid-template-columns:245px minmax(0,1fr)}.graphs{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.workspace{padding:10px}.layout{grid-template-columns:1fr}.side{position:static;max-height:none}.graphs{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart{height:255px}.chart.mini{height:220px}.panel{padding:10px}.side{padding:10px}.legend{gap:8px}}
 </style>
-<script defer src="/assets/pk-engine.js"></script><script defer src="/lite/lite.js"></script>
+<script defer src="/assets/pk-engine.js"></script><script defer src="/assets/charts.js"></script><script defer src="/lite/lite.js"></script>
 </head><body>
 <header><a class="brand" href="/" aria-label="AyFlux home">Ay<span>Flu<em>x</em></span></a><span class="lite-tag">LITE</span><div class="head-right"><a href="/">Full simulator</a></div></header>
 <div class="workspace">
@@ -111,10 +113,10 @@ footer a{margin-left:7px}
 </section>
 <div class="graphs">
 <section class="panel" aria-labelledby="acvTitle"><h2 id="acvTitle">Plasma acyclovir</h2>
-<canvas id="acvChart" class="chart" role="img" aria-label="Interactive modeled plasma acyclovir concentration curves versus time. Exact numeric scenario results appear in the comparison table."></canvas>
+<div id="acvChart" class="chart" role="img" aria-label="Interactive modeled plasma acyclovir concentration curves versus time. Exact numeric scenario results appear in the comparison table."><canvas class="chart"></canvas></div>
 </section>
 <section class="panel" aria-labelledby="cmmgTitle"><h2 id="cmmgTitle">Plasma CMMG</h2>
-<canvas id="cmmgChart" class="chart" role="img" aria-label="Exploratory modeled plasma CMMG concentration curves versus time."></canvas>
+<div id="cmmgChart" class="chart" role="img" aria-label="Exploratory modeled plasma CMMG concentration curves versus time."><canvas class="chart"></canvas></div>
 <p class="graph-note">CMMG is not a validated predictor of neurotoxicity.</p>
 </section>
 </div>
@@ -126,12 +128,12 @@ footer a{margin-left:7px}
 <tbody id="liteResults"><tr><td colspan="5">Calculating curves…</td></tr></tbody>
 </table></div>
 <details id="clearanceDetails"><summary>Show clearance curves</summary>
-<canvas id="clearChart" class="chart mini" role="img" aria-label="Total modeled acyclovir clearance in mL/min across scenarios."></canvas>
+<div id="clearChart" class="chart mini" role="img" aria-label="Total modeled acyclovir clearance in mL/min across scenarios."><canvas class="chart mini"></canvas></div>
 <p class="graph-note">Modeled total clearance includes residual kidney clearance, nonrenal elimination, and dialysis. Peritoneal transport can be bidirectional.</p>
 </details>
 <p id="liteStatus" role="status" aria-live="polite">Calculating…</p>
 <details><summary>Model assumptions and sources</summary>
-<p>Lite reuses the core AyFlux acyclovir/valacyclovir PK implementation and integrates each dosing and treatment boundary. It uses one nominal parameter draw, not a calibrated patient forecast. Default inputs mirror the older Renal PK Lab v2 example: 70 kg, CrCl 5 mL/min, acyclovir 350 mg IV every 24 hours, simulation 96 hours, HD at hour 24 for four hours, repeated every 48 hours; CRRT effluent 25 mL/kg/h. CAPD and APD now use the current AyFlux exploratory dialysate-transfer model, not v2's constant peritoneal clearances.</p>
+<p>Lite uses the AyFlux model with a single set of pharmacokinetic parameters. The default scenario spans 96 hours and assumes a body weight of 70 kg, CrCl of 5 mL/min, and 350 mg of intravenous acyclovir every 24 hours. In the HD scenario, four-hour sessions begin at hour 24 and repeat every 48 hours. The default CRRT effluent rate is 25 mL/kg/h. CAPD and APD use the same dialysate-transfer model as the full simulator.</p>
 <p>The CMMG CSF partition is not displayed here. Oral valacyclovir uses an assumed absorption model. PD and CMMG parameters have important uncertainties. For equations, references and evidence limitations, see <a href="/learn/model-methods/#equations">model methods</a>.</p>
 </details>
 </section>

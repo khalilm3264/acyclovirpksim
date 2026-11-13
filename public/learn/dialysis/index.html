@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+<script defer src="/assets/measurement-pixel.js"></script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Acyclovir in Hemodialysis, PD and CRRT | AyFlux</title>
   <meta name="description" content="Explore how hemodialysis, peritoneal dialysis, CRRT, and residual kidney function are represented in an educational acyclovir pharmacokinetic model.">
@@ -49,12 +51,12 @@
 </section>
 <section class="card">
   <h2>Peritoneal dialysis (PD)</h2>
-  <p>During peritoneal dialysis, acyclovir can move across the peritoneal membrane into dialysate, which is later drained. Exchange schedules, dwell times, and membrane transport affect how much drug may be removed.</p>
+  <p>During peritoneal dialysis, acyclovir can move across the peritoneal membrane into dialysate, which is later drained. AyFlux counts acyclovir in the drained fluid at each exchange and when a prescribed PD session ends early. If observation ends during a dwell, the summary reports the drug still in the cavity separately.</p>
   <p>AyFlux provides PD settings to explore these relationships. Its estimates should not be used to choose a PD prescription. For historical measured data, see <a href="https://pubmed.ncbi.nlm.nih.gov/2243158/" target="_blank" rel="noopener noreferrer">research on acyclovir in continuous ambulatory peritoneal dialysis</a>.</p>
 </section>
 <section class="card">
   <h2>Continuous renal replacement therapy (CRRT)</h2>
-  <p>CRRT generally runs over longer periods than intermittent hemodialysis. That changes the timing of drug removal and the shape of the predicted concentration curve. Actual clearance depends on the treatment settings and interruptions, so the same assumptions should not be applied across modalities.</p>
+  <p>CRRT typically removes acyclovir over longer intervals than intermittent hemodialysis. AyFlux estimates CRRT clearance from effluent flow, the sieving coefficient, and the fraction of prescribed therapy delivered. During a scheduled interruption, the CRRT contribution to clearance falls to zero.</p>
 </section>
 <section class="card">
   <h2>No dialysis and residual kidney function</h2>

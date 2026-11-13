@@ -1,0 +1,33 @@
+{
+  "cohort": {
+    "weightKg": 79.1,
+    "bsaM2": 1.89,
+    "absoluteCrCl": 98.32369942196532,
+    "indexedCrCl": 90
+  },
+  "engineAtLaskinCrCl": {
+    "renal": 332.08668361154315,
+    "nonrenal": 28.75877136205575,
+    "formationToCMMG": 26.752345453075115,
+    "otherNonrenal": 2.0064259089806336,
+    "totalFromParameters": 360.8454549735989,
+    "totalFromSimulatedAUC": 360.8454549736011,
+    "renalToCrClRatio": 3.6898520401282577,
+    "renalFraction": 0.9203016943523374
+  },
+  "laskinDerived": {
+    "nonrenalBySubtraction": 52,
+    "renalToCrClRatio": 2.7555555555555555
+  },
+  "anuric": {
+    "nonrenal": 28.66666666666667,
+    "totalFromSimulatedAUC": 28.666666701601997,
+    "sadjadiIntercept": 28.7
+  },
+  "probenecidEmulation": {
+    "engineAucIncreasePct": 41.74274965399445,
+    "laskinAucIncreasePct": 39.75903614457832,
+    "engineTotalClFallPct": 29.449654219275335,
+    "laskinTotalClFallPct": 26.66666666666667
+  }
+}

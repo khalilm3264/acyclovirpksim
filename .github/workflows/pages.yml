@@ -23,21 +23,17 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '22'
-      - name: Stage optional Cartesian heatmap bundle
+      - name: Stage chart and font assets
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1 plotly.js-dist-min@3.3.1 @fontsource/poppins@5.3.0
-          node scripts/stage-cartesian.cjs
+          npm install --no-save --ignore-scripts --no-audit --no-fund parse5@7.3.0 echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0
           node scripts/stage-visualizations.cjs
           node scripts/stage-poppins.cjs
       - name: Check JavaScript syntax
         run: |
-          node --check public/assets/vendor/plotly-basic-3.3.1.min.js
-          node --check public/assets/vendor/plotly-cartesian-3.3.1.min.js
-          node --check scripts/stage-cartesian.cjs
           node --check scripts/stage-poppins.cjs
           node --check public/assets/ayflux-exchange.js
           node --check public/assets/ayflux-version.js
-          node --check public/assets/plotly-loader.js
+          node --check public/assets/charts.js
           node --check public/assets/model-integrity.js
           node --check public/assets/osp-import.js
           node --check public/assets/research-workspace.js
@@ -45,19 +41,44 @@ jobs:
           node --check public/explore/model.js
           node --check public/explore/worker.js
           node --check public/explore/view.js
+          node --check public/research/pediatric/model.js
+          node --check public/research/pediatric/view.js
           node --check public/sw.js
           node --check public/assets/pk-engine.js
           node --check public/assets/simulator-ui.js
           node --check public/lite/lite.js
           node --check public/assets/lite-fallback.js
           node --check public/assets/simulator-worker.js
+      - name: Check bibliography synchronization
+        run: node scripts/references.cjs --check
+      - name: Check sitemap coverage
+        run: node scripts/sitemap.cjs
       - name: Run AyFlux regression tests
         run: node --test tests/*.test.cjs
       - name: Browser-check explorer and XLSX export
         run: |
           npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium firefox
+          node scripts/check-script-markup.cjs
           node scripts/check-visualizations.cjs
+
+          node scripts/check-pediatric.cjs
+          node scripts/check-concentrations.cjs
+          node scripts/check-study-overlay.cjs
+          node scripts/check-label-probenecid.cjs
+          node scripts/check-regimens.cjs
+
+      - name: Compare surface startup when the ECharts renderer changes
+        if: github.event_name == 'push'
+        env:
+          PREVIOUS_COMMIT: ${{ github.event.before }}
+        run: |
+          if [[ "$PREVIOUS_COMMIT" =~ ^[0-9a-f]{40}$ && "$PREVIOUS_COMMIT" != 0000000000000000000000000000000000000000 ]]; then
+            git fetch --depth=1 origin "$PREVIOUS_COMMIT"
+            if ! git diff --quiet "$PREVIOUS_COMMIT" HEAD -- public/explore/echarts-view.js && git show "$PREVIOUS_COMMIT:public/explore/echarts-view.js" > /tmp/previous-echarts-view.js; then
+              node scripts/benchmark-explorer.cjs /tmp/previous-echarts-view.js
+            fi
+          fi
 
   deploy-pages:
     if: github.event_name != 'pull_request'
@@ -73,10 +94,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-      - name: Stage optional Cartesian heatmap bundle
+      - name: Stage chart and font assets
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1 plotly.js-dist-min@3.3.1 @fontsource/poppins@5.3.0
-          node scripts/stage-cartesian.cjs
+          npm install --no-save --ignore-scripts --no-audit --no-fund echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0
           node scripts/stage-visualizations.cjs
           node scripts/stage-poppins.cjs
       - name: Configure Pages
@@ -84,10 +104,13 @@ jobs:
       - name: Upload public directory
         uses: actions/upload-pages-artifact@v5
         with:
+          name: github-pages-${{ github.run_attempt }}
           path: ./public
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
 
   deploy-cloudflare:
     # Deploy only when enabled in repository variables and after tests pass.
@@ -112,10 +135,9 @@ jobs:
             echo "::error::Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID as GitHub Actions repository secrets."
             exit 1
           fi
-      - name: Stage optional Cartesian heatmap bundle
+      - name: Stage chart and font assets
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund plotly.js-cartesian-dist-min@3.3.1 plotly.js-dist-min@3.3.1 @fontsource/poppins@5.3.0
-          node scripts/stage-cartesian.cjs
+          npm install --no-save --ignore-scripts --no-audit --no-fund echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0
           node scripts/stage-visualizations.cjs
           node scripts/stage-poppins.cjs
       - name: Deploy tested Worker to Cloudflare
@@ -125,3 +147,14 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
 
+      - name: Verify public sitemap and crawler discovery
+        run: |
+          for attempt in {1..6}; do
+            if curl -fsSL --max-time 15 https://ayflux.org/sitemap.xml -o /tmp/ayflux-live-sitemap.xml &&
+               cmp -s public/sitemap.xml /tmp/ayflux-live-sitemap.xml &&
+               curl -fsSL --max-time 15 https://ayflux.org/robots.txt | grep -Fx 'Sitemap: https://ayflux.org/sitemap.xml'; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
