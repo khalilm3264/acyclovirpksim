@@ -8,7 +8,7 @@ const ui=fs.readFileSync(path.join(__dirname,'../public/assets/simulator-ui.js')
 const html=fs.readFileSync(path.join(__dirname,'../public/index.html'),'utf8');
 
 test('label renal adjustment follows the four US acyclovir injection label bands',()=>{
- const cases=[[120,1,8],[50.1,1,8],[50,1,12],[25,1,12],[24.9,1,24],[10,1,24],[9.9,.5,24],[0,.5,24]];
+ const cases=[[120,1,8],[50.1,1,8],[50,1,12],[25.1,1,12],[25,1,24],[24.9,1,24],[10.1,1,24],[10,.5,24],[9.9,.5,24],[0,.5,24]];
  for(const [crcl,fraction,every] of cases){const t=E.labelRenalAdjustment(crcl);assert.equal(t.fraction,fraction,'CrCl '+crcl);assert.equal(t.every,every,'CrCl '+crcl);}
  assert.equal(E.labelRenalAdjustment(-1),null);assert.equal(E.labelRenalAdjustment(NaN),null);
 });
@@ -33,4 +33,37 @@ test('interface wires the label button and probenecid option, citing sources on 
  assert.match(ui,/rememberVersion\('Before label kidney adjustment'\)/);
  assert.match(ui,/if\(c\.every!==8\)return \{ok:false/,'idempotent: only adjusts an every-8-hour regimen');
  assert.match(html,/<li id="ref10">/);assert.match(html,/<li id="ref41">/);
+});
+
+
+// Exercise the normal importer, including old saved files and links, against current defaults.
+function importer(){
+ const source=ui.slice(ui.indexOf('function parseConfiguration(input)'),ui.indexOf('// ---------- Shareable links'));
+ return new Function('E','DEFS','fieldDef',source+';return parseConfiguration;')(E,{},()=>null);
+}
+function payload(config){return {format:'acyclovir-pk-simulator',schemaVersion:2,config,primary:'No dialysis',visibleScenarios:['No dialysis'],appearance:{palette:'standard'}};}
+test('older files gain optional label and probenecid defaults and new files preserve them',()=>{
+ const old=structuredClone(E.DEFAULTS);delete old.probenecid;delete old.labelBsa;
+ const parse=importer(),result=parse(payload(old));
+ assert.equal(result.next.probenecid,false);assert.equal(result.next.labelBsa,0);
+ const next=parse(payload({...result.next,probenecid:true,labelBsa:2})).next;
+ assert.equal(next.probenecid,true);assert.equal(next.labelBsa,2);
+ assert.throws(()=>parse(payload({...next,labelBsa:-1})),/surface area/);
+ assert.throws(()=>parse(payload({...next,probenecid:'yes'})),/parameter type/);
+});
+test('label comparison uses indexed CrCl and waits for explicit body surface area',()=>{
+ const source=ui.slice(ui.indexOf('function labelAdjustmentState()'),ui.indexOf('function medicationTools()'));
+ const state=config=>new Function('E','c',source+';return labelAdjustmentState();')(E,config);
+ assert.equal(state({...E.DEFAULTS,crcl:25}).ok,false);
+ const small=state({...E.DEFAULTS,crcl:25,labelBsa:1.5});
+ const large=state({...E.DEFAULTS,crcl:25,labelBsa:2});
+ assert.equal(small.every,12);assert.equal(large.every,24);
+ assert.match(large.text,/mL\/min\/1.73 m²/);
+});
+test('probenecid invalidates control-study overlays and disabling it restores the match',()=>{
+ const S=require('../public/assets/study-library.js');
+ const study=S.find('laskin-normal'),config=S.configFor(study,E);
+ assert.equal(S.matches(study,config,study.mode),true);
+ assert.equal(S.matches(study,{...config,probenecid:true},study.mode),false);
+ assert.equal(S.matches(study,{...config,probenecid:false},study.mode),true);
 });

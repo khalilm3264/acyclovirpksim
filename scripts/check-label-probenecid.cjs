@@ -23,7 +23,8 @@ async function main(){
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('http://127.0.0.1:'+server.address().port);
   await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});
-  // Default CrCl is above 50: no adjustment.
+  // Label comparison requires an explicit BSA; at 1.73 m² the default CrCl needs no adjustment.
+  await page.fill('#labelBsa','1.73');await page.locator('#labelBsa').dispatchEvent('change');
   assert.ok(await page.locator('#labelAdjust').isDisabled());
   assert.match(await page.textContent('#labelAdjustTip'),/needs no adjustment/);
   // CrCl 5: half the dose every 24 h; current curve becomes the baseline.
@@ -40,8 +41,14 @@ async function main(){
   await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});
   await page.check('#probenecid');
   await page.waitForFunction(()=>/with probenecid/.test(document.querySelector('#scenarioSummary')?.textContent||document.body.textContent),null,{timeout:60000});
+  // Loading a control study resets probenecid; enabling it hides the reference points.
+  await page.selectOption('#studySelect','laskin-normal');
+  await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});
+  await page.check('#probenecid');
+  await page.waitForFunction(()=>/no longer match/.test(document.querySelector('#studyStatus').textContent),null,{timeout:60000});
   assert.deepEqual(errors,[]);
   console.log('Label adjustment and probenecid checks passed.');
  }finally{await browser?.close();server.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
+

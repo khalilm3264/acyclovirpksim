@@ -28,7 +28,7 @@ const DEFAULTS={virus:'VZV',age:55,sex:'male',scr:1,crclSource:'manual',pdMethod
  pdRxEnabled:false,pdRxRows:[],vcScale:1,clearanceScale:1,pdCl:6,pdVolume:2,capdDwell:6,capdExchanges:4,pdGlucose:2.5,pdTransport:1,pdUfBase:120,pdAbsorb:20,pdSmallPore:0.5,pdSigma:0.12,apdStart:20,apdHours:10,apdCycles:5,apdDwell:1.5,apdTurnover:0.25,apdFactor:1,
  effluent:25,sieving:0.95,delivered:0.85,
  csfRatio:0.3,csfLag:4,csfMetRatio:0.25,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
- variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,probenecid:false,
+ variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,probenecid:false,labelBsa:0,
  schedule:[{type:'PD',start:0,end:24},{type:'PD',start:24,end:48},{type:'HD',start:54,end:58}]};
 // Time-varying residual CrCl is a user-defined illustration, not a measured GFR estimate.
 // Piecewise-linear interpolation, holding the first and last endpoints outside the knots.
@@ -153,11 +153,12 @@ const PROBENECID_RENAL=0.68;
 function labelRenalAdjustment(crcl){
  if(!Number.isFinite(crcl)||crcl<0)return null;
  if(crcl>50)return {fraction:1,every:8,band:'above 50'};
- if(crcl>=25)return {fraction:1,every:12,band:'25–50'};
- if(crcl>=10)return {fraction:1,every:24,band:'10–25'};
- return {fraction:0.5,every:24,band:'0–10'};
+ if(crcl>25)return {fraction:1,every:12,band:'>25–50'};
+ if(crcl>10)return {fraction:1,every:24,band:'>10–25'};
+ return {fraction:0.5,every:24,band:'≤10'};
 }
 function validate(c,mode,allowWindowBeyondHorizon=false){let err=[];
+ if(c.labelBsa!==undefined&&c.labelBsa!==0&&(!Number.isFinite(c.labelBsa)||c.labelBsa<0))err.push('Label body surface area must be 0 (not provided) or a positive value in m²');
  if(c.probenecid!==undefined&&typeof c.probenecid!=='boolean')err.push('Probenecid must be on or off');
  if(!Number.isFinite(c.weight)||c.weight<=0)err.push('weight must be positive');
  if(!Number.isFinite(c.horizon)||c.horizon>336||c.horizon<1)err.push('Simulation duration must be 1–336 hours');
@@ -605,6 +606,7 @@ const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,validateRenalProfil
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);
+
 
 
 

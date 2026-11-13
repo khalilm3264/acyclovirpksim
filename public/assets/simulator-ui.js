@@ -155,6 +155,7 @@ function setBusy(busy){
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
  $('saveBaseline').disabled=busy||!dataIsCurrent;
+ refreshLabelAdjust();
  if(busy)$('status').textContent='Updating simulation';
 }
 function calculationError(error){
@@ -317,31 +318,34 @@ function labelAdjustmentState(){
  if(c.dosingMode!=='repeat')return {ok:false,text:'Label adjustment applies to a repeating regimen. Switch Dosing schedule to Repeat dose.'};
  if(c.route!=='Acyclovir IV')return {ok:false,text:'Label adjustments for oral valacyclovir depend on the indication, so AyFlux does not apply them automatically.'};
  if(c.renalMode==='profile')return {ok:false,text:'Label adjustment uses one CrCl. Switch kidney function to constant to apply it.'};
- const tier=E.labelRenalAdjustment(c.crcl),n=v=>String(Number(Number(v).toPrecision(4)));
+ if(!(Number.isFinite(c.labelBsa)&&c.labelBsa>0))return {ok:false,text:'Enter body surface area to compare absolute CrCl with the label’s indexed kidney-function bands.'};
+ const indexedCrcl=c.crcl*1.73/c.labelBsa;
+ const tier=E.labelRenalAdjustment(indexedCrcl),n=v=>String(Number(Number(v).toPrecision(4)));
  if(!tier)return {ok:false,text:''};
  const dose=c.dose*tier.fraction,target=n(dose)+' mg every '+tier.every+' h';
  if(c.every!==8)return {ok:false,text:'The label adjusts a standard every-8-hour regimen. Set the interval to 8 h first; this regimen is already every '+n(c.every)+' h.'};
- if(tier.every===8)return {ok:false,text:'At CrCl '+n(c.crcl)+' mL/min the US label needs no adjustment (above 50 mL/min) [10].'};
- return {ok:true,dose,every:tier.every,text:'At CrCl '+n(c.crcl)+' mL/min ('+tier.band+' band), the US label gives '+(tier.fraction<1?'50% of the dose':'the same dose')+' every '+tier.every+' h: '+target+' [10].'};
+ if(tier.every===8)return {ok:false,text:'At indexed CrCl '+n(indexedCrcl)+' mL/min/1.73 m² the US label needs no adjustment (above 50 mL/min) [10].'};
+ return {ok:true,dose,every:tier.every,text:'At indexed CrCl '+n(indexedCrcl)+' mL/min/1.73 m² ('+tier.band+' band), the US label gives '+(tier.fraction<1?'50% of the dose':'the same dose')+' every '+tier.every+' h: '+target+' [10].'};
 }
 function medicationTools(){
  const state=labelAdjustmentState();
- return `<div class="label-adjust"><button type="button" class="btn secondary" id="labelAdjust" ${state.ok?'':'disabled'}>Apply label kidney adjustment</button><p class="tip" id="labelAdjustTip">${state.text}${state.ok?' The current curve is kept as a baseline for comparison.':''}</p></div>`+
+ return `<div class="label-adjust"><label for="labelBsa">Body surface area for label comparison (m²)</label><input id="labelBsa" type="number" min="0" step="any" inputmode="decimal" value="${c.labelBsa||''}" placeholder="Enter BSA"><p class="tip">Label CrCl = absolute CrCl × 1.73 ÷ body surface area. Used for this label comparison.</p><button type="button" class="btn secondary" id="labelAdjust" ${state.ok?'':'disabled'}>Apply label kidney adjustment</button><p class="tip" id="labelAdjustTip">${state.text}${state.ok?' The current curve is kept as a baseline for comparison.':''}</p></div>`+
   `<label class="check"><input type="checkbox" id="probenecid" ${c.probenecid?'checked':''}> Probenecid co-administration</label><p class="tip">Lowers acyclovir renal clearance by 32%, as measured in three adults by Laskin et al. [41]. CMMG clearance is unchanged. A single small study; illustrative only.</p>`;
 }
 function refreshLabelAdjust(){
  const button=$('labelAdjust'),tip=$('labelAdjustTip');if(!button||!tip)return;
- const state=labelAdjustmentState();button.disabled=!state.ok;
+ const state=labelAdjustmentState();button.disabled=!state.ok||!dataIsCurrent;
  tip.textContent=state.text+(state.ok?' The current curve is kept as a baseline for comparison.':'');
 }
 function applyLabelAdjustment(){
  const state=labelAdjustmentState();if(!state.ok)return;
- if(dataIsCurrent&&results?.[primary]){baseline={primary,config:structuredClone(c),data:structuredClone(results[primary])};baselineRevision++;$('saveBaseline').textContent='Replace baseline with selected curve';}
+ if(!dataIsCurrent||!results?.[primary])return;
+ baseline={primary,config:structuredClone(c),data:structuredClone(results[primary])};baselineRevision++;$('saveBaseline').textContent='Replace baseline with selected curve';
  rememberVersion('Before label kidney adjustment');studyOverlay=null;
  const before=c.dose+' mg every '+c.every+' h';
  c.dose=Number(state.dose.toPrecision(6));c.every=state.every;
  renderInputs();
- showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label for this CrCl [10]. The previous curve is shown as the baseline. On hemodialysis days the label gives the dose after dialysis; AyFlux does not move dose times automatically. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label using body surface area '+c.labelBsa+' m² [10]. The previous curve is shown as the baseline. The label specifies an additional dose after each hemodialysis session. Add those supplemental doses explicitly in the custom medication schedule. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
  defer();
 }
 function updateDrugCaution(){
@@ -818,7 +822,7 @@ $('enableRenalProfile').addEventListener('click',()=>{
 $('patientControls').addEventListener('change',e=>{if(e.target.id==='crclSource'){c.crclSource=e.target.value;if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='cgSex'){c.sex=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='route'){c.route=e.target.value;c.dose=c.route==='Valacyclovir oral'?1000:700;renderInputs();defer();}else if(e.target.id==='dosingMode'){c.dosingMode=e.target.value;renderInputs();defer();if(c.dosingMode==='custom')switchTab('doses');}});
 $('patientControls').addEventListener('input',e=>{if(e.target.id==='cgAge'||e.target.id==='cgScr'){const v=Number(e.target.value);if(!Number.isFinite(v)||e.target.value==='')return;if(e.target.id==='cgAge')c.age=v;else c.scr=v;c.crcl=calculatedCrCl();const target=$('cgOutput');if(target)target.textContent=Number.isFinite(c.crcl)?c.crcl.toFixed(1)+' mL/min':'—';defer();}});
 $('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');else if(e.target.id==='labelAdjust')applyLabelAdjustment();});
-$('patientControls').addEventListener('change',e=>{if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}});
+$('patientControls').addEventListener('change',e=>{if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}else if(e.target.id==='labelBsa'){const value=e.target.valueAsNumber;if(e.target.value!==''&&(!Number.isFinite(value)||value<=0)){e.target.setCustomValidity('Enter a positive body surface area in m²');c.labelBsa=0;refreshLabelAdjust();return;}e.target.setCustomValidity('');c.labelBsa=e.target.value===''?0:value;refreshLabelAdjust();}});
 $('modeControls').addEventListener('click',e=>{if(e.target.id==='showPdRx'){switchTab('timeline');$('pdRxPanel').scrollIntoView({block:'start',behavior:'smooth'});}});
 $('primary').addEventListener('change',e=>{primary=e.target.value;renderInputs();defer();});
 document.querySelector('aside').addEventListener('input',e=>{if(e.target.dataset.k)updateParam(e.target);});
@@ -1082,10 +1086,10 @@ function parseConfiguration(input){
   if(!src||typeof src!=='object'||Array.isArray(src))throw Error('Configuration data is missing. No settings were changed.');
   const next=structuredClone(E.DEFAULTS);
   const required=Object.keys(next),number=x=>typeof x==='number'&&Number.isFinite(x);
-  const missing=required.filter(key=>!['renalMode','renalProfile'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
+  const missing=required.filter(key=>!['renalMode','renalProfile','probenecid','labelBsa'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
   if(missing.length)throw Error('Configuration is incomplete (missing '+missing.slice(0,4).join(', ')+'). No settings were changed.');
   for(const key of required){
-   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile'].includes(key))continue;
+   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile','probenecid','labelBsa'].includes(key))continue;
    const v=src[key];
    if(['schedule','customDoses','observations','pdRxRows','renalProfile'].includes(key)){
     if(!Array.isArray(v)||v.length>(key==='renalProfile'?24:key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
@@ -1345,6 +1349,7 @@ $('loadConfig').addEventListener('change',async e=>{
 openSharedLink(true);
 $('primary').value=primary;renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxEditor();calculate();
 })();
+
 
 
 
