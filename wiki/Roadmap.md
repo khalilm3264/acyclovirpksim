@@ -14,7 +14,7 @@ None of these changed a model equation, parameter or default. See the [changelog
 
 | Priority | Item | Why | Blocked on |
 | --- | --- | --- | --- |
-| P0 | Review CMMG behavior at CrCl 0 without dialysis | The unadjusted guided scenario reaches a median peak plasma CMMG near 162 mg/L in 96 hours, about 60 times the 2.58 mg/L reference level. CMMG has no elimination path in that state. | Scientific review of the CMMG elimination terms |
+| P0 | Review CMMG behavior at CrCl 0 without dialysis | The unadjusted guided scenario reaches a median peak plasma CMMG near 162 mg/L in 96 hours, about 60 times the 2.58 mg/L reference level. At CrCl 0, 93% of acyclovir clearance is conversion to CMMG, and CMMG leaves only through a slow nonrenal route (half-life about 78 h). The CMMG/acyclovir AUC ratio is about half Kably 2025's at normal and low eGFR. See #46. | Scientific review of the CMMG formation and elimination terms |
 | P1 | Published case library | Load a reported case and overlay its measured levels: Ito 2025 (CHDF), Vasquez Vasquez 2025 (HD with dialysate recovery), Boulieu 1997 (CVVHD), Moyses Neto 2026 (cycler PD) | Full-text access; only abstracts reviewed so far |
 | P1 | Adult population-model comparison | Would mirror the existing pediatric comparison. No suitable adult acyclovir model identified yet (an earlier candidate turned out to be a meropenem study) | Finding a model |
 | P1 | Valacyclovir in hemodialysis benchmark | Hara 2008 measured valacyclovir, acyclovir and CMMG in 18 HD patients after 1,000 mg | Not yet in the bibliography |
