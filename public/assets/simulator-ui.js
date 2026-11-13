@@ -76,19 +76,50 @@ function timeAbove(time,values,level){
  }
  return hours;
 }
+// Peak after the last dose divided by peak after the first, on one curve. Null when there are fewer than two dose times.
+function accumulationRatio(time,values,doseTimes){
+ const starts=[...new Set(doseTimes.filter(Number.isFinite))].sort((a,b)=>a-b);
+ if(starts.length<2)return null;
+ const peak=(from,to)=>{let best=-Infinity;for(let i=0;i<time.length;i++)if(time[i]>=from&&time[i]<to&&values[i]>best)best=values[i];return best;};
+ const first=peak(starts[0],starts[1]),last=peak(starts[starts.length-1],Infinity);
+ return first>0&&Number.isFinite(last)?last/first:null;
+}
+// One-line plain-language description of the selected scenario, including mg/kg for repeat dosing.
+function describeScenario(config,mode){
+ const n=value=>String(Number(Number(value).toPrecision(4))),parts=[n(config.weight)+' kg'];
+ if(config.renalMode==='profile'&&config.renalProfile?.length){const p=config.renalProfile;parts.push('CrCl '+n(p[0].crcl)+' → '+n(p[p.length-1].crcl)+' mL/min (custom trajectory)');}
+ else parts.push('CrCl '+n(config.crcl)+' mL/min');
+ if(config.dosingMode==='custom')parts.push('custom schedule of '+config.customDoses.length+' dose'+(config.customDoses.length===1?'':'s'));
+ else{
+  const oral=config.route==='Valacyclovir oral';
+  parts.push((oral?'valacyclovir oral ':'acyclovir IV ')+n(config.dose)+' mg ('+n(config.dose/config.weight)+' mg/kg) every '+n(config.every)+' h, up to '+config.doseCount+' dose'+(config.doseCount===1?'':'s')+(oral?'':', '+n(config.infusion)+'-h infusion'));
+ }
+ parts.push(n(config.horizon)+' h simulated');
+ parts.push(mode==='Intermittent HD'?'intermittent HD: '+n(config.hdDuration)+' h every '+n(config.hdRepeat)+' h from hour '+n(config.hdStart):mode==='CRRT'?'CRRT at '+n(config.effluent)+' mL/kg/h effluent':mode==='Custom sequence'?'custom dialysis sequence ('+config.schedule.length+' session'+(config.schedule.length===1?'':'s')+')':mode.toLowerCase());
+ return parts.join(' · ');
+}
 let aboveLevelMg=null;
+// Summary-card readouts tied to results. They show only for current results and are cleared
+// while a calculation is pending or after one fails, so a stale value is never displayed.
 function renderTimeAbove(rewrite=false){
  const output=$('timeAboveResult'),input=$('timeAboveLevel');if(!output||!input)return;
  $('timeAboveUnit').textContent=unitLabel();
  if(rewrite||document.activeElement!==input)input.value=aboveLevelMg===null?'':String(Number(shown(aboveLevelMg,'acyclovir').toPrecision(6)));
- if(aboveLevelMg===null||!results?.[primary]){output.textContent='';return;}
- const d=results[primary],span=d.time[d.time.length-1]-d.time[0],hours=timeAbove(d.time,d.plasma.median,aboveLevelMg);
+ const run=dataIsCurrent&&results?results[primary]:null,words=$('scenarioWords'),accumulation=$('accumulationResult');
+ if(words)words.textContent=run?describeScenario(c,primary):'';
+ if(accumulation){
+  const ratio=run?accumulationRatio(run.time,run.plasma.median,run.doses.filter(d=>d.amount>0).map(d=>d.time)):null;
+  accumulation.textContent=ratio===null?'':'Accumulation: the plasma peak after the last dose is '+ratio.toFixed(2)+'× the peak after the first dose (median curve).';
+ }
+ if(aboveLevelMg===null||!run){output.textContent='';return;}
+ const span=run.time[run.time.length-1]-run.time[0],hours=timeAbove(run.time,run.plasma.median,aboveLevelMg);
  output.textContent=`${hours.toFixed(1)} of ${span.toFixed(0)} hours (${span>0?Math.round(100*hours/span):0}%) for the median ${primary} curve.`;
 }
 function tableOpen(){return tab==='concentration'&&!!$('tablePanel')?.open;}
 function requestedModes(all=false){return all||tableOpen()?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
 function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
+ if(typeof renderTimeAbove==='function')renderTimeAbove();
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
  $('saveBaseline').disabled=busy||!dataIsCurrent;
@@ -949,6 +980,7 @@ function applyVersion(state){
 }
 function restoreVersion(index){
  const entry=importHistory[index];if(!entry)return;
+ showScenarioNote('','');
  const restored=entry.state,label=entry.label,time=entry.savedAt.toLocaleTimeString();
  importHistory.splice(index,1);
  rememberVersion('Before restoring the '+time+' version');
@@ -1093,6 +1125,50 @@ $('copyShareLink').addEventListener('click',async()=>{
   researchStatus((copied?'Link copied. ':'Select and copy the link below. ')+'It contains this scenario’s settings (not measurements) inside the link itself; nothing is uploaded. Anyone with the link can open the same scenario.');
  }catch(error){field.classList.add('hidden');researchStatus(error.message,true);}
 });
+// ---------- Guided scenarios ----------
+// Teaching presets built on the defaults. Each is validated by the engine before it is applied.
+function guidedScenarios(){
+ const base=()=>({...structuredClone(E.DEFAULTS),observations:[]});
+ return [
+  {id:'noKidney',label:'Unadjusted IV dosing with no kidney function',primary:'No dialysis',visible:['No dialysis','Intermittent HD'],
+   config:{...base(),crcl:0,renalMode:'constant',crclSource:'manual'},
+   note:'The default 700 mg IV every 8 hours, but with creatinine clearance set to 0 and no dose change. Plasma acyclovir no longer returns to baseline between doses, and CMMG climbs past the dotted reference line. The Intermittent HD curve shows what a 4-hour session every 48 hours takes back out. Freeze a baseline, then lower the dose or lengthen the interval to see the effect.'},
+  {id:'kidneyInjury',label:'Oral valacyclovir with kidney injury mid-course',primary:'No dialysis',visible:['No dialysis'],
+   config:(()=>{const config={...base(),route:'Valacyclovir oral',dosingMode:'repeat',dose:1000,every:8,doseCount:21,horizon:168,crcl:95,renalMode:'profile',crclSource:'manual'};config.renalProfile=kidneyInjuryExample(95,168);return config;})(),
+   note:'Valacyclovir 1,000 mg every 8 hours for 7 days. Kidney function is normal until day 3.5, then falls to one fifth by day 5.25 and stays there, the general pattern described in published neurotoxicity case reports [22][23]. It is not a reconstruction of any patient. Watch the troughs rise after the fall begins while the dose stays the same, and CMMG rise proportionally more than acyclovir. The Clearance & sessions tab shows the kidney function curve.'},
+  {id:'modalities',label:'Same dose, three dialysis modalities',primary:'Intermittent HD',visible:['No dialysis','Intermittent HD','Peritoneal dialysis','CRRT'],
+   config:{...base(),crcl:0,renalMode:'constant',crclSource:'manual',dose:350,every:24,doseCount:4},
+   note:'350 mg IV once daily with no kidney function, shown with no dialysis, intermittent HD, peritoneal dialysis and CRRT as separate what-if curves. Open the Dialysis comparison table at the bottom of this tab and compare “Acyclovir removed by dialysis”: one HD session removes drug quickly but briefly, CRRT removes it continuously, and PD removes little.'}
+ ];
+}
+function showScenarioNote(title,text){
+ $('scenarioNoteTitle').textContent=title;$('scenarioNoteText').textContent=text;
+ $('scenarioNote').classList.toggle('hidden',!title);
+}
+function loadGuidedScenario(id){
+ const scenario=guidedScenarios().find(item=>item.id===id);if(!scenario)return;
+ const errors=[...new Set(scenario.visible.concat(scenario.primary).flatMap(mode=>E.validate(scenario.config,mode)))];
+ if(errors.length){researchStatus('Guided scenario could not be loaded: '+errors.slice(0,2).join('; '),true);return;}
+ rememberVersion('Before guided scenario: '+scenario.label);
+ applyVersion({config:scenario.config,primary:scenario.primary,visible:scenario.visible,palette:paletteMode,unit:concUnit});
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');
+ researchStatus('Loaded guided scenario: '+scenario.label+'.');alertMessage('');
+ showScenarioNote('Guided scenario: '+scenario.label,scenario.note);
+ switchTab('concentration');defer();
+}
+for(const scenario of guidedScenarios()){
+ const button=document.createElement('button');
+ button.type='button';button.className='btn secondary';button.dataset.guided=scenario.id;button.textContent=scenario.label;
+ $('guidedButtons').append(button);
+}
+$('guidedButtons').addEventListener('click',e=>{const button=e.target.closest('[data-guided]');if(button)loadGuidedScenario(button.dataset.guided);});
+$('resetDefaults').addEventListener('click',()=>{
+ rememberVersion('Before reset to defaults');
+ applyVersion({config:{...structuredClone(E.DEFAULTS),observations:[]},primary:'No dialysis',visible:['No dialysis','Intermittent HD','Custom sequence'],palette:paletteMode,unit:concUnit});
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');showScenarioNote('','');
+ researchStatus('All settings reset to defaults. Use Undo last import to go back.');alertMessage('');defer();
+});
+$('scenarioNoteClose').addEventListener('click',()=>showScenarioNote('',''));
 $('undoImport').addEventListener('click',()=>restoreVersion(0));
 $('importHistoryList').addEventListener('click',e=>{const button=e.target.closest('[data-restore]');if(button)restoreVersion(Number(button.dataset.restore));});
 $('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
