@@ -101,7 +101,7 @@ function describeScenario(config,mode){
   parts.push((oral?'valacyclovir oral ':'acyclovir IV ')+n(config.dose)+' mg ('+n(config.dose/config.weight)+' mg/kg) every '+n(config.every)+' h, up to '+config.doseCount+' dose'+(config.doseCount===1?'':'s')+(oral?'':', '+n(config.infusion)+'-h infusion'));
  }
  if(config.probenecid)parts.push('with probenecid');
- {const b=E.csfBarrierOf(config);if(b==='damaged')parts.push('damaged blood–brain barrier (exploratory CSF)');else if(b==='custom')parts.push('custom CSF partitions');}
+ {const of=(typeof window!=='undefined'&&window.RenalPKV7?.csfBarrierOf)||null,b=of?of(config):'intact';if(b==='damaged')parts.push('damaged blood–brain barrier (exploratory CSF)');else if(b==='custom')parts.push('custom CSF partitions');}
  parts.push(n(config.horizon)+' h simulated');
  parts.push(mode==='Intermittent HD'?'intermittent HD: '+n(config.hdDuration)+' h every '+n(config.hdRepeat)+' h from hour '+n(config.hdStart):mode==='CRRT'?'CRRT at '+n(config.effluent)+' mL/kg/h effluent':mode==='Custom sequence'?'custom dialysis sequence ('+config.schedule.length+' session'+(config.schedule.length===1?'':'s')+')':mode.toLowerCase());
  return parts.join(' · ');
