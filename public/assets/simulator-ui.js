@@ -1238,7 +1238,7 @@ function parseConfiguration(input){
   const errors=[...new Set(E.MODES.flatMap(mode=>E.validate(next,mode)))];
   if(errors.length)throw Error('Configuration fails model validation: '+errors.slice(0,3).join('; '));
   // Only now, after all shape and numerical checks, apply the loaded configuration.
-  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),
+  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:(typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
   return {next,primary:input.primary,visible:[...input.visibleScenarios],palette:importedPalette,migrating,converted};
@@ -1494,8 +1494,8 @@ $('scorecardCsv').addEventListener('click',()=>{
 });
 $('scorecardRows').addEventListener('click',e=>{const button=e.target.closest('[data-study]');if(button)loadStudy(button.dataset.study);});
 $('saveConfig').addEventListener('click',()=>{
- const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
- downloadJSON(data,'ayflux_simulation_v0.25.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
+ const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:(typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
+ downloadJSON(data,'ayflux_simulation_v'+((typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown')+'.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
 });
 $('loadConfig').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;

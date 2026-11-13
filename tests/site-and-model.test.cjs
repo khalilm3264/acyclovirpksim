@@ -186,9 +186,11 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(index.includes('id="printResearchReport"'));
  assert.ok(ui.includes('window.AyFluxResearchBridge'));
  assert.ok(index.includes('/manifest.webmanifest'));
- assert.ok(read('public/sw.js').includes('ayflux-static-v0.26.0'));
+ const version=read('public/assets/ayflux-version.js').match(/version:"([^"]+)"/)[1];
+ assert.ok(read('public/sw.js').includes('ayflux-static-v'+version),'offline cache name carries the app version');
  assert.ok(read('public/manifest.webmanifest').includes('AyFlux'));
- assert.ok(read('CITATION.cff').includes('version: "0.26.0"'));
+ assert.ok(read('CITATION.cff').includes('version: "'+version+'"'),'citation version matches the app');
  assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
- assert.ok(read('CHANGELOG.md').includes('[0.26.0]'));
+ assert.ok(read('CHANGELOG.md').includes('## ['+version+']'),'the changelog has a section for the current version');
+ assert.match(index,new RegExp('class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/releases/tag/v'+version.replace(/\./g,'\\.')+'"[^>]*>v'+version.replace(/\./g,'\\.')+'</a>'),'footer shows and links the current release');
 });
