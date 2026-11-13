@@ -58,7 +58,7 @@ Official examples: [OSPSuite-R simulation guide](https://www.open-systems-pharma
 ## 3. Evidence versus model assumptions
 
 - Original measured PK evidence includes [Laskin et al., 1982, renal-failure kinetics](https://pubmed.ncbi.nlm.nih.gov/7075109/) and [Burgess & Gill, 1990, CAPD](https://pubmed.ncbi.nlm.nih.gov/2243158/).
-- [Smith et al., 2010](https://pubmed.ncbi.nlm.nih.gov/20038622/) measured plasma/CSF acyclovir and metabolites in a small healthy/CKD cohort. Their CSF/plasma AUC ratio for **CMMG was about 0.025**, whereas AyFlux's current exploratory CSF CMMG partition setting is **0.25**. Treat this as a scientific mismatch that requires review and independent recalibration, not a validated parameter.
+- [Smith et al., 2010](https://pubmed.ncbi.nlm.nih.gov/20038622/) measured plasma/CSF acyclovir and metabolites in a small healthy/CKD cohort. Their CSF/plasma AUC ratio for **CMMG was about 0.025**. AyFlux used 0.25 until #47 and now uses 0.025. Lindström 2019 is the independent check (`research/validation/LINDSTROM-CSF.md`): 0.025 fits every sample with an intact blood–brain barrier, but CSF CMMG runs several times higher with barrier damage, which AyFlux does not model.
 - [Shah et al., 1986](https://pubmed.ncbi.nlm.nih.gov/3717158/) provides an additional CAPD case study but is not proof of AyFlux's PD mass-transfer assumptions.
 
 The user-facing [equation and parameter provenance guide](https://ayflux.org/learn/model-methods/#equations) identifies coded formulas and which constants remain illustrative. If any numerical parameter is changed, update both the independent model, deterministic fixtures and expected output, documenting a rationale with sources and tests.
