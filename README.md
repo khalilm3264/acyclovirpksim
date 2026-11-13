@@ -13,6 +13,7 @@
 <p align="center">
   <a href="https://ayflux.org/"><strong>Open simulator</strong></a> ·
   <a href="https://ayflux.org/learn/">User guide</a> ·
+  <a href="https://ayflux.org/references/">References</a> ·
   <a href="wiki/Roadmap.md">Development roadmap</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="https://ayflux.org/cite/">Cite AyFlux</a>
@@ -27,6 +28,10 @@
 > [!IMPORTANT]
 > **Educational simulation only.** AyFlux is **not** a validated clinical decision-support system. Modeled plasma, CSF and CMMG concentrations must not be used to prescribe medication, select dialysis prescriptions, determine treatment efficacy, diagnose neurotoxicity or make other patient-care decisions.
 
+## Current status
+
+The application and software citation identify **v0.26.0 preview**. Main also includes subsequent merged interface and research additions; **v0.27.0 is planned**, not yet released. Use an exact commit when reproducing work from main. See [release tracking #55](https://github.com/khalilm3264/acyclovirpksim/issues/55).
+
 ## What does AyFlux do?
 
 AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal clearance, a CMMG formation/elimination compartment, oral valacyclovir absorption and exploratory CSF effect models. It lets you explore how hypothetical changes in dosing, renal function and dialysis schedules affect **predicted** concentration–time curves.
@@ -39,9 +44,20 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 | **Model outputs** | Plasma/CSF acyclovir, plasma/CSF CMMG, dialysis transfer, clearance, AUC and estimated peaks |
 | **Exploratory statistics** | Monte Carlo uncertainty bands, user-supplied observation reweighting, sensitivity and model consistency checks |
 | **Data exchange** | Detailed or tidy CSV exports, configuration JSON, optional independent **mrgsolve** and **OSPSuite-R** comparison scripts, and local PK-Sim/MoBi **results** CSV overlays |
+| **Session tools** | Shared scenario links (excluding observations), mg/L or µmol/L display, JSON import undo and session-only import history |
 | **Reports and access** | Print-formatted PDF report with scenario-specific charts and page breaks, literature benchmark examples and offline static app caching where supported |
 
 **What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
+
+## Research pages
+
+- [Pediatric IV acyclovir](https://ayflux.org/research/pediatric/): separate Abdalla model with covariate and Zeng comparisons; [source-specific evidence review](https://ayflux.org/research/pediatric/evidence).
+- [Sampling and parameter recovery](https://ayflux.org/research/sampling/): synthetic experiments with different plasma sampling schedules.
+- [Visual explorer](https://ayflux.org/explore/): mass accounting, parameter grids, sensitivity and optional 3D surfaces.
+- [Published-evidence comparisons](research/validation/): source-specific CAPD, HD, CRRT, serum and CSF reconstructions and their limitations.
+- [Complete bibliography](https://ayflux.org/references/): stable source numbers, publication details, DOI links and evidence notes.
+
+These resources evaluate different questions; pediatric, neonatal, CNS and dialysis applicability must be assessed against each source and model.
 
 ## AyFlux Lite — a compact, v2-inspired alternative
 
@@ -59,7 +75,7 @@ The full simulator header links directly to the **User guide**. Lite is availabl
 
 ## Baseline comparison
 
-In the Concentration tab, choose **Save selected curve as baseline**, then change inputs. The dark dash-dot curve preserves the selected scenario’s median concentrations. Expand **Changed settings** to see the differences, or replace/clear the baseline. It is kept only for the current page session and is not included in configuration or data exports. Dose markers, shading and uncertainty bands refer to the current run. When durations differ, the chart shows both time ranges and the peak comparison notes the difference.
+In the Concentration tab, choose **Save selected curve as baseline**, then change inputs. The frozen curve preserves the selected scenario’s median concentrations. Expand **Changed settings** to see the differences, or replace/clear the baseline. It is kept only for the current page session and is not included in configuration or data exports. Dose markers, shading and uncertainty bands refer to the current run. When durations differ, the chart shows both time ranges and the peak comparison notes the difference.
 
 Completed results for up to three configurations are reused in memory; new numerical inputs and fitting observations invalidate reuse. Charts below the visible area wait until you scroll near them. See [performance verification](docs/interface-performance.md) for the scope of the measurements.
 
@@ -78,7 +94,7 @@ node scripts/stage-poppins.cjs
 npx --yes http-server@14.1.1 public -a 127.0.0.1 -p 8000
 ```
 
-Open http://localhost:8000. The numerical heatmap table still works when the optional script is absent. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. You can run the dependency-free test suite with:
+Open http://localhost:8000. The numerical heatmap table remains an accessible alternative to the visual grid. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. After staging the dependencies, run the regression suite with:
 
 ```bash
 node --test tests/*.test.cjs
@@ -91,7 +107,8 @@ Charts share a self-hosted ECharts library. The explorer requests ECharts GL whe
 1. **Patient and medication:** set body mass, residual CrCl or a kidney-function trajectory, dosing, and the simulation horizon.
 2. **Dialysis scenario:** select no dialysis, HD, PD, CRRT or a custom schedule. The graph overlays are hypothetical counterfactual comparisons; a custom schedule follows a single simulated switching timeline.
 3. **Concentration and clearance:** explore plasma, CSF, CMMG, and time-resolved dialysis/renal clearance results, with clearly labeled units.
-4. **Research tools:** inspect model assumptions, compare a local OSP results CSV, export data, run numerical diagnostics and create a printable research summary.
+4. **Research tools:** compare local OSP results, export data, inspect diagnostics, copy a scenario link or restore earlier imported settings.
+5. **References & methods:** read the drug reference table, implemented assumptions and numbered sources. The dialysis comparison table is an expandable panel at the bottom of Concentration.
 
 For deeper explanations, see [Dialysis](https://ayflux.org/learn/dialysis/), [Model methods and limits](https://ayflux.org/learn/model-methods/) and the [CSV/R/OSP exchange guide](docs/data-exchange.md).
 
@@ -104,7 +121,7 @@ AyFlux is a **teaching model with exploratory parameters**, not a fitted, extern
 - [Roadmap and planned scientific work](wiki/Roadmap.md) · [Verification plan](wiki/Release-Plan.md)
 - [Wiki-ready pages](wiki/Home.md) · [How to publish to the GitHub Wiki](docs/wiki-publishing.md)
 
-The `wiki/` directory contains the reviewed wiki source pages. GitHub's separate **Wiki** tab is not automatically updated by changes to this repository.
+The `wiki/` directory contains the version-controlled wiki source. GitHub stores the live Wiki separately; follow the [publishing instructions](docs/wiki-publishing.md) to synchronize it. See the [repository maintenance plan](docs/repository-maintenance.md) for PR dependencies and review priorities.
 
 ## Independent model comparisons
 
@@ -131,7 +148,9 @@ Scientific changes should include the units, equations or assumptions changed, p
 | [`public/assets/osp-import.js`](public/assets/osp-import.js) / [`ayflux-exchange.js`](public/assets/ayflux-exchange.js) | Unit-aware results import/export |
 | [`public/assets/research-workspace.js`](public/assets/research-workspace.js) | Diagnostic, sensitivity and research comparison tools |
 | [`src/index.js`](src/index.js) | Cloudflare Worker headers and static routing |
-| [`tests/`](tests/) | Dependency-free regression and scientific consistency checks |
+| [`public/assets/charts.js`](public/assets/charts.js) | Shared ECharts rendering and interaction layer |
+| [`public/research/`](public/research/) / [`research/`](research/) | Research pages, source reviews and reproducible experiments |
+| [`tests/`](tests/) | Regression and scientific consistency checks |
 | [`wiki/`](wiki/) / [`docs/`](docs/) | Roadmap, model exchange, deployment and contributor documentation |
 
 ## License, citations and contact

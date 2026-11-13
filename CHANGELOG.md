@@ -12,6 +12,10 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+- Refreshed README and wiki source around the current v0.26.0 preview, merged interface/research features and planned v0.27.0 work.
+- Added a synchronized standalone bibliography, linked from the guide, citation page and simulator; completed journal metadata and recorded the final Vasquez Vasquez case publication while preserving the reconstruction's preprint provenance.
+- Added reference maintenance and repository dependency notes. Scientific coefficients and simulation results are unchanged.
+
 - **Time above a level.** The simulation summary reports how many hours the selected scenario's median plasma curve is above a level you type in, in the current units. No default level is offered; it is a descriptive statistic, not a target.
 - **Fuller baseline comparison.** With a frozen baseline, the panel now lists baseline → current values and percent change for peak plasma, plasma AUC, peak CSF, peak CMMG and drug removed by dialysis.
 - **Kidney injury example.** The custom CrCl trajectory editor has a *Kidney injury mid-course* example: starting CrCl to the halfway point, a fall to one fifth by three quarters, then steady. It is illustrative and must be applied like any other edit.
