@@ -434,11 +434,11 @@ function renderRegimens(){
 // Saved curves retain their original inputs. Compare over the shorter of these two runs.
 function renderScenarioDifference(){
  const from=$('differenceFrom'),to=$('differenceTo');
- const previousFrom=from.value,previousTo=to.value;
+ const previousFrom=from.value,previousTo=to.value,hadPair=!to.disabled;
  from.replaceChildren(...savedRegimens.map((r,i)=>new Option(r.name,i)));
  to.replaceChildren(...savedRegimens.map((r,i)=>new Option(r.name,i)));
  from.value=previousFrom&&+previousFrom<savedRegimens.length?previousFrom:'0';
- to.value=previousTo&&+previousTo<savedRegimens.length?previousTo:String(Math.min(1,savedRegimens.length-1));
+ to.value=hadPair&&previousTo&&+previousTo<savedRegimens.length?previousTo:String(Math.min(1,savedRegimens.length-1));
  from.disabled=to.disabled=savedRegimens.length<2;
  const inputs=$('differenceInputs'),outcomes=$('differenceOutcomes');
  inputs.replaceChildren();outcomes.replaceChildren();
