@@ -439,7 +439,7 @@ html body .shell .time-above .accumulation:empty{display:none}
 <details class="advanced" id="advanced"><summary>Advanced settings</summary><div id="advancedControls"></div></details>
 </aside>
 <main>
-<div class="tabs" id="tabs"><button data-tab="concentration" class="active">Concentration</button><button data-tab="clearance">Clearance & sessions</button><button data-tab="timeline">Custom timeline</button><button data-tab="validation">Model validation</button><button data-tab="research">Research tools</button><button data-tab="method">References &amp; methods</button></div>
+<div class="tabs" id="tabs"><button data-tab="concentration" class="active">Concentration</button><button data-tab="clearance">Clearance & sessions</button><button data-tab="timeline">Custom timeline</button><button data-tab="validation">Model validation</button><button data-tab="research">Research tools</button><button data-tab="experimental">Experimental</button><button data-tab="method">References &amp; methods</button></div>
 <div id="alerts" class="warning hidden" role="alert"></div>
 <div id="scenarioNote" class="advisory scenario-note hidden" role="note"><div><strong id="scenarioNoteTitle"></strong><p id="scenarioNoteText"></p></div><button type="button" class="btn secondary" id="scenarioNoteClose">Dismiss</button></div>
 <p id="calculationState" class="progressbar hidden" role="status">Updating simulation…</p>
@@ -599,6 +599,7 @@ html body .shell .time-above .accumulation:empty{display:none}
 <div class="timeline-actions"><button type="button" class="btn secondary" id="scorecardCsv" disabled>Download scorecard CSV</button></div><h3>Mass recovery comparison</h3><p>Stathoulopoulou 2002 reports urinary and CAPD recovery over 24 hours. These amount endpoints are separate from the concentration scorecard and its pooled metrics. <a href="/research/mass-recovery/">Inspect published recovery, denominator ambiguity and model sensitivity</a>.</p></div>
 </section>
 
+<section id="experimental" class="hidden"><div class="card"><h2>Experimental</h2><p>Early research modules with their own published models and evidence limits.</p><h3><a href="/experimental/neonatal/">AyFlux Neonatal</a></h3><p>Explore predicted IV acyclovir clearance from 25 to 41 weeks postmenstrual age. Reproduces the published Sampson infant equation; no dose recommendations.</p></div></section>
 <section id="research" class="hidden">
  <div class="card" id="guidedPanel"><h2>Guided scenarios</h2><p class="tip">Each button loads a teaching scenario and opens the Concentration tab with a short note on what to look at. Your current settings are saved to version history first, so <strong>Undo last import</strong> brings them back. The regimens are deliberately unadjusted illustrations, not recommendations.</p>
  <div class="timeline-actions" id="guidedButtons"></div></div>

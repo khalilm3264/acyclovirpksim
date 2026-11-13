@@ -710,7 +710,7 @@ function switchTab(next){if(next==='doses')next='timeline';tab=next;for(const bt
  if(tab==='reference')tab='method';
  if(tab==='table'){tab='concentration';$('tablePanel').open=true;}
  for(const btn of document.querySelectorAll('[data-tab]'))btn.classList.toggle('active',btn.dataset.tab===tab);
- for(const name of ['concentration','clearance','timeline','validation','reference','method','research'])$(name).classList.toggle('hidden',name!==tab&&!(name==='reference'&&tab==='method'));
+ for(const name of ['concentration','clearance','timeline','validation','reference','method','research','experimental'])$(name).classList.toggle('hidden',name!==tab&&!(name==='reference'&&tab==='method'));
  if(tableOpen()&&(!dataIsCurrent||!results||modes.some(m=>!results[m])))calculate(true);
  else if(results)render();
  if(tab==='timeline'){renderSchedule();renderPdRxEditor();renderDoseRows();}
