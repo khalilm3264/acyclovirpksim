@@ -28,7 +28,7 @@ const DEFAULTS={virus:'VZV',age:55,sex:'male',scr:1,crclSource:'manual',pdMethod
  pdRxEnabled:false,pdRxRows:[],vcScale:1,clearanceScale:1,pdCl:6,pdVolume:2,capdDwell:6,capdExchanges:4,pdGlucose:2.5,pdTransport:1,pdUfBase:120,pdAbsorb:20,pdSmallPore:0.5,pdSigma:0.12,apdStart:20,apdHours:10,apdCycles:5,apdDwell:1.5,apdTurnover:0.25,apdFactor:1,
  effluent:25,sieving:0.95,delivered:0.85,
  csfRatio:0.3,csfLag:4,csfMetRatio:0.25,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
- variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,
+ variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,probenecid:false,labelBsa:0,
  schedule:[{type:'PD',start:0,end:24},{type:'PD',start:24,end:48},{type:'HD',start:54,end:58}]};
 // Time-varying residual CrCl is a user-defined illustration, not a measured GFR estimate.
 // Piecewise-linear interpolation, holding the first and last endpoints outside the knots.
@@ -146,7 +146,20 @@ function validatePdRx(c){
  if(c.pdMethod==='cycler'&&rows.filter(x=>x.sessionStart==null).some(r=>r.start+r.dwell>c.apdHours+1e-8))errors.push('Cycler template exchanges must fit within configured cycler session duration');
  return [...new Set(errors)];
 }
+// Laskin et al. 1982 (Antimicrob Agents Chemother 21:804): oral probenecid lowered acyclovir renal
+// clearance by 32% in three adults. Applied to the renal acyclovir term only; CMMG is not adjusted.
+const PROBENECID_RENAL=0.68;
+// US acyclovir sodium injection label, renal impairment: percent of the recommended dose and interval.
+function labelRenalAdjustment(crcl){
+ if(!Number.isFinite(crcl)||crcl<0)return null;
+ if(crcl>50)return {fraction:1,every:8,band:'above 50'};
+ if(crcl>25)return {fraction:1,every:12,band:'>25–50'};
+ if(crcl>10)return {fraction:1,every:24,band:'>10–25'};
+ return {fraction:0.5,every:24,band:'≤10'};
+}
 function validate(c,mode,allowWindowBeyondHorizon=false){let err=[];
+ if(c.labelBsa!==undefined&&c.labelBsa!==0&&(!Number.isFinite(c.labelBsa)||c.labelBsa<0))err.push('Label body surface area must be 0 (not provided) or a positive value in m²');
+ if(c.probenecid!==undefined&&typeof c.probenecid!=='boolean')err.push('Probenecid must be on or off');
  if(!Number.isFinite(c.weight)||c.weight<=0)err.push('weight must be positive');
  if(!Number.isFinite(c.horizon)||c.horizon>336||c.horizon<1)err.push('Simulation duration must be 1–336 hours');
  if(!ROUTES.includes(c.route))err.push('Unsupported medication route');
@@ -200,7 +213,7 @@ function drawParams(c){let random=rng(), norm=()=>Math.sqrt(-2*Math.log(Math.max
  const sampledCrCl=c.renalMode==='profile'?1:c.crcl;
  for(let i=0;i<c.draws;i++)params.push({
  vc:0.32*c.weight*(c.vcScale||1)*logn(0.20*v),vp:0.37*c.weight*logn(0.25*v),q:10*scale*logn(0.35*v),
- other:0.12*scale*(c.clearanceScale||1)*logn(0.35*v),renal:0.202*sampledCrCl*scale*(c.clearanceScale||1)*logn(0.35*v),form:1.6*c.formFactor*scale*logn(0.5*v),
+ other:0.12*scale*(c.clearanceScale||1)*logn(0.35*v),renal:0.202*sampledCrCl*scale*(c.clearanceScale||1)*(c.probenecid?PROBENECID_RENAL:1)*logn(0.35*v),form:1.6*c.formFactor*scale*logn(0.5*v),
  vm:0.4*c.weight*logn(0.35*v),mr:0.12*sampledCrCl*c.metRenal*scale*logn(0.65*v),mn:0.25*scale*logn(0.6*v),
  hd:c.hdCl*0.06*logn(0.2*v), pd:c.pdCl*0.06*logn(0.35*v),
  crrt:c.effluent*c.weight/1000*c.sieving*c.delivered*logn(0.25*v),
@@ -589,10 +602,11 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={renalCrClAt,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);
+
 
 
 

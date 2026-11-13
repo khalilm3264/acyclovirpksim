@@ -73,7 +73,7 @@
  }
  // True while the simulator still runs the study regimen, so measured points stay meaningful.
  function matches(study,config,mode){
-  return !!study&&mode===study.mode&&Object.entries(study.config).every(([key,value])=>JSON.stringify(config[key])===JSON.stringify(value));
+  return !!study&&!config.probenecid&&mode===study.mode&&Object.entries(study.config).every(([key,value])=>JSON.stringify(config[key])===JSON.stringify(value));
  }
  function pointsOf(study){
   return study.points.map(([time,observed])=>({analyte:'plasma',time,observed}))
@@ -125,3 +125,4 @@
  }
  return {STUDIES,find,configFor,matches,score,interp,pointsOf,csv,summarize};
 });
+
