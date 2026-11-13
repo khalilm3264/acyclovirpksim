@@ -153,6 +153,15 @@ function validatePdRx(c){
 // fit better (research/validation/HELLDEN-COTARD.md). Calibrated on the Helldén case; Hara is the check.
 // CSF CMMG partition (DEFAULTS.csfMetRatio) is 0.025 since #47 (was 0.25): Smith 2010 CSF/plasma AUC ratio,
 // checked against Lindström 2019 with an intact blood-brain barrier (research/validation/LINDSTROM-CSF.md).
+// Blood-brain barrier presets for the CSF proxies (#47). Intact = DEFAULTS (acyclovir 0.30; CMMG 0.025 from
+// Smith 2010, checked against Lindström 2019 intact-barrier samples). Damaged = exploratory, fitted to the
+// CSF/serum ratios of Lindström 2019's disrupted-barrier samples (research/validation/LINDSTROM-CSF.md);
+// no independent data test it.
+const CSF_BARRIER={intact:{csfRatio:0.3,csfMetRatio:0.025},damaged:{csfRatio:0.37,csfMetRatio:0.11}};
+function csfBarrierOf(c){
+ for(const [name,p] of Object.entries(CSF_BARRIER))if(Math.abs(c.csfRatio-p.csfRatio)<1e-9&&Math.abs(c.csfMetRatio-p.csfMetRatio)<1e-9)return name;
+ return 'custom';
+}
 const CMMG_NONRENAL_CL=0.5;
 const PROBENECID_RENAL=0.68;
 // US acyclovir sodium injection label, renal impairment: percent of the recommended dose and interval.
@@ -608,7 +617,7 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,CSF_BARRIER,csfBarrierOf,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);

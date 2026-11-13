@@ -1,4 +1,4 @@
-// Browser check: label kidney adjustment button and probenecid option.
+// Browser check: label kidney adjustment button, probenecid option and blood-brain barrier choice.
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -46,8 +46,18 @@ async function main(){
   await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});
   await page.check('#probenecid');
   await page.waitForFunction(()=>/no longer match/.test(document.querySelector('#studyStatus').textContent),null,{timeout:60000});
+  // Blood-brain barrier choice sets both CSF partitions, shows in the description, and reads Custom after a manual edit.
+  assert.equal(await page.inputValue('#csfBarrier'),'intact');
+  await page.selectOption('#csfBarrier','damaged');
+  await page.waitForFunction(()=>/damaged blood–brain barrier/.test(document.body.textContent),null,{timeout:60000});
+  await page.click('#advanced summary');
+  assert.equal(Number(await page.inputValue('#num_csfMetRatio')),0.11);assert.equal(Number(await page.inputValue('#num_csfRatio')),0.37);
+  await page.fill('#num_csfMetRatio','0.2');await page.dispatchEvent('#num_csfMetRatio','input');
+  await page.waitForFunction(()=>document.querySelector('#csfBarrier')?.value==='custom',null,{timeout:10000});
+  await page.selectOption('#csfBarrier','intact');
+  await page.waitForFunction(()=>Number(document.querySelector('#num_csfMetRatio')?.value)===0.025,null,{timeout:10000});
   assert.deepEqual(errors,[]);
-  console.log('Label adjustment and probenecid checks passed.');
+  console.log('Label adjustment, probenecid and blood-brain barrier checks passed.');
  }finally{await browser?.close();server.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

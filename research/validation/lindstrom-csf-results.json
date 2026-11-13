@@ -129,6 +129,54 @@
       "belowLimitConsistent": 0
     }
   },
+  "presets": {
+    "intact": {
+      "csfRatio": 0.3,
+      "csfMetRatio": 0.025,
+      "group": "intact",
+      "gmr": {
+        "csf": {
+          "n": 10,
+          "gmr": 0.804
+        },
+        "csfCmmg": {
+          "n": 3,
+          "gmr": 0.584
+        },
+        "plasma": {
+          "n": 10,
+          "gmr": 0.699
+        },
+        "cmmg": {
+          "n": 10,
+          "gmr": 0.857
+        }
+      }
+    },
+    "damaged": {
+      "csfRatio": 0.37,
+      "csfMetRatio": 0.11,
+      "group": "disrupted",
+      "gmr": {
+        "csf": {
+          "n": 23,
+          "gmr": 0.608
+        },
+        "csfCmmg": {
+          "n": 17,
+          "gmr": 0.972
+        },
+        "plasma": {
+          "n": 21,
+          "gmr": 0.609
+        },
+        "cmmg": {
+          "n": 21,
+          "gmr": 0.968
+        }
+      }
+    }
+  },
   "samples": [
     {
       "id": "1a",

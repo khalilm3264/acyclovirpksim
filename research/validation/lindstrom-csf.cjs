@@ -37,14 +37,14 @@ function barrier(r) {
   if (r.albumin_ratio_x1e3 === 'N/A') return 'unknown';
   return +r.albumin_ratio_x1e3 <= (+r.age <= 45 ? 6.8 : 10.2) ? 'intact' : 'disrupted';
 }
-function simulate(r, csfMetRatio) {
+function simulate(r, csfMetRatio, extra = {}) {
   const g = regimen(r), lag = +r.lag_time_h;
   const doseCount = Math.max(1, Math.round(g.days * 24 / g.every));
   const horizon = (doseCount - 1) * g.every + lag;
   const config = {...structuredClone(engine.DEFAULTS), age: +r.age, sex: r.sex === 'F' ? 'female' : 'male',
     weight: g.weight, crcl: +r.est_clcr_ml_min, crclSource: 'manual', renalMode: 'constant', route: g.route,
     dosingMode: 'repeat', dose: g.dose, every: g.every, doseCount, infusion: 1, horizon,
-    draws: 1, variability: 0, observations: [], csfMetRatio};
+    draws: 1, variability: 0, observations: [], csfMetRatio, ...extra};
   assert.deepEqual(engine.validate(config, 'No dialysis'), [], r.sample_id);
   const run = engine.single(config, engine.drawParams(config)[0], [], 0.25, engine.buildDoses(config));
   const i = run.t.length - 1;
@@ -98,8 +98,30 @@ assert.ok(S(0.025, 'intact').withinTwofold === S(0.025, 'intact').n &&
 assert.ok(S(0.25, 'disrupted').gmr > 1.5 && S(0.025, 'disrupted').gmr < 0.5, 'disrupted barrier: neither value fits');
 assert.ok(Math.abs(serum.cmmg.gmr - 1) < 0.15, 'serum CMMG unbiased within 15%');
 
-const results = {source: 'doi:10.1093/jac/dkz357, Table 1 (34 samples, 21 patients)', candidates: CANDIDATES, summary, serum, samples};
+// Blood-brain barrier presets (engine CSF_BARRIER). The damaged preset was fitted to the CSF/serum ratios of the
+// disrupted-barrier samples, so its fit below is in-sample: CSF GMR should match that group's serum GMR.
+const presets = {};
+for (const [name, p] of Object.entries(engine.CSF_BARRIER)) {
+  const group = name === 'intact' ? 'intact' : 'disrupted';
+  const sel = samples.filter(x => x.barrier === group);
+  const rowsById = Object.fromEntries(rows.map(r => [r.sample_id, r]));
+  const logs = {csf: [], csfCmmg: [], plasma: [], cmmg: []};
+  for (const x of sel) {
+    const pred = simulate(rowsById[x.id], p.csfMetRatio, {csfRatio: p.csfRatio});
+    for (const [k, o] of [['csf', 'csfAcv'], ['csfCmmg', 'csfCmmg'], ['plasma', 'serumAcv'], ['cmmg', 'serumCmmg']]) {
+      const v = x.observed[o];
+      if (v && 'value' in v) logs[k].push(Math.log(pred[k] / v.value));
+    }
+  }
+  const g = a => +Math.exp(a.reduce((x, y) => x + y, 0) / a.length).toFixed(3);
+  presets[name] = {...p, group, gmr: Object.fromEntries(Object.entries(logs).map(([k, a]) => [k, {n: a.length, gmr: g(a)}]))};
+}
+const ratioErr = q => Math.abs(Math.log(q.csf.gmr / q.plasma.gmr)) + Math.abs(Math.log(q.csfCmmg.gmr / q.cmmg.gmr));
+assert.ok(ratioErr(presets.damaged.gmr) < 0.1, 'damaged preset reproduces the disrupted-barrier CSF/serum ratios');
+
+const results = {source: 'doi:10.1093/jac/dkz357, Table 1 (34 samples, 21 patients)', candidates: CANDIDATES, summary, serum, presets, samples};
 const out = process.argv[2] || __dirname;
 fs.writeFileSync(path.join(out, 'lindstrom-csf-results.json'), JSON.stringify(results, null, 2) + '\n');
 for (const k of CANDIDATES) console.log('csfMetRatio', k, JSON.stringify(summary[k]));
 console.log('serum (independent of csfMetRatio):', JSON.stringify(serum));
+console.log('barrier presets:', JSON.stringify(presets));

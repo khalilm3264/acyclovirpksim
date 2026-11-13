@@ -26,6 +26,17 @@ GMR is the geometric mean of predicted/observed on measured values.
 - **Intact barrier:** 0.25 is about six times too high, and it predicts measurable CSF CMMG in every sample that was below the limit. 0.025 fits every intact-barrier sample. 0.035 fits slightly better, but choosing it from these data would make this check no longer independent.
 - **Disrupted barrier:** no single partition fits. CSF CMMG scales with the partition, so these samples imply roughly 0.11, more than four times Smith's value. It rises with the albumin ratio; patient 19, at 108–162 × 10⁻³, is above 0.7.
 
+## Blood–brain barrier presets
+
+The simulator's *Blood–brain barrier* setting (engine `CSF_BARRIER`) sets both CSF partitions at once:
+
+| Preset | CSF acyclovir partition | CSF CMMG partition | Basis | Lindström fit (CSF GMR vs serum GMR) |
+|---|---:|---:|---|---|
+| Intact (default) | 0.30 | 0.025 | Unchanged default; Smith 2010 for CMMG | acyclovir 0.80 vs 0.70; CMMG 0.58 (3 values) vs 0.86 |
+| Damaged (exploratory) | 0.37 | 0.11 | **Fitted** to the disrupted-barrier samples here | acyclovir 0.61 vs 0.61; CMMG 0.97 vs 0.97 |
+
+The damaged values are chosen so that the predicted CSF/serum ratio matches the observed one. That divides out the systemic error, such as AyFlux's low serum acyclovir, instead of folding it into the partition. Fitted on the intact samples, the same method gives 0.26 and 0.037, close to the defaults. The damaged fit is in-sample: no independent study tests it, and the interface says so. Barrier damage varies widely (albumin ratio 10–162 × 10⁻³ here), so one preset describes the typical damaged-barrier sample, not the most severe.
+
 ## Other sources
 
 - **Smith 2010** ([doi:10.1128/AAC.00729-09](https://doi.org/10.1128/AAC.00729-09)): CSF:plasma CMMG AUC ratio about 0.025 in healthy volunteers and 0.026 in chronic kidney disease, neither with CNS infection. This is the calibration source for 0.025.
