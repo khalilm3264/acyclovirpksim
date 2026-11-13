@@ -12,7 +12,7 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-Changes merged to `main` since 0.26.0 (pull requests #40–#44). **No pharmacokinetic equation, parameter, default, export format or configuration schema changed.**
+Changes merged to `main` since 0.26.0 (pull requests #40–#44), plus open draft pull requests marked as such. **No pharmacokinetic equation, parameter, default, export format or configuration schema changed.**
 
 ### Added
 
@@ -26,6 +26,10 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44). **No pharmacoki
 - **Guided scenarios.** Three teaching presets on Research tools that load a scenario, open the Concentration tab and show a dismissible note on what to look at. The regimens are deliberately unadjusted illustrations, not recommendations. (#44)
 - **Hemodialysis timing explorer.** Moves one HD session hourly across the first 96 hours and reruns the scenario with nominal parameters each time, plotting drug removed and plasma AUC against session start time. The simulation keeps its full duration, kidney-function trajectory and dose schedule. (#44)
 - **Kidney injury example** for the custom CrCl trajectory editor: steady to the halfway point, a fall to one fifth by three quarters, then steady. Illustrative only. (#43)
+- **Compare with a published study.** A selector above the plasma graph loads a published regimen (Laskin 1982 normal kidney function [41], Laskin 1982 anuric [1], or the US label 5 and 10 mg/kg q8h means [10]) and draws the published group means as dots. The points hide, with a note, as soon as the settings no longer match the study. The previous settings go to version history. Overlay state is not saved in files or links. (draft PR)
+- **Evidence scorecard** on References & methods. For each published study above: predicted/observed geometric mean ratio of the nominal curve, and how many published means fall inside the 90% model interval from 400 draws. Calculated in the browser when the tab opens and recalculated if calibration multipliers change. No study is used to fit anything. (draft PR)
+- **CMMG/acyclovir AUC ratio** in the simulation summary, over the last 24 simulated hours of the median curves, shown next to Kably 2025 population-model values (≈30% at eGFR above 90, ≈130% below 30 mL/min/1.73 m²) [29]. With default parameters AyFlux gives lower ratios than Kably at normal kidney function; see issue #46. (draft PR)
+- **Reference [41]**, Laskin 1982 *Antimicrob Agents Chemother* (probenecid study, normal-function serial plasma means). (draft PR)
 - **Reset to defaults** on Research tools, undoable through version history. (#44)
 - **Colorblind-friendly graph colors** (Okabe–Ito curves, viridis heatmaps), shared between the simulator and the visual explorer. (#40, #41)
 - **CRRT evidence.** Drug reference rows and references [38]–[40]: Boulieu 1997 (adult CVVHD), Bleyzac 1999 (CRRT variability), Collignon 2023 (pediatric CVVHDF). The first two are cited at abstract level and say so. (#40)
