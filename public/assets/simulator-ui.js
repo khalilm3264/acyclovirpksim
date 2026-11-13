@@ -11,7 +11,7 @@
 
 (function(){'use strict';
 const E=window.RenalPKV7,$=id=>document.getElementById(id),modes=E.MODES,STUDIES=window.AyFluxStudies;
-// Published study whose measured means are overlaid on the plasma chart. Display state only: it is not
+// Published study whose measured points are overlaid on the plasma and CMMG charts. Display state only: it is not
 // part of the configuration, saved files or share links.
 let studyOverlay=null;
 function overlayStudy(){const study=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;return study&&STUDIES.matches(study,c,primary)?study:null;}
@@ -46,6 +46,8 @@ let pendingCsvExport=false, migratedPayload=null;
 // Small, bounded cache of completed summaries; the engine retains its own raw ensemble cache.
 const completedResults=new Map();
 let baseline=null,baselineRevision=0;
+// Up to four frozen regimens (inputs, dose list and median curves) for side-by-side comparison.
+let savedRegimens=[],savedRevision=0;
 const presentationKeys=new Set(['virus','showBands','showShades','showStudy','showIC50','requestedModes']);
 function resultKey(config){return JSON.stringify(Object.keys(config).sort().filter(k=>!presentationKeys.has(k)).map(k=>[k,config[k]]));}
 function rememberResult(key,data){
@@ -98,6 +100,7 @@ function describeScenario(config,mode){
   const oral=config.route==='Valacyclovir oral';
   parts.push((oral?'valacyclovir oral ':'acyclovir IV ')+n(config.dose)+' mg ('+n(config.dose/config.weight)+' mg/kg) every '+n(config.every)+' h, up to '+config.doseCount+' dose'+(config.doseCount===1?'':'s')+(oral?'':', '+n(config.infusion)+'-h infusion'));
  }
+ if(config.probenecid)parts.push('with probenecid');
  parts.push(n(config.horizon)+' h simulated');
  parts.push(mode==='Intermittent HD'?'intermittent HD: '+n(config.hdDuration)+' h every '+n(config.hdRepeat)+' h from hour '+n(config.hdStart):mode==='CRRT'?'CRRT at '+n(config.effluent)+' mL/kg/h effluent':mode==='Custom sequence'?'custom dialysis sequence ('+config.schedule.length+' session'+(config.schedule.length===1?'':'s')+')':mode.toLowerCase());
  return parts.join(' · ');
@@ -116,12 +119,40 @@ function cmmgAucRatio(time,plasma,cmmg){
  }
  return parent>1e-12?{from,to,ratio:metabolite/parent}:null;
 }
+const PROVENANCE_LABEL={reported:'Reported',calculated:'Calculated',assumed:'Assumed',unknown:'Unknown'};
+function provenanceSummary(study){
+ const n=STUDIES.provenanceCounts(study);
+ if(!n)return '<span class="tip">Not yet recorded</span>';
+ return STUDIES.STATUSES.map(k=>`<span class="prov prov-${k}" title="${PROVENANCE_LABEL[k]}">${PROVENANCE_LABEL[k][0]} ${n[k]}</span>`).join(' ');
+}
+function renderStudyProvenance(study){
+ const box=$('studyProvenance');if(!box)return;
+ if(!study){box.classList.add('hidden');return;}
+ box.classList.remove('hidden');
+ const n=STUDIES.provenanceCounts(study),esc=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+ if(!n){$('studyProvenanceCounts').textContent='Input provenance has not yet been recorded for this study. The study note above lists its assumptions.';$('studyProvenanceRows').innerHTML='';return;}
+ $('studyProvenanceCounts').textContent=`Of ${study.provenance.length} inputs needed to reproduce this case: ${n.reported} reported by the source, ${n.calculated} calculated from reported values, ${n.assumed} assumed by AyFlux, ${n.unknown} unknown.`;
+ // The study's main source is named once; a row shows its own location only when it differs.
+ const tally=new Map();for(const r of study.provenance)tally.set(r.source,(tally.get(r.source)||0)+1);
+ const main=[...tally].sort((x,y)=>y[1]-x[1])[0][0];
+ $('studyMainSource').textContent='Source for rows without their own location: '+main+'.';
+ $('studyProvenanceRows').innerHTML=study.provenance.map(r=>`<tr><td>${esc(r.input)}<br><span class="prov prov-${r.status}">${PROVENANCE_LABEL[r.status]}</span></td><td>${esc(r.reported)}${r.source!==main?`<br><span class="tip">${esc(r.source)}</span>`:''}</td><td>${esc(r.used)}</td></tr>`).join('');
+ $('studySourceCheck').textContent=study.sourceCheck||'';$('studySourceCheck').classList.toggle('hidden',!study.sourceCheck);
+ const spec=study.explore;$('studyExplore').classList.toggle('hidden',!spec);
+ if(spec&&$('studyExplore').dataset.study!==study.id){
+  $('studyExplore').dataset.study=study.id;
+  $('studyExploreLabel').textContent=spec.label+' ('+spec.min+'–'+spec.max+' '+spec.unit+')';
+  $('studyExploreValue').min=spec.min;$('studyExploreValue').max=spec.max;$('studyExploreValue').value=spec.value;$('studyExploreUnit').textContent=spec.unit;
+  $('studyExploreStatus').textContent='Changes only “'+spec.input+'”. The reconstruction uses '+spec.value+' '+spec.unit+'. Exploring saves the original reconstruction as a regimen when there is room, and Undo restores your settings.';
+ }
+}
 function renderStudyStatus(){
  const select=$('studySelect'),status=$('studyStatus');if(!select||!status)return;
  const chosen=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;
+ renderStudyProvenance(chosen);
  if(!chosen){status.textContent='';if(select.value)select.value='';return;}
  if(select.value!==chosen.id)select.value=chosen.id;
- status.textContent=overlayStudy()?'Dots: published '+chosen.statistic+'s, n='+chosen.n+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
+ status.textContent=overlayStudy()?'Dots: '+chosen.pointsLabel+(chosen.n>1?', n='+chosen.n:', one patient')+(chosen.cmmgPoints?' (CMMG graph too)':'')+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
 }
 let aboveLevelMg=null;
 // Summary-card readouts tied to results. They show only for current results and are cleared
@@ -154,6 +185,8 @@ function setBusy(busy){
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
  $('saveBaseline').disabled=busy||!dataIsCurrent;
+ if(typeof refreshLabelAdjust==='function')refreshLabelAdjust();
+ if(typeof renderRegimens==='function'){renderRegimens();renderPostHd();}
  if(busy)$('status').textContent='Updating simulation';
 }
 function calculationError(error){
@@ -297,6 +330,7 @@ function renderInputs(){let keepAdvanced=$('advanced').open;
  (c.dosingMode==='repeat'?`<div class="inputrow"><label for="route">Drug and route</label><select id="route"><option value="Acyclovir IV" ${c.route==='Acyclovir IV'?'selected':''}>Acyclovir — IV</option><option value="Valacyclovir oral" ${c.route==='Valacyclovir oral'?'selected':''}>Valacyclovir — oral</option></select></div>`:'')+
  (c.dosingMode==='repeat'?['dose','every','doseCount'].concat(c.route==='Valacyclovir oral'?[]:['infusion']).map(numericField).join(''):
  `<button class="btn secondary" id="openDoses">Edit medication schedule</button><div class="advisory" id="customDoseSummary"></div>`)+
+ medicationTools()+
  group('Simulation window',['horizon']);
  $('modeControls').innerHTML=modalControls();
  $('modeHint').textContent=primary==='Custom sequence'?'Define sequential treatments in Treatment timeline.':'';
@@ -309,6 +343,117 @@ function renderInputs(){let keepAdvanced=$('advanced').open;
  $('draws').value=c.draws;$('coverage').value=c.coverage;$('advanced').open=keepAdvanced;
  $('drugCaution').classList.toggle('hidden',c.dosingMode!=='custom'&&c.route!=='Valacyclovir oral');
  updateDrugCaution();if(c.dosingMode==='custom')updateCustomDoseSummary();
+}
+// Label kidney-function adjustment for repeat IV acyclovir, and the probenecid option.
+function labelAdjustmentState(){
+ if(c.dosingMode!=='repeat')return {ok:false,text:'Label adjustment applies to a repeating regimen. Switch Dosing schedule to Repeat dose.'};
+ if(c.route!=='Acyclovir IV')return {ok:false,text:'Label adjustments for oral valacyclovir depend on the indication, so AyFlux does not apply them automatically.'};
+ if(c.renalMode==='profile')return {ok:false,text:'Label adjustment uses one CrCl. Switch kidney function to constant to apply it.'};
+ if(!(Number.isFinite(c.labelBsa)&&c.labelBsa>0))return {ok:false,text:'Enter body surface area to compare absolute CrCl with the label’s indexed kidney-function bands.'};
+ const indexedCrcl=c.crcl*1.73/c.labelBsa;
+ const tier=E.labelRenalAdjustment(indexedCrcl),n=v=>String(Number(Number(v).toPrecision(4)));
+ if(!tier)return {ok:false,text:''};
+ const dose=c.dose*tier.fraction,target=n(dose)+' mg every '+tier.every+' h';
+ if(c.every!==8)return {ok:false,text:'The label adjusts a standard every-8-hour regimen. Set the interval to 8 h first; this regimen is already every '+n(c.every)+' h.'};
+ if(tier.every===8)return {ok:false,text:'At indexed CrCl '+n(indexedCrcl)+' mL/min/1.73 m² the US label needs no adjustment (above 50 mL/min) [10].'};
+ return {ok:true,dose,every:tier.every,text:'At indexed CrCl '+n(indexedCrcl)+' mL/min/1.73 m² ('+tier.band+' band), the US label gives '+(tier.fraction<1?'50% of the dose':'the same dose')+' every '+tier.every+' h: '+target+' [10].'};
+}
+function medicationTools(){
+ const state=labelAdjustmentState();
+ return `<div class="label-adjust"><label for="labelBsa">Body surface area for label comparison (m²)</label><input id="labelBsa" type="number" min="0" step="any" inputmode="decimal" value="${c.labelBsa||''}" placeholder="Enter BSA"><p class="tip">Label CrCl = absolute CrCl × 1.73 ÷ body surface area. Used for this label comparison.</p><button type="button" class="btn secondary" id="labelAdjust" ${state.ok?'':'disabled'}>Apply label kidney adjustment</button><p class="tip" id="labelAdjustTip">${state.text}${state.ok?' The current curve is kept as a baseline for comparison.':''}</p></div>`+
+  `<label class="check"><input type="checkbox" id="probenecid" ${c.probenecid?'checked':''}> Probenecid co-administration</label><p class="tip">Lowers acyclovir renal clearance by 32%, as measured in three adults by Laskin et al. [41]. CMMG clearance is unchanged. A single small study; illustrative only.</p>`;
+}
+function refreshLabelAdjust(){
+ const button=$('labelAdjust'),tip=$('labelAdjustTip');if(!button||!tip)return;
+ const state=labelAdjustmentState();button.disabled=!state.ok||!dataIsCurrent;
+ tip.textContent=state.text+(state.ok?' The current curve is kept as a baseline for comparison.':'');
+}
+// ---------- Regimen comparison ----------
+const REG=window.AyFluxRegimens,REGIMEN_COLORS=['#7a3e9d','#a8740b','#2e7d4f','#c2185b'];
+const regimenEscape=text=>String(text).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+// Dose and dialysis timeline in words, for the prediction exercise.
+function regimenTimeline(config,mode){
+ const eff=E.effectiveConfig(config),hours=v=>String(Number(v.toFixed(2)));
+ const doses=E.buildDoses(eff),shown=doses.slice(0,10).map(d=>hours(d.time)).join(', ')+(doses.length>10?', …':'');
+ const sessions=E.scheduleFor(mode,eff).filter(r=>r.type!=='No dialysis').map(r=>r.type+' '+hours(r.start)+'–'+hours(r.end)+' h');
+ return 'Doses at hour '+shown+(sessions.length?' · '+sessions.slice(0,6).join(', ')+(sessions.length>6?', …':''):' · no dialysis');
+}
+function regimenRow(name,config,mode,data,T,color,index,hidden=false){
+ const m=REG.metrics(data,E.buildDoses(E.effectiveConfig(config)),T),f=v=>hidden?'?':v===null?'—':Number(v.toPrecision(3)).toString();
+ return `<tr><td>${color?`<span class="swatch" style="border-color:${color}"></span>`:''}${regimenEscape(name)}</td><td>${regimenEscape(describeScenario(config,mode))}${hidden?'<br><span class="tip">'+regimenEscape(regimenTimeline(config,mode))+'</span>':''}</td><td>${f(m.auc)}</td><td>${f(m.peak)}</td><td>${f(m.trough)}${hidden||m.troughTime===null?'':' <span class="tip">(h '+Number(m.troughTime.toFixed(2))+')</span>'}</td><td>${f(m.cmmgAuc)}</td><td>${f(m.cmmgPeak)}</td><td>${index===null?'':`<button type="button" class="btn secondary" data-remove-regimen="${index}">Remove</button>`}</td></tr>`;
+}
+function renderRegimens(){
+ const body=$('regimenRows');if(!body||!REG)return;
+ const current=dataIsCurrent&&results?.[primary]?results[primary]:null;
+ $('saveRegimen').disabled=!current||savedRegimens.length>=REG.MAX_SAVED;
+ $('regimenStatus').textContent=savedRegimens.length>=REG.MAX_SAVED?'Four regimens saved. Remove one to save another.':'Save the selected scenario under a name, change the dose, interval, timing or kidney function, and save again. Saved regimens are frozen: later edits do not change them. Up to four; they last until removed or the page is closed.';
+ if(!savedRegimens.length&&!current){body.innerHTML='';$('regimenCaption').textContent='';return;}
+ const T=regimenWindow(),hidden=predicting();
+ body.innerHTML=savedRegimens.map((r,i)=>regimenRow(r.name,r.config,r.primary,r.data,T,REGIMEN_COLORS[i],i,hidden)).join('')+(current&&!hidden?regimenRow('Current settings (not saved)',c,primary,current,T,null,null):'');
+ renderPredictControls();
+ $('regimenCaption').textContent=`All values are from median curves of the selected scenario, in mg/L, over the common window 0–${Number(T.toFixed(2))} h (the shortest simulation among the rows). AUC is the plasma area under the curve from 0 to ${Number(T.toFixed(2))} h (mg·h/L). Trough is plasma acyclovir at the start of the last dose that begins after hour 0 and before hour ${Number(T.toFixed(2))}, immediately before that dose; its hour is shown. CMMG values are plasma 9-carboxymethoxymethylguanine: AUC over the same window (mg·h/L) and the highest concentration in it (mg/L). Saved curves appear as dashed lines on the plasma acyclovir and plasma CMMG graphs.`;
+}
+// ---------- Prediction exercise: hide results, predict, then reveal ----------
+const PREDICT_METRICS={trough:'trough acyclovir',peak:'peak acyclovir',auc:'plasma acyclovir AUC',cmmgAuc:'plasma CMMG AUC'};
+function regimenWindow(){return Math.min(c.horizon,...savedRegimens.map(r=>r.config.horizon));}
+function predicting(){return !!$('predictMode')?.checked;}
+function renderPredictControls(){
+ const enough=savedRegimens.length>=2,choice=$('predictChoice'),keep=choice.value;
+ $('predictMode').disabled=!enough&&!predicting();
+ choice.innerHTML=savedRegimens.map((r,i)=>`<option value="${i}">${regimenEscape(r.name)}</option>`).join('');
+ if(keep&&+keep<savedRegimens.length)choice.value=keep;
+ for(const id of ['predictMetric','predictChoice','revealPrediction'])$(id).disabled=!predicting()||!enough;
+ $('predictQuestion').textContent=predicting()?`Which saved regimen will have the highest ${PREDICT_METRICS[$('predictMetric').value]} over hours 0–${Number(regimenWindow().toFixed(2))}? Concentration graphs and summaries are hidden until you reveal.`:enough?'':'Save at least two regimens to run a prediction exercise.';
+ document.querySelector('main').classList.toggle('predicting',predicting());
+}
+$('predictMode').addEventListener('change',()=>{$('predictResult').textContent='';renderRegimens();});
+$('predictMetric').addEventListener('change',renderPredictControls);
+$('revealPrediction').addEventListener('click',()=>{
+ const key=$('predictMetric').value,T=regimenWindow();
+ const values=savedRegimens.map(r=>REG.metrics(r.data,E.buildDoses(E.effectiveConfig(r.config)),T)[key]);
+ const valid=values.map((v,i)=>[v,i]).filter(([v])=>v!==null);
+ if(!valid.length){$('predictResult').textContent='No saved regimen has a value for this question (a single dose has no trough).';return;}
+ const best=valid.reduce((a,b)=>b[0]>a[0]?b:a),picked=+$('predictChoice').value,ties=valid.filter(([v])=>Math.abs(v-best[0])<=1e-9*Math.max(1,best[0])).map(([,i])=>i);
+ const unit=key==='trough'||key==='peak'?'mg/L':'mg·h/L',name=i=>savedRegimens[i].name;
+ $('predictResult').textContent=(ties.includes(picked)?'Correct. ':'Not this time. ')+`Highest ${PREDICT_METRICS[key]}: ${ties.map(name).join(' and ')} (${Number(best[0].toPrecision(3))} ${unit}). `+valid.map(([v,i])=>`${name(i)}: ${Number(v.toPrecision(3))}`).join(' · ')+(valid.length<values.length?' · regimens without a value were skipped':'')+'.';
+ $('predictMode').checked=false;renderRegimens();
+});
+$('saveRegimen').addEventListener('click',()=>{
+ if(!dataIsCurrent||!results?.[primary]||savedRegimens.length>=REG.MAX_SAVED)return;
+ const d=results[primary],name=($('regimenName').value.trim()||'Regimen '+(savedRegimens.length+1)).slice(0,40);
+ savedRegimens.push({name,primary,config:structuredClone(c),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
+ savedRevision++;$('regimenName').value='';renderRegimens();render();
+});
+$('regimenRows').addEventListener('click',e=>{const b=e.target.closest('[data-remove-regimen]');if(!b)return;savedRegimens.splice(+b.dataset.removeRegimen,1);savedRevision++;renderRegimens();render();});
+// ---------- Dose timing around intermittent hemodialysis ----------
+function currentPostHdPlan(){return REG.postHdPlan(E.effectiveConfig(c),E.scheduleFor(primary,E.effectiveConfig(c)),E.buildDoses(E.effectiveConfig(c)));}
+function renderPostHd(){
+ const panel=$('postHdRows');if(!panel||!REG)return;
+ const plan=currentPostHdPlan(),n=v=>v===null?'—':String(Number(Number(v).toFixed(2)));
+ $('applyPostHd').disabled=!plan.ok||!plan.apply;
+ if(!plan.ok){$('postHdRule').textContent=plan.reason;panel.innerHTML='';$('postHdFlags').replaceChildren();return;}
+ $('postHdRule').textContent=plan.ruleText+' '+plan.cite+(plan.apply?'':' No change is proposed for the current settings.');
+ panel.innerHTML=plan.rows.map(r=>`<tr class="${r.change==='unchanged'?'':'changed'}"><td>${r.dose??'new'}</td><td>${n(r.original)}</td><td>${n(r.proposed)}</td><td>${regimenEscape(String(Number(r.amount.toPrecision(6))))} mg</td><td>${r.change==='added'?'Added after HD ('+n(r.session.start)+'–'+n(r.session.end)+' h)':r.change==='moved'?'Moved to end of HD ('+n(r.session.start)+'–'+n(r.session.end)+' h)':'Unchanged'}</td></tr>`).join('');
+ $('postHdFlags').replaceChildren(...plan.flags.map(f=>{const li=document.createElement('li');li.className='flag-'+f.kind;li.textContent=({duplicate:'Check: ',drop:'Left out: ',gap:'Note: ',info:'Note: '})[f.kind]+f.text;return li;}));
+}
+$('applyPostHd').addEventListener('click',()=>{
+ const plan=currentPostHdPlan();if(!plan.ok||!plan.apply)return;
+ rememberVersion('Before post-dialysis dose timing');studyOverlay=null;
+ c.dosingMode='custom';c.customDoses=structuredClone(plan.customDoses);
+ renderInputs();
+ showScenarioNote('Dose timing after hemodialysis',plan.ruleText+' '+plan.cite+' The regimen is now a custom schedule; open Medication schedule to see every dose. Teaching comparison only, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ defer();
+});
+function applyLabelAdjustment(){
+ const state=labelAdjustmentState();if(!state.ok)return;
+ if(!dataIsCurrent||!results?.[primary])return;
+ baseline={primary,config:structuredClone(c),data:structuredClone(results[primary])};baselineRevision++;$('saveBaseline').textContent='Replace baseline with selected curve';
+ rememberVersion('Before label kidney adjustment');studyOverlay=null;
+ const before=c.dose+' mg every '+c.every+' h';
+ c.dose=Number(state.dose.toPrecision(6));c.every=state.every;
+ renderInputs();
+ showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label using body surface area '+c.labelBsa+' m² [10]. The previous curve is shown as the baseline. The label specifies an additional dose after each hemodialysis session. Preview and apply those supplemental doses in Dose timing around hemodialysis on the Concentration tab. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ defer();
 }
 function updateDrugCaution(){
  const oralDoses=c.dosingMode==='custom'?c.customDoses.filter(d=>d.route==='Valacyclovir oral').map(d=>d.amount):(c.route==='Valacyclovir oral'?[c.dose]:[]);
@@ -353,7 +498,7 @@ if(typeof IntersectionObserver!=='undefined'){
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
-function chartSignature(key){return JSON.stringify([key==='plasma'?overlayStudy()?.id||null:null,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
+function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,key==='plasma'||key==='cmmg'?savedRevision:0,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
 let chartWait=null;
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
@@ -445,13 +590,14 @@ function curve(key,unit,where,ref=null){if(!results)return;
   series.push(charts.line(m+(m===primary?' (selected)':''),d.time,scale(z.median),color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
  }
  const comparison=baseline&&['plasma','csf','cmmg','csfCmmg'].includes(key);
- const horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
+ let horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
  if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,scale(baseline.data[key].median),'#303846',2.5,[10,4,2,4]));
+ if(key==='plasma'||key==='cmmg')savedRegimens.forEach((r,i)=>{series.push(charts.line(r.name,r.data.time,scale(r.data[key].median),REGIMEN_COLORS[i],2.6,'dashed'));horizon=Math.max(horizon,r.config.horizon);});
  const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
- const study=key==='plasma'?overlayStudy():null;
- if(study)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
-  itemStyle:{color:'#1d2733',borderColor:'#ffffff',borderWidth:1.5},data:study.points.map(([t,v])=>[t,v*factor])});
+ const study=key==='plasma'||key==='cmmg'?overlayStudy():null,studyPoints=study?(key==='plasma'?study.points:study.cmmgPoints):null;
+ if(studyPoints)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
+  itemStyle:{color:'#1d2733',borderColor:'#ffffff',borderWidth:1.5},data:studyPoints.map(([t,v])=>[t,v*factor])});
  if(key==='csf'&&c.showIC50){
   const r=VIRUSES[c.virus];
   const low=r.min*factor,high=r.max*factor,text=v=>concUnit==='umol'?Number(v.toPrecision(3)):v;
@@ -545,7 +691,7 @@ function calculate(forceAll=false){
   queuedJob={id,key,config:jobConfig};setBusy(true);startNextJob();
  }catch(error){calculationError(error);}
 }
-function defer(){pendingCsvExport=false;++calculationVersion;queuedJob=null;dataIsCurrent=false;setBusy(true);clearTimeout(timer);timer=setTimeout(calculate,180);}
+function defer(){refreshLabelAdjust();pendingCsvExport=false;++calculationVersion;queuedJob=null;dataIsCurrent=false;setBusy(true);clearTimeout(timer);timer=setTimeout(calculate,180);}
 function updateParam(target){let id=target.dataset.k;if(!id)return;let value=Number(target.value);if(target.value.trim()===''||!Number.isFinite(value))return;
  const def=fieldDef(id);if(value<def[2]||value>def[3]){if(target.dataset.role==='number')target.setCustomValidity(`Use ${def[2]}–${def[3]}`);return;}target.setCustomValidity?.('');if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
  const same=document.querySelectorAll(`[data-k="${id}"]`);for(const el of same)if(el!==target)el.value=value;
@@ -783,7 +929,8 @@ $('enableRenalProfile').addEventListener('click',()=>{
 });
 $('patientControls').addEventListener('change',e=>{if(e.target.id==='crclSource'){c.crclSource=e.target.value;if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='cgSex'){c.sex=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='route'){c.route=e.target.value;c.dose=c.route==='Valacyclovir oral'?1000:700;renderInputs();defer();}else if(e.target.id==='dosingMode'){c.dosingMode=e.target.value;renderInputs();defer();if(c.dosingMode==='custom')switchTab('doses');}});
 $('patientControls').addEventListener('input',e=>{if(e.target.id==='cgAge'||e.target.id==='cgScr'){const v=Number(e.target.value);if(!Number.isFinite(v)||e.target.value==='')return;if(e.target.id==='cgAge')c.age=v;else c.scr=v;c.crcl=calculatedCrCl();const target=$('cgOutput');if(target)target.textContent=Number.isFinite(c.crcl)?c.crcl.toFixed(1)+' mL/min':'—';defer();}});
-$('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');});
+$('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');else if(e.target.id==='labelAdjust')applyLabelAdjustment();});
+$('patientControls').addEventListener('change',e=>{if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}else if(e.target.id==='labelBsa'){const value=e.target.valueAsNumber;if(e.target.value!==''&&(!Number.isFinite(value)||value<=0)){e.target.setCustomValidity('Enter a positive body surface area in m²');c.labelBsa=0;refreshLabelAdjust();return;}e.target.setCustomValidity('');c.labelBsa=e.target.value===''?0:value;refreshLabelAdjust();}});
 $('modeControls').addEventListener('click',e=>{if(e.target.id==='showPdRx'){switchTab('timeline');$('pdRxPanel').scrollIntoView({block:'start',behavior:'smooth'});}});
 $('primary').addEventListener('change',e=>{primary=e.target.value;renderInputs();defer();});
 document.querySelector('aside').addEventListener('input',e=>{if(e.target.dataset.k)updateParam(e.target);});
@@ -1047,10 +1194,10 @@ function parseConfiguration(input){
   if(!src||typeof src!=='object'||Array.isArray(src))throw Error('Configuration data is missing. No settings were changed.');
   const next=structuredClone(E.DEFAULTS);
   const required=Object.keys(next),number=x=>typeof x==='number'&&Number.isFinite(x);
-  const missing=required.filter(key=>!['renalMode','renalProfile'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
+  const missing=required.filter(key=>!['renalMode','renalProfile','probenecid','labelBsa'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
   if(missing.length)throw Error('Configuration is incomplete (missing '+missing.slice(0,4).join(', ')+'). No settings were changed.');
   for(const key of required){
-   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile'].includes(key))continue;
+   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile','probenecid','labelBsa'].includes(key))continue;
    const v=src[key];
    if(['schedule','customDoses','observations','pdRxRows','renalProfile'].includes(key)){
     if(!Array.isArray(v)||v.length>(key==='renalProfile'?24:key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
@@ -1225,26 +1372,126 @@ function loadStudy(id){
 }
 if(STUDIES)for(const study of STUDIES.STUDIES){const option=document.createElement('option');option.value=study.id;option.textContent=study.label;$('studySelect').append(option);}
 $('studySelect').addEventListener('change',e=>loadStudy(e.target.value));
+// Vary one reconstruction assumption (from #68). The published values are unchanged; the measured
+// points hide because the settings no longer match the reconstruction.
+$('studyExploreRun').addEventListener('click',()=>{
+ const study=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;if(!study?.explore)return;
+ try{
+  const raw=$('studyExploreValue').value;if(!raw.trim())throw new Error('Enter a value for the assumption.');
+  const value=Number(raw),calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale};
+  const original=STUDIES.configFor(study,E,calibration),config=STUDIES.exploreConfig(study,E,value,calibration);
+  const errors=E.validate(config,study.mode);if(errors.length)throw new Error(errors[0]);
+  let kept=false;
+  if(savedRegimens.length<REG.MAX_SAVED&&!savedRegimens.some(r=>r.name===('Original: '+study.short).slice(0,40))){
+   const d=E.simulateMany({...original,variability:0,draws:1,requestedModes:[study.mode]})[study.mode];
+   savedRegimens.push({name:('Original: '+study.short).slice(0,40),primary:study.mode,config:structuredClone(original),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
+   savedRevision++;kept=true;
+  }
+  rememberVersion('Before exploring an assumption: '+study.short);
+  applyVersion({config,primary:study.mode,visible:[study.mode],palette:paletteMode,unit:concUnit});
+  studyOverlay=study.id;
+  const spec=study.explore;
+  showScenarioNote('Hypothetical assumption: '+study.short,spec.label+' set to '+value+' '+spec.unit+' (the reconstruction uses '+spec.value+' '+spec.unit+'). '+(kept?'The original reconstruction is saved as a regimen for comparison. ':'')+'The published measurements are unchanged but hidden, because the settings no longer match the reconstruction. Use Undo last import in Research tools to return to your previous settings.');
+  $('studyExploreStatus').textContent='Exploring '+value+' '+spec.unit+'.';
+  renderRegimens();renderStudyStatus();switchTab('concentration');defer();
+ }catch(error){$('studyExploreStatus').textContent=error.message;}
+});
 // Evidence scorecard on the Methods tab. Recomputed only when calibration multipliers change.
-let scorecardKey='',scorecardRun=0;
+let scorecardKey='',scorecardRun=0,scorecardScores=[],scorecardCalibration=null;
 function renderScorecard(){
  const body=$('scorecardRows');if(!body||!STUDIES)return;
  const calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale},key=JSON.stringify(calibration);
  if(key===scorecardKey)return;
- scorecardKey=key;const run=++scorecardRun,rows=[];
- body.innerHTML='<tr><td colspan="6">Calculating…</td></tr>';
+ scorecardKey=key;const run=++scorecardRun,rows=[],scores=[];
+ scorecardScores=[];$('scorecardCsv').disabled=true;
+ body.innerHTML='<tr><td colspan="7">Calculating…</td></tr>';
  const next=index=>setTimeout(()=>{
   if(run!==scorecardRun)return;
   const study=STUDIES.STUDIES[index];
-  try{const r=STUDIES.score(study,E,{calibration,draws:400});
-   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} (n=${study.n})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
-  }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="5">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
-  if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="6">Calculating…</td></tr>';next(index+1);}
-  else{body.innerHTML=rows.join('');
-   $('scorecardCaption').textContent=(calibration.vcScale===1&&calibration.clearanceScale===1?'Default parameters.':'Calibration multipliers active: central volume ×'+calibration.vcScale+', clearance ×'+calibration.clearanceScale+'.')+' The label rows are the same aggregate values used by the optional calibration in Research tools, so they are not independent once that fit is applied.';}
+  try{const r=STUDIES.score(study,E,{calibration,draws:400});scores.push(r);
+   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td>${provenanceSummary(study)}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
+  }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="6">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
+  if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="7">Calculating…</td></tr>';next(index+1);return;}
+  body.innerHTML=rows.join('');scorecardScores=scores;scorecardCalibration=calibration;$('scorecardCsv').disabled=!scores.length;
+  const summary=STUDIES.summarize(scores),overall=summary.overall;
+  const description=r=>r.total+' points; bias ratio '+r.gmr.toFixed(2)+'; geometric mean absolute fold error '+r.absoluteFoldError.toFixed(2)+'; '+r.withinTwo+'/'+r.total+' within twofold; '+r.inside+'/'+r.total+' inside assumed model bands.';
+  $('scorecardCaption').textContent=(calibration.vcScale===1&&calibration.clearanceScale===1?'Default parameters. ':'Calibration multipliers active: central volume ×'+calibration.vcScale+', clearance ×'+calibration.clearanceScale+'. ')+
+   summary.scenarios+' comparison scenarios from '+summary.sources+' reference sources. '+(overall?description(overall):'No results.')+
+   ' The pooled ratio measures bias, not accuracy; opposite errors cancel. Repeated samples, group means and author-fitted values have equal point weight, not independent patient weight. Band inclusion is descriptive, not validated predictive coverage. Label values are not independent after label-based calibration.';
+  $('scorecardGroups').textContent=summary.groups.filter(r=>r.total).map(r=>r.name+': '+description(r)).join('\n');
+  drawScorecardFigure();drawResidualFigure();
  },30);
  next(0);
 }
+async function drawScorecardFigure(){
+ const target=$('scorecardFigure'),status=$('scorecardFigureStatus');if(!target||!scorecardScores.length)return;
+ const groups=[['Plasma acyclovir, no dialysis','#2367a0','circle',s=>s.mode==='No dialysis'],['Plasma acyclovir, dialysis','#ba591d','diamond',s=>s.mode!=='No dialysis']];
+ const point=(study,r)=>[r.observed,r.predicted,study.short+' '+study.cite+', '+(r.analyte==='cmmg'?'CMMG':'acyclovir')+' at '+Number(r.time.toFixed(2))+' h'];
+ const series=groups.map(([name,color,symbol,test])=>({name,type:'scatter',symbol,symbolSize:10,itemStyle:{color,borderColor:'#fff',borderWidth:1},
+  data:scorecardScores.flatMap(score=>{const study=STUDIES.find(score.id);return test(study)?score.rows.filter(r=>r.analyte==='plasma').map(r=>point(study,r)):[];})}));
+ series.push({name:'Plasma CMMG',type:'scatter',symbol:'triangle',symbolSize:11,itemStyle:{color:'#6b3fa0',borderColor:'#fff',borderWidth:1},
+  data:scorecardScores.flatMap(score=>{const study=STUDIES.find(score.id);return score.rows.filter(r=>r.analyte==='cmmg').map(r=>point(study,r));})});
+ const values=scorecardScores.flatMap(s=>s.rows.flatMap(r=>[r.observed,r.predicted]));
+ const lo=10**Math.floor(Math.log10(Math.min(...values)/2)),hi=10**Math.ceil(Math.log10(Math.max(...values)*2));
+ const guide=(name,k,type)=>({name,type:'line',silent:true,showSymbol:false,tooltip:{show:false},itemStyle:{color:'#5b6670'},lineStyle:{color:'#5b6670',width:k===1?1.6:1,type},data:[[lo,lo*k],[hi,hi*k]]});
+ series.push(guide('Perfect agreement',1,'solid'),guide('Twofold',2,'dashed'),{...guide('Twofold',.5,'dashed'),name:'Twofold '});
+ try{
+  await window.AyFluxCharts.ensure();
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true,label:{description:'Predicted versus observed concentration for each published point, log scales, with lines for perfect agreement and twofold error.'}},series,
+   legend:{bottom:0,data:groups.map(g=>g[0]).concat('Plasma CMMG','Perfect agreement','Twofold')},grid:{top:16,left:70,right:20,bottom:84},
+   tooltip:{trigger:'item',confine:true,formatter:p=>p.data?.[2]?p.data[2]+'\nObserved '+Number(p.data[0].toPrecision(3))+' mg/L, predicted '+Number(p.data[1].toPrecision(3))+' mg/L':''},
+   xAxis:{type:'log',min:lo,max:hi,name:'Published (mg/L)',nameLocation:'middle',nameGap:30},
+   yAxis:{type:'log',min:lo,max:hi,name:'AyFlux nominal prediction (mg/L)',nameLocation:'middle',nameGap:46}});
+  status.textContent='Points above the solid line are overpredicted, points below underpredicted. Dashed lines mark twofold error.';
+ }catch{status.textContent='Figure unavailable. The table and CSV contain the same values.';}
+}
+// Residuals: predicted/observed for each published value against hours since the most recent dose,
+// marked by the sample type each source reports.
+function renderResidualTable(){
+ const body=$('residualRows');if(!body||!scorecardScores.length)return;
+ const two=v=>v.toFixed(2),h=v=>String(Number(v.toFixed(2)));
+ const listed=(list,fitted)=>list.length?list.map(r=>two(r.ratio)+' at '+h(r.time)+' h'+(r.analyte==='cmmg'?' (CMMG)':'')).join('; ')+(fitted?' (author-fitted)':''):'—';
+ const direction={below:'All below 1 (underpredicted)',above:'All above 1 (overpredicted)',mixed:'Mixed'};
+ body.replaceChildren(...STUDIES.residualsByStudy(scorecardScores).map(s=>{
+  const tr=document.createElement('tr'),cell=text=>{const td=document.createElement('td');td.textContent=text;tr.append(td);};
+  cell(s.short+' '+s.cite);cell(String(s.total));cell(two(s.median));cell(two(s.min)+'–'+two(s.max));cell(direction[s.direction]);
+  cell(listed(s.peaks,s.fitted));cell(listed(s.troughs,s.fitted));return tr;
+ }));
+}
+async function drawResidualFigure(){
+ renderResidualTable();
+ const target=$('residualFigure');if(!target||!scorecardScores.length)return;
+ const KIND={peak:['Peak','triangle'],trough:['Trough','path://M0,0L10,0L5,10Z'],'post-infusion':['Post-infusion','rect'],'hd-start':['HD inlet','diamond'],'hd-end':['HD inlet','diamond'],serial:['Serial (no peak/trough label)','circle']};
+ const SETTING=[['No dialysis','#2367a0',(s,r)=>r.analyte==='plasma'&&s.mode==='No dialysis'],['Dialysis','#ba591d',(s,r)=>r.analyte==='plasma'&&s.mode!=='No dialysis'],['CMMG','#6b3fa0',(s,r)=>r.analyte==='cmmg']];
+ const series=[],ratios=[];
+ for(const [setting,color,test] of SETTING)for(const kind of ['peak','trough','post-infusion','hd','serial']){
+  const data=[];
+  for(const score of scorecardScores){const study=STUDIES.find(score.id);for(const r of score.rows){
+   const k=r.kind.startsWith('hd-')?'hd':r.kind;
+   if(k!==kind||!test(study,r)||r.sinceDose===null)continue;
+   const ratio=r.predicted/r.observed;ratios.push(ratio);
+   data.push([r.sinceDose,ratio,study.short+' '+study.cite+' · '+KIND[r.kind][0].toLowerCase()+' '+(r.analyte==='cmmg'?'CMMG':'acyclovir')+' at hour '+Number(r.time.toFixed(2))]);
+  }}
+  if(data.length)series.push({name:setting+' · '+KIND[kind==='hd'?'hd-start':kind][0],type:'scatter',symbol:KIND[kind==='hd'?'hd-start':kind][1],symbolSize:kind==='serial'?8:12,itemStyle:{color,borderColor:'#fff',borderWidth:1},data});
+ }
+ const lo=Math.min(.25,...ratios)/1.15,hi=Math.max(4,...ratios)*1.15,xmax=Math.ceil(Math.max(...scorecardScores.flatMap(s=>s.rows.map(r=>r.sinceDose??0)))+1);
+ const guide=(name,y,width,type)=>({name,type:'line',silent:true,showSymbol:false,tooltip:{show:false},itemStyle:{color:'#5b6670'},lineStyle:{color:'#5b6670',width,type},data:[[0,y],[xmax,y]]});
+ series.push(guide('Predicted = observed',1,1.8,'solid'),guide('Twofold',2,1,'dashed'),{...guide('Twofold',.5,1,'dashed'),name:'Twofold '});
+ try{
+  await window.AyFluxCharts.ensure();
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true,label:{description:'Predicted over observed ratio for each published value against hours since the most recent dose, by sample type.'}},series,
+   legend:{bottom:0,itemGap:12},grid:{top:16,left:70,right:20,bottom:110},
+   tooltip:{trigger:'item',confine:true,formatter:p=>p.data?.[2]?p.data[2]+'\nPredicted/observed '+p.data[1].toFixed(2)+', '+Number(p.data[0].toFixed(2))+' h after dose start':''},
+   xAxis:{type:'value',min:0,max:xmax,name:'Hours since the start of the most recent dose',nameLocation:'middle',nameGap:30},
+   yAxis:{type:'log',min:lo,max:hi,name:'Predicted / observed',nameLocation:'middle',nameGap:46,axisLabel:{formatter:v=>Number(v.toPrecision(2))}}});
+  $('residualFigureStatus').textContent='Points above 1 are overpredicted, below 1 underpredicted; dashed lines mark twofold. Shape gives the sample type as each source reports it; serial time courses have no peak or trough label.';
+ }catch{$('residualFigureStatus').textContent='Figure unavailable. The CSV contains the same values.';}
+}
+$('scorecardCsv').addEventListener('click',()=>{
+ if(!scorecardScores.length)return;
+ const a=document.createElement('a'),url=URL.createObjectURL(new Blob([STUDIES.csv(scorecardScores,scorecardCalibration)],{type:'text/csv;charset=utf-8'}));
+ a.href=url;a.download='ayflux_evidence_scorecard.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+});
 $('scorecardRows').addEventListener('click',e=>{const button=e.target.closest('[data-study]');if(button)loadStudy(button.dataset.study);});
 $('saveConfig').addEventListener('click',()=>{
  const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
@@ -1276,6 +1523,7 @@ $('loadConfig').addEventListener('change',async e=>{
 openSharedLink(true);
 $('primary').value=primary;renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxEditor();calculate();
 })();
+
 
 
 

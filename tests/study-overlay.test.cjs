@@ -26,10 +26,44 @@ test('every published study loads as a valid regimen with positive, time-ordered
   assert.equal(S.find(study.id),study);
   assert.ok(study.legend.length<=26,'legend label stays short: '+study.legend);
   assert.ok(S.matches(study,config,study.mode));
-  assert.ok(!S.matches(study,{...config,dose:config.dose+1},study.mode),'changed dose hides the overlay');
+  assert.ok(!S.matches(study,{...config,weight:config.weight+1},study.mode),'changed weight hides the overlay');
+  if(study.config.customDoses)assert.ok(!S.matches(study,{...config,customDoses:config.customDoses.slice(1)},study.mode),'changed dose list hides the overlay');
   assert.ok(!S.matches(study,config,'Intermittent HD'),'changed scenario hides the overlay');
  }
  assert.equal(S.find('nope'),null);
+ for(const study of S.STUDIES)for(const [t,v] of study.cmmgPoints||[])assert.ok(v>0&&t>=0);
+ assert.ok(S.STUDIES.some(s=>s.mode==='Peritoneal dialysis')&&S.STUDIES.some(s=>s.mode==='Custom sequence'),'dialysis studies included');
+});
+
+test('dialysis and single-patient studies reproduce the research/validation reconstructions',()=>{
+ // Boelaert: same configuration as research/validation/boelaert-capd.cjs, whose outputs are recorded in JSON.
+ const reference=JSON.parse(read('research/validation/boelaert-v026-reference-results.json'));
+ for(const subject of reference.subjects){
+  const study=S.find('boelaert-'+subject.subject),score=S.score(study,E,{draws:20});
+  subject.checkpoints.forEach((point,i)=>{
+   assert.ok(Math.abs(score.rows[i].predicted-point.ayflux_mg_L)<2e-3,study.id+' '+point.metric);
+   assert.ok(Math.abs(score.rows[i].observed-point.source_fitted_mg_L)<1e-3,study.id+' observed '+point.metric);
+  });
+ }
+ // Vasquez: the 4-hour admission assumption of research/validation/vasquez-hd.cjs.
+ const vasquez=require('../research/validation/vasquez-hd.cjs').simulate(4,0.125),v=S.score(S.find('vasquez'),E,{draws:20});
+ assert.deepEqual(v.rows.map(r=>r.observed),[vasquez[0][1],vasquez[1][1]]);
+ v.rows.forEach((r,i)=>assert.ok(Math.abs(r.predicted-vasquez[i][2])<0.02,'Vasquez '+i));
+ // Kacirova: the reference reconstruction (creatinine 87 µmol/L, ninth infusion, 1-hour infusions).
+ // The 25-minute sample is between grid points here, so allow 3%.
+ const kacirova=require('../research/validation/kacirova-paired.cjs').predict(87,8,1,1/12),k=S.score(S.find('kacirova'),E,{draws:20});
+ const byOrder=[k.rows[0],k.rows[1],k.rows[2],k.rows[3]].map(r=>r.predicted);
+ byOrder.forEach((value,i)=>assert.ok(Math.abs(value/kacirova[i]-1)<0.03,'Kacirova endpoint '+i+': '+value+' vs '+kacirova[i]));
+ assert.deepEqual(k.rows.map(r=>r.analyte),['plasma','plasma','cmmg','cmmg']);
+});
+
+test('scorecard CSV has one row per published point and quotes text safely',()=>{
+ const scores=['laskin-anuric','kacirova'].map(id=>S.score(S.find(id),E,{draws:20}));
+ const lines=S.csv(scores,{vcScale:1.1,clearanceScale:0.9}).trim().split('\n');
+ assert.equal(lines[0],'study_id,citation,analyte,time_h,observed_mg_L,predicted_nominal_mg_L,interval_lower_mg_L,interval_upper_mg_L,inside_interval,point_type,central_volume_multiplier,clearance_multiplier');
+ assert.equal(lines.length,1+3+4);
+ assert.match(lines[1],/^laskin-anuric,"Laskin 1982 \(anuric, before dialysis\) \[1\]",plasma,1,/);
+ assert.match(lines.at(-1),/^kacirova,.*,cmmg,65\.4167,0\.64,.*,measured concentrations,1\.1,0\.9$/);
 });
 
 test('study data agree with the existing benchmark tables instead of duplicating different numbers',()=>{
@@ -82,10 +116,40 @@ test('overlay, scorecard and ratio are wired into the page without entering save
  assert.match(read('public/sw.js'),/"\/assets\/study-library\.js"/);
  // Overlay state lives outside the configuration object, so files and links never carry it.
  assert.doesNotMatch(ui,/c\.studyOverlay|studyOverlay:/);
- assert.match(ui,/function chartSignature\(key\)\{return JSON\.stringify\(\[key==='plasma'\?overlayStudy\(\)/);
+ assert.match(ui,/function chartSignature\(key\)\{return JSON\.stringify\(\[key==='plasma'\|\|key==='cmmg'\?overlayStudy\(\)/);
+ assert.match(html,/id="scorecardFigure"/);assert.match(html,/id="scorecardCsv" disabled/);
  // Readouts are rendered only from current results.
  const render=ui.slice(ui.indexOf('function renderTimeAbove('),ui.indexOf('function tableOpen('));
  assert.match(render,/run=dataIsCurrent&&results\?results\[primary\]:null/);
  assert.match(render,/cmmgAucRatio\(run\.time/);
  assert.match(ui,/if\(tab==='method'\)renderScorecard\(\)/);
+});
+
+test('bias cancellation does not hide error magnitude, and analytes remain separate',()=>{
+ const row=(observed,predicted,analyte='plasma')=>({observed,predicted,analyte,inside:true});
+ const s=S.summarize([{id:'laskin-normal',rows:[row(1,2),row(2,1)]},{id:'kacirova',rows:[row(1,1,'cmmg')]}]);
+ assert.ok(Math.abs(s.overall.gmr-1)<1e-12);
+ assert.ok(Math.abs(s.groups[0].absoluteFoldError-2)<1e-12);
+ assert.equal(s.groups[0].total,2);assert.equal(s.groups[2].total,1);
+ assert.equal(s.sources,2);assert.equal(s.scenarios,2);
+});
+test('case observations cite the case publication and mass endpoints remain separate',()=>{
+ assert.equal(S.find('kacirova').ref,'ref42');
+ assert.match(html,/id="ref42"/);assert.match(html,/mass-recovery/);
+ assert.equal(S.STUDIES.flatMap(S.pointsOf).length,37);
+ const scores=S.STUDIES.map(s=>({id:s.id,rows:S.pointsOf(s).map(r=>({...r,predicted:r.observed,inside:true}))}));
+ const summary=S.summarize(scores);assert.equal(summary.scenarios,9);assert.equal(summary.sources,6);
+});
+
+test('component ablation reuses the scorecard predictions and moves bias in the expected directions',()=>{
+ const A=require('../research/validation/ablation-study.cjs'),results=A.run(),by=Object.fromEntries(results.map(r=>[r.variant.id,r]));
+ // The reference variant reproduces the scorecard's nominal predictions exactly.
+ let i=0;for(const study of S.STUDIES)for(const row of S.score(study,E,{draws:5}).rows)assert.ok(Math.abs(row.predicted/by.full.rows[i++].predicted-1)<1e-12);
+ assert.equal(i,by.full.rows.length);
+ // Less clearance means higher predictions; more renal clearance assumed means lower.
+ assert.ok(by['no-dialysis'].groups['plasma-dialysis'].bias>by.full.groups['plasma-dialysis'].bias);
+ assert.equal(by['no-dialysis'].groups['plasma-no-dialysis'].bias,by.full.groups['plasma-no-dialysis'].bias);
+ assert.ok(by['gfr-only'].groups['plasma-no-dialysis'].bias>by.full.groups['plasma-no-dialysis'].bias);
+ assert.equal(by['no-cmmg'].groups.cmmg,null,'zero CMMG predictions have no fold error');
+ assert.ok(results.every(r=>r.rows.length===37));
 });

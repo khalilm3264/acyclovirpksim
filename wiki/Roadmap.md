@@ -1,78 +1,36 @@
 # Development roadmap
 
-This is a **living plan**, not a promise of release dates, clinical utility, or completion. The priority is scientific transparency, reliable numerical behavior, and a compact interface.
+Reviewed 2026-11-13 against main. Current release metadata is **v0.26.0 preview**; v0.27.0 is planned. This page describes priorities rather than promised release dates.
 
-## Delivered since 0.26.0 (unreleased)
+## Already available
 
-- Graph zoom and pan controls, concentration units, shareable links, undo and version history
-- Guided scenarios, hemodialysis timing explorer, time above a level, accumulation ratio, fuller baseline comparison
-- Drug reference table grouped by modality, with CRRT sources [38]–[40]
+ECharts concentration and clearance charts, baseline comparison, unit switching, shared scenario links, import history, time-varying kidney input, an optional visual explorer, Lite, CSV/XLSX export, published-evidence comparison scripts, pediatric IV research and sampling experiments. See [Home](Home) and [Research modules](Research-Modules).
 
-None of these changed a model equation, parameter or default. See the [changelog](https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#unreleased).
+## Scientific priorities
 
-## Candidates raised during the November 2026 literature review
+| Priority | Work | Tracking and completion criteria |
+| --- | --- | --- |
+| P0 | Review CMMG formation and clearance at CrCl zero | [#46](https://github.com/khalilm3264/acyclovirpksim/issues/46); identify the mechanism, compare with measured evidence and retain mass/units checks |
+| P0 | Recalibrate exploratory CSF CMMG partition | [#47](https://github.com/khalilm3264/acyclovirpksim/issues/47); assess the default 0.25 against Smith 2010's approximately 0.025 CSF/plasma AUC ratio, with estimand differences and an independent evaluation protocol |
+| P0 | Freeze the manuscript model version | [#48](https://github.com/khalilm3264/acyclovirpksim/issues/48); record commit, settings, source versions, scripts and reproducible outputs |
+| P1 | Align manuscript and website references | [#49](https://github.com/khalilm3264/acyclovirpksim/issues/49); stable DOI mapping and explicit case/cohort overlap |
+| P1 | Extend dialysis evidence comparisons | [#50](https://github.com/khalilm3264/acyclovirpksim/issues/50), [#51](https://github.com/khalilm3264/acyclovirpksim/issues/51); Hara measurements and Laskin renal/nonrenal split with study-specific assumptions |
+| P1 | Complete full-text review | [#53](https://github.com/khalilm3264/acyclovirpksim/issues/53); distinguish bibliographic verification, abstract review and reviewed full text |
+| P1 | Replayable literature cases | [#54](https://github.com/khalilm3264/acyclovirpksim/issues/54); keep observed samples, author-fitted values and reconstructed inputs distinct |
 
-| Priority | Item | Why | Blocked on |
-| --- | --- | --- | --- |
-| P0 | Review CMMG behavior at CrCl 0 without dialysis | The unadjusted guided scenario reaches a median peak plasma CMMG near 162 mg/L in 96 hours, about 60 times the 2.58 mg/L reference level. At CrCl 0, 93% of acyclovir clearance is conversion to CMMG, and CMMG leaves only through a slow nonrenal route (half-life about 78 h). The CMMG/acyclovir AUC ratio is about half Kably 2025's at normal and low eGFR. See #46. | Scientific review of the CMMG formation and elimination terms |
-| P1 | Published case library | Load a reported case and overlay its measured levels: Ito 2025 (CHDF), Vasquez Vasquez 2025 (HD with dialysate recovery), Boulieu 1997 (CVVHD), Moyses Neto 2026 (cycler PD) | Full-text access; only abstracts reviewed so far |
-| P1 | Adult population-model comparison | Would mirror the existing pediatric comparison. No suitable adult acyclovir model identified yet (an earlier candidate turned out to be a meropenem study) | Finding a model |
-| P1 | Valacyclovir in hemodialysis benchmark | Hara 2008 measured valacyclovir, acyclovir and CMMG in 18 HD patients after 1,000 mg | Not yet in the bibliography |
-| P2 | Body-weight scalar | Turner 2016: ideal-weight dosing underexposes obese patients | Design decision on how weight enters volumes and clearance |
-| P2 | Prolonged or continuous infusion | Reported in pediatric and neonatal CRRT cases | Infusion input is capped at 4 hours |
-| P2 | SLED / prolonged intermittent dialysis | No acyclovir data found; would be labeled extrapolation | Scientific review |
+## Planned release work
 
-## v0.21.0 preview additions
+[v0.27.0 release tracking (#55)](https://github.com/khalilm3264/acyclovirpksim/issues/55) follows the [release checklist](Release-Plan). Release labels change only when the release is deliberately prepared. Documentation should describe pending functionality as pending.
 
-- An optional user-entered CrCl time trajectory, interpolated into the acyclovir and CMMG renal elimination models
-- A dual-axis CrCl / modeled renal drug-clearance chart instead of an uninformative constant renal-clearance trace
-- A single CSV export button with a format selector; detailed CSV includes the entered CrCl at every time sample
-- Uniform spacing between sidebar fields, buttons, blocks and mobile layouts; short-page footer alignment
-- A refreshed GitHub README, roadmap and verification documentation
+Open PR dependencies and overlap are recorded in the repository's [maintenance plan](https://github.com/khalilm3264/acyclovirpksim/blob/main/docs/repository-maintenance.md). The live PR state takes precedence over that dated snapshot. Drafts and closed unmerged branches require review before their work is discarded or merged.
 
-The CrCl trajectory is a **hypothetical model input**, never a prediction of kidney injury or recovery.
+## Quality and research follow-up
 
-## Scientific follow-up following the source audit
+- Continue conservation, dose/treatment-boundary and time-step checks, including interrupted PD dwells.
+- Extend the independent mrgsolve comparison across repeated dosing, oral absorption and dialysis transitions.
+- Match subject, route, renal function, time origin and output definition before interpreting OSP comparisons.
+- Measure browser interaction and cold-load performance separately from numerical compute benchmarks.
+- Keep accessible numeric outputs and desktop/mobile checks as visualizations evolve.
+- Assess identifiability and data adequacy before adding fitted or machine-learning components.
 
-**Priority P0: review and recalibrate the exploratory CSF CMMG partition parameter.** AyFlux currently defaults to 0.25, whereas [Smith et al., 2010 (PMID 20038622)](https://pubmed.ncbi.nlm.nih.gov/20038622/) reported CSF/plasma AUC ratios around 0.025 for CMMG in a very small cohort. These are not perfectly equivalent estimands, but the order-of-magnitude difference means current simulated CSF CMMG results should remain explicitly caution-labeled. Do not silently replace a model coefficient or treat one small study as sufficient validation: define a parameter-identification and independent-evaluation protocol first.
-
-**Priority P1: expand the mrgsolve model-equation parity suite** from single IV, no dialysis to repeated dose events, HD transitions, oral valacyclovir, and then PD mass-transfer conservation; keep each extension independently testable.
-
-**Priority P1: make a matched OSPSuite aciclovir PBPK comparator** with a documented individual, administered route, time horizon, total versus unbound plasma output and renal physiology. Compare only after these are aligned, and distinguish model structural differences from numerical errors.
-
-## Current / near-term
-
-| Priority | Workstream | Deliverable | Definition of done |
-| --- | --- | --- | --- |
-| P0 | Reliability | Verify dynamic CrCl and existing constant renal clearance | Old configurations load unchanged; 0 CrCl means zero renal clearance; correct time-dependent renal and CMMG terms; mass-balance and convergence tests |
-| P0 | Browser usability | Uniform spacing, footer alignment, compact export controls | Firefox, Chrome and mobile smoke tests; controls don't overflow; clear labels and keyboard access |
-| P0 | Model integrity | Stronger numerical diagnostics | Time-grid checks, dose event boundaries, PD drain accounting, anomaly reporting and unit tests |
-| P1 | Reproducibility | Versioned research export bundle | All parameters, medication/dialysis events, units, model version, result time series and assumptions included |
-| P1 | Data exchange | Broader PK-Sim/MoBi result CSV compatibility | Configurable column mapping, unit conversion, transparent interpolation, error metrics and tests with sample exports |
-| P1 | References | Auditable parameter/source table | Each PK parameter lists units, nominal value, uncertainty assumption, evidence source and limitations |
-| P1 | Reporting | Research summary improvements | Clear scenario assumptions, charts, interval labels, source citations, limitations, and printable PDF |
-| P2 | Offline | Install and offline UX verification | Cached public assets update safely; no patient/CSV data are sent to servers |
-| P2 | Accessibility | Contrast and assistive-technology review | Focus/labels, keyboard navigation, chart alternatives, reduced-motion consideration |
-
-## Research-oriented extensions to investigate
-
-- **Renal trajectory editor:** interpolate user-entered CrCl time points, optionally display entered CrCl and modeled renal clearance on separate axes, and show concentration changes without implying a renal recovery forecast.
-- **HD and CRRT:** investigate time-varying prescriptions, interruptions, delivered treatment, post-dialysis rebound and extracorporeal model parameter provenance.
-- **PD:** refine per-exchange dwell/fill, membrane mass balance and dialysate concentration comparisons using public measurements.
-- **CMMG and CNS:** explicitly separate observed exposure–toxicity associations from speculative CNS model assumptions; assess parameter identifiability.
-- **Open Systems Pharmacology:** explore whether a mapping to OSP models is scientifically meaningful. Native PK-Sim/MoBi import/export is **not currently supported**.
-- **Educational case library:** three guided scenarios now exist on Research tools. Further synthetic examples, and published cases with measured levels, are listed under the November 2026 candidates above.
-
-## Validation criteria before any clinical claims
-
-1. Publish equations, units, nominal parameters and uncertainties, with primary citations.
-2. Test conservation of mass, time-step convergence, event boundaries, zero renal clearance, and negative states.
-3. Use independent measurements not used for fitting, with a prespecified analysis protocol and disclosed cohort properties.
-4. Quantify prediction error, calibration and generalizability and explicitly characterize failure cases.
-5. Obtain domain-expert and appropriate regulatory/clinical review before making any patient-care claims.
-
-**No validation plan or comparison between two simulators should be represented as evidence of clinical readiness.**
-
-## How to propose a change
-
-Create a [feature request](https://github.com/khalilm3264/acyclovirpksim/issues/new/choose) describing the use case, units, input/output examples, primary references, failure cases, and a feasible test. Source changes should follow [CONTRIBUTING.md](https://github.com/khalilm3264/acyclovirpksim/blob/main/CONTRIBUTING.md).
+A matched model comparison, synthetic recovery experiment or case reconstruction does not by itself establish clinical predictive validity.

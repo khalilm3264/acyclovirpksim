@@ -49,6 +49,8 @@ jobs:
           node --check public/lite/lite.js
           node --check public/assets/lite-fallback.js
           node --check public/assets/simulator-worker.js
+      - name: Check bibliography synchronization
+        run: node scripts/references.cjs --check
       - name: Check sitemap coverage
         run: node scripts/sitemap.cjs
       - name: Run AyFlux regression tests
@@ -63,6 +65,8 @@ jobs:
           node scripts/check-pediatric.cjs
           node scripts/check-concentrations.cjs
           node scripts/check-study-overlay.cjs
+          node scripts/check-label-probenecid.cjs
+          node scripts/check-regimens.cjs
           node scripts/check-literature.cjs
 
       - name: Compare surface startup when the ECharts renderer changes
