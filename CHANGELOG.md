@@ -34,6 +34,8 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44, #61, #63 and #67
 - **Kidney injury example** for the custom CrCl trajectory editor: steady to the halfway point, a fall to one fifth by three quarters, then steady. Illustrative only. (#43)
 - **Compare with a published study.** A selector above the plasma graph loads a published regimen (Laskin 1982 normal kidney function [41], Laskin 1982 anuric [1], or the US label 5 and 10 mg/kg q8h means [10]) and draws the published group means as dots. The points hide, with a note, as soon as the settings no longer match the study. The previous settings go to version history. Overlay state is not saved in files or links. (draft PR)
 - **Evidence scorecard** on References & methods. For each published study above: predicted/observed geometric mean ratio of the nominal curve, and how many published means fall inside the 90% model interval from 400 draws. Calculated in the browser when the tab opens and recalculated if calibration multipliers change. No study is used to fit anything. (draft PR)
+- **Dialysis and single-patient studies** in the study comparison and scorecard: Boelaert 1987 CAPD patients 1, 4 and 5 (author-fitted peaks and troughs) [6], Vasquez 2025 intermittent HD (4-hour admission gap assumed) [22], and Kacirova 2022 with paired acyclovir and CMMG levels, shown on the CMMG graph too [42]. Each reproduces its `research/validation` reconstruction, and tests check that. (draft PR)
+- **Predicted-versus-observed figure and scorecard CSV.** A log-scale plot of every published point against the AyFlux nominal prediction, with lines for perfect agreement and twofold error, plus a CSV with one row per point (observed, predicted, interval, inside or not, calibration multipliers). The caption gives the overall ratio and the counts within twofold and inside the interval. (draft PR)
 - **CMMG/acyclovir AUC ratio** in the simulation summary, over the last 24 simulated hours of the median curves, shown next to Kably 2025 population-model values (≈30% at eGFR above 90, ≈130% below 30 mL/min/1.73 m²) [29]. With default parameters AyFlux gives lower ratios than Kably at normal kidney function; see issue #46. (draft PR)
 - **Reference [41]**, Laskin 1982 *Antimicrob Agents Chemother* (probenecid study, normal-function serial plasma means). (draft PR)
 - **Reset to defaults** on Research tools, undoable through version history. (#44)
@@ -170,3 +172,8 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44, #61, #63 and #67
 [0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0220---2026-11-07-preview
 [0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0210---2026-11-07-preview
 [0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0200---2026-11-07-preview
+
+### Study comparison review
+- Corrected the paired Kacirova case citation to its source publication [42], distinct from cohort [32].
+- Distinguished nine comparison scenarios from six reference sources and added error magnitude and separate dialysis, no-dialysis and CMMG summaries. Band inclusion is descriptive, not validated predictive coverage.
+- Added Stathoulopoulou 2002 urinary/CAPD mass-recovery sensitivity results separately from concentration metrics, retaining both denominator interpretations.
