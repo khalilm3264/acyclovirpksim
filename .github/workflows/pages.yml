@@ -49,6 +49,8 @@ jobs:
           node --check public/lite/lite.js
           node --check public/assets/lite-fallback.js
           node --check public/assets/simulator-worker.js
+      - name: Check bibliography synchronization
+        run: node scripts/references.cjs --check
       - name: Check sitemap coverage
         run: node scripts/sitemap.cjs
       - name: Run AyFlux regression tests
