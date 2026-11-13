@@ -13,6 +13,11 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 ## [Unreleased]
 
 ### Added
+- **Usability pass from inpatient pharmacist feedback.**
+  - *Results first:* on the Concentration tab the plasma acyclovir graph now follows the summary. Baseline, regimen and hemodialysis-timing tools move below the graphs under "Comparison tools".
+  - *Which level to read:* the summary leads with plasma acyclovir peak, AUC and a new trough (median curve, just before the last dose); other outputs are secondary, and a short guide says what each level is for. Threshold, accumulation and interval notes fold into "More statistics".
+  - *Where to start:* a dismissible start-here strip and numbered steps in the input panel.
+  - *Dosing weight:* optional height (cm or in) shows BMI, ideal (Devine) and adjusted body weight, and the dose in mg/kg by each. The Cockcroft–Gault estimate can use actual, ideal or adjusted weight (new optional settings `height` and `cgWeight`; schema stays 2). The pharmacokinetic model still scales from actual weight and has no obesity-specific adjustment; the interface says so at BMI 30 or above.
 - **Blood–brain barrier setting (#47).** A patient-level choice, *Intact* (default) or *Damaged (CNS infection; exploratory)*, sets the CSF acyclovir and CMMG partitions together: 0.30/0.025 or 0.37/0.11. The damaged values are fitted to the CSF/serum ratios of Lindström 2019's disrupted-barrier samples and have no independent test. Plasma curves are unchanged. Manual edits under Advanced settings show as *Custom*, and the scenario description names the choice.
 - **Lindström 2019 CSF CMMG benchmark (#47), no parameter changed.** `research/validation/LINDSTROM-CSF.md` reconstructs 34 paired serum/CSF samples [4]. With an intact blood–brain barrier, the current CSF CMMG partition (0.25) is about six times too high, and Smith's 0.025 fits every sample. With barrier disruption, CSF CMMG runs several times higher than either value predicts. Serum CMMG is unbiased (GMR 0.96, 32 samples), independent support for the #85 clearance.
 

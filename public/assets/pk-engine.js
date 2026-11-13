@@ -28,7 +28,7 @@ const DEFAULTS={virus:'VZV',age:55,sex:'male',scr:1,crclSource:'manual',pdMethod
  pdRxEnabled:false,pdRxRows:[],vcScale:1,clearanceScale:1,pdCl:6,pdVolume:2,capdDwell:6,capdExchanges:4,pdGlucose:2.5,pdTransport:1,pdUfBase:120,pdAbsorb:20,pdSmallPore:0.5,pdSigma:0.12,apdStart:20,apdHours:10,apdCycles:5,apdDwell:1.5,apdTurnover:0.25,apdFactor:1,
  effluent:25,sieving:0.95,delivered:0.85,
  csfRatio:0.3,csfLag:4,csfMetRatio:0.025,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
- variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,probenecid:false,labelBsa:0,
+ variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,probenecid:false,labelBsa:0,height:0,cgWeight:'actual',
  schedule:[{type:'PD',start:0,end:24},{type:'PD',start:24,end:48},{type:'HD',start:54,end:58}]};
 // Time-varying residual CrCl is a user-defined illustration, not a measured GFR estimate.
 // Piecewise-linear interpolation, holding the first and last endpoints outside the knots.
@@ -62,9 +62,24 @@ function validateRenalProfile(c){
  if(pts[0]?.time!==0)err.push('Kidney function profile must begin at hour 0');
  return [...new Set(err)];
 }
-function cockcroftGault({age,sex,scr,weight}){
+// Body-size descriptors from height: BMI, ideal body weight (Devine: 50 kg men, 45.5 kg women, plus 2.3 kg per
+// inch over 5 ft) and adjusted body weight (ideal + 0.4 x (actual - ideal)). Null when no valid height is entered.
+function bodySize({sex,weight,height}){
+ if(!Number.isFinite(height)||height<120||height>230||!Number.isFinite(weight)||weight<=0||!['male','female'].includes(sex))return null;
+ const ideal=Math.max((sex==='female'?45.5:50)+2.3*(height/2.54-60),30);
+ return {bmi:weight/Math.pow(height/100,2),ideal,adjusted:ideal+.4*(weight-ideal)};
+}
+// Weight entered into Cockcroft-Gault. 'ideal' and 'adjusted' need a height and never exceed actual weight, so
+// a patient below ideal weight is estimated from actual weight. Affects only the CrCl estimate, not the PK model.
+function cgWeightOf(c){
+ const size=bodySize(c),choice=c.cgWeight??'actual';
+ if(!size||choice==='actual'||c.weight<=size.ideal)return c.weight;
+ return choice==='ideal'?size.ideal:choice==='adjusted'?size.adjusted:c.weight;
+}
+function cockcroftGault(c){
+ const {age,sex,scr,weight}=c;
  if(!Number.isFinite(age)||age<18||age>120||!Number.isFinite(weight)||weight<=0||!Number.isFinite(scr)||scr<=0||!['male','female'].includes(sex))return NaN;
- return (140-age)*weight*(sex==='female'?.85:1)/(72*scr);
+ return (140-age)*cgWeightOf(c)*(sex==='female'?.85:1)/(72*scr);
 }
 function rng(seed=2026){let s=seed|0;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return(s>>>0)/4294967296;};}
 function quantile(a,q){let b=Array.from(a).sort((x,y)=>x-y),p=(b.length-1)*q,j=Math.floor(p);return b[j]+((b[j+1]??b[j])-b[j])*(p-j);}
@@ -617,7 +632,7 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,CSF_BARRIER,csfBarrierOf,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={bodySize,cgWeightOf,renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,CSF_BARRIER,csfBarrierOf,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);
