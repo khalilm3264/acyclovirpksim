@@ -66,6 +66,13 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44, #61, #63 and #67
 - Import validation lives in one function used by file imports and shared links. File import behavior is unchanged. (#42)
 - Reference [22] (Vasquez Vasquez et al.) cites the peer-reviewed article, Br J Clin Pharmacol 2025;91(8):2469–2473, and keeps the preprint as a secondary link. (#44)
 
+### Search indexing
+
+- Every page in the sitemap now has a description, a canonical URL and matching social-preview tags. The home page, Experimental, AyFlux Neonatal, CAPD mass recovery, pediatric evidence and plasma sampling pages were missing some of these.
+- The home page carries structured data (schema.org WebSite and SoftwareApplication: a free educational web app, AGPL-licensed, by Muhammad Khalil). No clinical claims.
+- Deploys add `<lastmod>` dates to the sitemap from git history: the last commit touching each page or its own files (for the home page, also `public/assets/`). The committed sitemap stays URL-only; `scripts/sitemap.cjs --write --lastmod` refuses to run on a shallow clone.
+- The script-markup check allows `application/ld+json` data blocks only when they are valid JSON; all other inline scripts are still rejected.
+
 ### Fixed
 
 - The HD timing explorer cancels an in-progress sweep when its source settings or selected scenario change, clearing the previous output. (#44)
