@@ -34,7 +34,8 @@ const server=http.createServer((req,res)=>{
  console.log(await page.locator('#heatmapStatus').innerText());
  console.log(await page.locator('#hdTimingStatus').innerText());
  await page.setViewportSize({width:390,height:844});
- assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2));
+ // Charts resize on the next frames after the viewport change; wait for layout to settle instead of measuring at once.
+ await page.waitForFunction(()=>document.documentElement.scrollWidth<=window.innerWidth+2,null,{timeout:10000});
  assert.deepEqual(errors,[]);
  console.log('No page errors or mobile horizontal overflow');
  }finally{await browser.close();server.close();}

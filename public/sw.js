@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-cmmg-clearance-20261113";
+const CACHE = "ayflux-static-v0.27.0-csf-barrier-20261113";
 const CORE = [
  "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js",
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",

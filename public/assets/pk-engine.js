@@ -27,7 +27,7 @@ const DEFAULTS={virus:'VZV',age:55,sex:'male',scr:1,crclSource:'manual',pdMethod
  hdStart:24,hdDuration:4,hdRepeat:48,hdCl:81.8,
  pdRxEnabled:false,pdRxRows:[],vcScale:1,clearanceScale:1,pdCl:6,pdVolume:2,capdDwell:6,capdExchanges:4,pdGlucose:2.5,pdTransport:1,pdUfBase:120,pdAbsorb:20,pdSmallPore:0.5,pdSigma:0.12,apdStart:20,apdHours:10,apdCycles:5,apdDwell:1.5,apdTurnover:0.25,apdFactor:1,
  effluent:25,sieving:0.95,delivered:0.85,
- csfRatio:0.3,csfLag:4,csfMetRatio:0.25,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
+ csfRatio:0.3,csfLag:4,csfMetRatio:0.025,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
  variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,probenecid:false,labelBsa:0,
  schedule:[{type:'PD',start:0,end:24},{type:'PD',start:24,end:48},{type:'HD',start:54,end:58}]};
 // Time-varying residual CrCl is a user-defined illustration, not a measured GFR estimate.
@@ -151,6 +151,17 @@ function validatePdRx(c){
 // Non-kidney CMMG clearance (L/h at 70 kg). 0.5 since #46 (was 0.25): Helldén 2007 [45] case 1 shows CMMG
 // falling between HD sessions with an apparent half-life of about 35 h, and Hara 2008 single-dose CMMG peaks
 // fit better (research/validation/HELLDEN-COTARD.md). Calibrated on the Helldén case; Hara is the check.
+// CSF CMMG partition (DEFAULTS.csfMetRatio) is 0.025 since #47 (was 0.25): Smith 2010 CSF/plasma AUC ratio,
+// checked against Lindström 2019 with an intact blood-brain barrier (research/validation/LINDSTROM-CSF.md).
+// Blood-brain barrier presets for the CSF proxies (#47). Intact = DEFAULTS (acyclovir 0.30; CMMG 0.025 from
+// Smith 2010, checked against Lindström 2019 intact-barrier samples). Damaged = exploratory, fitted to the
+// CSF/serum ratios of Lindström 2019's disrupted-barrier samples (research/validation/LINDSTROM-CSF.md);
+// no independent data test it.
+const CSF_BARRIER={intact:{csfRatio:0.3,csfMetRatio:0.025},damaged:{csfRatio:0.37,csfMetRatio:0.11}};
+function csfBarrierOf(c){
+ for(const [name,p] of Object.entries(CSF_BARRIER))if(Math.abs(c.csfRatio-p.csfRatio)<1e-9&&Math.abs(c.csfMetRatio-p.csfMetRatio)<1e-9)return name;
+ return 'custom';
+}
 const CMMG_NONRENAL_CL=0.5;
 const PROBENECID_RENAL=0.68;
 // US acyclovir sodium injection label, renal impairment: percent of the recommended dose and interval.
@@ -606,7 +617,7 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,CSF_BARRIER,csfBarrierOf,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);

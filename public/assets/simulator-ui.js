@@ -101,6 +101,7 @@ function describeScenario(config,mode){
   parts.push((oral?'valacyclovir oral ':'acyclovir IV ')+n(config.dose)+' mg ('+n(config.dose/config.weight)+' mg/kg) every '+n(config.every)+' h, up to '+config.doseCount+' dose'+(config.doseCount===1?'':'s')+(oral?'':', '+n(config.infusion)+'-h infusion'));
  }
  if(config.probenecid)parts.push('with probenecid');
+ {const of=(typeof window!=='undefined'&&window.RenalPKV7?.csfBarrierOf)||null,b=of?of(config):'intact';if(b==='damaged')parts.push('damaged blood–brain barrier (exploratory CSF)');else if(b==='custom')parts.push('custom CSF partitions');}
  parts.push(n(config.horizon)+' h simulated');
  parts.push(mode==='Intermittent HD'?'intermittent HD: '+n(config.hdDuration)+' h every '+n(config.hdRepeat)+' h from hour '+n(config.hdStart):mode==='CRRT'?'CRRT at '+n(config.effluent)+' mL/kg/h effluent':mode==='Custom sequence'?'custom dialysis sequence ('+config.schedule.length+' session'+(config.schedule.length===1?'':'s')+')':mode.toLowerCase());
  return parts.join(' · ');
@@ -361,7 +362,12 @@ function labelAdjustmentState(){
 function medicationTools(){
  const state=labelAdjustmentState();
  return `<div class="label-adjust"><label for="labelBsa">Body surface area for label comparison (m²)</label><input id="labelBsa" type="number" min="0" step="any" inputmode="decimal" value="${c.labelBsa||''}" placeholder="Enter BSA"><p class="tip">Label CrCl = absolute CrCl × 1.73 ÷ body surface area. Used for this label comparison.</p><button type="button" class="btn secondary" id="labelAdjust" ${state.ok?'':'disabled'}>Apply label kidney adjustment</button><p class="tip" id="labelAdjustTip">${state.text}${state.ok?' The current curve is kept as a baseline for comparison.':''}</p></div>`+
-  `<label class="check"><input type="checkbox" id="probenecid" ${c.probenecid?'checked':''}> Probenecid co-administration</label><p class="tip">Lowers acyclovir renal clearance by 32%, as measured in three adults by Laskin et al. [41]. CMMG clearance is unchanged. A single small study; illustrative only.</p>`;
+  `<label class="check"><input type="checkbox" id="probenecid" ${c.probenecid?'checked':''}> Probenecid co-administration</label><p class="tip">Lowers acyclovir renal clearance by 32%, as measured in three adults by Laskin et al. [41]. CMMG clearance is unchanged. A single small study; illustrative only.</p>`+csfBarrierControl();
+}
+// Blood-brain barrier choice: sets the two CSF partitions (#47). Values that match neither preset show as Custom.
+function csfBarrierControl(){
+ const state=E.csfBarrierOf(c),B=E.CSF_BARRIER,opt=(v,t)=>`<option value="${v}" ${state===v?'selected':''}>${t}</option>`;
+ return `<div class="inputrow"><label for="csfBarrier">Blood–brain barrier (CSF curves)</label><select id="csfBarrier">${opt('intact','Intact (default)')}${opt('damaged','Damaged (CNS infection; exploratory)')}${state==='custom'?opt('custom','Custom values (Advanced settings)'):''}</select><p class="tip">Sets how much acyclovir and CMMG reach the CSF. Choose Damaged for encephalitis or meningitis with barrier disruption. Intact: ${B.intact.csfRatio} and ${B.intact.csfMetRatio} of plasma [4][15]. Damaged: ${B.damaged.csfRatio} and ${B.damaged.csfMetRatio}, fitted to patients with herpesvirus CNS infection and a raised CSF:serum albumin ratio [4]; no independent study tests it. Plasma curves are unchanged.</p></div>`;
 }
 function refreshLabelAdjust(){
  const button=$('labelAdjust'),tip=$('labelAdjustTip');if(!button||!tip)return;
@@ -695,6 +701,7 @@ function defer(){refreshLabelAdjust();pendingCsvExport=false;++calculationVersio
 function updateParam(target){let id=target.dataset.k;if(!id)return;let value=Number(target.value);if(target.value.trim()===''||!Number.isFinite(value))return;
  const def=fieldDef(id);if(value<def[2]||value>def[3]){if(target.dataset.role==='number')target.setCustomValidity(`Use ${def[2]}–${def[3]}`);return;}target.setCustomValidity?.('');if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
  const same=document.querySelectorAll(`[data-k="${id}"]`);for(const el of same)if(el!==target)el.value=value;
+ if((id==='csfRatio'||id==='csfMetRatio')&&$('csfBarrier'))$('csfBarrier').closest('.inputrow').outerHTML=csfBarrierControl();
  defer();}
 function renderSchedule(){const rows=draft;
  $('scheduleRows').innerHTML=rows.map((r,i)=>`<div class="intervals" data-row="${i}"><div><label>Mode</label><select data-index="${i}" data-field="type">${E.TYPES.map(m=>`<option ${m===r.type?'selected':''}>${m}</option>`).join('')}</select></div><div><label>Start (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="start" value="${r.start}"></div><div><label>End (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="end" value="${r.end}"></div><button class="btn secondary small" data-delete="${i}" aria-label="Delete session ${i+1}">✕</button></div>`).join('');
@@ -930,7 +937,7 @@ $('enableRenalProfile').addEventListener('click',()=>{
 $('patientControls').addEventListener('change',e=>{if(e.target.id==='crclSource'){c.crclSource=e.target.value;if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='cgSex'){c.sex=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='route'){c.route=e.target.value;c.dose=c.route==='Valacyclovir oral'?1000:700;renderInputs();defer();}else if(e.target.id==='dosingMode'){c.dosingMode=e.target.value;renderInputs();defer();if(c.dosingMode==='custom')switchTab('doses');}});
 $('patientControls').addEventListener('input',e=>{if(e.target.id==='cgAge'||e.target.id==='cgScr'){const v=Number(e.target.value);if(!Number.isFinite(v)||e.target.value==='')return;if(e.target.id==='cgAge')c.age=v;else c.scr=v;c.crcl=calculatedCrCl();const target=$('cgOutput');if(target)target.textContent=Number.isFinite(c.crcl)?c.crcl.toFixed(1)+' mL/min':'—';defer();}});
 $('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');else if(e.target.id==='labelAdjust')applyLabelAdjustment();});
-$('patientControls').addEventListener('change',e=>{if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}else if(e.target.id==='labelBsa'){const value=e.target.valueAsNumber;if(e.target.value!==''&&(!Number.isFinite(value)||value<=0)){e.target.setCustomValidity('Enter a positive body surface area in m²');c.labelBsa=0;refreshLabelAdjust();return;}e.target.setCustomValidity('');c.labelBsa=e.target.value===''?0:value;refreshLabelAdjust();}});
+$('patientControls').addEventListener('change',e=>{if(e.target.id==='csfBarrier'){const p=E.CSF_BARRIER[e.target.value];if(p){c.csfRatio=p.csfRatio;c.csfMetRatio=p.csfMetRatio;renderInputs();defer();}return;}if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}else if(e.target.id==='labelBsa'){const value=e.target.valueAsNumber;if(e.target.value!==''&&(!Number.isFinite(value)||value<=0)){e.target.setCustomValidity('Enter a positive body surface area in m²');c.labelBsa=0;refreshLabelAdjust();return;}e.target.setCustomValidity('');c.labelBsa=e.target.value===''?0:value;refreshLabelAdjust();}});
 $('modeControls').addEventListener('click',e=>{if(e.target.id==='showPdRx'){switchTab('timeline');$('pdRxPanel').scrollIntoView({block:'start',behavior:'smooth'});}});
 $('primary').addEventListener('change',e=>{primary=e.target.value;renderInputs();defer();});
 document.querySelector('aside').addEventListener('input',e=>{if(e.target.dataset.k)updateParam(e.target);});
