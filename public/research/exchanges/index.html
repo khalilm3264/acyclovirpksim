@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PD exchanges and sample timing | AyFlux</title>
+<meta name="description" content="Inspect simulated CAPD drain accounting and explore hypothetical sample timing using the Boelaert 1987 reconstruction.">
+<meta property="og:url" content="https://ayflux.org/research/exchanges/">
+<meta property="og:title" content="PD exchanges and sample timing | AyFlux">
+<meta property="og:description" content="Inspect simulated CAPD drain accounting and explore hypothetical sample timing using the Boelaert 1987 reconstruction.">
+<link rel="canonical" href="https://ayflux.org/research/exchanges/">
+<link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="style.css">
+<script defer src="/assets/pk-engine.js"></script><script defer src="/assets/study-library.js"></script><script defer src="/assets/ayflux-version.js"></script><script defer src="/assets/charts.js"></script><script defer src="view.js"></script></head>
+<body><div class="shell"><main><p><a href="/learn/">← AyFlux user guide</a></p>
+<h1>PD exchanges and sample timing</h1><p>Educational research tool. Do not use for patient dosing or dialysis prescriptions.</p>
+<section class="card"><h2>Replay the Boelaert CAPD reconstruction</h2>
+<label>Patient <select id="patient"><option value="boelaert-1">Boelaert patient 1</option><option value="boelaert-4">Boelaert patient 4</option><option value="boelaert-5">Boelaert patient 5</option></select></label>
+<label>Simulation end (h) <input id="horizon" type="number" min="1" max="120" step="0.25" value="120"></label>
+<button id="download" type="button">Download replay data</button>
+<button id="replay" type="button">Replay five days</button> <a id="share" href="?patient=boelaert-1">Link to this replay</a>
+<p id="protocol"></p><p id="version"></p><p>The published dots are author-fitted plasma endpoints. The curve uses AyFlux's default membrane assumptions and assumed residual CrCl of zero. <a href="/references/#ref6">Boelaert 1987 source</a> · <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/research/validation/boelaert-capd.cjs">Reproduction protocol</a></p>
+<div id="chart" role="img" aria-label="Simulated plasma acyclovir with published endpoints"></div><p id="status" role="status"></p></section>
+<section class="card"><h2>Exchange inspector</h2><label>Exchange <select id="exchange"></select></label><p id="drain"></p><p id="balance"></p>
+<div class="scroll"><table><caption>Exchange accounting at the simulation end</caption><thead><tr><th>Start (h)</th><th>End (h)</th><th>Status</th><th>Volume (L)</th><th>Dialysate (mg/L)</th><th>Drained (mg)</th><th>Still in cavity (mg)</th></tr></thead><tbody id="exchanges"></tbody></table></div></section>
+<section class="card"><h2>Sample-timing explorer</h2><label>Published endpoint <select id="sample"></select></label>
+<label>Hypothetical time shift (h) <input id="shift" type="range" min="-2" max="2" step="0.25" value="0"></label>
+<p id="timing" role="status"></p><p>The observed concentration stays fixed while its assumed collection time moves. Boelaert's endpoint times are inferred from fitted peaks and troughs. This exercise does not revise the source or fit the model.</p>
+<div class="scroll"><table><caption>Published endpoint comparisons at the reconstructed times</caption><thead><tr><th>Time (h)</th><th>Observed (mg/L)</th><th>Predicted (mg/L)</th><th>Predicted ÷ observed</th></tr></thead><tbody id="endpoints"></tbody></table></div></section>
+</main></div></body></html>
