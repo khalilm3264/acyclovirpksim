@@ -155,7 +155,7 @@ function setBusy(busy){
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
  $('saveBaseline').disabled=busy||!dataIsCurrent;
- refreshLabelAdjust();
+ if(typeof refreshLabelAdjust==='function')refreshLabelAdjust();
  if(busy)$('status').textContent='Updating simulation';
 }
 function calculationError(error){
