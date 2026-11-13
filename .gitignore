@@ -1,0 +1,12 @@
+# Installed by `npm ci`
+node_modules/
+
+# Copied from node_modules by `npm run stage`; not committed
+public/assets/vendor/
+public/assets/fonts/
+
+# Generated research output
+research/validation/results/
+
+.DS_Store
+.wrangler/

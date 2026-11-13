@@ -16,6 +16,11 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 - **CMMG evidence check (#46), no parameter changed.** `research/validation/CMMG-EVIDENCE.md` and `cmmg-evidence.cjs` show that the Hara CMMG dialysis gap comes from the default dialyzer clearance, not the CMMG dialysis term: with the dialyzer matched to each study's acyclovir decline, Hara and Helldén's thesis (Paper V) bracket AyFlux's CMMG decline. CMMG kidney clearance sources conflict, and accumulation with no kidney function cannot be identified from the data in hand. The guided "no kidney function" scenario now says its CMMG height is an untested extrapolation.
 - **Boelaert 1987 source check done.** The CAPD patients 1, 4 and 5 were checked against the original paper (J Antimicrob Chemother 1987;20:69–76). Every value AyFlux uses matches Tables I–II and the Methods, so the "pending source check" note is gone. Two provenance rows are now more precise: exchange timing is reported (dialysate instilled just before the infusion at time 0), and CrCl 0 rests on the paper collecting urine only from non-anuric patients, with none listed for these three.
 
+### Security and privacy
+
+- The third-party measurement pixel is removed. It was disabled in #43 but every page still loaded `measurement-pixel.js`, and the Worker's Content Security Policy still allowed its two external hosts. The script, its tag on each page and those policy entries are gone, so the policy now allows same-origin scripts and connections only.
+- The Cloudflare deploy action is pinned to a commit instead of a moving tag, because that step receives the Cloudflare API token.
+
 ## [0.27.0] - 2026-11-13 (preview)
 
 Everything merged to `main` since 0.26.0 ([full comparison](https://github.com/khalilm3264/acyclovirpksim/compare/b928978...v0.27.0)).

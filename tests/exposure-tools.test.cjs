@@ -37,17 +37,17 @@ test('kidney injury example is a valid CrCl trajectory at every supported horizo
  }
 });
 
-test('exposure tools stay descriptive and the measurement pixel is off',()=>{
+test('exposure tools stay descriptive and no measurement pixel is shipped',()=>{
  const html=read('public/index.html');
  assert.match(html,/id="timeAboveLevel"[^>]*placeholder="Enter a level"/,'no default level is suggested');
  assert.match(html,/no established therapeutic or toxic cutoff/);
  assert.match(ui,/id="renalExample"/);
- const pixel=read('public/assets/measurement-pixel.js');
- assert.match(pixel,/const ENABLED = false;/);
- // With the flag off the script must return before creating any element or queue.
- const calls=[],w={},d={createElement:t=>{calls.push(t);return {};},head:{appendChild:()=>calls.push('append')}};
- vm.runInNewContext(pixel,{window:w,document:d});
- assert.deepEqual(calls,[]);assert.equal(w.oaiq,undefined);
+ assert.ok(!fs.existsSync(path.join(root,'public/assets/measurement-pixel.js')));
+ // No page loads a script from another origin, and the Worker policy allows none.
+ const pages=fs.readdirSync(path.join(root,'public'),{recursive:true}).filter(f=>f.endsWith('.html'));
+ assert.ok(pages.length>=15);
+ for(const page of pages)assert.doesNotMatch(read(path.join('public',page)),/measurement-pixel|<script[^>]+src="https?:/,page);
+ assert.doesNotMatch(read('src/index.js'),/openai\.com/);
 });
 
 test('every guided scenario passes engine validation for each curve it shows, and carries no measurements',()=>{

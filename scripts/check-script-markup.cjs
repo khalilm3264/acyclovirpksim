@@ -6,7 +6,6 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const expectedSources = [
-  '/assets/measurement-pixel.js',
   './assets/charts.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
