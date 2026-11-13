@@ -193,3 +193,18 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(read('CHANGELOG.md').includes('## ['+version+']'),'the changelog has a section for the current version');
  assert.match(index,new RegExp('class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/releases/tag/v'+version.replace(/\./g,'\\.')+'"[^>]*>v'+version.replace(/\./g,'\\.')+'</a>'),'footer shows and links the current release');
 });
+
+test('blood-brain barrier presets: intact matches DEFAULTS, damaged raises only the CSF curves',()=>{
+ const pk=require('../public/assets/pk-engine.js');
+ assert.deepEqual(pk.CSF_BARRIER.intact,{csfRatio:pk.DEFAULTS.csfRatio,csfMetRatio:pk.DEFAULTS.csfMetRatio});
+ assert.equal(pk.csfBarrierOf(pk.DEFAULTS),'intact');
+ const damaged={...structuredClone(pk.DEFAULTS),...pk.CSF_BARRIER.damaged,draws:1,variability:0};
+ assert.equal(pk.csfBarrierOf(damaged),'damaged');
+ assert.equal(pk.csfBarrierOf({...damaged,csfMetRatio:.2}),'custom');
+ const base={...structuredClone(pk.DEFAULTS),draws:1,variability:0};
+ const run=c=>pk.single(c,pk.drawParams(c)[0],[],.25);
+ const a=run(base),b=run(damaged);
+ assert.deepEqual(a.cols.plasma,b.cols.plasma);assert.deepEqual(a.cols.cmmg,b.cols.cmmg);
+ const peak=(r,k)=>Math.max(...r.cols[k]);
+ assert.ok(peak(b,'csf')/peak(a,'csf')>1.2&&peak(b,'csfCmmg')/peak(a,'csfCmmg')>4);
+});
