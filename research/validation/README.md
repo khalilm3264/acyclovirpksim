@@ -51,3 +51,7 @@ Run `node research/validation/compare-benchmarks.cjs` to reproduce the [benchmar
 ## Oral valacyclovir and hemodialysis
 
 [Hara 2008](HARA-HD.md) compares the model with acyclovir and CMMG endpoints after oral valacyclovir. Run `node research/validation/hara-hd.cjs`.
+
+## Obesity and renal-function estimation
+
+[Smith 2016](SMITH2016-OBESITY.md) separates CrCl estimation from PK weight scaling in one obese patient with measured renal impairment. Run `node research/validation/smith2016-obesity.cjs`; source-derived endpoints and unknown infusion duration are explicitly identified. This is a diagnostic sensitivity comparison, not a blinded validation or an obesity correction. It changes no model defaults or pooled scorecard statistics.
