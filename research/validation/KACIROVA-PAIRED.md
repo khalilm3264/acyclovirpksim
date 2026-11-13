@@ -10,7 +10,7 @@ All concentrations and differences are in mg/L. Reproduce with `node research/va
 |---|---:|---:|---:|---:|
 | Acyclovir trough | 1.7 | 0.45 | -1.25 | 0.43–0.71 |
 | Acyclovir +25 min | 8.9 | 9.05 | 0.15 | 5.97–10.34 |
-| CMMG trough | 0.27 | 0.11 | -0.16 | 0.11–0.22 |
-| CMMG +25 min | 0.64 | 0.71 | 0.07 | 0.67–0.84 |
+| CMMG trough | 0.27 | 0.11 | -0.16 | 0.10–0.21 |
+| CMMG +25 min | 0.64 | 0.70 | 0.06 | 0.66–0.83 |
 
 The model underpredicts both troughs throughout the tested scenarios. In the reference reconstruction both post-infusion predictions are within 0.15 mg/L of the measured values. The resulting trough-to-post-infusion increases exceed the observed increases for both compounds. Two sampling times in one patient cannot distinguish clearance, distribution, metabolite formation and baseline effects.

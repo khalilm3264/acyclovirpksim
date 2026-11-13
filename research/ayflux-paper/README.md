@@ -17,7 +17,7 @@ The script uses the **existing production engine** `public/assets/pk-engine.js` 
 - `results/ablations.csv`: four component-removal experiments and baseline
 - `results/curves.csv`: exported deterministic HD and CAPD model concentrations
 
-**Engine code snapshot reviewed:** GitHub blob SHA `8a98c8c20c65bb3dff73e8f6c708ffb4bdb59237`. If that file changes, rerun the study and update the manuscript; future code may change numerical results.
+**Engine code snapshot reviewed:** GitHub blob SHA `cb07505a2b9e619ee3351bb0bf66d5610a611a6f` (non-kidney CMMG clearance 0.5 L/h, #46). The study was rerun for that change: only the CMMG columns of `ablations.csv` and `curves.csv` moved (full-model CMMG peak 3.82 → 3.03 mg/L); every plasma value quoted in the manuscript is unchanged. If the engine changes again, rerun the study and update the manuscript.
 
 ## Read next
 

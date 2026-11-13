@@ -12,6 +12,9 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+### Model change
+- **Non-kidney CMMG clearance raised from 0.25 to 0.5 L/h (#46).** Calibrated on Helldén 2007 case 1 [45], where CMMG fell between dialysis sessions with an apparent half-life of about 35 h. Checked against Hara 2008, whose CMMG peak moves from +15% to −5% of the measured value. With no kidney function, the nominal CMMG half-life at 70 kg falls from 78 h to 39 h, and the guided "no kidney function" scenario's CMMG peak from 158 to 118 mg/L. Plasma and CSF acyclovir are unchanged. Before/after outputs for every validation script are in `research/validation/MODEL-CHANGE-46.md`. CMMG results at low kidney function differ from v0.27.0.
+
 ### Changed
 - **Helldén 2007 case 1 benchmark (#46), no parameter changed.** `research/validation/HELLDEN-COTARD.md` reconstructs a chronic haemodialysis patient on valaciclovir 1 g daily. Acyclovir fits within 8%, but CMMG falls between sessions with an apparent half-life of about 35 h, and AyFlux's default leaves day-6 CMMG 2.6–3 times too high. Hara 2008, used as an independent check, also favors about twice the current non-kidney CMMG clearance. New references [45] (Helldén 2007, BMJ) and [46] (Helldén 2010 thesis).
 - **CMMG evidence check (#46), no parameter changed.** `research/validation/CMMG-EVIDENCE.md` and `cmmg-evidence.cjs` show that the Hara CMMG dialysis gap comes from the default dialyzer clearance, not the CMMG dialysis term: with the dialyzer matched to each study's acyclovir decline, Hara and Helldén's thesis (Paper V) bracket AyFlux's CMMG decline. CMMG kidney clearance sources conflict, and accumulation with no kidney function cannot be identified from the data in hand. The guided "no kidney function" scenario now says its CMMG height is an untested extrapolation.

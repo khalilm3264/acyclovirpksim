@@ -14,66 +14,66 @@
     {
       "hdCl": 81.8,
       "acyclovirDeclinePct": 51.9,
-      "cmmgDeclinePct": 58.8
+      "cmmgDeclinePct": 59.8
     },
     {
       "hdCl": 100,
       "acyclovirDeclinePct": 57.1,
-      "cmmgDeclinePct": 66
+      "cmmgDeclinePct": 66.8
     },
     {
       "hdCl": 120,
       "acyclovirDeclinePct": 61.9,
-      "cmmgDeclinePct": 72.5
+      "cmmgDeclinePct": 73.1
     },
     {
       "hdCl": 140,
       "acyclovirDeclinePct": 66,
-      "cmmgDeclinePct": 77.8
+      "cmmgDeclinePct": 78.2
     },
     {
       "hdCl": 160,
       "acyclovirDeclinePct": 69.5,
-      "cmmgDeclinePct": 82
+      "cmmgDeclinePct": 82.4
     },
     {
       "hdCl": 180,
       "acyclovirDeclinePct": 72.5,
-      "cmmgDeclinePct": 85.4
+      "cmmgDeclinePct": 85.7
     }
   ],
   "metDialSweep": [
     {
       "metDial": 1,
       "acyclovirDeclinePct": 51.9,
-      "cmmgDeclinePct": 58.8
+      "cmmgDeclinePct": 59.8
     },
     {
       "metDial": 1.5,
       "acyclovirDeclinePct": 51.9,
-      "cmmgDeclinePct": 73.1
+      "cmmgDeclinePct": 73.6
     },
     {
       "metDial": 2,
       "acyclovirDeclinePct": 51.9,
-      "cmmgDeclinePct": 82.3
+      "cmmgDeclinePct": 82.6
     },
     {
       "metDial": 2.5,
       "acyclovirDeclinePct": 51.9,
-      "cmmgDeclinePct": 88.4
+      "cmmgDeclinePct": 88.5
     }
   ],
   "matched": {
     "hara": {
       "hdCl": 159,
       "acyclovirDeclinePct": 69.3,
-      "cmmgDeclinePct": 81.8
+      "cmmgDeclinePct": 82.2
     },
     "helldenPaperV": {
       "hdCl": 96,
       "acyclovirDeclinePct": 56,
-      "cmmgDeclinePct": 64.5
+      "cmmgDeclinePct": 65.4
     }
   },
   "renal": {
@@ -83,7 +83,7 @@
     "helldenPaperVAcyclovirRenalPerCrCl": 1.5392
   },
   "crcl0": {
-    "nominalCmmgHalfLifeH": 77.6,
+    "nominalCmmgHalfLifeH": 38.8,
     "identifiable": false,
     "note": "No source in hand reports CMMG nonrenal clearance or an interdialytic CMMG half-life."
   },

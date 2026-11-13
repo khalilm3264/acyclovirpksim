@@ -92,6 +92,8 @@
     "showShades": true,
     "showStudy": true,
     "showIC50": false,
+    "probenecid": false,
+    "labelBsa": 0,
     "schedule": [
       {
         "type": "HD",
@@ -116,8 +118,8 @@
     {
       "endpoint": "cmmgPeak",
       "observed": 7.47,
-      "predicted": 8.565853607636642,
-      "predictedObservedRatio": 1.1467006168188276
+      "predicted": 7.059741718754452,
+      "predictedObservedRatio": 0.9450792126846657
     },
     {
       "endpoint": "plasmaDeclinePct",
@@ -128,8 +130,8 @@
     {
       "endpoint": "cmmgDeclinePct",
       "observed": 77.6,
-      "predicted": 58.76993783008941,
-      "predictedObservedRatio": 0.7573445596661007
+      "predicted": 59.75129727151427,
+      "predictedObservedRatio": 0.7699909442205447
     }
   ],
   "residualCrClSensitivity": [
@@ -137,25 +139,25 @@
       "crcl": 0,
       "plasmaPeak": 13.025929732303165,
       "plasmaAuc12": 95.89231706637112,
-      "cmmgPeak": 10.322469509892748,
+      "cmmgPeak": 8.158823954131309,
       "plasmaDeclinePct": 51.3882896941803,
-      "cmmgDeclinePct": 58.099303253651925
+      "cmmgDeclinePct": 59.10415852338715
     },
     {
       "crcl": 0.93,
       "plasmaPeak": 12.952202882961538,
       "plasmaAuc12": 93.38485544771726,
-      "cmmgPeak": 8.565853607636642,
+      "cmmgPeak": 7.059741718754452,
       "plasmaDeclinePct": 51.90501341245444,
-      "cmmgDeclinePct": 58.76993783008941
+      "cmmgDeclinePct": 59.75129727151427
     },
     {
       "crcl": 2.94,
       "plasmaPeak": 12.794573151759971,
       "plasmaAuc12": 88.29993392977181,
-      "cmmgPeak": 6.291803518416561,
+      "cmmgPeak": 5.468258784546932,
       "plasmaDeclinePct": 52.97737572427069,
-      "cmmgDeclinePct": 60.173795871618466
+      "cmmgDeclinePct": 61.104232974874925
     }
   ]
 }

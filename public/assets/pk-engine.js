@@ -148,6 +148,10 @@ function validatePdRx(c){
 }
 // Laskin et al. 1982 (Antimicrob Agents Chemother 21:804): oral probenecid lowered acyclovir renal
 // clearance by 32% in three adults. Applied to the renal acyclovir term only; CMMG is not adjusted.
+// Non-kidney CMMG clearance (L/h at 70 kg). 0.5 since #46 (was 0.25): Helldén 2007 [45] case 1 shows CMMG
+// falling between HD sessions with an apparent half-life of about 35 h, and Hara 2008 single-dose CMMG peaks
+// fit better (research/validation/HELLDEN-COTARD.md). Calibrated on the Helldén case; Hara is the check.
+const CMMG_NONRENAL_CL=0.5;
 const PROBENECID_RENAL=0.68;
 // US acyclovir sodium injection label, renal impairment: percent of the recommended dose and interval.
 function labelRenalAdjustment(crcl){
@@ -214,7 +218,7 @@ function drawParams(c){let random=rng(), norm=()=>Math.sqrt(-2*Math.log(Math.max
  for(let i=0;i<c.draws;i++)params.push({
  vc:0.32*c.weight*(c.vcScale||1)*logn(0.20*v),vp:0.37*c.weight*logn(0.25*v),q:10*scale*logn(0.35*v),
  other:0.12*scale*(c.clearanceScale||1)*logn(0.35*v),renal:0.202*sampledCrCl*scale*(c.clearanceScale||1)*(c.probenecid?PROBENECID_RENAL:1)*logn(0.35*v),form:1.6*c.formFactor*scale*logn(0.5*v),
- vm:0.4*c.weight*logn(0.35*v),mr:0.12*sampledCrCl*c.metRenal*scale*logn(0.65*v),mn:0.25*scale*logn(0.6*v),
+ vm:0.4*c.weight*logn(0.35*v),mr:0.12*sampledCrCl*c.metRenal*scale*logn(0.65*v),mn:CMMG_NONRENAL_CL*scale*logn(0.6*v),
  hd:c.hdCl*0.06*logn(0.2*v), pd:c.pdCl*0.06*logn(0.35*v),
  crrt:c.effluent*c.weight/1000*c.sieving*c.delivered*logn(0.25*v),
  kp:Math.min(1.3,c.csfRatio*logn(0.4*v)),km:Math.min(1.3,c.csfMetRatio*logn(0.55*v)),
@@ -602,7 +606,7 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);
