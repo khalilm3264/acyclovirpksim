@@ -81,10 +81,10 @@
  }
  // One row per published point for the CSV export, in mg/L.
  function csv(scores,calibration={}){
-  const head=['study_id','citation','analyte','time_h','observed_mg_L','predicted_nominal_mg_L','interval_lower_mg_L','interval_upper_mg_L','inside_interval','point_type','central_volume_multiplier','clearance_multiplier'];
+  const head=['study_id','citation','analyte','time_h','observed_mg_L','predicted_nominal_mg_L','interval_lower_mg_L','interval_upper_mg_L','inside_interval','point_type','central_volume_multiplier','clearance_multiplier','reference_id','regimen','scenario','subjects','assumptions','study_configuration_json','model_interval_fraction'];
   const cell=v=>typeof v==='string'&&/[",\n]/.test(v)?'"'+v.replaceAll('"','""')+'"':String(v);
   const lines=[head.join(',')];
-  for(const score of scores){const study=find(score.id);for(const r of score.rows)lines.push([study.id,study.short+' '+study.cite,r.analyte,+r.time.toFixed(4),r.observed,+r.predicted.toPrecision(6),+r.lower.toPrecision(6),+r.upper.toPrecision(6),r.inside,study.pointsLabel,calibration.vcScale??1,calibration.clearanceScale??1].map(cell).join(','));}
+  for(const score of scores){const study=find(score.id);for(const r of score.rows)lines.push([study.id,study.short+' '+study.cite,r.analyte,+r.time.toFixed(4),r.observed,+r.predicted.toPrecision(6),+r.lower.toPrecision(6),+r.upper.toPrecision(6),r.inside,study.pointsLabel,calibration.vcScale??1,calibration.clearanceScale??1,study.ref,study.regimen,study.mode,study.n,study.note,JSON.stringify(study.config),score.coverage].map(cell).join(','));}
   return lines.join('\n')+'\n';
  }
  // Bias and error magnitude are distinct: opposite errors cancel in GMR, not absolute fold error.
