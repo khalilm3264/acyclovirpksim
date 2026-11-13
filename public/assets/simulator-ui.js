@@ -391,6 +391,7 @@ function regimenRow(name,config,mode,data,T,color,index,hidden=false){
 function renderRegimens(){
  const body=$('regimenRows');if(!body||!REG)return;
  const current=dataIsCurrent&&results?.[primary]?results[primary]:null;
+ renderScenarioDifference();
  $('saveRegimen').disabled=!current||savedRegimens.length>=REG.MAX_SAVED;
  $('regimenStatus').textContent=savedRegimens.length>=REG.MAX_SAVED?'Four regimens saved. Remove one to save another.':'Save the selected scenario under a name, change the dose, interval, timing or kidney function, and save again. Saved regimens are frozen: later edits do not change them. Up to four; they last until removed or the page is closed.';
  if(!savedRegimens.length&&!current){body.innerHTML='';$('regimenCaption').textContent='';return;}
@@ -399,6 +400,46 @@ function renderRegimens(){
  renderPredictControls();
  $('regimenCaption').textContent=`All values are from median curves of the selected scenario, in mg/L, over the common window 0–${Number(T.toFixed(2))} h (the shortest simulation among the rows). AUC is the plasma area under the curve from 0 to ${Number(T.toFixed(2))} h (mg·h/L). Trough is plasma acyclovir at the start of the last dose that begins after hour 0 and before hour ${Number(T.toFixed(2))}, immediately before that dose; its hour is shown. CMMG values are plasma 9-carboxymethoxymethylguanine: AUC over the same window (mg·h/L) and the highest concentration in it (mg/L). Saved curves appear as dashed lines on the plasma acyclovir and plasma CMMG graphs.`;
 }
+// Saved curves retain their original inputs. Compare over the shorter of these two runs.
+function renderScenarioDifference(){
+ const from=$('differenceFrom'),to=$('differenceTo');
+ const previousFrom=from.value,previousTo=to.value;
+ from.replaceChildren(...savedRegimens.map((r,i)=>new Option(r.name,i)));
+ to.replaceChildren(...savedRegimens.map((r,i)=>new Option(r.name,i)));
+ from.value=previousFrom&&+previousFrom<savedRegimens.length?previousFrom:'0';
+ to.value=previousTo&&+previousTo<savedRegimens.length?previousTo:String(Math.min(1,savedRegimens.length-1));
+ from.disabled=to.disabled=savedRegimens.length<2;
+ const inputs=$('differenceInputs'),outcomes=$('differenceOutcomes');
+ inputs.replaceChildren();outcomes.replaceChildren();
+ if(savedRegimens.length<2){$('differenceStatus').textContent='Save two regimens to compare their inputs and outcomes.';return;}
+ const a=savedRegimens[+from.value],b=savedRegimens[+to.value];
+ const T=Math.min(a.config.horizon,b.config.horizon);
+ const cellRow=values=>{const tr=document.createElement('tr');for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}return tr;};
+ const value=x=>x===undefined?'Default / unspecified':typeof x==='object'?JSON.stringify(x):String(x);
+ const labels={primary:'Dialysis scenario',dose:'Dose (mg)',every:'Dose interval (h)',infusion:'IV infusion (h)',crcl:'Creatinine clearance (mL/min)',weight:'Weight (kg)',horizon:'Simulation end (h)',customDoses:'Custom doses',pdRxRows:'PD exchanges',csfMetRatio:'CSF CMMG partition',csfRatio:'CSF acyclovir partition'};
+ const settingsA={...a.config,primary:a.primary},settingsB={...b.config,primary:b.primary};
+ const keys=[...new Set([...Object.keys(settingsA),...Object.keys(settingsB)])];
+ for(const key of keys){
+  if(key.startsWith('show')||JSON.stringify(settingsA[key])===JSON.stringify(settingsB[key]))continue;
+  inputs.append(cellRow([labels[key]||key.replace(/([A-Z])/g,' $1').replace(/^./,ch=>ch.toUpperCase()),value(settingsA[key]),value(settingsB[key])]));
+ }
+ if(!inputs.children.length)inputs.append(cellRow(['No changed inputs','—','—']));
+ $('differenceStatus').textContent=predicting()?'Reveal the prediction exercise to see outcome differences.':`Comparison minus baseline over hours 0–${T}. Exposure and concentration outcomes use saved median curves. Dialysis removal uses a nominal run with the saved inputs. Each trough uses its own last pre-dose time in this window.`;
+ if(predicting())return;
+ const metrics=r=>{
+  const config=E.effectiveConfig({...r.config,variability:0,draws:1}),doses=E.buildDoses(config);
+  const measured=REG.metrics(r.data,doses,T);
+  const nominal=E.single({...config,horizon:T},E.drawParams(config)[0],E.scheduleFor(r.primary,config),.125,doses);
+  return {...measured,mass:nominal.summary.mass};
+ };
+ const left=metrics(a),right=metrics(b),format=x=>x===null?'Unavailable':String(Number(x.toPrecision(4)));
+ for(const [key,label] of [['auc','Acyclovir AUC (mg·h/L)'],['peak','Peak acyclovir (mg/L)'],['trough','Trough acyclovir (mg/L)'],['cmmgAuc','CMMG AUC (mg·h/L)'],['cmmgPeak','Peak CMMG (mg/L)'],['mass','Nominal dialysis removal (mg)']]){
+  const x=left[key],y=right[key],delta=x===null||y===null?null:y-x;
+  outcomes.append(cellRow([label,format(x),format(y),format(delta),delta===null?'Unavailable':x===0?'Undefined (zero baseline)':format(delta/Math.abs(x)*100)]));
+ }
+}
+$('differenceFrom').addEventListener('change',renderScenarioDifference);
+$('differenceTo').addEventListener('change',renderScenarioDifference);
 // ---------- Prediction exercise: hide results, predict, then reveal ----------
 const PREDICT_METRICS={trough:'trough acyclovir',peak:'peak acyclovir',auc:'plasma acyclovir AUC',cmmgAuc:'plasma CMMG AUC'};
 function regimenWindow(){return Math.min(c.horizon,...savedRegimens.map(r=>r.config.horizon));}
@@ -1413,18 +1454,19 @@ $('studyExploreRun').addEventListener('click',()=>{
 let scorecardKey='',scorecardRun=0,scorecardScores=[],scorecardCalibration=null;
 function renderScorecard(){
  const body=$('scorecardRows');if(!body||!STUDIES)return;
- const calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale},key=JSON.stringify(calibration);
+ const calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale};
+ const evidence=$('evidenceFilter').value,studies=STUDIES.filterEvidence(STUDIES.STUDIES,evidence),key=JSON.stringify([calibration,evidence]);
  if(key===scorecardKey)return;
  scorecardKey=key;const run=++scorecardRun,rows=[],scores=[];
  scorecardScores=[];$('scorecardCsv').disabled=true;
  body.innerHTML='<tr><td colspan="7">Calculating…</td></tr>';
  const next=index=>setTimeout(()=>{
   if(run!==scorecardRun)return;
-  const study=STUDIES.STUDIES[index];
+  const study=studies[index];
   try{const r=STUDIES.score(study,E,{calibration,draws:400});scores.push(r);
    rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}<details class="study-assumptions"><summary>Study assumptions and source data</summary><p>${study.note}</p></details></td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td>${provenanceSummary(study)}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
   }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="6">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
-  if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="7">Calculating…</td></tr>';next(index+1);return;}
+  if(index+1<studies.length){body.innerHTML=rows.join('')+'<tr><td colspan="7">Calculating…</td></tr>';next(index+1);return;}
   body.innerHTML=rows.join('');scorecardScores=scores;scorecardCalibration=calibration;$('scorecardCsv').disabled=!scores.length;
   const summary=STUDIES.summarize(scores),overall=summary.overall;
   const description=r=>r.total+' points; bias ratio '+r.gmr.toFixed(2)+'; geometric mean absolute fold error '+r.absoluteFoldError.toFixed(2)+'; '+r.withinTwo+'/'+r.total+' within twofold; '+r.inside+'/'+r.total+' inside assumed model bands.';
@@ -1505,6 +1547,7 @@ $('scorecardCsv').addEventListener('click',()=>{
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([STUDIES.csv(scorecardScores,scorecardCalibration)],{type:'text/csv;charset=utf-8'}));
  a.href=url;a.download='ayflux_evidence_scorecard.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
 });
+$('evidenceFilter').addEventListener('change',renderScorecard);
 $('scorecardRows').addEventListener('click',e=>{const button=e.target.closest('[data-study]');if(button)loadStudy(button.dataset.study);});
 $('saveConfig').addEventListener('click',()=>{
  const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:(typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};

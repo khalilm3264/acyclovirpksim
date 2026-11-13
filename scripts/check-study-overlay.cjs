@@ -90,6 +90,20 @@ async function main(){
    const s=window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption()?.series||[];
    return s.some(x=>x.type==='scatter'&&x.data.length===4);
   },null,{timeout:60000});
+  await page.click('[data-tab="method"]');
+  for(const [kind,count] of [['measured',25],['means',19],['individual',6],['fitted',12],['all',37]]){
+   await page.selectOption('#evidenceFilter',kind);
+   await page.waitForFunction(n=>!document.querySelector('#scorecardCsv').disabled&&document.querySelector('#scorecardCaption').textContent.includes(n+' points;'),count,{timeout:120000});
+   const plotted=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#scorecardFigure')).getOption().series.filter(s=>s.type==='scatter').reduce((n,s)=>n+s.data.length,0));
+   assert.equal(plotted,count);
+  }
+  await page.selectOption('#evidenceFilter','measured');
+  await page.waitForFunction(()=>!document.querySelector('#scorecardCsv').disabled&&document.querySelector('#scorecardCaption').textContent.includes('25 points;'),null,{timeout:120000});
+  const filteredDownload=page.waitForEvent('download');await page.click('#scorecardCsv');
+  const filteredFile=await filteredDownload;
+  const filteredCsv=fs.readFileSync(await filteredFile.path(),'utf8');
+  assert.equal(filteredCsv.trim().split('\n').length,26);
+  assert.ok(!filteredCsv.includes('boelaert-'));
   assert.deepEqual(errors,[]);
   console.log('Study overlay, scorecard and CMMG ratio checks passed.');
  }finally{await browser?.close();server.close();}
