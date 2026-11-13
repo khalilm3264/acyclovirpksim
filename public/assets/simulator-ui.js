@@ -11,7 +11,7 @@
 
 (function(){'use strict';
 const E=window.RenalPKV7,$=id=>document.getElementById(id),modes=E.MODES,STUDIES=window.AyFluxStudies;
-// Published study whose measured means are overlaid on the plasma chart. Display state only: it is not
+// Published study whose measured points are overlaid on the plasma and CMMG charts. Display state only: it is not
 // part of the configuration, saved files or share links.
 let studyOverlay=null;
 function overlayStudy(){const study=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;return study&&STUDIES.matches(study,c,primary)?study:null;}
@@ -121,7 +121,7 @@ function renderStudyStatus(){
  const chosen=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;
  if(!chosen){status.textContent='';if(select.value)select.value='';return;}
  if(select.value!==chosen.id)select.value=chosen.id;
- status.textContent=overlayStudy()?'Dots: published '+chosen.statistic+'s, n='+chosen.n+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
+ status.textContent=overlayStudy()?'Dots: '+chosen.pointsLabel+(chosen.n>1?', n='+chosen.n:', one patient')+(chosen.cmmgPoints?' (CMMG graph too)':'')+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
 }
 let aboveLevelMg=null;
 // Summary-card readouts tied to results. They show only for current results and are cleared
@@ -353,7 +353,7 @@ if(typeof IntersectionObserver!=='undefined'){
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
-function chartSignature(key){return JSON.stringify([key==='plasma'?overlayStudy()?.id||null:null,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
+function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
 let chartWait=null;
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
@@ -449,9 +449,9 @@ function curve(key,unit,where,ref=null){if(!results)return;
  if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,scale(baseline.data[key].median),'#303846',2.5,[10,4,2,4]));
  const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
- const study=key==='plasma'?overlayStudy():null;
- if(study)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
-  itemStyle:{color:'#1d2733',borderColor:'#ffffff',borderWidth:1.5},data:study.points.map(([t,v])=>[t,v*factor])});
+ const study=key==='plasma'||key==='cmmg'?overlayStudy():null,studyPoints=study?(key==='plasma'?study.points:study.cmmgPoints):null;
+ if(studyPoints)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
+  itemStyle:{color:'#1d2733',borderColor:'#ffffff',borderWidth:1.5},data:studyPoints.map(([t,v])=>[t,v*factor])});
  if(key==='csf'&&c.showIC50){
   const r=VIRUSES[c.virus];
   const low=r.min*factor,high=r.max*factor,text=v=>concUnit==='umol'?Number(v.toPrecision(3)):v;
@@ -1226,25 +1226,57 @@ function loadStudy(id){
 if(STUDIES)for(const study of STUDIES.STUDIES){const option=document.createElement('option');option.value=study.id;option.textContent=study.label;$('studySelect').append(option);}
 $('studySelect').addEventListener('change',e=>loadStudy(e.target.value));
 // Evidence scorecard on the Methods tab. Recomputed only when calibration multipliers change.
-let scorecardKey='',scorecardRun=0;
+let scorecardKey='',scorecardRun=0,scorecardScores=[],scorecardCalibration=null;
 function renderScorecard(){
  const body=$('scorecardRows');if(!body||!STUDIES)return;
  const calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale},key=JSON.stringify(calibration);
  if(key===scorecardKey)return;
- scorecardKey=key;const run=++scorecardRun,rows=[];
+ scorecardKey=key;const run=++scorecardRun,rows=[],scores=[];
+ scorecardScores=[];$('scorecardCsv').disabled=true;
  body.innerHTML='<tr><td colspan="6">Calculating…</td></tr>';
  const next=index=>setTimeout(()=>{
   if(run!==scorecardRun)return;
   const study=STUDIES.STUDIES[index];
-  try{const r=STUDIES.score(study,E,{calibration,draws:400});
-   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} (n=${study.n})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
+  try{const r=STUDIES.score(study,E,{calibration,draws:400});scores.push(r);
+   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
   }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="5">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
-  if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="6">Calculating…</td></tr>';next(index+1);}
-  else{body.innerHTML=rows.join('');
-   $('scorecardCaption').textContent=(calibration.vcScale===1&&calibration.clearanceScale===1?'Default parameters.':'Calibration multipliers active: central volume ×'+calibration.vcScale+', clearance ×'+calibration.clearanceScale+'.')+' The label rows are the same aggregate values used by the optional calibration in Research tools, so they are not independent once that fit is applied.';}
+  if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="6">Calculating…</td></tr>';next(index+1);return;}
+  body.innerHTML=rows.join('');scorecardScores=scores;scorecardCalibration=calibration;$('scorecardCsv').disabled=!scores.length;
+  const all=scores.flatMap(r=>r.rows),overall=all.length?Math.exp(all.reduce((sum,x)=>sum+Math.log(x.predicted/x.observed),0)/all.length):NaN;
+  const within2=all.filter(x=>x.predicted/x.observed>=.5&&x.predicted/x.observed<=2).length;
+  $('scorecardCaption').textContent=(calibration.vcScale===1&&calibration.clearanceScale===1?'Default parameters. ':'Calibration multipliers active: central volume ×'+calibration.vcScale+', clearance ×'+calibration.clearanceScale+'. ')+
+   `Across all ${all.length} points: predicted/observed ${overall.toFixed(2)}, ${within2} of ${all.length} within twofold, ${all.filter(x=>x.inside).length} inside the model interval. Points from different studies are not equally informative: single patients and author-fitted values count the same as group means here. The label rows are the same values the optional calibration in Research tools fits to, so they are not independent once that fit is applied.`;
+  drawScorecardFigure();
  },30);
  next(0);
 }
+async function drawScorecardFigure(){
+ const target=$('scorecardFigure'),status=$('scorecardFigureStatus');if(!target||!scorecardScores.length)return;
+ const groups=[['Plasma acyclovir, no dialysis','#2367a0','circle',s=>s.mode==='No dialysis'],['Plasma acyclovir, dialysis','#ba591d','diamond',s=>s.mode!=='No dialysis']];
+ const point=(study,r)=>[r.observed,r.predicted,study.short+' '+study.cite+', '+(r.analyte==='cmmg'?'CMMG':'acyclovir')+' at '+Number(r.time.toFixed(2))+' h'];
+ const series=groups.map(([name,color,symbol,test])=>({name,type:'scatter',symbol,symbolSize:10,itemStyle:{color,borderColor:'#fff',borderWidth:1},
+  data:scorecardScores.flatMap(score=>{const study=STUDIES.find(score.id);return test(study)?score.rows.filter(r=>r.analyte==='plasma').map(r=>point(study,r)):[];})}));
+ series.push({name:'Plasma CMMG',type:'scatter',symbol:'triangle',symbolSize:11,itemStyle:{color:'#6b3fa0',borderColor:'#fff',borderWidth:1},
+  data:scorecardScores.flatMap(score=>{const study=STUDIES.find(score.id);return score.rows.filter(r=>r.analyte==='cmmg').map(r=>point(study,r));})});
+ const values=scorecardScores.flatMap(s=>s.rows.flatMap(r=>[r.observed,r.predicted]));
+ const lo=10**Math.floor(Math.log10(Math.min(...values)/2)),hi=10**Math.ceil(Math.log10(Math.max(...values)*2));
+ const guide=(name,k,type)=>({name,type:'line',silent:true,showSymbol:false,tooltip:{show:false},itemStyle:{color:'#5b6670'},lineStyle:{color:'#5b6670',width:k===1?1.6:1,type},data:[[lo,lo*k],[hi,hi*k]]});
+ series.push(guide('Perfect agreement',1,'solid'),guide('Twofold',2,'dashed'),{...guide('Twofold',.5,'dashed'),name:'Twofold '});
+ try{
+  await window.AyFluxCharts.ensure();
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true,label:{description:'Predicted versus observed concentration for each published point, log scales, with lines for perfect agreement and twofold error.'}},series,
+   legend:{bottom:0,data:groups.map(g=>g[0]).concat('Plasma CMMG','Perfect agreement','Twofold')},grid:{top:16,left:70,right:20,bottom:84},
+   tooltip:{trigger:'item',confine:true,formatter:p=>p.data?.[2]?p.data[2]+'\nObserved '+Number(p.data[0].toPrecision(3))+' mg/L, predicted '+Number(p.data[1].toPrecision(3))+' mg/L':''},
+   xAxis:{type:'log',min:lo,max:hi,name:'Published (mg/L)',nameLocation:'middle',nameGap:30},
+   yAxis:{type:'log',min:lo,max:hi,name:'AyFlux nominal prediction (mg/L)',nameLocation:'middle',nameGap:46}});
+  status.textContent='Points above the solid line are overpredicted, points below underpredicted. Dashed lines mark twofold error.';
+ }catch{status.textContent='Figure unavailable. The table and CSV contain the same values.';}
+}
+$('scorecardCsv').addEventListener('click',()=>{
+ if(!scorecardScores.length)return;
+ const a=document.createElement('a'),url=URL.createObjectURL(new Blob([STUDIES.csv(scorecardScores,scorecardCalibration)],{type:'text/csv;charset=utf-8'}));
+ a.href=url;a.download='ayflux_evidence_scorecard.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+});
 $('scorecardRows').addEventListener('click',e=>{const button=e.target.closest('[data-study]');if(button)loadStudy(button.dataset.study);});
 $('saveConfig').addEventListener('click',()=>{
  const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};

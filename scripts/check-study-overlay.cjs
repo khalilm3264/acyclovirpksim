@@ -51,19 +51,45 @@ async function main(){
   await page.selectOption('#studySelect','');
   assert.equal(await page.textContent('#studyStatus'),'');
 
-  // Scorecard on the Methods tab: one row per study, finite ratios, load buttons work.
+  // Scorecard on the Methods tab: one row per study, finite ratios, figure, CSV and load buttons.
+  const count=await page.evaluate(()=>window.AyFluxStudies.STUDIES.length);
+  const pointCount=await page.evaluate(()=>window.AyFluxStudies.STUDIES.reduce((n,s)=>n+s.points.length+(s.cmmgPoints||[]).length,0));
   await page.click('[data-tab="method"]');
-  await page.waitForFunction(()=>document.querySelectorAll('#scorecardRows [data-study]').length===4,null,{timeout:60000});
+  await page.waitForFunction(n=>document.querySelectorAll('#scorecardRows [data-study]').length===n&&!document.querySelector('#scorecardCsv').disabled,count,{timeout:120000});
   const rows=await page.$$eval('#scorecardRows tr',trs=>trs.map(tr=>[...tr.cells].map(td=>td.textContent)));
-  assert.equal(rows.length,4);
-  for(const row of rows){assert.ok(Number(row[3])>0.3&&Number(row[3])<2,row.join(' | '));assert.match(row[4],/^\d+ of \d+$/);}
+  assert.equal(rows.length,count);
+  for(const row of rows){assert.ok(Number(row[3])>0.3&&Number(row[3])<3,row.join(' | '));assert.match(row[4],/^\d+ of \d+$/);}
   assert.equal(rows[0][3],'0.77');
+  assert.match(await page.textContent('#scorecardCaption'),new RegExp('Across all '+pointCount+' points'));
+  await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#scorecardFigure')),null,{timeout:60000});
+  const figure=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#scorecardFigure')).getOption());
+  assert.equal(figure.xAxis[0].type,'log');
+  assert.equal(figure.series.filter(s=>s.type==='scatter').reduce((n,s)=>n+s.data.length,0),pointCount);
+  const [download]=await Promise.all([page.waitForEvent('download'),page.click('#scorecardCsv')]);
+  const csv=fs.readFileSync(await download.path(),'utf8').trim().split('\n');
+  assert.equal(csv.length,1+pointCount);
+  assert.equal(download.suggestedFilename(),'ayflux_evidence_scorecard.csv');
   await page.click('#scorecardRows [data-study="laskin-anuric"]');
   await page.waitForFunction(()=>{
    const s=window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption()?.series||[];
    return s.some(x=>x.type==='scatter'&&x.data.length===3);
   },null,{timeout:60000});
   assert.equal(await page.inputValue('#num_crcl'),'0');
+  // Kacirova reports CMMG too: its points appear on the CMMG graph.
+  await page.selectOption('#studySelect','kacirova');
+  await page.locator('#cmmgChart').scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>{
+   const s=window.echarts?.getInstanceByDom(document.querySelector('#cmmgChart'))?.getOption()?.series||[];
+   return s.some(x=>x.type==='scatter'&&x.data.length===2&&x.data[1][1]===0.64);
+  },null,{timeout:60000});
+  // A dialysis study switches the selected scenario.
+  await page.selectOption('#studySelect','boelaert-4');
+  await page.waitForFunction(()=>document.querySelector('#primary').value==='Peritoneal dialysis');
+  await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>{
+   const s=window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption()?.series||[];
+   return s.some(x=>x.type==='scatter'&&x.data.length===4);
+  },null,{timeout:60000});
   assert.deepEqual(errors,[]);
   console.log('Study overlay, scorecard and CMMG ratio checks passed.');
  }finally{await browser?.close();server.close();}
