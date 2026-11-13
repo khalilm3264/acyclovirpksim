@@ -11,7 +11,7 @@ ECharts concentration and clearance charts, baseline comparison, unit switching,
 | Priority | Work | Tracking and completion criteria |
 | --- | --- | --- |
 | P0 | Review CMMG formation and clearance at CrCl zero | [#46](https://github.com/khalilm3264/acyclovirpksim/issues/46); identify the mechanism, compare with measured evidence and retain mass/units checks |
-| P0 | Recalibrate exploratory CSF CMMG partition | [#47](https://github.com/khalilm3264/acyclovirpksim/issues/47); assess the default 0.25 against Smith 2010's approximately 0.025 CSF/plasma AUC ratio, with estimand differences and an independent evaluation protocol |
+| P0 | Recalibrate exploratory CSF CMMG partition | [#47](https://github.com/khalilm3264/acyclovirpksim/issues/47); default 0.25 → 0.025 (Smith 2010), independently checked against Lindström 2019 with an intact barrier. Open: represent blood–brain barrier damage in CNS infection |
 | P0 | Freeze the manuscript model version | [#48](https://github.com/khalilm3264/acyclovirpksim/issues/48); record commit, settings, source versions, scripts and reproducible outputs |
 | P1 | Align manuscript and website references | [#49](https://github.com/khalilm3264/acyclovirpksim/issues/49); stable DOI mapping and explicit case/cohort overlap |
 | P1 | Extend dialysis evidence comparisons | [#50](https://github.com/khalilm3264/acyclovirpksim/issues/50), [#51](https://github.com/khalilm3264/acyclovirpksim/issues/51); Hara measurements and Laskin renal/nonrenal split with study-specific assumptions |

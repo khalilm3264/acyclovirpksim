@@ -77,7 +77,7 @@
     "delivered": 0.85,
     "csfRatio": 0.3,
     "csfLag": 4,
-    "csfMetRatio": 0.25,
+    "csfMetRatio": 0.025,
     "csfMetLag": 6,
     "formFactor": 1,
     "metRenal": 1,

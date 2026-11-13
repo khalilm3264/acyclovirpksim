@@ -6,9 +6,9 @@ function cases(){
  const base={...structuredClone(pk.DEFAULTS),draws:1,variability:0,observations:[],schedule:[],crclSource:'manual',renalMode:'constant',dosingMode:'repeat'};
  const smith=(id,label,crcl,dose,every,auc)=>({
   id,label,doi:'10.1128/AAC.00729-09',mode:'No dialysis',analyte:'csfCmmg',
-  note:'Smith Table 1 group mean CSF CMMG AUC after dose five. Nominal 70 kg reconstruction with group-average CrCl. The alternative coefficient is informed by this same study and requires independent evaluation.',
+  note:'Smith Table 1 group mean CSF CMMG AUC after dose five. Nominal 70 kg reconstruction with group-average CrCl. The default CMMG CSF coefficient (0.025) is informed by this same study, so agreement here is not independent; the comparison column shows the previous default, 0.25, and Lindström 2019 is the independent check.',
   config:{...structuredClone(base),weight:70,route:'Valacyclovir oral',crcl,dose,every,doseCount:5,horizon:every*5},
-  interval:[every*4,every*5],observedAuc:auc*239.19/1000,points:[],alternative:.025
+  interval:[every*4,every*5],observedAuc:auc*239.19/1000,points:[],alternative:.25
  });
  return [
   {id:'laskin',label:'Laskin 1982 anuric cohort',doi:'10.1038/clpt.1982.83',mode:'No dialysis',analyte:'plasma',

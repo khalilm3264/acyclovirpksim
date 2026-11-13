@@ -2,7 +2,7 @@
 
 Lindström J, Helldén A, Lycke J, Grahn A, Studahl M. *J Antimicrob Chemother.* 2019;74:3565–3572. [doi:10.1093/jac/dkz357](https://doi.org/10.1093/jac/dkz357), reference [4]. Table 1 gives paired serum and CSF acyclovir and CMMG for 34 samples from 21 patients treated for herpesvirus CNS infection, with each sample's CSF:serum albumin ratio, a marker of blood–brain barrier damage.
 
-**No model parameter is changed.** Reproduce with `node research/validation/lindstrom-csf.cjs`; the table is in `data/lindstrom2019-table1.csv` and the results in `lindstrom-csf-results.json`. The study was not used to set any AyFlux parameter, so it is an independent check of the CSF CMMG partition (`csfMetRatio`, default 0.25) and of the alternative 0.025 that Smith 2010 informed.
+**Since the #47 model change, AyFlux's default is 0.025** (see `MODEL-CHANGE-47.md`); this benchmark was written before it and compares candidate values explicitly. Reproduce with `node research/validation/lindstrom-csf.cjs`; the table is in `data/lindstrom2019-table1.csv` and the results in `lindstrom-csf-results.json`. The study was not used to set any AyFlux parameter, so it is an independent check of the CSF CMMG partition (`csfMetRatio`, default 0.25) and of the alternative 0.025 that Smith 2010 informed.
 
 ## Reconstruction
 
@@ -17,9 +17,9 @@ Each sample is simulated at its weight, dose, estimated CrCl and time since the 
 
 | CSF CMMG partition | Barrier intact (3 measured, 7 below limit) | Barrier disrupted (17 measured, 6 below limit) |
 |---|---|---|
-| 0.25 (current default) | GMR 5.85, within twofold 0/3, below-limit consistent 0/7 | GMR 2.21, within twofold 2/17, below-limit consistent 0/6 |
+| 0.25 (default before #47) | GMR 5.85, within twofold 0/3, below-limit consistent 0/7 | GMR 2.21, within twofold 2/17, below-limit consistent 0/6 |
 | 0.035 | GMR 0.82, within twofold 3/3, below-limit consistent 7/7 | GMR 0.31, within twofold 6/17, below-limit consistent 5/6 |
-| **0.025 (Smith 2010)** | **GMR 0.58, within twofold 3/3, below-limit consistent 7/7** | GMR 0.22, within twofold 4/17, below-limit consistent 6/6 |
+| **0.025 (Smith 2010; current default)** | **GMR 0.58, within twofold 3/3, below-limit consistent 7/7** | GMR 0.22, within twofold 4/17, below-limit consistent 6/6 |
 
 GMR is the geometric mean of predicted/observed on measured values.
 
@@ -38,4 +38,4 @@ Serum CMMG does not depend on the partition. With the 0.5 L/h non-kidney CMMG cl
 
 ## Implication for #47
 
-The data support 0.025 for patients with an intact blood–brain barrier. They also show that CNS infection with barrier damage raises CSF CMMG several-fold, an effect AyFlux does not represent. A default change should therefore come with a warning on the CSF output for encephalitis or meningitis.
+The data support 0.025 for patients with an intact blood–brain barrier. They also show that CNS infection with barrier damage raises CSF CMMG several-fold, an effect AyFlux does not represent. The #47 change adopts 0.025 and adds that warning to the CSF CMMG chart.

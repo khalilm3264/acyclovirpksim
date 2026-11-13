@@ -46,7 +46,7 @@ $('runLiterature').addEventListener('click',async()=>{
   await window.AyFluxCharts.ensure();
   if(version!==generation)return;
   const charts=window.AyFluxCharts,series=[charts.line('Nominal model',time,values,'#285a7b')];
-  if(alternative)series.push(charts.line('Exploratory CSF coefficient 0.025',time,alternative,'#b55b16',2,'dashed'));
+  if(alternative)series.push(charts.line('Previous default CSF coefficient 0.25',time,alternative,'#b55b16',2,'dashed'));
   if(study.points.length)series.push({name:'Published group mean',type:'scatter',symbolSize:10,data:study.points.map(v=>[v.time,v.value])});
   const option=charts.options(series,'Time since first dose (hours)',(study.analyte==='plasma'?'Plasma acyclovir':'CSF CMMG')+' (mg/L)');
   $('literaturePlot').classList.remove('hidden');charts.draw($('literaturePlot'),option);
