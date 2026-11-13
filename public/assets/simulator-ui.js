@@ -152,7 +152,7 @@ function renderStudyStatus(){
  renderStudyProvenance(chosen);
  if(!chosen){status.textContent='';if(select.value)select.value='';return;}
  if(select.value!==chosen.id)select.value=chosen.id;
- status.textContent=overlayStudy()?'Dots: '+chosen.pointsLabel+(chosen.n>1?', n='+chosen.n:', one patient')+(chosen.cmmgPoints?' (CMMG graph too)':'')+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
+ status.textContent=overlayStudy()&&chosen.teaching?'Teaching case: no concentrations were measured, so there are no dots to compare '+chosen.cite+'.':overlayStudy()?'Dots: '+chosen.pointsLabel+(chosen.n>1?', n='+chosen.n:', one patient')+(chosen.cmmgPoints?' (CMMG graph too)':'')+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
 }
 let aboveLevelMg=null;
 // Summary-card readouts tied to results. They show only for current results and are cleared
@@ -596,7 +596,7 @@ function curve(key,unit,where,ref=null){if(!results)return;
  const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
  const study=key==='plasma'||key==='cmmg'?overlayStudy():null,studyPoints=study?(key==='plasma'?study.points:study.cmmgPoints):null;
- if(studyPoints)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
+ if(studyPoints?.length)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
   itemStyle:{color:'#1d2733',borderColor:'#ffffff',borderWidth:1.5},data:studyPoints.map(([t,v])=>[t,v*factor])});
  if(key==='csf'&&c.showIC50){
   const r=VIRUSES[c.virus];
@@ -1370,7 +1370,13 @@ function loadStudy(id){
  showScenarioNote('Published study: '+study.label,study.note+' Use Undo last import in Research tools to return to your previous settings.');
  renderStudyStatus();switchTab('concentration');defer();
 }
-if(STUDIES)for(const study of STUDIES.STUDIES){const option=document.createElement('option');option.value=study.id;option.textContent=study.label;$('studySelect').append(option);}
+// Published studies with measured concentrations, then teaching cases that have none.
+if(STUDIES)for(const [label,list] of [['Measured concentrations',STUDIES.STUDIES],['Teaching cases (no measured levels)',STUDIES.CASES||[]]]){
+ if(!list.length)continue;
+ const group=document.createElement('optgroup');group.label=label;
+ for(const study of list){const option=document.createElement('option');option.value=study.id;option.textContent=study.label;group.append(option);}
+ $('studySelect').append(group);
+}
 $('studySelect').addEventListener('change',e=>loadStudy(e.target.value));
 // Vary one reconstruction assumption (from #68). The published values are unchanged; the measured
 // points hide because the settings no longer match the reconstruction.

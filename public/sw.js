@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.26.0-provenance-predict-merge-20261113";
+const CACHE = "ayflux-static-v0.26.0-khajehdehi-moysesneto-20261113";
 const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",

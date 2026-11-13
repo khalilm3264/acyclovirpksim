@@ -106,7 +106,32 @@
    note:'A 69-year-old woman (49.9 kg, serum creatinine 11.3 mg/dL) took four 1,000 mg valacyclovir doses 8 hours apart. The dots are dialyzer-inlet plasma levels at the start and end of her first 2-hour HD session. The paper does not give the time from the last dose to admission; AyFlux assumes 4 hours, so the first session starts at hour 44. research/validation/vasquez-hd.cjs shows how the result changes for 0 and 8 hours.'},
   ...BOELAERT.map(boelaert)
  ];
- function find(id){return STUDIES.find(study=>study.id===id)||null;}
+ // Teaching cases: published regimens with no measured concentrations. They load like a study but have
+ // no points, so they are never scored and never enter the scorecard, CSV or residual table.
+ // Moyses Neto M et al. Perit Dial Int 2026 [44], case 3. Cases 1 and 2 took oral acyclovir, a route
+ // AyFlux does not model, so only the valacyclovir case is included.
+ const MOYSES_SOURCE='Moysés Neto 2026, Table 1 and Case 3';
+ const CASES=[
+  {id:'moysesneto-apd-3',teaching:true,legend:'Moysés Neto 2026 case 3',short:'Moysés Neto 2026, cycler PD case 3',
+   label:'Moysés Neto 2026: valacyclovir on cycler PD, neurotoxicity case (no levels)',ref:'ref44',cite:'[44]',n:1,
+   pointsLabel:'no measured concentrations',group:'dialysis',mode:'Peritoneal dialysis',
+   regimen:'Valacyclovir 500 mg q8h for 4 days on cycler PD (6 × 2 L, 60-minute dwells)',
+   config:{age:80,sex:'male',weight:65,crcl:0,crclSource:'manual',renalMode:'constant',route:'Valacyclovir oral',dosingMode:'repeat',
+    dose:500,every:8,doseCount:12,horizon:264,pdMethod:'cycler',apdCycles:6,apdDwell:1,apdHours:7.5,pdVolume:2},
+   provenance:[
+    P('Dose','reported','Valacyclovir 500 mg orally every 8 hours (authors: labeled dose for PD is 500 mg every 24 hours)','500 mg every 8 h',MOYSES_SOURCE),
+    P('Duration','reported','Stopped after 4 days, when symptoms began','12 doses over 4 days',MOYSES_SOURCE),
+    P('Age, sex, weight','reported','80-year-old man, 65 kg','80 years, male, 65 kg',MOYSES_SOURCE),
+    P('Residual kidney function','unknown','Not reported; on PD for 18 months','CrCl 0 mL/min (assumed; residual function would lower every curve)','Not reported'),
+    P('Cycler prescription','reported','12 L per session: 6 cycles of 2 L, 60-minute dwells','6 cycles of 2 L, 1-hour dwells; 7.5-hour session',MOYSES_SOURCE),
+    P('Cycler start time and turnover','assumed','Not reported','Starts 20 h after the first dose, then daily; 15 minutes fill and drain per cycle','Not reported'),
+    P('Peritoneal transport and dialysate glucose','assumed','Not reported','AyFlux default membrane parameters','Not reported'),
+    P('Drug concentrations','unknown','None measured','Nothing to compare; this is a teaching case','Not reported')],
+   explore:{input:'Residual kidney function',label:'Hypothetical residual CrCl',unit:'mL/min',value:0,min:0,max:30},
+   points:[],
+   note:'An 80-year-old man (65 kg) on cycler PD took valacyclovir 500 mg every 8 hours, three times the labeled PD dose, for herpes zoster. On day 4 he developed confusion, dysarthria, involuntary leg movements and ataxia. The drug was stopped, cycler PD continued unchanged, and he improved over 7 days. No drug levels were measured, so there are no dots: use this case to see how acyclovir and CMMG build up and fall, not to test the model. Residual kidney function was not reported and is set to 0.'}
+ ];
+ function find(id){return STUDIES.find(study=>study.id===id)||CASES.find(study=>study.id===id)||null;}
  // Full simulator configuration for a study. Calibration multipliers carry over so the scorecard
  // reflects whatever calibration is active; every other setting comes from the defaults.
  function configFor(study,E,calibration={}){
@@ -212,6 +237,6 @@
     peaks:rows.filter(r=>r.kind==='peak'),troughs:rows.filter(r=>r.kind==='trough')};
   });
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,residualsByStudy,exploreConfig,csv,summarize};
+ return {STUDIES,CASES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,residualsByStudy,exploreConfig,csv,summarize};
 });
 
