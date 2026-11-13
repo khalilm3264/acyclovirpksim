@@ -32,6 +32,15 @@
   return {window:T,auc:aucTo(time,plasma,T),peak,trough:last===undefined?null:interp(time,plasma,last),troughTime:last??null,
    cmmgAuc:aucTo(time,cmmg,T),cmmgPeak:peakCmmg};
  }
+ // CROWDING_H is an AyFlux interface rule, not a label rule: neither label sets a minimum spacing
+ // between doses. One hour is the standard AyFlux IV infusion length, so two dose starts closer than
+ // that would overlap or be indistinguishable from one double dose. It is a review threshold, not a
+ // pharmacokinetic limit, and changing it changes no prediction.
+ //  - IV acyclovir: the label itself requires the added dose, so a nearby scheduled dose is flagged
+ //    for review but applying is allowed.
+ //  - Oral valacyclovir: the move is AyFlux's reading of "after hemodialysis", so a move that would
+ //    crowd the next dose blocks applying.
+ const CROWDING_H=1;
  const LABELS={
   'Acyclovir IV':{rule:'add',cite:'[10]',
    text:'US acyclovir injection label: the dosing schedule should be adjusted so that an additional dose is given after each dialysis. Scheduled doses are kept and one dose is added at the end of each HD session.'},
@@ -52,8 +61,8 @@
   if(label.rule==='add'){
    for(const s of hd){
     if(s.end+infusion>T+1e-9){flags.push({kind:'drop',text:'HD session ending at hour '+n(s.end)+': the added dose would not finish within the '+n(T)+'-hour simulation, so it is left out.'});continue;}
-    const clash=rows.find(r=>Math.abs(r.proposed-s.end)<Math.max(infusion,1)-1e-9);
-    if(clash)flags.push({kind:'duplicate',text:'Added dose at hour '+n(s.end)+' overlaps scheduled dose '+clash.dose+' at hour '+n(clash.proposed)+'. Both are kept as the label states; check whether that is intended.'});
+    const clash=rows.find(r=>Math.abs(r.proposed-s.end)<Math.max(infusion,CROWDING_H)-1e-9);
+    if(clash)flags.push({kind:'duplicate',text:'Added dose at hour '+n(s.end)+' starts within '+n(Math.max(infusion,CROWDING_H))+' h of scheduled dose '+clash.dose+' at hour '+n(clash.proposed)+'. Both are kept as the label states; check whether that is intended. (AyFlux review threshold, not a label rule.)'});
     rows.push({dose:null,original:null,proposed:s.end,amount:config.dose,change:'added',session:s});
    }
    for(const r of rows)if(r.change==='unchanged'){const s=hd.find(x=>r.original>=x.start&&r.original<x.end);if(s)flags.push({kind:'info',text:'Scheduled dose '+r.dose+' at hour '+n(r.original)+' starts during the session ('+n(s.start)+'–'+n(s.end)+' h) and is kept.'});}
@@ -66,7 +75,7 @@
    }
    for(const r of rows)if(r.change==='moved'){
     const next=rows.filter(x=>x!==r&&x.proposed>=r.original).sort((a,b)=>a.proposed-b.proposed)[0];
-    if(next&&next.proposed-r.proposed<1-1e-9)flags.push({kind:'duplicate',text:'Moved dose '+r.dose+' (hour '+n(r.proposed)+') would fall within 1 hour of dose '+next.dose+' at hour '+n(next.proposed)+'.'});
+    if(next&&next.proposed-r.proposed<CROWDING_H-1e-9)flags.push({kind:'duplicate',text:'Moved dose '+r.dose+' (hour '+n(r.proposed)+') would fall within '+n(CROWDING_H)+' h of dose '+next.dose+' at hour '+n(next.proposed)+', so applying is blocked. This is an AyFlux interface rule, not a label rule: the labels set no minimum spacing.'});
    }
   }
   rows.sort((a,b)=>a.proposed-b.proposed||(a.dose??99)-(b.dose??99));
@@ -76,5 +85,5 @@
   const blocking=flags.some(f=>f.kind==='duplicate'&&label.rule==='move')||customDoses.length>200;
   return {ok:true,apply:changed&&!blocking,rule:label.rule,ruleText:label.text,cite:label.cite,rows,flags,customDoses};
  }
- return {MAX_SAVED,interp,aucTo,metrics,postHdPlan,LABELS};
+ return {MAX_SAVED,CROWDING_H,interp,aucTo,metrics,postHdPlan,LABELS};
 });

@@ -44,9 +44,15 @@ test('oral valacyclovir: the label moves the HD-day dose to after the session, o
   if(r.change==='moved')assert.ok(hd.some(s=>r.proposed===s.end&&r.original>=s.start&&r.original<s.end));
   else assert.equal(r.proposed,r.original);
  }
- // A moved dose landing within an hour of the next one blocks applying.
- const crowded=plan({route:'Valacyclovir oral',dose:500,every:4.5,doseCount:20,hdDuration:4,hdStart:23}).p;
- if(crowded.flags.some(f=>f.kind==='duplicate'))assert.equal(crowded.apply,false);
+ // A moved dose landing within CROWDING_H of the next one blocks applying.
+ // Every 4 h, HD 23–27.5 h: the 24 h dose moves to 27.5 h, 0.5 h before the 28 h dose.
+ const crowded=plan({route:'Valacyclovir oral',dose:500,every:4,doseCount:20,hdDuration:4.5,hdStart:23,hdRepeat:48}).p;
+ assert.ok(crowded.flags.some(f=>f.kind==='duplicate'&&/interface rule, not a label rule/.test(f.text)),'crowding is flagged and labelled as an interface rule');
+ assert.equal(crowded.apply,false,'and blocks applying');
+ assert.equal(R.CROWDING_H,1);
+ // Exactly CROWDING_H apart is allowed: HD 23–27 h moves the 24 h dose to 27 h, 1 h before 28 h.
+ const spaced=plan({route:'Valacyclovir oral',dose:500,every:4,doseCount:20,hdDuration:4,hdStart:23,hdRepeat:48}).p;
+ assert.ok(!spaced.flags.some(f=>f.kind==='duplicate'));assert.equal(spaced.apply,true);
 });
 
 test('post-HD timing is unavailable without HD sessions or a repeat regimen',()=>{
