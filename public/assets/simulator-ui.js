@@ -1421,6 +1421,9 @@ function loadStudy(id){
  researchStatus('Loaded the '+study.short+' regimen for comparison.');
  showScenarioNote('Published study: '+study.label,study.note+' Use Undo last import in Research tools to return to your previous settings.');
  renderStudyStatus();switchTab('concentration');defer();
+ // Bring the plasma graph into view when the study was loaded from elsewhere (for example the evidence scorecard).
+ const card=$('plasmaChart')?.closest('.card'),box=card?.getBoundingClientRect();
+ if(box&&(box.bottom<80||box.top>window.innerHeight-80))card.scrollIntoView({block:'start'});
 }
 // Published studies with measured concentrations, then teaching cases that have none.
 if(STUDIES)for(const [label,list] of [['Measured concentrations',STUDIES.STUDIES],['Teaching cases (no measured levels)',STUDIES.CASES||[]]]){
