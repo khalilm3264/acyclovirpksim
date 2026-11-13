@@ -12,7 +12,13 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-Changes merged to `main` since 0.26.0 (pull requests #40–#44), plus open draft pull requests marked as such. **No pharmacokinetic equation, parameter, default, export format or configuration schema changed.**
+Changes merged to `main` since 0.26.0 (pull requests #40–#44, #61, #63 and #67). **No pharmacokinetic equation, parameter, default, export format or configuration schema changed.**
+
+### Documentation (#61)
+
+- Refreshed README and wiki source around the current v0.26.0 preview, merged interface/research features and planned v0.27.0 work.
+- Added a synchronized standalone bibliography, linked from the guide, citation page and simulator; completed journal metadata and recorded the final Vasquez Vasquez case publication while preserving the reconstruction's preprint provenance.
+- Added reference maintenance and repository dependency notes. Scientific coefficients and simulation results are unchanged.
 
 ### Added
 

@@ -13,6 +13,7 @@
 <p align="center">
   <a href="https://ayflux.org/"><strong>Open simulator</strong></a> ·
   <a href="https://ayflux.org/learn/">User guide</a> ·
+  <a href="https://ayflux.org/references/">References</a> ·
   <a href="wiki/Roadmap.md">Development roadmap</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="https://ayflux.org/cite/">Cite AyFlux</a>
@@ -26,6 +27,10 @@
 
 > [!IMPORTANT]
 > **Educational simulation only.** AyFlux is **not** a validated clinical decision-support system. Modeled plasma, CSF and CMMG concentrations must not be used to prescribe medication, select dialysis prescriptions, determine treatment efficacy, diagnose neurotoxicity or make other patient-care decisions.
+
+## Current status
+
+The application and software citation identify **v0.26.0 preview**. Main also includes subsequent merged interface and research additions; **v0.27.0 is planned**, not yet released. Use an exact commit when reproducing work from main. See [release tracking #55](https://github.com/khalilm3264/acyclovirpksim/issues/55).
 
 ## What does AyFlux do?
 
@@ -59,6 +64,16 @@ These are merged and live at [ayflux.org](https://ayflux.org/) but not yet tagge
 - **Undo and version history** for imports, links, guided scenarios and resets.
 - **Expanded drug reference:** grouped by modality, with CRRT sources added.
 - **Privacy:** the third-party measurement pixel is switched off.
+
+## Research pages
+
+- [Pediatric IV acyclovir](https://ayflux.org/research/pediatric/): separate Abdalla model with covariate and Zeng comparisons; [source-specific evidence review](https://ayflux.org/research/pediatric/evidence).
+- [Sampling and parameter recovery](https://ayflux.org/research/sampling/): synthetic experiments with different plasma sampling schedules.
+- [Visual explorer](https://ayflux.org/explore/): mass accounting, parameter grids, sensitivity and optional 3D surfaces.
+- [Published-evidence comparisons](research/validation/): source-specific CAPD, HD, CRRT, serum and CSF reconstructions and their limitations.
+- [Complete bibliography](https://ayflux.org/references/): stable source numbers, publication details, DOI links and evidence notes.
+
+These resources evaluate different questions; pediatric, neonatal, CNS and dialysis applicability must be assessed against each source and model.
 
 ## Privacy
 
@@ -102,7 +117,7 @@ node scripts/stage-poppins.cjs
 npx --yes http-server@14.1.1 public -a 127.0.0.1 -p 8000
 ```
 
-Open http://localhost:8000. The numerical heatmap table still works when the optional script is absent. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. You can run the dependency-free test suite with:
+Open http://localhost:8000. The numerical heatmap table remains an accessible alternative to the visual grid. GitHub Actions stages the bundle automatically for its Pages and Cloudflare deployments. After staging the dependencies, run the regression suite with:
 
 ```bash
 node --test tests/*.test.cjs
@@ -135,7 +150,7 @@ AyFlux is a **teaching model with exploratory parameters**, not a fitted, extern
 - [Roadmap and planned scientific work](wiki/Roadmap.md) · [Verification plan](wiki/Release-Plan.md)
 - [Wiki-ready pages](wiki/Home.md) · [How to publish to the GitHub Wiki](docs/wiki-publishing.md)
 
-The `wiki/` directory contains the reviewed wiki source pages. GitHub's separate **Wiki** tab is not automatically updated by changes to this repository.
+The `wiki/` directory contains the version-controlled wiki source. GitHub stores the live Wiki separately; follow the [publishing instructions](docs/wiki-publishing.md) to synchronize it. See the [repository maintenance plan](docs/repository-maintenance.md) for PR dependencies and review priorities.
 
 ## Independent model comparisons
 
@@ -165,7 +180,9 @@ Scientific changes should include the units, equations or assumptions changed, p
 | [`public/assets/osp-import.js`](public/assets/osp-import.js) / [`ayflux-exchange.js`](public/assets/ayflux-exchange.js) | Unit-aware results import/export |
 | [`public/assets/research-workspace.js`](public/assets/research-workspace.js) | Diagnostic, sensitivity and research comparison tools |
 | [`src/index.js`](src/index.js) | Cloudflare Worker headers and static routing |
-| [`tests/`](tests/) | Dependency-free regression and scientific consistency checks |
+| [`public/assets/charts.js`](public/assets/charts.js) | Shared ECharts rendering and interaction layer |
+| [`public/research/`](public/research/) / [`research/`](research/) | Research pages, source reviews and reproducible experiments |
+| [`tests/`](tests/) | Regression and scientific consistency checks |
 | [`wiki/`](wiki/) / [`docs/`](docs/) | Roadmap, model exchange, deployment and contributor documentation |
 
 ## License, citations and contact
