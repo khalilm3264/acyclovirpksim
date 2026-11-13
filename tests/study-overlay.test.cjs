@@ -155,3 +155,30 @@ test('component ablation reuses the scorecard predictions and moves bias in the 
  assert.equal(by['no-cmmg'].groups.cmmg,null,'zero CMMG predictions have no fold error');
  assert.ok(results.every(r=>r.rows.length===37));
 });
+
+test('teaching cases load as valid regimens but are never scored',()=>{
+ assert.ok(Array.isArray(S.CASES)&&S.CASES.length>=1);
+ const ids=new Set(S.STUDIES.map(s=>s.id));
+ for(const study of S.CASES){
+  assert.ok(study.teaching,study.id);
+  assert.ok(!ids.has(study.id),'teaching case id is distinct from scored studies');
+  assert.equal(S.find(study.id),study);
+  assert.deepEqual(study.points,[],'no measured points');
+  const config=S.configFor(study,E);
+  assert.deepEqual(E.validate(config,study.mode),[],study.id);
+  assert.ok(S.matches(study,config,study.mode));
+  assert.match(html,new RegExp('<li id="'+study.ref+'">'),'citation anchor for '+study.id);
+  assert.ok(study.legend.length<=26,'legend label stays short: '+study.legend);
+  assert.ok(study.provenance.every(r=>S.STATUSES.includes(r.status)));
+  const explored=S.exploreConfig(study,E,10);
+  assert.equal(explored.crcl,10);
+ }
+ // The cycler PD case runs the reported prescription, and only valacyclovir (oral acyclovir is not modelled).
+ const apd=S.find('moysesneto-apd-3');
+ assert.equal(apd.config.pdMethod,'cycler');
+ assert.equal(apd.config.route,'Valacyclovir oral');
+ assert.equal(apd.config.dose*apd.config.doseCount,6000,'500 mg every 8 h for 4 days');
+ // The scorecard iterates STUDIES only.
+ assert.match(ui,/for\(const \[label,list\] of \[\['Measured concentrations',STUDIES\.STUDIES\],\['Teaching cases \(no measured levels\)',STUDIES\.CASES\|\|\[\]\]\]\)/);
+ assert.match(ui,/if\(studyPoints\?\.length\)series\.push/);
+});

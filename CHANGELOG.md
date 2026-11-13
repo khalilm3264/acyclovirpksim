@@ -26,6 +26,13 @@ Everything merged to `main` since 0.26.0 ([full comparison](https://github.com/k
 - **Two new optional inputs.** Probenecid (off by default; multiplies renal acyclovir clearance by 0.68, from Laskin 1982 [41]) and the body surface area used only by the label kidney-adjustment comparison.
 - **Configuration schema stays 2.** Files saved by 0.26.0 load unchanged; the new fields default to off and not provided.
 
+### Evidence: Khajehdehi 2000 and Moysés Neto 2026
+
+- **References [43] and [44].** Khajehdehi, Jamal and Bastani (2000), one anuric adult on CVVHD and CVVHDF, and Moysés Neto et al. (2026), three neurotoxicity cases on cycler PD. Both are in the drug reference table, the standalone bibliography and the dialysis guide.
+- **CRRT sieving context.** The reference table and dialysis guide now say that the default sieving coefficient (0.95) is the upper end of measured adult values (0.60–0.98, by membrane and mode), and that blood-side and effluent clearance estimates can disagree in one patient. The default itself is unchanged.
+- **Teaching cases.** *Compare with a published study* now has a second group, *Teaching cases (no measured levels)*, with Moysés Neto case 3: valacyclovir 500 mg every 8 hours on cycler PD. It loads the reported regimen and records its input provenance, but has no dots and is never scored. Cases 1 and 2 used oral acyclovir, which AyFlux does not model.
+- No pharmacokinetic equation, parameter, default, export format or configuration schema changed.
+
 ### Documentation (#61)
 
 - Refreshed README and wiki source around the merged interface and research features.
