@@ -1,0 +1,1452 @@
+{
+  "source": "doi:10.1093/jac/dkz357, Table 1 (34 samples, 21 patients)",
+  "candidates": [
+    0.25,
+    0.035,
+    0.025
+  ],
+  "summary": {
+    "0.25": {
+      "all": {
+        "csfCmmg": {
+          "n": 21,
+          "gmr": 2.643,
+          "aafe": 3.545,
+          "withinTwofold": 2,
+          "belowLimit": 13,
+          "belowLimitConsistent": 0
+        }
+      },
+      "intact": {
+        "csfCmmg": {
+          "n": 3,
+          "gmr": 5.845,
+          "aafe": 5.845,
+          "withinTwofold": 0,
+          "belowLimit": 7,
+          "belowLimitConsistent": 0
+        }
+      },
+      "disrupted": {
+        "csfCmmg": {
+          "n": 17,
+          "gmr": 2.209,
+          "aafe": 3.175,
+          "withinTwofold": 2,
+          "belowLimit": 6,
+          "belowLimitConsistent": 0
+        }
+      }
+    },
+    "0.035": {
+      "all": {
+        "csfCmmg": {
+          "n": 21,
+          "gmr": 0.37,
+          "aafe": 2.71,
+          "withinTwofold": 10,
+          "belowLimit": 13,
+          "belowLimitConsistent": 12
+        }
+      },
+      "intact": {
+        "csfCmmg": {
+          "n": 3,
+          "gmr": 0.818,
+          "aafe": 1.222,
+          "withinTwofold": 3,
+          "belowLimit": 7,
+          "belowLimitConsistent": 7
+        }
+      },
+      "disrupted": {
+        "csfCmmg": {
+          "n": 17,
+          "gmr": 0.309,
+          "aafe": 3.244,
+          "withinTwofold": 6,
+          "belowLimit": 6,
+          "belowLimitConsistent": 5
+        }
+      }
+    },
+    "0.025": {
+      "all": {
+        "csfCmmg": {
+          "n": 21,
+          "gmr": 0.264,
+          "aafe": 3.783,
+          "withinTwofold": 8,
+          "belowLimit": 13,
+          "belowLimitConsistent": 13
+        }
+      },
+      "intact": {
+        "csfCmmg": {
+          "n": 3,
+          "gmr": 0.584,
+          "aafe": 1.713,
+          "withinTwofold": 3,
+          "belowLimit": 7,
+          "belowLimitConsistent": 7
+        }
+      },
+      "disrupted": {
+        "csfCmmg": {
+          "n": 17,
+          "gmr": 0.221,
+          "aafe": 4.525,
+          "withinTwofold": 4,
+          "belowLimit": 6,
+          "belowLimitConsistent": 6
+        }
+      }
+    }
+  },
+  "serum": {
+    "cmmg": {
+      "n": 32,
+      "gmr": 0.958,
+      "aafe": 1.791,
+      "withinTwofold": 22,
+      "belowLimit": 0,
+      "belowLimitConsistent": 0
+    },
+    "acyclovir": {
+      "n": 32,
+      "gmr": 0.642,
+      "aafe": 2.029,
+      "withinTwofold": 18,
+      "belowLimit": 0,
+      "belowLimitConsistent": 0
+    },
+    "csfAcyclovir": {
+      "n": 34,
+      "gmr": 0.569,
+      "aafe": 1.809,
+      "withinTwofold": 22,
+      "belowLimit": 0,
+      "belowLimitConsistent": 0
+    }
+  },
+  "samples": [
+    {
+      "id": "1a",
+      "barrier": "unknown",
+      "albuminRatio": "N/A",
+      "observed": {
+        "serumAcv": {
+          "value": 5.7
+        },
+        "serumCmmg": {
+          "value": 0.74
+        },
+        "csfAcv": {
+          "value": 8.4
+        },
+        "csfCmmg": {
+          "value": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 4.622,
+          "csf": 4.069,
+          "cmmg": 1.753,
+          "csfCmmg": 0.771
+        },
+        "0.035": {
+          "plasma": 4.622,
+          "csf": 4.069,
+          "cmmg": 1.753,
+          "csfCmmg": 0.108
+        },
+        "0.025": {
+          "plasma": 4.622,
+          "csf": 4.069,
+          "cmmg": 1.753,
+          "csfCmmg": 0.077
+        }
+      }
+    },
+    {
+      "id": "1b",
+      "barrier": "disrupted",
+      "albuminRatio": "15.4",
+      "observed": {
+        "serumAcv": {
+          "value": 2.7
+        },
+        "serumCmmg": {
+          "value": 0.29
+        },
+        "csfAcv": {
+          "value": 7.1
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 4.186,
+          "csf": 3.643,
+          "cmmg": 1.806,
+          "csfCmmg": 0.873
+        },
+        "0.035": {
+          "plasma": 4.186,
+          "csf": 3.643,
+          "cmmg": 1.806,
+          "csfCmmg": 0.122
+        },
+        "0.025": {
+          "plasma": 4.186,
+          "csf": 3.643,
+          "cmmg": 1.806,
+          "csfCmmg": 0.087
+        }
+      }
+    },
+    {
+      "id": "1c",
+      "barrier": "disrupted",
+      "albuminRatio": "11.7",
+      "observed": {
+        "serumAcv": {
+          "value": 5
+        },
+        "serumCmmg": {
+          "value": 0.59
+        },
+        "csfAcv": {
+          "value": 8.5
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 7.109,
+          "csf": 5.153,
+          "cmmg": 3.621,
+          "csfCmmg": 1.401
+        },
+        "0.035": {
+          "plasma": 7.109,
+          "csf": 5.153,
+          "cmmg": 3.621,
+          "csfCmmg": 0.196
+        },
+        "0.025": {
+          "plasma": 7.109,
+          "csf": 5.153,
+          "cmmg": 3.621,
+          "csfCmmg": 0.14
+        }
+      }
+    },
+    {
+      "id": "2",
+      "barrier": "intact",
+      "albuminRatio": "7",
+      "observed": {
+        "serumAcv": {
+          "value": 70
+        },
+        "serumCmmg": {
+          "value": 12
+        },
+        "csfAcv": {
+          "value": 11
+        },
+        "csfCmmg": {
+          "value": 0.27
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 10.045,
+          "csf": 6.928,
+          "cmmg": 4.529,
+          "csfCmmg": 1.472
+        },
+        "0.035": {
+          "plasma": 10.045,
+          "csf": 6.928,
+          "cmmg": 4.529,
+          "csfCmmg": 0.206
+        },
+        "0.025": {
+          "plasma": 10.045,
+          "csf": 6.928,
+          "cmmg": 4.529,
+          "csfCmmg": 0.147
+        }
+      }
+    },
+    {
+      "id": "3",
+      "barrier": "intact",
+      "albuminRatio": "6.9",
+      "observed": {
+        "serumAcv": {
+          "value": 29
+        },
+        "serumCmmg": {
+          "value": 1.7
+        },
+        "csfAcv": {
+          "value": 3.1
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 26.5,
+          "csf": 2.906,
+          "cmmg": 1.59,
+          "csfCmmg": 0.32
+        },
+        "0.035": {
+          "plasma": 26.5,
+          "csf": 2.906,
+          "cmmg": 1.59,
+          "csfCmmg": 0.045
+        },
+        "0.025": {
+          "plasma": 26.5,
+          "csf": 2.906,
+          "cmmg": 1.59,
+          "csfCmmg": 0.032
+        }
+      }
+    },
+    {
+      "id": "4a",
+      "barrier": "disrupted",
+      "albuminRatio": "29.4",
+      "observed": {
+        "serumAcv": {
+          "value": 110
+        },
+        "serumCmmg": {
+          "value": 57
+        },
+        "csfAcv": {
+          "value": 40
+        },
+        "csfCmmg": {
+          "value": 3.3
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 50.853,
+          "csf": 23.106,
+          "cmmg": 30.906,
+          "csfCmmg": 7.846
+        },
+        "0.035": {
+          "plasma": 50.853,
+          "csf": 23.106,
+          "cmmg": 30.906,
+          "csfCmmg": 1.098
+        },
+        "0.025": {
+          "plasma": 50.853,
+          "csf": 23.106,
+          "cmmg": 30.906,
+          "csfCmmg": 0.785
+        }
+      }
+    },
+    {
+      "id": "4b",
+      "barrier": "disrupted",
+      "albuminRatio": "15.7",
+      "observed": {
+        "serumAcv": {
+          "value": 25
+        },
+        "serumCmmg": {
+          "value": 2.8
+        },
+        "csfAcv": {
+          "value": 7.5
+        },
+        "csfCmmg": {
+          "value": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 2.973,
+          "csf": 3.396,
+          "cmmg": 0.713,
+          "csfCmmg": 0.437
+        },
+        "0.035": {
+          "plasma": 2.973,
+          "csf": 3.396,
+          "cmmg": 0.713,
+          "csfCmmg": 0.061
+        },
+        "0.025": {
+          "plasma": 2.973,
+          "csf": 3.396,
+          "cmmg": 0.713,
+          "csfCmmg": 0.044
+        }
+      }
+    },
+    {
+      "id": "4c",
+      "barrier": "disrupted",
+      "albuminRatio": "23.8",
+      "observed": {
+        "serumAcv": {
+          "value": 10
+        },
+        "serumCmmg": {
+          "value": 1.5
+        },
+        "csfAcv": {
+          "value": 10
+        },
+        "csfCmmg": {
+          "value": 0.19
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 1.807,
+          "csf": 2.484,
+          "cmmg": 0.33,
+          "csfCmmg": 0.284
+        },
+        "0.035": {
+          "plasma": 1.807,
+          "csf": 2.484,
+          "cmmg": 0.33,
+          "csfCmmg": 0.04
+        },
+        "0.025": {
+          "plasma": 1.807,
+          "csf": 2.484,
+          "cmmg": 0.33,
+          "csfCmmg": 0.028
+        }
+      }
+    },
+    {
+      "id": "5",
+      "barrier": "disrupted",
+      "albuminRatio": "24.3",
+      "observed": {
+        "serumAcv": {
+          "value": 9.6
+        },
+        "serumCmmg": {
+          "value": 1.3
+        },
+        "csfAcv": {
+          "value": 6.7
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 4.697,
+          "csf": 4.388,
+          "cmmg": 1.386,
+          "csfCmmg": 0.546
+        },
+        "0.035": {
+          "plasma": 4.697,
+          "csf": 4.388,
+          "cmmg": 1.386,
+          "csfCmmg": 0.076
+        },
+        "0.025": {
+          "plasma": 4.697,
+          "csf": 4.388,
+          "cmmg": 1.386,
+          "csfCmmg": 0.055
+        }
+      }
+    },
+    {
+      "id": "6a",
+      "barrier": "disrupted",
+      "albuminRatio": "20.1",
+      "observed": {
+        "serumAcv": {
+          "value": 50
+        },
+        "serumCmmg": {
+          "value": 9.7
+        },
+        "csfAcv": {
+          "value": 24
+        },
+        "csfCmmg": {
+          "value": 0.68
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 39.442,
+          "csf": 16.048,
+          "cmmg": 15.682,
+          "csfCmmg": 3.509
+        },
+        "0.035": {
+          "plasma": 39.442,
+          "csf": 16.048,
+          "cmmg": 15.682,
+          "csfCmmg": 0.491
+        },
+        "0.025": {
+          "plasma": 39.442,
+          "csf": 16.048,
+          "cmmg": 15.682,
+          "csfCmmg": 0.351
+        }
+      }
+    },
+    {
+      "id": "6b",
+      "barrier": "disrupted",
+      "albuminRatio": "15.4",
+      "observed": {
+        "serumAcv": {
+          "value": 18.6
+        },
+        "serumCmmg": {
+          "value": 2.7
+        },
+        "csfAcv": {
+          "value": 14
+        },
+        "csfCmmg": {
+          "value": 0.3
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 18.66,
+          "csf": 10.352,
+          "cmmg": 6.702,
+          "csfCmmg": 1.542
+        },
+        "0.035": {
+          "plasma": 18.66,
+          "csf": 10.352,
+          "cmmg": 6.702,
+          "csfCmmg": 0.216
+        },
+        "0.025": {
+          "plasma": 18.66,
+          "csf": 10.352,
+          "cmmg": 6.702,
+          "csfCmmg": 0.154
+        }
+      }
+    },
+    {
+      "id": "6c",
+      "barrier": "disrupted",
+      "albuminRatio": "11.9",
+      "observed": {
+        "serumAcv": {
+          "value": 11
+        },
+        "serumCmmg": {
+          "value": 2.3
+        },
+        "csfAcv": {
+          "value": 12
+        },
+        "csfCmmg": {
+          "value": 0.23
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 6.646,
+          "csf": 5.365,
+          "cmmg": 2.84,
+          "csfCmmg": 1.185
+        },
+        "0.035": {
+          "plasma": 6.646,
+          "csf": 5.365,
+          "cmmg": 2.84,
+          "csfCmmg": 0.166
+        },
+        "0.025": {
+          "plasma": 6.646,
+          "csf": 5.365,
+          "cmmg": 2.84,
+          "csfCmmg": 0.119
+        }
+      }
+    },
+    {
+      "id": "7a",
+      "barrier": "disrupted",
+      "albuminRatio": "14.7",
+      "observed": {
+        "serumAcv": {
+          "value": 55
+        },
+        "serumCmmg": {
+          "value": 18
+        },
+        "csfAcv": {
+          "value": 16
+        },
+        "csfCmmg": {
+          "value": 0.29
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 23.026,
+          "csf": 10.481,
+          "cmmg": 4.861,
+          "csfCmmg": 0.773
+        },
+        "0.035": {
+          "plasma": 23.026,
+          "csf": 10.481,
+          "cmmg": 4.861,
+          "csfCmmg": 0.108
+        },
+        "0.025": {
+          "plasma": 23.026,
+          "csf": 10.481,
+          "cmmg": 4.861,
+          "csfCmmg": 0.077
+        }
+      }
+    },
+    {
+      "id": "7b",
+      "barrier": "disrupted",
+      "albuminRatio": "10.5",
+      "observed": {
+        "serumAcv": {
+          "value": 120
+        },
+        "serumCmmg": {
+          "value": 38
+        },
+        "csfAcv": {
+          "value": 29
+        },
+        "csfCmmg": {
+          "value": 1
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 31.218,
+          "csf": 16.01,
+          "cmmg": 12.869,
+          "csfCmmg": 3.11
+        },
+        "0.035": {
+          "plasma": 31.218,
+          "csf": 16.01,
+          "cmmg": 12.869,
+          "csfCmmg": 0.435
+        },
+        "0.025": {
+          "plasma": 31.218,
+          "csf": 16.01,
+          "cmmg": 12.869,
+          "csfCmmg": 0.311
+        }
+      }
+    },
+    {
+      "id": "7c",
+      "barrier": "disrupted",
+      "albuminRatio": "14.6",
+      "observed": {
+        "serumAcv": {
+          "value": 11
+        },
+        "serumCmmg": {
+          "value": 11
+        },
+        "csfAcv": {
+          "value": 8.2
+        },
+        "csfCmmg": {
+          "value": 0.66
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 4.946,
+          "csf": 3.042,
+          "cmmg": 5.296,
+          "csfCmmg": 2.599
+        },
+        "0.035": {
+          "plasma": 4.946,
+          "csf": 3.042,
+          "cmmg": 5.296,
+          "csfCmmg": 0.364
+        },
+        "0.025": {
+          "plasma": 4.946,
+          "csf": 3.042,
+          "cmmg": 5.296,
+          "csfCmmg": 0.26
+        }
+      }
+    },
+    {
+      "id": "8",
+      "barrier": "intact",
+      "albuminRatio": "7.4",
+      "observed": {
+        "serumAcv": {
+          "value": 11
+        },
+        "serumCmmg": {
+          "value": 1
+        },
+        "csfAcv": {
+          "value": 6.7
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 3.852,
+          "csf": 3.947,
+          "cmmg": 1.041,
+          "csfCmmg": 0.425
+        },
+        "0.035": {
+          "plasma": 3.852,
+          "csf": 3.947,
+          "cmmg": 1.041,
+          "csfCmmg": 0.06
+        },
+        "0.025": {
+          "plasma": 3.852,
+          "csf": 3.947,
+          "cmmg": 1.041,
+          "csfCmmg": 0.043
+        }
+      }
+    },
+    {
+      "id": "9a",
+      "barrier": "intact",
+      "albuminRatio": "9.3",
+      "observed": {
+        "serumAcv": {
+          "value": 75
+        },
+        "serumCmmg": {
+          "value": 10
+        },
+        "csfAcv": {
+          "value": 12
+        },
+        "csfCmmg": {
+          "value": 0.27
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 105.624,
+          "csf": 9.653,
+          "cmmg": 7.163,
+          "csfCmmg": 1.68
+        },
+        "0.035": {
+          "plasma": 105.624,
+          "csf": 9.653,
+          "cmmg": 7.163,
+          "csfCmmg": 0.235
+        },
+        "0.025": {
+          "plasma": 105.624,
+          "csf": 9.653,
+          "cmmg": 7.163,
+          "csfCmmg": 0.168
+        }
+      }
+    },
+    {
+      "id": "9b",
+      "barrier": "disrupted",
+      "albuminRatio": "11.7",
+      "observed": {
+        "serumAcv": {
+          "value": 20
+        },
+        "serumCmmg": {
+          "value": 5
+        },
+        "csfAcv": {
+          "value": 11
+        },
+        "csfCmmg": {
+          "value": 0.26
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 13.167,
+          "csf": 7.998,
+          "cmmg": 6.405,
+          "csfCmmg": 1.908
+        },
+        "0.035": {
+          "plasma": 13.167,
+          "csf": 7.998,
+          "cmmg": 6.405,
+          "csfCmmg": 0.267
+        },
+        "0.025": {
+          "plasma": 13.167,
+          "csf": 7.998,
+          "cmmg": 6.405,
+          "csfCmmg": 0.191
+        }
+      }
+    },
+    {
+      "id": "10",
+      "barrier": "disrupted",
+      "albuminRatio": "9.6",
+      "observed": {
+        "serumAcv": {
+          "value": 13
+        },
+        "serumCmmg": {
+          "value": 0.9
+        },
+        "csfAcv": {
+          "value": 8.5
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 63.929,
+          "csf": 4.189,
+          "cmmg": 1.682,
+          "csfCmmg": 0.165
+        },
+        "0.035": {
+          "plasma": 63.929,
+          "csf": 4.189,
+          "cmmg": 1.682,
+          "csfCmmg": 0.023
+        },
+        "0.025": {
+          "plasma": 63.929,
+          "csf": 4.189,
+          "cmmg": 1.682,
+          "csfCmmg": 0.016
+        }
+      }
+    },
+    {
+      "id": "11",
+      "barrier": "disrupted",
+      "albuminRatio": "26.7",
+      "observed": {
+        "serumAcv": {
+          "value": 14
+        },
+        "serumCmmg": {
+          "value": 1.5
+        },
+        "csfAcv": {
+          "value": 17
+        },
+        "csfCmmg": {
+          "value": 0.77
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 5.221,
+          "csf": 4.746,
+          "cmmg": 1.518,
+          "csfCmmg": 0.467
+        },
+        "0.035": {
+          "plasma": 5.221,
+          "csf": 4.746,
+          "cmmg": 1.518,
+          "csfCmmg": 0.065
+        },
+        "0.025": {
+          "plasma": 5.221,
+          "csf": 4.746,
+          "cmmg": 1.518,
+          "csfCmmg": 0.047
+        }
+      }
+    },
+    {
+      "id": "12",
+      "barrier": "disrupted",
+      "albuminRatio": "13.8",
+      "observed": {
+        "serumAcv": {
+          "value": 31
+        },
+        "serumCmmg": {
+          "value": 4.9
+        },
+        "csfAcv": {
+          "value": 8.9
+        },
+        "csfCmmg": {
+          "value": 0.17
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 43.935,
+          "csf": 7.236,
+          "cmmg": 4.05,
+          "csfCmmg": 0.627
+        },
+        "0.035": {
+          "plasma": 43.935,
+          "csf": 7.236,
+          "cmmg": 4.05,
+          "csfCmmg": 0.088
+        },
+        "0.025": {
+          "plasma": 43.935,
+          "csf": 7.236,
+          "cmmg": 4.05,
+          "csfCmmg": 0.063
+        }
+      }
+    },
+    {
+      "id": "13",
+      "barrier": "disrupted",
+      "albuminRatio": "8.6",
+      "observed": {
+        "serumAcv": {
+          "value": 6.1
+        },
+        "serumCmmg": {
+          "value": 1.2
+        },
+        "csfAcv": {
+          "value": 5.9
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 2.511,
+          "csf": 3.334,
+          "cmmg": 0.602,
+          "csfCmmg": 0.469
+        },
+        "0.035": {
+          "plasma": 2.511,
+          "csf": 3.334,
+          "cmmg": 0.602,
+          "csfCmmg": 0.066
+        },
+        "0.025": {
+          "plasma": 2.511,
+          "csf": 3.334,
+          "cmmg": 0.602,
+          "csfCmmg": 0.047
+        }
+      }
+    },
+    {
+      "id": "14",
+      "barrier": "intact",
+      "albuminRatio": "8.6",
+      "observed": {
+        "serumAcv": {
+          "value": 13
+        },
+        "serumCmmg": {
+          "value": 2
+        },
+        "csfAcv": {
+          "value": 4.8
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 22.831,
+          "csf": 2.343,
+          "cmmg": 1.104,
+          "csfCmmg": 0.173
+        },
+        "0.035": {
+          "plasma": 22.831,
+          "csf": 2.343,
+          "cmmg": 1.104,
+          "csfCmmg": 0.024
+        },
+        "0.025": {
+          "plasma": 22.831,
+          "csf": 2.343,
+          "cmmg": 1.104,
+          "csfCmmg": 0.017
+        }
+      }
+    },
+    {
+      "id": "15a",
+      "barrier": "intact",
+      "albuminRatio": "8.5",
+      "observed": {
+        "serumAcv": {
+          "value": 10
+        },
+        "serumCmmg": {
+          "value": 2.3
+        },
+        "csfAcv": {
+          "value": 7.7
+        },
+        "csfCmmg": {
+          "value": 0.16
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 7.462,
+          "csf": 5.432,
+          "cmmg": 2.927,
+          "csfCmmg": 0.942
+        },
+        "0.035": {
+          "plasma": 7.462,
+          "csf": 5.432,
+          "cmmg": 2.927,
+          "csfCmmg": 0.132
+        },
+        "0.025": {
+          "plasma": 7.462,
+          "csf": 5.432,
+          "cmmg": 2.927,
+          "csfCmmg": 0.094
+        }
+      }
+    },
+    {
+      "id": "15b",
+      "barrier": "intact",
+      "albuminRatio": "8.8",
+      "observed": {
+        "serumAcv": {
+          "value": 40
+        },
+        "serumCmmg": {
+          "value": 5.4
+        },
+        "csfAcv": {
+          "value": 7.6
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 15.797,
+          "csf": 7.557,
+          "cmmg": 4.293,
+          "csfCmmg": 0.819
+        },
+        "0.035": {
+          "plasma": 15.797,
+          "csf": 7.557,
+          "cmmg": 4.293,
+          "csfCmmg": 0.115
+        },
+        "0.025": {
+          "plasma": 15.797,
+          "csf": 7.557,
+          "cmmg": 4.293,
+          "csfCmmg": 0.082
+        }
+      }
+    },
+    {
+      "id": "16",
+      "barrier": "disrupted",
+      "albuminRatio": "22.5",
+      "observed": {
+        "serumAcv": null,
+        "serumCmmg": null,
+        "csfAcv": {
+          "value": 8
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 98.732,
+          "csf": 6.789,
+          "cmmg": 3.152,
+          "csfCmmg": 0.406
+        },
+        "0.035": {
+          "plasma": 98.732,
+          "csf": 6.789,
+          "cmmg": 3.152,
+          "csfCmmg": 0.057
+        },
+        "0.025": {
+          "plasma": 98.732,
+          "csf": 6.789,
+          "cmmg": 3.152,
+          "csfCmmg": 0.041
+        }
+      }
+    },
+    {
+      "id": "17",
+      "barrier": "intact",
+      "albuminRatio": "4.1",
+      "observed": {
+        "serumAcv": {
+          "value": 17
+        },
+        "serumCmmg": {
+          "value": 1.6
+        },
+        "csfAcv": {
+          "value": 7.5
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 30.409,
+          "csf": 5.456,
+          "cmmg": 2.627,
+          "csfCmmg": 0.292
+        },
+        "0.035": {
+          "plasma": 30.409,
+          "csf": 5.456,
+          "cmmg": 2.627,
+          "csfCmmg": 0.041
+        },
+        "0.025": {
+          "plasma": 30.409,
+          "csf": 5.456,
+          "cmmg": 2.627,
+          "csfCmmg": 0.029
+        }
+      }
+    },
+    {
+      "id": "18",
+      "barrier": "disrupted",
+      "albuminRatio": "13.3",
+      "observed": {
+        "serumAcv": null,
+        "serumCmmg": null,
+        "csfAcv": {
+          "value": 14
+        },
+        "csfCmmg": {
+          "value": 0.24
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 5.524,
+          "csf": 5.628,
+          "cmmg": 1.49,
+          "csfCmmg": 0.6
+        },
+        "0.035": {
+          "plasma": 5.524,
+          "csf": 5.628,
+          "cmmg": 1.49,
+          "csfCmmg": 0.084
+        },
+        "0.025": {
+          "plasma": 5.524,
+          "csf": 5.628,
+          "cmmg": 1.49,
+          "csfCmmg": 0.06
+        }
+      }
+    },
+    {
+      "id": "19a",
+      "barrier": "disrupted",
+      "albuminRatio": "162.4",
+      "observed": {
+        "serumAcv": {
+          "value": 15
+        },
+        "serumCmmg": {
+          "value": 5.2
+        },
+        "csfAcv": {
+          "value": 28
+        },
+        "csfCmmg": {
+          "value": 6.4
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 10.517,
+          "csf": 6.842,
+          "cmmg": 5.2,
+          "csfCmmg": 1.677
+        },
+        "0.035": {
+          "plasma": 10.517,
+          "csf": 6.842,
+          "cmmg": 5.2,
+          "csfCmmg": 0.235
+        },
+        "0.025": {
+          "plasma": 10.517,
+          "csf": 6.842,
+          "cmmg": 5.2,
+          "csfCmmg": 0.168
+        }
+      }
+    },
+    {
+      "id": "19b",
+      "barrier": "disrupted",
+      "albuminRatio": "108.1",
+      "observed": {
+        "serumAcv": {
+          "value": 13
+        },
+        "serumCmmg": {
+          "value": 3.6
+        },
+        "csfAcv": {
+          "value": 27
+        },
+        "csfCmmg": {
+          "value": 3.8
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 7.067,
+          "csf": 5.335,
+          "cmmg": 3.013,
+          "csfCmmg": 1.095
+        },
+        "0.035": {
+          "plasma": 7.067,
+          "csf": 5.335,
+          "cmmg": 3.013,
+          "csfCmmg": 0.153
+        },
+        "0.025": {
+          "plasma": 7.067,
+          "csf": 5.335,
+          "cmmg": 3.013,
+          "csfCmmg": 0.109
+        }
+      }
+    },
+    {
+      "id": "20a",
+      "barrier": "intact",
+      "albuminRatio": "1.7",
+      "observed": {
+        "serumAcv": {
+          "value": 31
+        },
+        "serumCmmg": {
+          "value": 3.8
+        },
+        "csfAcv": {
+          "value": 6.5
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 15.144,
+          "csf": 8.192,
+          "cmmg": 3.326,
+          "csfCmmg": 0.514
+        },
+        "0.035": {
+          "plasma": 15.144,
+          "csf": 8.192,
+          "cmmg": 3.326,
+          "csfCmmg": 0.072
+        },
+        "0.025": {
+          "plasma": 15.144,
+          "csf": 8.192,
+          "cmmg": 3.326,
+          "csfCmmg": 0.051
+        }
+      }
+    },
+    {
+      "id": "20b",
+      "barrier": "intact",
+      "albuminRatio": "1.4",
+      "observed": {
+        "serumAcv": {
+          "value": 12
+        },
+        "serumCmmg": {
+          "value": 3
+        },
+        "csfAcv": {
+          "value": 3.3
+        },
+        "csfCmmg": {
+          "below": 0.15
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 11.353,
+          "csf": 4.263,
+          "cmmg": 3.019,
+          "csfCmmg": 0.486
+        },
+        "0.035": {
+          "plasma": 11.353,
+          "csf": 4.263,
+          "cmmg": 3.019,
+          "csfCmmg": 0.068
+        },
+        "0.025": {
+          "plasma": 11.353,
+          "csf": 4.263,
+          "cmmg": 3.019,
+          "csfCmmg": 0.049
+        }
+      }
+    },
+    {
+      "id": "21a",
+      "barrier": "disrupted",
+      "albuminRatio": "28.8",
+      "observed": {
+        "serumAcv": {
+          "value": 9.9
+        },
+        "serumCmmg": {
+          "value": 1.1
+        },
+        "csfAcv": {
+          "value": 12
+        },
+        "csfCmmg": {
+          "value": 0.2
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 5.488,
+          "csf": 5.746,
+          "cmmg": 1.412,
+          "csfCmmg": 0.471
+        },
+        "0.035": {
+          "plasma": 5.488,
+          "csf": 5.746,
+          "cmmg": 1.412,
+          "csfCmmg": 0.066
+        },
+        "0.025": {
+          "plasma": 5.488,
+          "csf": 5.746,
+          "cmmg": 1.412,
+          "csfCmmg": 0.047
+        }
+      }
+    },
+    {
+      "id": "21b",
+      "barrier": "disrupted",
+      "albuminRatio": "18",
+      "observed": {
+        "serumAcv": {
+          "value": 19
+        },
+        "serumCmmg": {
+          "value": 1.9
+        },
+        "csfAcv": {
+          "value": 14
+        },
+        "csfCmmg": {
+          "value": 0.24
+        }
+      },
+      "predicted": {
+        "0.25": {
+          "plasma": 15.484,
+          "csf": 8.33,
+          "cmmg": 3.281,
+          "csfCmmg": 0.506
+        },
+        "0.035": {
+          "plasma": 15.484,
+          "csf": 8.33,
+          "cmmg": 3.281,
+          "csfCmmg": 0.071
+        },
+        "0.025": {
+          "plasma": 15.484,
+          "csf": 8.33,
+          "cmmg": 3.281,
+          "csfCmmg": 0.051
+        }
+      }
+    }
+  ]
+}

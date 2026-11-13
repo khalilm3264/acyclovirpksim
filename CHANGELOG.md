@@ -12,6 +12,9 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+### Added
+- **Lindström 2019 CSF CMMG benchmark (#47), no parameter changed.** `research/validation/LINDSTROM-CSF.md` reconstructs 34 paired serum/CSF samples [4]. With an intact blood–brain barrier, the current CSF CMMG partition (0.25) is about six times too high, and Smith's 0.025 fits every sample. With barrier disruption, CSF CMMG runs several times higher than either value predicts. Serum CMMG is unbiased (GMR 0.96, 32 samples), independent support for the #85 clearance.
+
 ### Model change
 - **Non-kidney CMMG clearance raised from 0.25 to 0.5 L/h (#46).** Calibrated on Helldén 2007 case 1 [45], where CMMG fell between dialysis sessions with an apparent half-life of about 35 h. Checked against Hara 2008, whose CMMG peak moves from +15% to −5% of the measured value. With no kidney function, the nominal CMMG half-life at 70 kg falls from 78 h to 39 h, and the guided "no kidney function" scenario's CMMG peak from 158 to 118 mg/L. Plasma and CSF acyclovir are unchanged. Before/after outputs for every validation script are in `research/validation/MODEL-CHANGE-46.md`. CMMG results at low kidney function differ from v0.27.0.
 
