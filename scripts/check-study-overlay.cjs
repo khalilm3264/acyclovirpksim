@@ -60,7 +60,7 @@ async function main(){
   assert.equal(rows.length,count);
   for(const row of rows){assert.ok(Number(row[3])>0.3&&Number(row[3])<3,row.join(' | '));assert.match(row[4],/^\d+ of \d+$/);}
   assert.equal(rows[0][3],'0.77');
-  assert.match(await page.textContent('#scorecardCaption'),new RegExp('Across all '+pointCount+' points'));
+  assert.match(await page.textContent('#scorecardCaption'),new RegExp(pointCount+' points; bias ratio'));
   await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#scorecardFigure')),null,{timeout:60000});
   const figure=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#scorecardFigure')).getOption());
   assert.equal(figure.xAxis[0].type,'log');
