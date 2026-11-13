@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AyFlux Neonatal | Experimental</title>
+<link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/learn.css">
+<style>main{max-width:960px;margin:30px auto;padding:0 20px}header{margin-bottom:28px}.controls{display:flex;gap:24px;flex-wrap:wrap}label{display:grid;gap:8px}input{padding:10px;font:inherit;width:130px}svg{width:100%;height:auto}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:12px;border-bottom:1px solid #ccd5da}button{font:inherit;padding:10px;margin:16px 0}math{font-size:1.15em;margin:20px 0}#error{color:#a12424}.chart{overflow:hidden}.notice{padding:14px;background:#f4eee3}h1{line-height:1.15}</style>
+<script src="model.js" defer></script><script src="view.js" defer></script></head><body><main>
+<header><a href="/?tab=experimental">AyFlux</a> / <a href="/experimental/">Experimental</a></header>
+<h1>AyFlux Neonatal</h1><p>IV acyclovir clearance across maturation</p>
+<p class="notice">Research only. Reproduces a published population equation; not an individual prediction or dosing recommendation.</p>
+<p>Compare two postmenstrual ages within the study range of 25–41 weeks. Postmenstrual age is gestational age at birth plus time since birth.</p>
+<form id="inputs" class="controls"><label>Infant A PMA (weeks)<input id="a" type="number" min="25" max="41" step="0.1" value="28" required></label><label>Infant B PMA (weeks)<input id="b" type="number" min="25" max="41" step="0.1" value="36" required></label><button type="submit">Compare</button></form>
+<p id="error" role="alert"></p>
+<div class="chart"><svg id="chart" viewBox="0 0 800 410" role="img" aria-labelledby="chartTitle chartDesc"><title id="chartTitle">Typical acyclovir clearance by postmenstrual age</title><desc id="chartDesc">Published model curve from 25 to 41 weeks, with two selected ages marked. Numerical values appear in the table below.</desc></svg></div>
+<table><caption>Typical model predictions, not observed infant data</caption><thead><tr><th>Comparison</th><th>PMA (weeks)</th><th>Clearance (L/h/kg)</th></tr></thead><tbody id="values"></tbody></table><p id="ratio" aria-live="polite"></p>
+<button id="export" type="button">Download model curve CSV</button>
+<h2>Published equation</h2>
+<math display="block" aria-label="Clearance in liters per hour per kilogram equals 0.305 times postmenstrual age divided by 31.3 weeks raised to the power 3.02"><mrow><mi>CL</mi><mo>=</mo><mn>0.305</mn><mo>×</mo><msup><mrow><mo>(</mo><mfrac><mrow><mi>PMA</mi></mrow><mrow><mn>31.3</mn><mtext> weeks</mtext></mrow></mfrac><mo>)</mo></mrow><mn>3.02</mn></msup></mrow></math>
+<p>CL is typical clearance in L/h/kg. Both infants are compared per kilogram, so the curve isolates the model’s age effect rather than a difference in body weight.</p>
+<h2>Evidence and scope</h2><p>Sampson and colleagues studied 28 preterm and term infants. The equation predicts a 4.45-fold clearance increase between 25 and 41 weeks PMA. This page reproduces that relationship; it does not independently validate it against concentration measurements.</p>
+<p>The equation has no adjustable kidney-function term. Do not interpret these estimates as predictions for renal impairment, dialysis, or ages outside the source range. No adult clearance equation, toxicity threshold, or treatment schedule is applied.</p>
+<p>Sampson MR et al. Population Pharmacokinetics of Intravenous Acyclovir in Preterm and Term Infants. Pediatr Infect Dis J. 2014;33:42–49. <a href="https://doi.org/10.1097/01.inf.0000435509.75114.3d">DOI</a> · <a href="https://www.ncbi.nlm.nih.gov/books/NBK556630/">NIH study synopsis and equation</a></p>
+</main></body></html>
