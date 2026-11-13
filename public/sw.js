@@ -1,7 +1,7 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-usability-20261113";
-const CORE = [
+const CACHE = "ayflux-static-v0.27.0-evidence-replay-20261113";
+const CORE = [\n "/research/exchanges/", "/research/exchanges/view.js", "/research/exchanges/style.css",
  "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js",
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
