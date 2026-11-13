@@ -124,3 +124,19 @@ test('overlay, scorecard and ratio are wired into the page without entering save
  assert.match(render,/cmmgAucRatio\(run\.time/);
  assert.match(ui,/if\(tab==='method'\)renderScorecard\(\)/);
 });
+
+test('bias cancellation does not hide error magnitude, and analytes remain separate',()=>{
+ const row=(observed,predicted,analyte='plasma')=>({observed,predicted,analyte,inside:true});
+ const s=S.summarize([{id:'laskin-normal',rows:[row(1,2),row(2,1)]},{id:'kacirova',rows:[row(1,1,'cmmg')]}]);
+ assert.ok(Math.abs(s.overall.gmr-1)<1e-12);
+ assert.ok(Math.abs(s.groups[0].absoluteFoldError-2)<1e-12);
+ assert.equal(s.groups[0].total,2);assert.equal(s.groups[2].total,1);
+ assert.equal(s.sources,2);assert.equal(s.scenarios,2);
+});
+test('case observations cite the case publication and mass endpoints remain separate',()=>{
+ assert.equal(S.find('kacirova').ref,'ref42');
+ assert.match(html,/id="ref42"/);assert.match(html,/mass-recovery/);
+ assert.equal(S.STUDIES.flatMap(S.pointsOf).length,37);
+ const scores=S.STUDIES.map(s=>({id:s.id,rows:S.pointsOf(s).map(r=>({...r,predicted:r.observed,inside:true}))}));
+ const summary=S.summarize(scores);assert.equal(summary.scenarios,9);assert.equal(summary.sources,6);
+});

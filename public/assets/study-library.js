@@ -30,7 +30,7 @@
  // Vasquez Vasquez J et al. Br J Clin Pharmacol 2025 [22], Table 1A: dialyzer-inlet plasma at the start and
  // end of the first HD session. The last dose to admission gap is not reported; 4 h is assumed.
  const VASQUEZ_ADMISSION=28,VASQUEZ_HD=[{type:'HD',start:VASQUEZ_ADMISSION+16,end:VASQUEZ_ADMISSION+18},{type:'HD',start:VASQUEZ_ADMISSION+32,end:VASQUEZ_ADMISSION+34.5}];
- // Kacirova I et al. Biomed Pharmacother 2022 [32]: one trough and one sample 25 min after the ninth infusion.
+ // Kacirova I et al. Klinicka farmakologie a farmacie 2022 [42]: one trough and one sample 25 min after the ninth infusion.
  const KACIROVA_DOSES=Array.from({length:9},(_,i)=>({time:i*8,route:'Acyclovir IV',amount:i<6?750:850,infusion:1}));
  const iv=(weight,crcl,dose,every,doseCount,horizon)=>({weight,crcl,crclSource:'manual',renalMode:'constant',route:'Acyclovir IV',
   dosingMode:'repeat',dose,every,doseCount,infusion:1,horizon});
@@ -52,7 +52,7 @@
    regimen:'10 mg/kg IV over 1 h every 8 h',
    note:'The label reports a mean steady-state peak and trough for 7 adults with normal kidney function. AyFlux places them at the end of the tenth infusion (hour 73) and just before an eleventh dose (hour 80). Weight and CrCl are nominal assumptions.'},
   {id:'kacirova',legend:'Kacirova 2022 measured',short:'Kacirova 2022, one patient (with CMMG)',label:'Kacirova 2022: IV acyclovir, paired acyclovir and CMMG levels',
-   ref:'ref32',cite:'[32]',n:1,pointsLabel:'measured concentrations',mode:'No dialysis',regimen:'750 mg IV q8h ×6, then 850 mg; estimated CrCl',
+   ref:'ref42',cite:'[42]',n:1,pointsLabel:'measured concentrations',mode:'No dialysis',regimen:'750 mg IV q8h ×6, then 850 mg; estimated CrCl',
    config:{age:36,sex:'male',weight:86,scr:87/88.4,crclSource:'estimated',renalMode:'constant',dosingMode:'custom',customDoses:KACIROVA_DOSES,horizon:72},
    points:[[64,1.7],[65+25/60,8.9]],cmmgPoints:[[64,0.27],[65+25/60,0.64]],
    note:'A 36-year-old man (86 kg, serum creatinine 87 µmol/L) given 750 mg IV every 8 hours for two days, then 850 mg. The dots are a measured trough and a sample 25 minutes after the ninth infusion, for both acyclovir and CMMG (shown on the CMMG graph). AyFlux estimates CrCl by Cockcroft–Gault. The infusion length (1 hour) and which infusion was sampled are read from the paper\'s figure, and the preceding oral course is not simulated.'},
@@ -87,6 +87,24 @@
   for(const score of scores){const study=find(score.id);for(const r of score.rows)lines.push([study.id,study.short+' '+study.cite,r.analyte,+r.time.toFixed(4),r.observed,+r.predicted.toPrecision(6),+r.lower.toPrecision(6),+r.upper.toPrecision(6),r.inside,study.pointsLabel,calibration.vcScale??1,calibration.clearanceScale??1].map(cell).join(','));}
   return lines.join('\n')+'\n';
  }
+ // Bias and error magnitude are distinct: opposite errors cancel in GMR, not absolute fold error.
+ function summarize(scores){
+  const stats=rows=>{
+   if(!rows.length)return null;
+   const logs=rows.map(r=>Math.log(r.predicted/r.observed));
+   return {total:rows.length,gmr:Math.exp(logs.reduce((a,b)=>a+b,0)/rows.length),
+    absoluteFoldError:Math.exp(logs.reduce((a,b)=>a+Math.abs(b),0)/rows.length),
+    withinTwo:rows.filter(r=>r.predicted/r.observed>=.5&&r.predicted/r.observed<=2).length,
+    inside:rows.filter(r=>r.inside).length};
+  };
+  const all=scores.flatMap(s=>s.rows);
+  const groups=[
+   ['Plasma acyclovir — no dialysis',(s,r)=>s.mode==='No dialysis'&&r.analyte==='plasma'],
+   ['Plasma acyclovir — dialysis',(s,r)=>s.mode!=='No dialysis'&&r.analyte==='plasma'],
+   ['Plasma CMMG',(s,r)=>r.analyte==='cmmg']
+  ].map(([name,test])=>({name,...stats(scores.flatMap(score=>score.rows.filter(r=>test(find(score.id),r))))}));
+  return {overall:stats(all),groups,scenarios:scores.length,sources:new Set(scores.map(s=>find(s.id).ref)).size};
+ }
  function interp(time,values,t){
   if(t<=time[0])return values[0];
   for(let i=1;i<time.length;i++)if(time[i]>=t){const f=(t-time[i-1])/(time[i]-time[i-1]);return values[i-1]+f*(values[i]-values[i-1]);}
@@ -105,5 +123,5 @@
   const gmr=Math.exp(rows.reduce((sum,row)=>sum+Math.log(row.predicted/row.observed),0)/rows.length);
   return {id:study.id,rows,gmr,inside:rows.filter(row=>row.inside).length,total:rows.length,coverage:config.coverage};
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,csv};
+ return {STUDIES,find,configFor,matches,score,interp,pointsOf,csv,summarize};
 });

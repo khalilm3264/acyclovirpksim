@@ -1242,10 +1242,12 @@ function renderScorecard(){
   }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="5">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
   if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="6">Calculating…</td></tr>';next(index+1);return;}
   body.innerHTML=rows.join('');scorecardScores=scores;scorecardCalibration=calibration;$('scorecardCsv').disabled=!scores.length;
-  const all=scores.flatMap(r=>r.rows),overall=all.length?Math.exp(all.reduce((sum,x)=>sum+Math.log(x.predicted/x.observed),0)/all.length):NaN;
-  const within2=all.filter(x=>x.predicted/x.observed>=.5&&x.predicted/x.observed<=2).length;
+  const summary=STUDIES.summarize(scores),overall=summary.overall;
+  const description=r=>r.total+' points; bias ratio '+r.gmr.toFixed(2)+'; geometric mean absolute fold error '+r.absoluteFoldError.toFixed(2)+'; '+r.withinTwo+'/'+r.total+' within twofold; '+r.inside+'/'+r.total+' inside assumed model bands.';
   $('scorecardCaption').textContent=(calibration.vcScale===1&&calibration.clearanceScale===1?'Default parameters. ':'Calibration multipliers active: central volume ×'+calibration.vcScale+', clearance ×'+calibration.clearanceScale+'. ')+
-   `Across all ${all.length} points: predicted/observed ${overall.toFixed(2)}, ${within2} of ${all.length} within twofold, ${all.filter(x=>x.inside).length} inside the model interval. Points from different studies are not equally informative: single patients and author-fitted values count the same as group means here. The label rows are the same values the optional calibration in Research tools fits to, so they are not independent once that fit is applied.`;
+   summary.scenarios+' comparison scenarios from '+summary.sources+' reference sources. '+(overall?description(overall):'No results.')+
+   ' The pooled ratio measures bias, not accuracy; opposite errors cancel. Repeated samples, group means and author-fitted values have equal point weight, not independent patient weight. Band inclusion is descriptive, not validated predictive coverage. Label values are not independent after label-based calibration.';
+  $('scorecardGroups').textContent=summary.groups.filter(r=>r.total).map(r=>r.name+': '+description(r)).join('\n');
   drawScorecardFigure();
  },30);
  next(0);
