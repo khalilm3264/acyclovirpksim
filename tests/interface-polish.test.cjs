@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
-const read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8').replaceAll('\r\n','\n');
 function charts(storage={}){
  const window={localStorage:{getItem:key=>storage[key]??null,setItem:(key,value)=>{storage[key]=String(value);}}};
  vm.runInNewContext(read('public/assets/charts.js'),{window,document:{}});
