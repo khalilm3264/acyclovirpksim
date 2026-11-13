@@ -74,3 +74,31 @@ test('regimen comparison and post-HD panels are wired without entering saved set
  assert.match(ui,/rememberVersion\('Before post-dialysis dose timing'\)/);
  assert.match(ui,/config:structuredClone\(c\),data:\{time:d\.time\.slice\(\)/,'saved regimens are frozen copies');
 });
+
+test('provenance: every recorded input has a valid status, value and source, and counts add up',()=>{
+ const recorded=S.STUDIES.filter(s=>s.provenance);
+ assert.deepEqual(recorded.map(s=>s.id).sort(),['boelaert-1','boelaert-4','boelaert-5','vasquez']);
+ for(const study of recorded){
+  const n=S.provenanceCounts(study);
+  assert.equal(Object.values(n).reduce((a,b)=>a+b,0),study.provenance.length);
+  for(const row of study.provenance){assert.ok(S.STATUSES.includes(row.status),row.input);assert.ok(row.input&&row.value&&row.source,study.id+' '+row.input);}
+ }
+ // Inputs AyFlux had to supply are not labelled as reported.
+ const status=(id,input)=>S.find(id).provenance.find(r=>r.input===input).status;
+ assert.equal(status('vasquez','Time from last dose to admission'),'unknown');
+ assert.equal(status('vasquez','HD drug clearance'),'assumed');
+ assert.equal(status('boelaert-4','Residual kidney function'),'assumed');
+ assert.equal(status('boelaert-4','Plasma values compared'),'calculated');
+ // Recorded values agree with the configuration actually simulated.
+ assert.match(S.find('boelaert-4').provenance[0].value,new RegExp('^'+S.find('boelaert-4').config.dose+' mg'));
+ assert.match(S.find('vasquez').provenance.find(r=>r.input==='Weight').value,new RegExp(S.find('vasquez').config.weight+' kg'));
+ assert.equal(S.provenanceCounts(S.find('laskin-normal')),null);
+});
+
+test('prediction exercise hides results until revealed',()=>{
+ assert.match(html,/id="predictMode"/);assert.match(html,/id="revealPrediction"/);
+ assert.match(html,/main\.predicting \.chart,/);
+ assert.match(ui,/\(current&&!hidden\?regimenRow/,'current row hidden while predicting');
+ assert.match(ui,/f=v=>hidden\?'\?'/,'metric cells hidden while predicting');
+ assert.match(ui,/\$\('predictMode'\)\.checked=false;renderRegimens\(\);/,'reveal ends the exercise');
+});

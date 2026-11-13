@@ -119,9 +119,25 @@ function cmmgAucRatio(time,plasma,cmmg){
  }
  return parent>1e-12?{from,to,ratio:metabolite/parent}:null;
 }
+const PROVENANCE_LABEL={reported:'Reported',calculated:'Calculated',assumed:'Assumed',unknown:'Unknown'};
+function provenanceSummary(study){
+ const n=STUDIES.provenanceCounts(study);
+ if(!n)return '<span class="tip">Not yet recorded</span>';
+ return STUDIES.STATUSES.map(k=>`<span class="prov prov-${k}" title="${PROVENANCE_LABEL[k]}">${PROVENANCE_LABEL[k][0]} ${n[k]}</span>`).join(' ');
+}
+function renderStudyProvenance(study){
+ const box=$('studyProvenance');if(!box)return;
+ if(!study){box.classList.add('hidden');return;}
+ box.classList.remove('hidden');
+ const n=STUDIES.provenanceCounts(study),esc=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+ if(!n){$('studyProvenanceCounts').textContent='Input provenance has not yet been recorded for this study. The study note above lists its assumptions.';$('studyProvenanceRows').innerHTML='';return;}
+ $('studyProvenanceCounts').textContent=`Of ${study.provenance.length} inputs needed to reproduce this case: ${n.reported} reported by the source, ${n.calculated} calculated from reported values, ${n.assumed} assumed by AyFlux, ${n.unknown} unknown.`;
+ $('studyProvenanceRows').innerHTML=study.provenance.map(r=>`<tr><td>${esc(r.input)}</td><td><span class="prov prov-${r.status}">${PROVENANCE_LABEL[r.status]}</span></td><td>${esc(r.value)}<br><span class="tip">${esc(r.source)}</span></td></tr>`).join('');
+}
 function renderStudyStatus(){
  const select=$('studySelect'),status=$('studyStatus');if(!select||!status)return;
  const chosen=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;
+ renderStudyProvenance(chosen);
  if(!chosen){status.textContent='';if(select.value)select.value='';return;}
  if(select.value!==chosen.id)select.value=chosen.id;
  status.textContent=overlayStudy()?'Dots: '+chosen.pointsLabel+(chosen.n>1?', n='+chosen.n:', one patient')+(chosen.cmmgPoints?' (CMMG graph too)':'')+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
@@ -343,9 +359,16 @@ function refreshLabelAdjust(){
 // ---------- Regimen comparison ----------
 const REG=window.AyFluxRegimens,REGIMEN_COLORS=['#7a3e9d','#a8740b','#2e7d4f','#c2185b'];
 const regimenEscape=text=>String(text).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
-function regimenRow(name,config,mode,data,T,color,index){
- const m=REG.metrics(data,E.buildDoses(E.effectiveConfig(config)),T),f=v=>v===null?'—':Number(v.toPrecision(3)).toString();
- return `<tr><td>${color?`<span class="swatch" style="border-color:${color}"></span>`:''}${regimenEscape(name)}</td><td>${regimenEscape(describeScenario(config,mode))}</td><td>${f(m.auc)}</td><td>${f(m.peak)}</td><td>${f(m.trough)}${m.troughTime===null?'':' <span class="tip">(h '+Number(m.troughTime.toFixed(2))+')</span>'}</td><td>${f(m.cmmgAuc)}</td><td>${f(m.cmmgPeak)}</td><td>${index===null?'':`<button type="button" class="btn secondary" data-remove-regimen="${index}">Remove</button>`}</td></tr>`;
+// Dose and dialysis timeline in words, for the prediction exercise.
+function regimenTimeline(config,mode){
+ const eff=E.effectiveConfig(config),hours=v=>String(Number(v.toFixed(2)));
+ const doses=E.buildDoses(eff),shown=doses.slice(0,10).map(d=>hours(d.time)).join(', ')+(doses.length>10?', …':'');
+ const sessions=E.scheduleFor(mode,eff).filter(r=>r.type!=='No dialysis').map(r=>r.type+' '+hours(r.start)+'–'+hours(r.end)+' h');
+ return 'Doses at hour '+shown+(sessions.length?' · '+sessions.slice(0,6).join(', ')+(sessions.length>6?', …':''):' · no dialysis');
+}
+function regimenRow(name,config,mode,data,T,color,index,hidden=false){
+ const m=REG.metrics(data,E.buildDoses(E.effectiveConfig(config)),T),f=v=>hidden?'?':v===null?'—':Number(v.toPrecision(3)).toString();
+ return `<tr><td>${color?`<span class="swatch" style="border-color:${color}"></span>`:''}${regimenEscape(name)}</td><td>${regimenEscape(describeScenario(config,mode))}${hidden?'<br><span class="tip">'+regimenEscape(regimenTimeline(config,mode))+'</span>':''}</td><td>${f(m.auc)}</td><td>${f(m.peak)}</td><td>${f(m.trough)}${hidden||m.troughTime===null?'':' <span class="tip">(h '+Number(m.troughTime.toFixed(2))+')</span>'}</td><td>${f(m.cmmgAuc)}</td><td>${f(m.cmmgPeak)}</td><td>${index===null?'':`<button type="button" class="btn secondary" data-remove-regimen="${index}">Remove</button>`}</td></tr>`;
 }
 function renderRegimens(){
  const body=$('regimenRows');if(!body||!REG)return;
@@ -353,10 +376,36 @@ function renderRegimens(){
  $('saveRegimen').disabled=!current||savedRegimens.length>=REG.MAX_SAVED;
  $('regimenStatus').textContent=savedRegimens.length>=REG.MAX_SAVED?'Four regimens saved. Remove one to save another.':'Save the selected scenario under a name, change the dose, interval, timing or kidney function, and save again. Saved regimens are frozen: later edits do not change them. Up to four; they last until removed or the page is closed.';
  if(!savedRegimens.length&&!current){body.innerHTML='';$('regimenCaption').textContent='';return;}
- const T=Math.min(c.horizon,...savedRegimens.map(r=>r.config.horizon));
- body.innerHTML=savedRegimens.map((r,i)=>regimenRow(r.name,r.config,r.primary,r.data,T,REGIMEN_COLORS[i],i)).join('')+(current?regimenRow('Current settings (not saved)',c,primary,current,T,null,null):'');
+ const T=regimenWindow(),hidden=predicting();
+ body.innerHTML=savedRegimens.map((r,i)=>regimenRow(r.name,r.config,r.primary,r.data,T,REGIMEN_COLORS[i],i,hidden)).join('')+(current&&!hidden?regimenRow('Current settings (not saved)',c,primary,current,T,null,null):'');
+ renderPredictControls();
  $('regimenCaption').textContent=`All values are from median curves of the selected scenario, in mg/L, over the common window 0–${Number(T.toFixed(2))} h (the shortest simulation among the rows). AUC is the plasma area under the curve from 0 to ${Number(T.toFixed(2))} h (mg·h/L). Trough is plasma acyclovir at the start of the last dose that begins after hour 0 and before hour ${Number(T.toFixed(2))}, immediately before that dose; its hour is shown. CMMG values are plasma 9-carboxymethoxymethylguanine: AUC over the same window (mg·h/L) and the highest concentration in it (mg/L). Saved curves appear as dashed lines on the plasma acyclovir and plasma CMMG graphs.`;
 }
+// ---------- Prediction exercise: hide results, predict, then reveal ----------
+const PREDICT_METRICS={trough:'trough acyclovir',peak:'peak acyclovir',auc:'plasma acyclovir AUC',cmmgAuc:'plasma CMMG AUC'};
+function regimenWindow(){return Math.min(c.horizon,...savedRegimens.map(r=>r.config.horizon));}
+function predicting(){return !!$('predictMode')?.checked;}
+function renderPredictControls(){
+ const enough=savedRegimens.length>=2,choice=$('predictChoice'),keep=choice.value;
+ $('predictMode').disabled=!enough&&!predicting();
+ choice.innerHTML=savedRegimens.map((r,i)=>`<option value="${i}">${regimenEscape(r.name)}</option>`).join('');
+ if(keep&&+keep<savedRegimens.length)choice.value=keep;
+ for(const id of ['predictMetric','predictChoice','revealPrediction'])$(id).disabled=!predicting()||!enough;
+ $('predictQuestion').textContent=predicting()?`Which saved regimen will have the highest ${PREDICT_METRICS[$('predictMetric').value]} over hours 0–${Number(regimenWindow().toFixed(2))}? Concentration graphs and summaries are hidden until you reveal.`:enough?'':'Save at least two regimens to run a prediction exercise.';
+ document.querySelector('main').classList.toggle('predicting',predicting());
+}
+$('predictMode').addEventListener('change',()=>{$('predictResult').textContent='';renderRegimens();});
+$('predictMetric').addEventListener('change',renderPredictControls);
+$('revealPrediction').addEventListener('click',()=>{
+ const key=$('predictMetric').value,T=regimenWindow();
+ const values=savedRegimens.map(r=>REG.metrics(r.data,E.buildDoses(E.effectiveConfig(r.config)),T)[key]);
+ const valid=values.map((v,i)=>[v,i]).filter(([v])=>v!==null);
+ if(!valid.length){$('predictResult').textContent='No saved regimen has a value for this question (a single dose has no trough).';return;}
+ const best=valid.reduce((a,b)=>b[0]>a[0]?b:a),picked=+$('predictChoice').value,ties=valid.filter(([v])=>Math.abs(v-best[0])<=1e-9*Math.max(1,best[0])).map(([,i])=>i);
+ const unit=key==='trough'||key==='peak'?'mg/L':'mg·h/L',name=i=>savedRegimens[i].name;
+ $('predictResult').textContent=(ties.includes(picked)?'Correct. ':'Not this time. ')+`Highest ${PREDICT_METRICS[key]}: ${ties.map(name).join(' and ')} (${Number(best[0].toPrecision(3))} ${unit}). `+valid.map(([v,i])=>`${name(i)}: ${Number(v.toPrecision(3))}`).join(' · ')+(valid.length<values.length?' · regimens without a value were skipped':'')+'.';
+ $('predictMode').checked=false;renderRegimens();
+});
 $('saveRegimen').addEventListener('click',()=>{
  if(!dataIsCurrent||!results?.[primary]||savedRegimens.length>=REG.MAX_SAVED)return;
  const d=results[primary],name=($('regimenName').value.trim()||'Regimen '+(savedRegimens.length+1)).slice(0,40);
@@ -1319,14 +1368,14 @@ function renderScorecard(){
  if(key===scorecardKey)return;
  scorecardKey=key;const run=++scorecardRun,rows=[],scores=[];
  scorecardScores=[];$('scorecardCsv').disabled=true;
- body.innerHTML='<tr><td colspan="6">Calculating…</td></tr>';
+ body.innerHTML='<tr><td colspan="7">Calculating…</td></tr>';
  const next=index=>setTimeout(()=>{
   if(run!==scorecardRun)return;
   const study=STUDIES.STUDIES[index];
   try{const r=STUDIES.score(study,E,{calibration,draws:400});scores.push(r);
-   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
-  }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="5">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
-  if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="6">Calculating…</td></tr>';next(index+1);return;}
+   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td>${provenanceSummary(study)}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
+  }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="6">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
+  if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="7">Calculating…</td></tr>';next(index+1);return;}
   body.innerHTML=rows.join('');scorecardScores=scores;scorecardCalibration=calibration;$('scorecardCsv').disabled=!scores.length;
   const summary=STUDIES.summarize(scores),overall=summary.overall;
   const description=r=>r.total+' points; bias ratio '+r.gmr.toFixed(2)+'; geometric mean absolute fold error '+r.absoluteFoldError.toFixed(2)+'; '+r.withinTwo+'/'+r.total+' within twofold; '+r.inside+'/'+r.total+' inside assumed model bands.';

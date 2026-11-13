@@ -25,10 +25,42 @@
   group:'dialysis',mode:'Peritoneal dialysis',regimen:b.dose+' mg IV daily ×5, CAPD 4/4/4/12 h dwells, CrCl 0',
   config:{age:b.age,sex:b.sex,weight:b.weight,crcl:0,crclSource:'manual',renalMode:'constant',route:'Acyclovir IV',dosingMode:'repeat',
    dose:b.dose,every:24,doseCount:5,infusion:1,horizon:120,pdMethod:'manual',pdRxEnabled:true,pdRxRows:CAPD_ROWS,pdVolume:2,pdGlucose:1.36},
+  provenance:boelaertProvenance(b),
   points:[1,24,97,120].map((t,i)=>[t,b.values[i]*ACV_MW/1000]),kinds:['peak','trough','peak','trough'],
   note:'One continuous ambulatory PD patient ('+b.weight+' kg) given '+b.dose+' mg IV over 1 hour daily for 5 days, with four 2 L, 1.36% exchanges a day (dwells of 4, 4, 4 and 12 hours). The dots are the day-1 and day-5 peaks and troughs the authors derived from their own curve fits, not raw samples. No urinary recovery was reported, so CrCl is set to 0; that is an assumption.'});
  // Vasquez Vasquez J et al. Br J Clin Pharmacol 2025 [22], Table 1A: dialyzer-inlet plasma at the start and
  // end of the first HD session. The last dose to admission gap is not reported; 4 h is assumed.
+ // Input provenance: how each reconstruction input was obtained. reported = stated in the source;
+ // calculated = derived by AyFlux or the authors from reported values; assumed = set by AyFlux because
+ // the source gives no value; unknown = not reported and with no effect assumed beyond what is listed.
+ const P=(input,status,value,source)=>({input,status,value,source});
+ const BOELAERT_SOURCE='Boelaert 1987, Methods and Tables I–II';
+ const boelaertProvenance=b=>[
+  P('Dose','reported',b.dose+' mg IV over 1 h',BOELAERT_SOURCE),
+  P('Dose times','reported','Every 24 h for 5 days',BOELAERT_SOURCE+' (Methods)'),
+  P('Weight','reported',b.weight+' kg',BOELAERT_SOURCE+' (Table I)'),
+  P('Residual kidney function','assumed','CrCl 0 mL/min','No urinary recovery reported for this subject; absence of a value is not proof of no function'),
+  P('PD prescription','reported','Four 2 L exchanges of 1.36% dextrose; dwells 4, 4, 4 and 12 h',BOELAERT_SOURCE+' (Methods)'),
+  P('Exchange times on the clock','assumed','First exchange at the start of the first infusion','Not reported'),
+  P('Peritoneal transport and ultrafiltration','assumed','AyFlux default membrane parameters','Per-exchange drained volume and transport type not reported'),
+  P('Plasma values compared','calculated','Day-1 and day-5 peaks and troughs fitted by the authors','Tables I–II; not raw samples'),
+  P('Sample times','calculated','End of infusion (peak) and just before the next dose (trough)','Implied by the fitted Cmax and Cmin'),
+  P('Dialysate recovery','reported','Percent of dose recovered in dialysate',BOELAERT_SOURCE+' (Table II); used in case study 3, not in the scorecard')];
+ const VASQUEZ_SOURCE='Vasquez Vasquez 2024 preprint (Authorea), case report; check against the 2025 BJCP version';
+ const VASQUEZ_PROVENANCE=[
+  P('Dose','reported','Valacyclovir 1,000 mg, four doses',VASQUEZ_SOURCE),
+  P('Dose interval','assumed','Every 8 h','Reported as three times daily; clock times not given'),
+  P('Time from last dose to admission','unknown','Assumed 4 h (0 and 8 h in research/validation/vasquez-hd.cjs)','Not reported: presented after the fourth dose'),
+  P('Weight','reported','49.9 kg',VASQUEZ_SOURCE),
+  P('Serum creatinine','reported','11.3 mg/dL (author eGFR 3.3 mL/min)',VASQUEZ_SOURCE),
+  P('Residual kidney function','calculated','Cockcroft–Gault CrCl 3.70 mL/min','From reported age, sex, weight and creatinine. Urinary recovery of 17.7 mg over 30 h was reported but is not used to set CrCl'),
+  P('Admission to first HD','reported','16 h','Urine collected from admission to just before the first session'),
+  P('First HD duration','calculated','2 h','4.5 h total HD minus the reported 2.5 h second session'),
+  P('Gap between sessions','reported','14 h','Urine collected over 14 h between sessions'),
+  P('Second HD duration','reported','2.5 h',VASQUEZ_SOURCE),
+  P('HD drug clearance','assumed','AyFlux default 81.8 mL/min','Blood flow 250 and dialysate flow 500 mL/min reported; drug clearance not reported'),
+  P('Plasma values compared','reported','8.8 and 3.2 mg/L before and after the first session','Dialyzer-inlet plasma, Table 1A'),
+  P('Sample times','reported','Start and end of the first session',VASQUEZ_SOURCE)];
  const VASQUEZ_ADMISSION=28,VASQUEZ_HD=[{type:'HD',start:VASQUEZ_ADMISSION+16,end:VASQUEZ_ADMISSION+18},{type:'HD',start:VASQUEZ_ADMISSION+32,end:VASQUEZ_ADMISSION+34.5}];
  // Kacirova I et al. Klinicka farmakologie a farmacie 2022 [42]: one trough and one sample 25 min after the ninth infusion.
  const KACIROVA_DOSES=Array.from({length:9},(_,i)=>({time:i*8,route:'Acyclovir IV',amount:i<6?750:850,infusion:1}));
@@ -60,6 +92,7 @@
    ref:'ref22',cite:'[22]',n:1,pointsLabel:'measured concentrations',group:'dialysis',mode:'Custom sequence',regimen:'Valacyclovir 1,000 mg q8h ×4, then two HD sessions; estimated CrCl',
    config:{age:69,sex:'female',weight:49.9,scr:11.3,crclSource:'estimated',renalMode:'constant',route:'Valacyclovir oral',dosingMode:'repeat',
     dose:1000,every:8,doseCount:4,schedule:VASQUEZ_HD,horizon:VASQUEZ_HD[1].end},
+   provenance:VASQUEZ_PROVENANCE,
    points:[[VASQUEZ_HD[0].start,8.8],[VASQUEZ_HD[0].end,3.2]],kinds:['hd-start','hd-end'],
    note:'A 69-year-old woman (49.9 kg, serum creatinine 11.3 mg/dL) took four 1,000 mg valacyclovir doses 8 hours apart. The dots are dialyzer-inlet plasma levels at the start and end of her first 2-hour HD session. The paper does not give the time from the last dose to admission; AyFlux assumes 4 hours, so the first session starts at hour 44. research/validation/vasquez-hd.cjs shows how the result changes for 0 and 8 hours.'},
   ...BOELAERT.map(boelaert)
@@ -80,6 +113,14 @@
  function pointsOf(study){
   return study.points.map(([time,observed],i)=>({analyte:'plasma',time,observed,kind:study.kinds?.[i]||'serial'}))
    .concat((study.cmmgPoints||[]).map(([time,observed],i)=>({analyte:'cmmg',time,observed,kind:study.cmmgKinds?.[i]||'serial'})));
+ }
+ const STATUSES=['reported','calculated','assumed','unknown'];
+ // Count of reconstruction inputs by provenance status, or null when not yet recorded.
+ function provenanceCounts(study){
+  if(!study.provenance)return null;
+  const counts=Object.fromEntries(STATUSES.map(k=>[k,0]));
+  for(const row of study.provenance)counts[row.status]++;
+  return counts;
  }
  // Hours from the start of the most recent earlier dose to each sample. A sample taken at the moment
  // a dose starts (a trough) counts from the dose before it.
@@ -131,6 +172,6 @@
   const gmr=Math.exp(rows.reduce((sum,row)=>sum+Math.log(row.predicted/row.observed),0)/rows.length);
   return {id:study.id,rows,gmr,inside:rows.filter(row=>row.inside).length,total:rows.length,coverage:config.coverage};
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,csv,summarize};
+ return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,csv,summarize};
 });
 

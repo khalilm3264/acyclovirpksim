@@ -40,6 +40,14 @@ async function main(){
   assert.match(await page.textContent('#regimenCaption'),/start of the last dose/);
   await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>{const s=window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption()?.series||[];return s.some(x=>x.name==='Unadjusted')&&s.some(x=>x.name==='Label');},null,{timeout:60000});
+  // Prediction exercise: results hidden, then revealed with a verdict.
+  await page.check('#predictMode');
+  assert.equal(await page.evaluate(()=>getComputedStyle(document.querySelector('#plasmaChart')).visibility),'hidden');
+  assert.equal(await page.locator('#regimenRows tr').count(),2,'current row hidden while predicting');
+  assert.match(await page.textContent('#regimenRows'),/\?/);assert.match(await page.textContent('#regimenRows'),/Doses at hour 0, 8, 16/);
+  await page.selectOption('#predictChoice','0');await page.click('#revealPrediction');
+  assert.match(await page.textContent('#predictResult'),/^(Correct|Not this time)\. Highest trough acyclovir: Unadjusted/);
+  assert.equal(await page.evaluate(()=>document.querySelector('main').classList.contains('predicting')),false);
   // Post-HD timing preview for IV acyclovir on intermittent HD.
   await page.selectOption('#primary','Intermittent HD');await ready();
   await page.waitForFunction(()=>!document.querySelector('#applyPostHd').disabled,null,{timeout:60000});
@@ -50,10 +58,19 @@ async function main(){
   await page.click('#applyPostHd');await ready();
   assert.equal(await page.evaluate(()=>document.querySelector('#customDoseSummary')!==null),true,'now a custom schedule');
   assert.ok(await page.locator('#applyPostHd').isDisabled(),'not offered again for a custom schedule');
+  // Provenance view for a published case and the scorecard column.
+  await page.selectOption('#studySelect','vasquez');
+  await page.waitForFunction(()=>!document.querySelector('#studyProvenance').classList.contains('hidden'));
+  assert.match(await page.textContent('#studyProvenanceCounts'),/8 reported by the source, 2 calculated from reported values, 2 assumed by AyFlux, 1 unknown/);
+  assert.match(await page.textContent('#studyProvenanceRows'),/Time from last dose to admission\s*Unknown/);
+  await page.selectOption('#studySelect','laskin-normal');
+  await page.waitForFunction(()=>/not yet been recorded/.test(document.querySelector('#studyProvenanceCounts').textContent));
   // Residual figure on the Methods tab.
   await page.click('[data-tab="method"]');
   await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#residualFigure')),null,{timeout:120000});
   const points=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#residualFigure')).getOption().series.filter(s=>s.type==='scatter').reduce((n,s)=>n+s.data.length,0));
+  const prov=await page.$$eval('#scorecardRows tr',trs=>trs.map(tr=>tr.cells[5]?.textContent||''));
+  assert.ok(prov.some(t=>/R 8 C 2 A 2 U 1/.test(t)),'Vasquez counts in the scorecard');assert.ok(prov.some(t=>/Not yet recorded/.test(t)));
   assert.equal(points,await page.evaluate(()=>window.AyFluxStudies.STUDIES.reduce((n,s)=>n+s.points.length+(s.cmmgPoints||[]).length,0)));
   assert.ok(doseRows>0);
   assert.deepEqual(errors,[]);
