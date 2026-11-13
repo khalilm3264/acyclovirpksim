@@ -12,7 +12,7 @@ Thank you for helping improve AyFlux, an **educational** acyclovir and valacyclo
 ## Development and pull requests
 
 - Work on a branch; open a focused pull request against `main`. Avoid committing directly to `main`.
-- Use **Node.js 22 or newer**. Run `node --test tests/*.test.cjs` and `node --check` on changed JavaScript files.
+- Use **Node.js 22 or newer**. Run `npm ci` once, then `npm run stage` to copy the chart and font files into `public/`, and `npm test` before opening a pull request. `npm run dev` serves the site locally. Run `node --check` on changed JavaScript files.
 - Explain any changes to pharmacokinetic equations, units, default values, dialysis scheduling, CMMG or CSF estimates. Add regression tests covering expected and boundary behavior.
 - Keep units explicit in code, graphs, CSV columns, and docs: e.g., hours, mg/L, mL/min, and mg/hour. Do not silently convert values.
 - Preserve renal edge cases such as zero renal clearance at `CrCl = 0`, and prevent impossible or unphysical negative concentrations from silently reaching users.
