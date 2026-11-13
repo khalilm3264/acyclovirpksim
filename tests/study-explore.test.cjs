@@ -16,7 +16,7 @@ test('provenance keeps what the paper reports apart from what AyFlux uses',()=>{
 
 test('pending source checks are recorded for Vasquez and Boelaert only',()=>{
  assert.match(S.find('vasquez').sourceCheck,/Authorea preprint[^]*not yet been checked against the final Br J Clin Pharmacol 2025 article/);
- for(const id of ['boelaert-1','boelaert-4','boelaert-5'])assert.match(S.find(id).sourceCheck,/not yet been checked against the original Boelaert 1987 paper/);
+ for(const id of ['boelaert-1','boelaert-4','boelaert-5'])assert.equal(S.find(id).sourceCheck,undefined,'Boelaert rows were checked against the original paper');
  assert.ok(S.STUDIES.filter(s=>s.sourceCheck).every(s=>s.provenance),'a source check note only where provenance is recorded');
 });
 

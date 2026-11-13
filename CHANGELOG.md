@@ -12,7 +12,8 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+- **Boelaert 1987 source check done.** The CAPD patients 1, 4 and 5 were checked against the original paper (J Antimicrob Chemother 1987;20:69–76). Every value AyFlux uses matches Tables I–II and the Methods, so the "pending source check" note is gone. Two provenance rows are now more precise: exchange timing is reported (dialysate instilled just before the infusion at time 0), and CrCl 0 rests on the paper collecting urine only from non-anuric patients, with none listed for these three.
 
 ## [0.27.0] - 2026-11-13 (preview)
 
