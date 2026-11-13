@@ -12,6 +12,7 @@ This changelog distinguishes the application version from the configuration sche
 
 ## Unreleased
 
+- **Cats page gallery.** The hidden cats page now reads `public/cats/gallery.json` and shows a thumbnail picker when more than one piece is listed. Pieces under `public/cats/art/` are copied in by pull request from the private pixel-art repository; the page stays `noindex` and still works without JavaScript. No simulator code or model results changed.
 - Refreshed README and wiki source around the current v0.26.0 preview, merged interface/research features and planned v0.27.0 work.
 - Added a synchronized standalone bibliography, linked from the guide, citation page and simulator; completed journal metadata and recorded the final Vasquez Vasquez case publication while preserving the reconstruction's preprint provenance.
 - Added reference maintenance and repository dependency notes. Scientific coefficients and simulation results are unchanged.

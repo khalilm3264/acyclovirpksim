@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "pieces": [
+    {
+      "id": "four-cats",
+      "src": "four-cats.png",
+      "title": "Four kittens on the cushion",
+      "names": ["Claire", "George", "Sabrina", "Diamond"],
+      "alt": "Colorful pixel art of four kittens together on a patterned cushion beside a window."
+    }
+  ]
+}
