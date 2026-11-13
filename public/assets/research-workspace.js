@@ -82,11 +82,32 @@ $('ospClear').addEventListener("click",()=>{
 window.addEventListener("ayflux:results-updated",()=>{
  if(lastExternal)updateText("ospStatus","AyFlux simulation changed. Click Compare curves to refresh the overlay.");
 });
+
+// One worker per research operation, separate from the live simulation worker.
+function researchRunner(){
+ const worker=new Worker('/assets/research-worker.js');
+ let next=0,pending=null;
+ worker.onmessage=event=>{
+  if(!pending||event.data.id!==pending.id)return;
+  const request=pending;pending=null;
+  event.data.error?request.reject(Error(event.data.error)):request.resolve(event.data.data);
+ };
+ worker.onerror=()=>{if(pending){pending.reject(Error('Research worker failed. Reload and try again.'));pending=null;}};
+ return {
+  summary:(config,mode)=>new Promise((resolve,reject)=>{
+   pending={id:++next,resolve,reject};worker.postMessage({id:next,config,mode});
+  }),
+  close:()=>worker.terminate()
+ };
+}
+
 const pause=()=>new Promise(resolve=>setTimeout(resolve,0));
 $('runHeatmap').addEventListener("click",async ()=>{
  const button=$('runHeatmap');button.disabled=true;
+ let runner;const started=performance.now();
  try{
   const snapshot=getSnapshot();
+  runner=researchRunner();
   const config={...snapshot.config,crclSource:"manual",draws:1,variability:0};
   const xValues=[0,10,25,50,75,100,150],yValues=[0,25,50,75,100,150,200];
   const metric=$('heatmapMetric').value,values=[];
@@ -96,8 +117,10 @@ $('runHeatmap').addEventListener("click",async ()=>{
    await pause();
    for(const crcl of xValues){
     const c={...config,renalMode:'constant',crcl,hdCl:yValues[j]};
-    const simulated=pk.simulate(c,"Intermittent HD");
-    const value=simulated.summary[metric].median;
+    const summary=await runner.summary(c,'Intermittent HD');
+    const current=bridge.snapshot();
+    if(!current.updated||current.revision!==snapshot.revision||current.primary!==snapshot.primary)throw Error('Settings changed. Run the heatmap again.');
+    const value=summary[metric].median;
     if(!Number.isFinite(value))throw Error("Nonfinite model result in grid.");
     row.push(value);
    }
@@ -105,8 +128,9 @@ $('runHeatmap').addEventListener("click",async ()=>{
   }
   lastHeatmap={values,metric,xValues,yValues};
   await drawHeatmap(lastHeatmap);
+  updateText("heatmapStatus",$("heatmapStatus").textContent+" Elapsed "+((performance.now()-started)/1000).toFixed(2)+" s.");
  }catch(error){updateText("heatmapStatus","Unable to produce heatmap: "+error.message);}
- finally{button.disabled=false;}
+ finally{runner?.close();button.disabled=false;}
 });
 let lastHeatmap=null;
 window.addEventListener('ayflux:palette',()=>{if(lastHeatmap)drawHeatmap(lastHeatmap).catch(()=>{});});
@@ -181,19 +205,21 @@ function cancelStaleHdTiming(snapshot){
 }
 $('runHdTiming').addEventListener('click',async ()=>{
  const button=$('runHdTiming');button.disabled=true;
+ let runner;const started=performance.now();
  $('hdTimingArea').replaceChildren();$('hdTimingPlot').classList.add('hidden');
  try{
   const snapshot=getSnapshot();
+  runner=researchRunner();
   const plan=hdTimingPlan(snapshot.config);
   const config=snapshot.config;
   const problems=pk.validate(hdTimingConfig(config,plan,plan.starts[plan.starts.length-1]),'Custom sequence');
   if(problems.length)throw Error(problems.slice(0,2).join('; '));
-  const reference=pk.simulate({...config,crclSource:'manual',draws:1,variability:0},'No dialysis').summary;
+  const reference=await runner.summary({...config,crclSource:'manual',draws:1,variability:0},'No dialysis');
   const rows=[];
   for(const [index,start] of plan.starts.entries()){
    if(index%8===0){updateText('hdTimingStatus','Computing '+(index+1)+' of '+plan.starts.length+' session times…');await pause();}
    if(cancelStaleHdTiming(snapshot))return;
-   const summary=pk.simulate(hdTimingConfig(config,plan,start),'Custom sequence').summary;
+   const summary=await runner.summary(hdTimingConfig(config,plan,start),'Custom sequence');
    const row={start,removed:summary.mass.median,auc:summary.auc.median,peak:summary.peak.median,cmmg:summary.mPeak.median};
    if(!Object.values(row).every(Number.isFinite))throw Error('Nonfinite model result in sweep.');
    rows.push(row);
@@ -207,7 +233,7 @@ $('runHdTiming').addEventListener('click',async ()=>{
   for(const row of rows){const tr=body.insertRow();for(const text of [row.start,row.removed.toFixed(1),row.auc.toFixed(0),row.peak.toFixed(2),row.cmmg.toFixed(2)])tr.insertCell().textContent=String(text);}
   $('hdTimingArea').replaceChildren(table);
   const best=rows.reduce((a,b)=>b.removed>a.removed?b:a),worst=rows.reduce((a,b)=>b.removed<a.removed?b:a);
-  const summaryText=plan.starts.length+' simulations. Most drug removed when the session starts at hour '+best.start+' ('+best.removed.toFixed(0)+' mg); least at hour '+worst.start+' ('+worst.removed.toFixed(0)+' mg). Dashed lines mark dose times.';
+  const summaryText=plan.starts.length+' simulations in '+((performance.now()-started)/1000).toFixed(2)+' s. Most drug removed when the session starts at hour '+best.start+' ('+best.removed.toFixed(0)+' mg); least at hour '+worst.start+' ('+worst.removed.toFixed(0)+' mg). Dashed lines mark dose times.';
   try{
    await window.AyFluxCharts.ensure();
    if(cancelStaleHdTiming(snapshot))return;
@@ -229,7 +255,7 @@ $('runHdTiming').addEventListener('click',async ()=>{
    updateText('hdTimingStatus',summaryText+' Interactive plot unavailable; numeric table shown. '+error.message);
   }
  }catch(error){updateText('hdTimingStatus','Unable to run the timing sweep: '+error.message);}
- finally{button.disabled=false;}
+ finally{runner?.close();button.disabled=false;}
 });
 $('runIntegrity').addEventListener("click",async ()=>{
  const button=$('runIntegrity');button.disabled=true;updateText("integrityStatus","Checking numerical consistency…");
@@ -320,7 +346,7 @@ function buildResearchReportHtml({date,values,metrics,charts,diagnostic,scenario
   '</style></head><body>'+
   '<p class="screen-help">Use your browser Print command (Ctrl+P / Cmd+P) and select Save as PDF.</p>'+
   '<section class="report-summary"><h1>AyFlux — educational PK research report</h1>'+
-  '<p class="meta">Generated '+escapeHtml(date)+' · AyFlux '+escapeHtml(window.AyFluxVersion?.version||'0.25.0')+
+  '<p class="meta">Generated '+escapeHtml(date)+' · AyFlux '+escapeHtml(window.AyFluxVersion?.version||'unknown')+
   ' · Configuration schema 2</p>'+
   '<p class="note"><strong>EDUCATIONAL USE ONLY.</strong> Simulated, non-validated concentration estimates. Not for prescribing, toxicity assessment, clinical decisions, or dialysis planning.</p>'+
   '<h2>Simulation assumptions</h2><table>'+values.map(r=>tableRow(...r)).join('')+'</table>'+
@@ -348,7 +374,7 @@ $('printResearchReport').addEventListener('click',async ()=>{
   const snap=getSnapshot(),config=snap.config,sim=snap.results[snap.primary];
   await window.AyFluxCharts.ensure();
   const values=[
-   ['Release','v0.25.0 (research preview)'],['Scenario',snap.primary],
+   ['Release','v'+(window.AyFluxVersion?.version||'unknown')+' ('+(window.AyFluxVersion?.channel||'preview')+')'],['Scenario',snap.primary],
    ['Medication schedule',config.dosingMode==='custom'?'Custom doses':'Repeating regimen'],
    ['Drug and route',config.dosingMode==='custom'?'See saved configuration':config.route],
    ['Dose (mg)',config.dosingMode==='custom'?'See custom schedule':config.dose],

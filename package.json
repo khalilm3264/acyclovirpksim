@@ -1,6 +1,6 @@
 {
   "name": "ayflux",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "private": true,
   "description": "Educational acyclovir and valacyclovir pharmacokinetics simulator",
   "license": "AGPL-3.0-only",

@@ -1,0 +1,26 @@
+name: AyFlux paper benchmark reproducibility
+on:
+  pull_request:
+    paths:
+      - "research/ayflux-paper/**"
+      - "public/assets/pk-engine.js"
+      - ".github/workflows/ayflux-paper-regression.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  paper-benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - name: Re-run published benchmark generator
+        run: node research/ayflux-paper/run_study.cjs
+      - name: Verify tracked deterministic outputs have not changed
+        run: git diff --exit-code -- research/ayflux-paper/results/

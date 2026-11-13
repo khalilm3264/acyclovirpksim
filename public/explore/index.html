@@ -1,6 +1,12 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>AyFlux visual explorer</title><meta name="description" content="Explore modeled drug accounting, two-input heatmaps and optional 3D response surfaces in AyFlux."><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="/explore/style.css"></head>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>AyFlux visual explorer</title>
+<link rel="canonical" href="https://ayflux.org/explore/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AyFlux">
+<meta property="og:title" content="AyFlux visual explorer">
+<meta property="og:description" content="Explore modeled drug accounting, two-input heatmaps and optional 3D response surfaces in AyFlux.">
+<meta property="og:url" content="https://ayflux.org/explore/"><meta name="description" content="Explore modeled drug accounting, two-input heatmaps and optional 3D response surfaces in AyFlux."><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="/explore/style.css"></head>
 <body><header class="site-header ay-header"><div class="ay-header-brand"><img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" width="42" height="42" alt=""><div><a class="brand ayflux-logo" href="/">AyFlux</a><p class="site-subtitle">Visual explorer</p></div></div><a class="ay-guide-link" href="/">← Simulator</a></header>
 <div class="shell"><main><h1>Pharmacokinetic visualization explorer</h1><p>Deterministic model predictions for education. These views do not identify safe doses or establish clinical validation.</p>
 <section class="card"><h2>Scenario</h2><p id="source" role="status"></p><div class="controls"><label>Dialysis mode<select id="mode"><option>No dialysis</option><option>Intermittent HD</option><option>Peritoneal dialysis</option><option>CRRT</option><option>Custom sequence</option></select></label><label>Graph colors<select id="graphColors"><option value="standard">Standard</option><option value="accessible">Colorblind-friendly</option></select></label></div><p id="settings"></p><p class="tip">Open this page from Research tools to copy your current settings. Sweeps use nominal parameters, without uncertainty sampling or fitting to observations. The full selected simulation duration is retained.</p></section>

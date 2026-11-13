@@ -30,7 +30,7 @@
 
 ## Current status
 
-The application and software citation identify **v0.26.0 preview**. Main also includes subsequent merged interface and research additions; **v0.27.0 is planned**, not yet released. Use an exact commit when reproducing work from main. See [release tracking #55](https://github.com/khalilm3264/acyclovirpksim/issues/55).
+The application and software citation identify **v0.27.0 preview**, released 2026-11-13 ([release notes](https://github.com/khalilm3264/acyclovirpksim/releases/tag/v0.27.0)). Use the release tag, or an exact commit for later work from main.
 
 ## What does AyFlux do?
 
@@ -51,9 +51,9 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 
 **What it does not do:** infer a reliable kidney recovery trajectory from serum creatinine, generate valid native PK-Sim/MoBi model files, establish clinical thresholds, or replace externally validated patient-level PK analyses.
 
-## What's new since 0.26.0
+## What's new in 0.27.0
 
-These are merged and live at [ayflux.org](https://ayflux.org/) but not yet tagged as a release. None of them changes a model equation, parameter or default. Full details are in the [changelog](CHANGELOG.md#unreleased).
+Released and live at [ayflux.org](https://ayflux.org/). Simulated concentrations are unchanged from 0.26.0; drug-removed accounting is now exact within each solver step, and probenecid is a new option that is off by default. Full details are in the [changelog](CHANGELOG.md#unreleased).
 
 - **Zoom like Plotly:** drag a box on any graph, double-click to reset; pan, zoom and download from the toolbar.
 - **Shareable links:** send someone a scenario as a link. The settings live in the link; nothing is uploaded.
