@@ -17,7 +17,7 @@ test('Smith fifth-interval AUCs use analyte units and changing only CSF transpor
  for(const id of ['smith-normal','smith-ckd']){
   const a=literature.runCase(id),fine=literature.runCase(id,1/16);
   assert.ok(Math.abs(a.auc-fine.auc)/fine.auc<.005);
-  assert.ok(Math.abs(a.alternativeAuc/a.auc-.1)<1e-12);
+  assert.ok(Math.abs(a.alternativeAuc/a.auc-10)<1e-9); // previous default 0.25 vs current 0.025
   assert.ok(a.study.observedAuc>0);
  }
  const normal=literature.runCase('smith-normal'),ckd=literature.runCase('smith-ckd');
@@ -25,7 +25,7 @@ test('Smith fifth-interval AUCs use analyte units and changing only CSF transpor
  assert.ok(Math.abs(ckd.study.observedAuc-3.8*.23919)<1e-12);
  const c=normal.study.config;
  const a=pk.single(c,pk.drawParams(c)[0],[],.125);
- const other={...c,csfMetRatio:.025},b=pk.single(other,pk.drawParams(other)[0],[],.125);
+ const other={...c,csfMetRatio:.25},b=pk.single(other,pk.drawParams(other)[0],[],.125);
  assert.deepEqual(a.cols.plasma,b.cols.plasma);assert.deepEqual(a.cols.cmmg,b.cols.cmmg);
 });
 test('research worker returns the same summaries and handles errors',()=>{
