@@ -49,6 +49,7 @@ jobs:
           node --check public/lite/lite.js
           node --check public/assets/lite-fallback.js
           node --check public/assets/simulator-worker.js
+          node --check public/cats/cats.js
       - name: Check bibliography synchronization
         run: node scripts/references.cjs --check
       - name: Check sitemap coverage
