@@ -64,6 +64,7 @@ jobs:
           node scripts/check-concentrations.cjs
           node scripts/check-study-overlay.cjs
           node scripts/check-label-probenecid.cjs
+          node scripts/check-regimens-post-hd.cjs
 
       - name: Compare surface startup when the ECharts renderer changes
         if: github.event_name == 'push'

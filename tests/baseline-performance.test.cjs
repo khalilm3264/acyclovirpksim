@@ -35,7 +35,7 @@ test('numeric change after input does not schedule the same simulation twice',()
 function curveHarness(){
  const config={...E.DEFAULTS,draws:1,horizon:24,requestedModes:['No dialysis']},data=E.simulateMany(config),elements={};
  for(const [i,id] of ['plasmaChart','csfChart','cmmgChart','csfCmmgChart'].entries())elements[id]={getClientRects:()=>[{}],getBoundingClientRect:()=>({top:i<2?600:1400,bottom:i<2?900:1700})};
- const state={overlayStudy:()=>null,results:data,dataIsCurrent:true,resultsRevision:1,baselineRevision:0,primary:'No dialysis',modes:E.MODES,visible:new Set(['No dialysis']),c:config,baseline:null,DEFS:{dose:['Dose','mg']},presentationKeys:new Set(['showBands','virus']),COLORS:{'No dialysis':'#88949f'},LINE_DASH:{'No dialysis':'solid'},paletteMode:'standard',E,window:{innerHeight:900},IntersectionObserver:function(){},$:id=>elements[id],pendingPlots:new Map(),chartStates:new Map(),activePlot:null,labelsFor:t=>t,rgba:()=>'',layout:(u,h,series)=>({toolbox:{feature:{saveAsImage:{}}},series}),requestPlotFrame(){},structuredClone};
+ const state={overlayStudy:()=>null,results:data,dataIsCurrent:true,resultsRevision:1,baselineRevision:0,primary:'No dialysis',modes:E.MODES,visible:new Set(['No dialysis']),c:config,regimens:[],REGIMEN_STYLES:[{color:'#303846',dash:[10,4,2,4]},{color:'#6b3fa0',dash:[8,4]}],DEFS:{dose:['Dose','mg']},presentationKeys:new Set(['showBands','virus']),COLORS:{'No dialysis':'#88949f'},LINE_DASH:{'No dialysis':'solid'},paletteMode:'standard',E,window:{innerHeight:900},IntersectionObserver:function(){},$:id=>elements[id],pendingPlots:new Map(),chartStates:new Map(),activePlot:null,labelsFor:t=>t,rgba:()=>'',layout:(u,h,series)=>({toolbox:{feature:{saveAsImage:{}}},series}),requestPlotFrame(){},structuredClone};
  vm.createContext(state);vm.runInContext(fs.readFileSync(require.resolve('../public/assets/charts.js'),'utf8'),state);vm.runInContext(section('const MOLAR_MASS=', 'function tableOpen(')+section('function chartNearViewport(', "\nif(typeof IntersectionObserver")+section('function chartSignature(', 'let chartWait')+section('function curve(', 'function baselineChanges(')+section('function baselineChanges(', 'function renderBaseline('),state);
  return {state,elements,run:s=>vm.runInContext(s,state)};
 }
@@ -43,15 +43,15 @@ test('off-screen charts defer traces; scrolling draws latest data and baseline s
  const {state,elements,run}=curveHarness();
  for(const [key,id] of [['plasma','plasmaChart'],['csf','csfChart'],['cmmg','cmmgChart'],['csfCmmg','csfCmmgChart']])run(`curve('${key}','mg/L','${id}')`);
  assert.equal(state.pendingPlots.size,2);
- run('baseline={primary,config:structuredClone(c),data:structuredClone(results[primary])};baselineRevision++');
- const frozen=state.baseline.data.plasma.median[1];state.results['No dialysis'].plasma.median[1]+=1;state.c.dose+=25;
- assert.ok(run('baselineChanges(baseline,c,primary)').some(x=>x.includes('Dose: 700 → 725 mg')));
- state.c.showBands=false;assert.equal(run('baselineChanges(baseline,c,primary)').length,1);
+ run("regimens=[{id:'r1',name:'Regimen A',primary,config:structuredClone(c),data:structuredClone(results[primary])}];baselineRevision++");
+ const frozen=state.regimens[0].data.plasma.median[1];state.results['No dialysis'].plasma.median[1]+=1;state.c.dose+=25;
+ assert.ok(run('baselineChanges(regimens[0],c,primary)').some(x=>x.includes('Dose: 700 → 725 mg')));
+ state.c.showBands=false;assert.equal(run('baselineChanges(regimens[0],c,primary)').length,1);
  run("curve('plasma','mg/L','plasmaChart')");
- assert.equal(state.pendingPlots.get('plasmaChart').option.series.find(t=>t.name.startsWith('Baseline:')).data[1][1],frozen);
+ assert.equal(state.pendingPlots.get('plasmaChart').option.series.find(t=>t.name==='Saved: Regimen A').data[1][1],frozen);
  elements.cmmgChart.getBoundingClientRect=()=>({top:300,bottom:600});run("curve('cmmg','mg/L','cmmgChart')");assert.equal(state.pendingPlots.size,3);
  elements.csfCmmgChart.getClientRects=()=>[];run("curve('csfCmmg','mg/L','csfCmmgChart')");assert.equal(state.pendingPlots.size,3);
- run("baseline=null;baselineRevision++;curve('plasma','mg/L','plasmaChart')");assert.ok(!state.pendingPlots.get('plasmaChart').option.series.some(t=>t.name?.startsWith('Baseline:')));
+ run("regimens=[];baselineRevision++;curve('plasma','mg/L','plasmaChart')");assert.ok(!state.pendingPlots.get('plasmaChart').option.series.some(t=>t.name?.startsWith('Saved:')));
 });
 test('obsolete results cannot replace a newer accepted simulation',()=>{
  let accepted=0,started=0;

@@ -35,7 +35,7 @@ async function main(){
   await page.click('#labelAdjust');
   assert.equal(await page.inputValue('#num_dose'),'350');assert.equal(await page.inputValue('#num_every'),'24');
   assert.ok(await page.locator('#labelAdjust').isDisabled(),'cannot apply twice');
-  await page.waitForFunction(()=>/Baseline → current/.test(document.querySelector('#baselineDelta')?.textContent||''),null,{timeout:60000});
+  await page.waitForFunction(()=>/Before label adjustment → current/.test(document.querySelector('#baselineDelta')?.textContent||''),null,{timeout:60000});
   // Probenecid raises exposure and appears in the scenario description.
   const auc=()=>page.evaluate(()=>document.querySelectorAll('.summary-card .metric')[1]?.textContent||'');
   await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});

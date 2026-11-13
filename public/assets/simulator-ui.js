@@ -45,7 +45,11 @@ let calculationVersion=0,activeJob=null,queuedJob=null,worker=null,workerDisable
 let pendingCsvExport=false, migratedPayload=null;
 // Small, bounded cache of completed summaries; the engine retains its own raw ensemble cache.
 const completedResults=new Map();
-let baseline=null,baselineRevision=0;
+// Saved regimens for comparison (up to AyFluxRegimens.MAX_REGIMENS). Each is a deep-frozen
+// snapshot of the settings, primary-scenario curves and dose times at the moment it was saved.
+let regimens=[],baselineRevision=0,regimenSeq=0;
+// Line colour and dash for each saved regimen; dash patterns keep them distinct without colour.
+const REGIMEN_STYLES=[{color:'#303846',dash:[10,4,2,4]},{color:'#6b3fa0',dash:[8,4]},{color:'#8a5300',dash:[2,4]},{color:'#00616b',dash:[16,4,4,4]}];
 const presentationKeys=new Set(['virus','showBands','showShades','showStudy','showIC50','requestedModes']);
 function resultKey(config){return JSON.stringify(Object.keys(config).sort().filter(k=>!presentationKeys.has(k)).map(k=>[k,config[k]]));}
 function rememberResult(key,data){
@@ -154,7 +158,7 @@ function setBusy(busy){
  if(typeof renderTimeAbove==='function')renderTimeAbove();
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
- $('saveBaseline').disabled=busy||!dataIsCurrent;
+ $('saveBaseline').disabled=busy||!dataIsCurrent||(typeof regimens!=='undefined'&&regimens.length>=4);
  if(typeof refreshLabelAdjust==='function')refreshLabelAdjust();
  if(busy)$('status').textContent='Updating simulation';
 }
@@ -329,23 +333,23 @@ function labelAdjustmentState(){
 }
 function medicationTools(){
  const state=labelAdjustmentState();
- return `<div class="label-adjust"><label for="labelBsa">Body surface area for label comparison (m²)</label><input id="labelBsa" type="number" min="0" step="any" inputmode="decimal" value="${c.labelBsa||''}" placeholder="Enter BSA"><p class="tip">Label CrCl = absolute CrCl × 1.73 ÷ body surface area. Used for this label comparison.</p><button type="button" class="btn secondary" id="labelAdjust" ${state.ok?'':'disabled'}>Apply label kidney adjustment</button><p class="tip" id="labelAdjustTip">${state.text}${state.ok?' The current curve is kept as a baseline for comparison.':''}</p></div>`+
+ return `<div class="label-adjust"><label for="labelBsa">Body surface area for label comparison (m²)</label><input id="labelBsa" type="number" min="0" step="any" inputmode="decimal" value="${c.labelBsa||''}" placeholder="Enter BSA"><p class="tip">Label CrCl = absolute CrCl × 1.73 ÷ body surface area. Used for this label comparison.</p><button type="button" class="btn secondary" id="labelAdjust" ${state.ok?'':'disabled'}>Apply label kidney adjustment</button><p class="tip" id="labelAdjustTip">${state.text}${state.ok?' The current curve is saved as a regimen for comparison.':''}</p></div>`+
   `<label class="check"><input type="checkbox" id="probenecid" ${c.probenecid?'checked':''}> Probenecid co-administration</label><p class="tip">Lowers acyclovir renal clearance by 32%, as measured in three adults by Laskin et al. [41]. CMMG clearance is unchanged. A single small study; illustrative only.</p>`;
 }
 function refreshLabelAdjust(){
  const button=$('labelAdjust'),tip=$('labelAdjustTip');if(!button||!tip)return;
  const state=labelAdjustmentState();button.disabled=!state.ok||!dataIsCurrent;
- tip.textContent=state.text+(state.ok?' The current curve is kept as a baseline for comparison.':'');
+ tip.textContent=state.text+(state.ok?' The current curve is saved as a regimen for comparison.':'');
 }
 function applyLabelAdjustment(){
  const state=labelAdjustmentState();if(!state.ok)return;
  if(!dataIsCurrent||!results?.[primary])return;
- baseline={primary,config:structuredClone(c),data:structuredClone(results[primary])};baselineRevision++;$('saveBaseline').textContent='Replace baseline with selected curve';
+ const kept=saveRegimen('Before label adjustment');
  rememberVersion('Before label kidney adjustment');studyOverlay=null;
  const before=c.dose+' mg every '+c.every+' h';
  c.dose=Number(state.dose.toPrecision(6));c.every=state.every;
  renderInputs();
- showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label using body surface area '+c.labelBsa+' m² [10]. The previous curve is shown as the baseline. The label specifies an additional dose after each hemodialysis session. Add those supplemental doses explicitly in the custom medication schedule. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label using body surface area '+c.labelBsa+' m² [10]. '+(kept?'The previous curve is saved as the regimen “Before label adjustment” for comparison. ':'Four regimens are already saved, so the previous curve was not added to the comparison. ')+'The label specifies an additional dose after each hemodialysis session; preview and apply those with Dose timing after hemodialysis in Research tools. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
  defer();
 }
 function updateDrugCaution(){
@@ -482,9 +486,9 @@ function curve(key,unit,where,ref=null){if(!results)return;
   if(m===primary&&c.showBands)series.push(charts.band(Math.round(c.coverage*100)+'% '+(results._validation.fitted?'updated':'unfitted')+' model interval',d.time,scale(z.lower),scale(z.upper),rgba(color,.17)));
   series.push(charts.line(m+(m===primary?' (selected)':''),d.time,scale(z.median),color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
  }
- const comparison=baseline&&['plasma','csf','cmmg','csfCmmg'].includes(key);
- const horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
- if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,scale(baseline.data[key].median),'#303846',2.5,[10,4,2,4]));
+ const comparison=regimens.length>0&&['plasma','csf','cmmg','csfCmmg'].includes(key);
+ const horizon=comparison?Math.max(c.horizon,...regimens.map(r=>r.config.horizon)):c.horizon;
+ if(comparison)regimens.forEach((r,i)=>{const style=REGIMEN_STYLES[i%REGIMEN_STYLES.length];series.push(charts.line('Saved: '+r.name,r.data.time,scale(r.data[key].median),style.color,2.5,style.dash));});
  const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
  const study=key==='plasma'||key==='cmmg'?overlayStudy():null,studyPoints=study?(key==='plasma'?study.points:study.cmmgPoints):null;
@@ -512,29 +516,81 @@ function baselineChanges(saved,config,selected){
  }
  return changes;
 }
+function regimenDosing(config){
+ const n=value=>String(Number(Number(value).toPrecision(4)));
+ if(config.dosingMode==='custom')return config.customDoses.length+' custom dose'+(config.customDoses.length===1?'':'s');
+ return (config.route==='Valacyclovir oral'?'Valacyclovir oral ':'Acyclovir IV ')+n(config.dose)+' mg every '+n(config.every)+' h'+(config.probenecid?', probenecid':'');
+}
+// Saved regimens plus the current settings, with metrics over one shared window.
+function regimenRows(){
+ const RG=window.AyFluxRegimens;
+ const rows=regimens.map(r=>({id:r.id,name:r.name,primary:r.primary,config:r.config,data:r.data,doseTimes:r.doseTimes,saved:true}));
+ if(dataIsCurrent&&results?.[primary])rows.push({id:'current',name:'Current settings (not saved)',primary,config:c,data:results[primary],doseTimes:E.buildDoses(c).map(d=>d.time),saved:false});
+ const span=RG.commonWindow(rows.map(r=>r.data));
+ return {span,rows:rows.map(r=>({...r,metrics:RG.regimenMetrics(r.data,r.doseTimes,span)}))};
+}
 function renderBaseline(){
- $('clearBaseline').disabled=!baseline;
- $('baselineDetails').classList.toggle('hidden',!baseline);
+ const RG=window.AyFluxRegimens,full=regimens.length>=RG.MAX_REGIMENS,latest=regimens[regimens.length-1];
+ $('clearBaseline').disabled=!regimens.length;
+ $('saveBaseline').disabled=full||!dataIsCurrent;
+ $('regimenName').disabled=full;$('regimenName').placeholder=full?'Four regimens saved':RG.nextName(regimens);
+ $('baselineDetails').classList.toggle('hidden',!latest);
  $('baselineChanges').replaceChildren();$('baselineDelta').textContent='';
- if(!baseline){$('baselineStatus').textContent='Freeze the selected scenario, then change settings to compare concentration curves. The baseline lasts until cleared or this page is closed.';return;}
- $('baselineStatus').textContent='Frozen baseline: '+baseline.primary+'. Dark dash-dot lines show saved medians on the four concentration charts; shading, dose markers and uncertainty bands describe the current settings only.';
- const changes=baselineChanges(baseline,c,primary);
+ const area=$('regimenTableArea');area.replaceChildren();
+ if(!latest){$('baselineStatus').textContent='Name and save the selected scenario, then change settings to compare up to four regimens. Saved regimens last until removed or this page is closed.';return;}
+ $('baselineStatus').textContent=regimens.length+' of '+RG.MAX_REGIMENS+' regimens saved'+(full?'; remove one to save another':'')+'. Each keeps the settings and curves it had when saved. Dashed lines show their medians on the four concentration charts; shading, dose markers and uncertainty bands describe the current settings only.';
+ $('baselineSummary').textContent='Changed settings since '+latest.name;
+ const changes=baselineChanges(latest,c,primary);
  for(const text of changes.length?changes:['No input settings changed.']){const li=document.createElement('li');li.textContent=text;$('baselineChanges').append(li);}
- const rows=[['Peak plasma acyclovir','peak','mg/L',2,'acyclovir'],['Plasma acyclovir AUC','auc','mg·h/L',0,'acyclovir'],['Peak CSF acyclovir','csfPeak','mg/L',2,'acyclovir'],['Peak plasma CMMG','mPeak','mg/L',2,'cmmg'],['Removed by dialysis','mass','mg',0]];
- const parts=rows.map(([label,key,unit,digits,analyte])=>{
-  const before=shown(baseline.data.summary[key].median,analyte),after=shown(results[primary].summary[key].median,analyte);
+ const keys=[['Peak plasma acyclovir','peak','mg/L',2,'acyclovir'],['Plasma acyclovir AUC','auc','mg·h/L',0,'acyclovir'],['Peak CSF acyclovir','csfPeak','mg/L',2,'acyclovir'],['Peak plasma CMMG','mPeak','mg/L',2,'cmmg'],['Removed by dialysis','mass','mg',0]];
+ const parts=keys.map(([label,key,unit,digits,analyte])=>{
+  const before=shown(latest.data.summary[key].median,analyte),after=shown(results[primary].summary[key].median,analyte);
   const change=before>0?` (${after>=before?'+':''}${Math.round(100*(after-before)/before)}%)`:'';
   return `${label}: ${before.toFixed(digits)} → ${after.toFixed(digits)} ${analyte?unitText(unit):unit}${change}`;
  });
- $('baselineDelta').textContent='Baseline → current, median values. '+parts.join(' · ')+'.'+(baseline.config.horizon!==c.horizon?' Simulation durations differ; each value covers its own run.':'');
+ $('baselineDelta').textContent=latest.name+' → current, median values over each full run. '+parts.join(' · ')+'.'+(latest.config.horizon!==c.horizon?' Simulation durations differ; each value covers its own run. The table below uses one shared window.':'');
+ const {span,rows}=regimenRows(),w=String(Number(span.toFixed(2)));
+ const table=document.createElement('table');table.className='regimen-table';
+ const caption=document.createElement('caption');caption.textContent='Saved regimens and current settings, 0–'+w+' h';table.append(caption);
+ const head=document.createElement('tr');
+ for(const text of ['Regimen','Scenario and settings','Plasma acyclovir AUC 0–'+w+' h ('+unitText('mg·h/L')+')','Trough plasma acyclovir ('+unitText('mg/L')+')','Peak plasma CMMG 0–'+w+' h ('+unitText('mg/L')+')','']){const th=document.createElement('th');th.scope='col';th.textContent=text;head.append(th);}
+ const thead=document.createElement('thead');thead.append(head);table.append(thead);
+ const body=document.createElement('tbody');
+ rows.forEach((r,i)=>{
+  const tr=document.createElement('tr');if(!r.saved)tr.className='regimen-current';
+  const th=document.createElement('th');th.scope='row';
+  if(r.saved){const style=REGIMEN_STYLES[i%REGIMEN_STYLES.length],swatch=document.createElement('span');swatch.className='regimen-swatch';swatch.style.borderTopColor=style.color;swatch.style.borderTopStyle=i===2?'dotted':'dashed';swatch.setAttribute('aria-hidden','true');th.append(swatch);}
+  th.append(document.createTextNode(r.name));tr.append(th);
+  const m=r.metrics,cell=text=>{const td=document.createElement('td');td.textContent=text;tr.append(td);};
+  cell(r.primary+' · '+regimenDosing(r.config)+' · '+describeScenario(r.config,r.primary).split(' · ').filter(x=>/CrCl|kg$/.test(x)).join(' · '));
+  cell(shown(m.plasmaAuc,'acyclovir').toFixed(1));
+  cell(m.trough?shown(m.trough.value,'acyclovir').toFixed(2)+' at '+String(Number(m.trough.time.toFixed(2)))+' h':'— (no dose after 0 h)');
+  cell(shown(m.cmmgPeak,'cmmg').toFixed(2));
+  const td=document.createElement('td');
+  if(r.saved){const button=document.createElement('button');button.type='button';button.className='btn secondary';button.dataset.removeRegimen=r.id;button.textContent='Remove';button.setAttribute('aria-label','Remove '+r.name);td.append(button);}
+  tr.append(td);body.append(tr);
+ });
+ table.append(body);area.append(table);
+ const note=document.createElement('p');note.className='tip';
+ note.textContent='All values come from the median curve of each regimen’s selected scenario. Window: 0–'+w+' h for every row, the shortest simulation being compared. AUC: trapezoidal area under the median plasma acyclovir curve over that window. Trough: median plasma acyclovir at the start time of the last dose that begins after 0 h and before '+w+' h, i.e. just before that dose; doses are infused or absorbed, so the curve is continuous there. Peak plasma CMMG: the highest median plasma CMMG concentration in the window. Educational comparison, not dosing guidance.';
+ area.append(note);
+}
+function saveRegimen(name){
+ const RG=window.AyFluxRegimens;
+ if(!dataIsCurrent||!results?.[primary]||regimens.length>=RG.MAX_REGIMENS)return false;
+ regimens.push(RG.snapshotRegimen({id:'r'+(++regimenSeq),name:RG.cleanName(name,RG.nextName(regimens)),primary,config:c,data:results[primary],doseTimes:E.buildDoses(c).map(d=>d.time)}));
+ baselineRevision++;render();return true;
 }
 $('saveBaseline').addEventListener('click',()=>{
- if(!dataIsCurrent||!results?.[primary])return;
- baseline={primary,config:structuredClone(c),data:structuredClone(results[primary])};baselineRevision++;
- $('saveBaseline').textContent='Replace baseline with selected curve';render();
+ if(saveRegimen($('regimenName').value))$('regimenName').value='';
 });
+$('regimenName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('saveBaseline').click();}});
 $('clearBaseline').addEventListener('click',()=>{
- baseline=null;baselineRevision++;$('saveBaseline').textContent='Save selected curve as baseline';render();
+ regimens=[];baselineRevision++;render();
+});
+$('regimenTableArea').addEventListener('click',e=>{
+ const button=e.target.closest('[data-remove-regimen]');if(!button)return;
+ regimens=regimens.filter(r=>r.id!==button.dataset.removeRegimen);baselineRevision++;render();
 });
 function showStats(){let d=results[primary].summary;
  let arr=[['Peak plasma acyclovir',d.peak,'mg/L',1,'#ed766b','acyclovir'],['Plasma acyclovir AUC',d.auc,'mg·h/L',0,'#8660c1','acyclovir'],['Peak CSF acyclovir',d.csfPeak,'mg/L',1,'#179b89','acyclovir'],['CSF acyclovir AUC',d.csfAuc,'mg·h/L',0,'#d59c37','acyclovir'],['Peak plasma CMMG',d.mPeak,'mg/L',2,'#cb5891','cmmg'],['Acyclovir removed by dialysis',d.mass,'mg',0,'#3976bd'],['Plasma at simulation end',d.endPlasma,'mg/L',2,'#315d74','acyclovir']];
@@ -1232,6 +1288,85 @@ function loadGuidedScenario(id){
  showScenarioNote('Guided scenario: '+scenario.label,scenario.note);
  switchTab('concentration');defer();
 }
+// ---- Dose timing after hemodialysis (Research tools) ----
+// Shows the label-based schedule next to the current one. Nothing changes until
+// "Apply proposed schedule" is pressed; applying goes through version history.
+const postHdHours=v=>String(Number(Number(v).toFixed(2)));
+const postHd={RG:window.AyFluxRegimens,preview:null};
+
+function postHdSignature(){try{return JSON.stringify([primary,c.horizon,E.buildDoses(c),E.scheduleFor(primary,c)]);}catch{return '';}}
+function postHdStatus(text){$('postHdStatus').textContent=text;}
+function clearPostHd(text){
+ postHd.preview=null;$('postHdArea').replaceChildren();$('applyPostHd').disabled=true;$('postHdConfirmRow').classList.add('hidden');
+ if(text!==undefined)postHdStatus(text);
+}
+
+function postHdTable(plan){
+ const table=document.createElement('table');table.className='post-hd-table';
+ const caption=document.createElement('caption');caption.textContent='Original and proposed dose times (hours from the start of the simulation)';table.append(caption);
+ const head=document.createElement('tr');
+ for(const text of ['Dose','Drug and route','Amount (mg)','Original time (h)','Proposed time (h)','Change','Label rule and flags']){const th=document.createElement('th');th.scope='col';th.textContent=text;head.append(th);}
+ const thead=document.createElement('thead');thead.append(head);table.append(thead);
+ const body=document.createElement('tbody');
+ plan.rows.forEach((r,i)=>{
+  const tr=document.createElement('tr');
+  if(r.flags.length)tr.className='flagged';else if(r.change!=='unchanged')tr.className='changed';
+  const add=(text,num)=>{const td=document.createElement('td');td.textContent=text;if(num)td.className='num';tr.append(td);return td;};
+  add(String(i+1),true);add(r.route);add(postHdHours(r.amount),true);
+  add(r.original===null?'—':postHdHours(r.original),true);add(r.proposed===null?'—':postHdHours(r.proposed),true);
+  add({unchanged:'Kept',moved:'Moved',added:'Added','not added':'Not added'}[r.change]);
+  const notes=add(r.reason||(r.change==='unchanged'?'Kept as scheduled':''));
+  for(const flag of r.flags){const span=document.createElement('span');span.className='post-hd-flag';span.textContent=' Flag: '+flag+'.';notes.append(span);}
+  body.append(tr);
+ });
+ table.append(body);return table;
+}
+
+function showPostHdPreview(){
+ if(!dataIsCurrent){clearPostHd('Wait for the current simulation to finish, then preview again.');return;}
+ const errors=E.validate(c,primary);
+ if(errors.length){clearPostHd('Fix the current settings first: '+errors.slice(0,2).join('; ')+'.');return;}
+ const plan=postHd.RG.postHdPlan({doses:E.buildDoses(c),sessions:postHd.RG.hdSessions(E.scheduleFor(primary,c)),horizon:c.horizon});
+ if(!plan.applicable){clearPostHd(plan.message);return;}
+ postHd.preview={signature:postHdSignature(),plan};
+ const routes=new Set(plan.rows.map(r=>r.route)),area=$('postHdArea');area.replaceChildren();
+ const intro=document.createElement('p');intro.className='tip';
+ intro.textContent='Selected scenario: '+primary+'. Hemodialysis sessions: '+plan.sessions.map(s=>postHdHours(s.start)+'–'+postHdHours(s.end)+' h').join(', ')+'. '+
+  [...routes].map(route=>route+': '+postHd.RG.LABEL_RULES[route].text+' ['+postHd.RG.LABEL_RULES[route].ref+'].').join(' ')+
+  ' Doses not named by these rules are kept at their original times.';
+ area.append(intro,postHdTable(plan));
+ const summary=document.createElement('p');summary.className='tip';
+ summary.textContent=plan.changed+' change'+(plan.changed===1?'':'s')+'; '+plan.originalCount+' doses now, '+plan.proposedCount+' proposed'+
+  (plan.flagCount?'. '+plan.flagCount+' row'+(plan.flagCount===1?' is':'s are')+' flagged: a dose that would be dropped, or two doses within '+postHd.RG.NEAR_DOSE_H+' h of each other (possible duplicate). Review them before applying.':'. Nothing is flagged.')+
+  ' Applying replaces the dose schedule with these doses as a custom schedule for every scenario, saves the current curve as a regimen for comparison when there is room, and can be undone in Research tools. A teaching comparison, not a dosing recommendation.';
+ area.append(summary);
+ const confirm=$('postHdConfirm');confirm.checked=false;$('postHdConfirmRow').classList.toggle('hidden',!plan.flagCount);
+ $('applyPostHd').disabled=!plan.changed||!plan.proposedCount||plan.flagCount>0;
+ postHdStatus('Preview ready. Nothing has been changed.');
+}
+
+function applyPostHd(){
+ if(!postHd.preview)return;
+ if(postHdSignature()!==postHd.preview.signature||!dataIsCurrent){clearPostHd('Settings changed since the preview. Preview again before applying.');return;}
+ const plan=postHd.preview.plan;
+ if(plan.flagCount&&!$('postHdConfirm').checked)return;
+ const config={...structuredClone(c),dosingMode:'custom',customDoses:structuredClone(plan.doses)};
+ const errors=[...new Set([...visible,primary].flatMap(mode=>E.validate(config,mode)))];
+ if(errors.length){postHdStatus('Not applied: '+errors.slice(0,2).join('; ')+'.');return;}
+ const kept=saveRegimen('Before post-HD timing');
+ rememberVersion('Before post-dialysis dose timing');studyOverlay=null;
+ applyVersion({config,primary,visible:[...visible],palette:paletteMode,unit:concUnit});
+ showScenarioNote('Dose timing after hemodialysis','Applied '+plan.changed+' label-based change'+(plan.changed===1?'':'s')+' around '+plan.sessions.length+' hemodialysis session'+(plan.sessions.length===1?'':'s')+' as a custom dose schedule ([10] acyclovir IV, [8] valacyclovir). '+
+  (kept?'The previous curve is saved as the regimen “Before post-HD timing”. ':'')+'Use Undo last import in Research tools to return to the previous settings. A teaching comparison, not a dosing recommendation.');
+ clearPostHd('Applied. The dose schedule is now a custom schedule.');
+ switchTab('concentration');defer();
+}
+
+function checkPostHdStale(){if(postHd.preview&&postHdSignature()!==postHd.preview.signature)clearPostHd('Settings changed. Preview again.');}
+$('previewPostHd').addEventListener('click',showPostHdPreview);
+$('applyPostHd').addEventListener('click',applyPostHd);
+$('postHdConfirm').addEventListener('change',e=>{if(postHd.preview)$('applyPostHd').disabled=!e.target.checked||!postHd.preview.plan.changed||!postHd.preview.plan.proposedCount;});
+for(const type of ['input','change','click'])document.addEventListener(type,e=>{if(!e.target.closest?.('#postHdPanel'))setTimeout(checkPostHdStale,0);},true);
 for(const scenario of guidedScenarios()){
  const button=document.createElement('button');
  button.type='button';button.className='btn secondary';button.dataset.guided=scenario.id;button.textContent=scenario.label;
