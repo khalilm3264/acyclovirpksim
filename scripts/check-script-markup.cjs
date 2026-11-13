@@ -13,6 +13,8 @@ const expectedSources = [
   './assets/ayflux-version.js',
   './assets/model-integrity.js',
   './assets/osp-import.js',
+  './assets/study-library.js',
+  './assets/regimen-tools.js',
   './assets/simulator-ui.js',
   './assets/analysis-views.js',
   './assets/research-workspace.js',

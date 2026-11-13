@@ -42,6 +42,7 @@
     <a href="/learn/dialysis/">Dialysis</a>
     <a href="/learn/model-methods/" aria-current="page">Model methods</a>
     <a href="/learn/interoperability/">Data exchange</a>
+    <a href="/references/">References</a>
   </nav>
   <main id="main-content">
     <div class="page-intro">
@@ -118,7 +119,7 @@
   <tr><td>Peritoneal transfer and ultrafiltration</td><td>Exploratory membrane PS, small-pore convection, reabsorption and glucose decay</td><td>Relevant <a href="https://pubmed.ncbi.nlm.nih.gov/2243158/">Burgess &amp; Gill 1990</a>, <a href="https://pubmed.ncbi.nlm.nih.gov/3717158/">Shah et al. 1986</a>, and <a href="https://pubmed.ncbi.nlm.nih.gov/3624115/">Boelaert et al. 1987</a>. These sources do <strong>not</strong> establish current APD prescription-level coefficients.</td></tr>
   <tr><td>Monte Carlo bands</td><td>Lognormal parameter variability with user-adjusted coverage</td><td>Chosen educational prior assumptions; <strong>not</strong> externally calibrated 90% clinical prediction intervals.</td></tr>
   </tbody></table></div>
-  <p><strong>Additional references:</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/20038622/">Smith et al. (2010), ACV/CMMG CSF and systemic PK (PMID 20038622)</a>; <a href="https://pubmed.ncbi.nlm.nih.gov/3717158/">Shah, Winer and Krasny (1986), CAPD acyclovir pharmacokinetics (PMID 3717158)</a>. These provide independent measurements for future evaluation, not validation of this implementation. The source-code <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/public/assets/pk-engine.js">engine</a> and <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/interop/ayflux_reference.cpp">independent mrgsolve reference</a> expose the calculations for review.</p>
+  <p><strong>Additional references:</strong> <a href="https://pubmed.ncbi.nlm.nih.gov/20038622/">Smith et al. (2010), ACV/CMMG CSF and systemic PK (PMID 20038622)</a>; <a href="https://pubmed.ncbi.nlm.nih.gov/3717158/">Shah, Winer and Krasny (1986), CAPD acyclovir pharmacokinetics (PMID 3717158)</a>. These provide measurements for study-specific evaluation; each reconstruction must identify unavailable inputs and whether reference values were observed or source-author fitted. They do not establish clinical validation of this implementation. The source-code <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/public/assets/pk-engine.js">engine</a> and <a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/interop/ayflux_reference.cpp">independent mrgsolve reference</a> expose the calculations for review.</p>
 </section>
 <section class="card" id="benchmark-results">
   <h2>Comparison with published measurements</h2>
@@ -143,7 +144,9 @@
   <p>Study protocols, sensitivity analyses and reproducible JavaScript commands are available in the <a href="https://github.com/khalilm3264/acyclovirpksim/tree/main/research/validation">benchmark comparison files</a>. Each study file links its original source. These results describe performance in the stated reconstructions.</p>
 </section>
 <section class="card" id="new-research-evidence">
-  <h2>Additional research references (2026 evidence review)</h2>
+  <h2>Research evidence and reference updates</h2>
+  <p><strong>Publication update:</strong> Vasquez Vasquez and colleagues’ case is now published in <em>British Journal of Clinical Pharmacology</em> (2025;91:2469–2473), <a href="https://doi.org/10.1002/bcp.70138">doi:10.1002/bcp.70138</a>. Reference [22] retains the earlier preprint as publication history; the current HD reconstruction already cites the final article. These are the same case.</p>
+  <p>The <a href="/references/">complete numbered bibliography</a> includes publication details and DOI links. Bibliographic verification, abstract review and full-text review are distinct; see individual source notes.</p>
   <p>These primary studies and clinical reports offer benchmarks and scientific context. They <strong>do not</strong> constitute validation of AyFlux. To see the full numbered bibliography, open the simulator’s <strong>References &amp; methods</strong> tab.</p>
   <ul>
     <li><strong>Plasma and CSF pharmacokinetics:</strong> <a href="https://doi.org/10.1128/AAC.47.8.2438-2441.2003" target="_blank" rel="noopener noreferrer">Lycke et al. (2003)</a> measured steady-state serum and CSF acyclovir after valacyclovir. <a href="https://doi.org/10.1128/AAC.01023-10" target="_blank" rel="noopener noreferrer">Pouplin et al. (2011)</a> reported CNS-infection CSF concentrations over time. <a href="https://doi.org/10.1093/jac/24.6.947" target="_blank" rel="noopener noreferrer">Lycke et al. (1989)</a> investigated oral <em>acyclovir</em>, a route not supported by AyFlux.</li>

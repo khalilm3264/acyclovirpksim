@@ -1,37 +1,79 @@
-# AyFlux changelog
+# Changelog
 
-## Unreleased — pediatric research module
-- Added a source-audited Abdalla/Zeng pediatric IV comparison, nine reproducible covariate scenarios, 12 bibliography entries, and explicit limitations for CAPD, CMMG, neonatal and CNS evidence.
+All notable changes to AyFlux are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) with a `preview` label while the project is pre-1.0.
 
+Three things are versioned separately:
 
-- Add an isolated Abdalla (2020) IV pediatric model with weight/eGFR comparisons, conditional variability bands, accessible numeric results, and CSV export.
-- Add equation verification, independent RK4 and exposure checks, and reproducible fixtures. Population target-attainment and clinical validation remain unperformed.
-- Link the module from the guide and model methods; add reference [25].
+- **Application version** (this file, `public/assets/ayflux-version.js`, `CITATION.cff`).
+- **Configuration schema** for saved JSON files, currently **2**. It changes only when saved files would stop loading.
+- **License**, AGPL-3.0-only.
 
-This changelog distinguishes the application version from the configuration schema and AGPL license.
+Every entry states whether pharmacokinetic equations, parameters or defaults changed. If an entry does not say so, they did not.
 
-## Unreleased
+## [Unreleased]
 
-- **Time above a level.** The simulation summary reports how many hours the selected scenario's median plasma curve is above a level you type in, in the current units. No default level is offered; it is a descriptive statistic, not a target.
-- **Fuller baseline comparison.** With a frozen baseline, the panel now lists baseline → current values and percent change for peak plasma, plasma AUC, peak CSF, peak CMMG and drug removed by dialysis.
-- **Kidney injury example.** The custom CrCl trajectory editor has a *Kidney injury mid-course* example: starting CrCl to the halfway point, a fall to one fifth by three quarters, then steady. It is illustrative and must be applied like any other edit.
-- The third-party measurement pixel is disabled (`ENABLED = false` in `public/assets/measurement-pixel.js`). Pages load the file but it requests nothing from other servers.
+Changes merged to `main` since 0.26.0 (pull requests #40–#44, #61, #63 and #67). **No pharmacokinetic equation, parameter, default, export format or configuration schema changed.**
 
-- **Shareable links.** Research tools → Save / load → *Copy shareable link* puts the current scenario (settings that differ from the defaults, selected scenario, visible curves, colors and units) into the link itself, after `#s=`. Nothing is uploaded and browsers do not send that part of a link to servers. Opening a link runs the same full validation as a JSON import, removes the scenario from the address bar, and adds an entry to version history when it replaces existing settings. Links never contain measured concentrations.
-- **Concentration units.** A *Units* selector on the Concentration tab switches graphs, the summary and the dialysis comparison table between mg/L and µmol/L (acyclovir 225.21 g/mol, CMMG 239.19 g/mol). The simulation, CSV/XLSX exports, saved JSON, Model validation and Research tools stay in mg/L.
+### Documentation (#61)
 
-- Graph colors moved out of the page header and into settings: **Advanced settings → Graph colors** in the simulator and a **Graph colors** setting on the visual explorer. The stored preference is unchanged and still shared between the two pages.
-- The dialysis comparison table is now the last panel on the Concentration tab, titled **Dialysis comparison table** with a one-line description of its contents.
+- Refreshed README and wiki source around the current v0.26.0 preview, merged interface/research features and planned v0.27.0 work.
+- Added a synchronized standalone bibliography, linked from the guide, citation page and simulator; completed journal metadata and recorded the final Vasquez Vasquez case publication while preserving the reconstruction's preprint provenance.
+- Added reference maintenance and repository dependency notes. Scientific coefficients and simulation results are unchanged.
 
-- Graph navigation: click and drag zooms into a box by default (mouse or trackpad), double-click resets, and the toolbar adds pan, zoom in/out, undo and image download. Touch screens keep page scrolling and use the toolbar. A short hint above the graphs explains the controls.
-- Layout: the primary dialysis mode is now the first sidebar control; Research tools is the second tab from the right; Drug references and Methods and References are one **References & methods** tab; the comparison table is an on-demand panel under Concentration (all scenarios are still calculated only while it is open).
-- Smaller top notice with the same warnings; the "Why upper uncertainty bands can be wide" note is a short collapsed panel; example schedules load from compact chips.
-- Save / load: every JSON import first stores the settings it replaces. **Undo last import** and a 10-entry **Version history** restore earlier settings; history lives only in the open tab and is never written to storage.
-- More colorful two-parameter heatmaps with value labels, and a **Colorblind-safe colors** toggle in the header (Okabe–Ito curves, viridis heatmaps). The preference is one browser flag shared with the visual explorer; the Advanced setting stays in step.
-- The published-study reference library is the last item on Research tools, styled as a source list.
-- Drug reference table regrouped by kidney function and modality (normal, intermittent HD, PD, CRRT, CNS/metabolite), with rows for oral valacyclovir bioavailability, oral acyclovir HD removal, CAPD peritoneal clearance and three CRRT studies. Added references [38]–[40] (Boulieu 1997, Bleyzac 1999, Collignon 2023).
-- Visual explorer: colorblind-safe toggle (shared preference), multi-hue grid and heatmap colors with contrast-checked cell text, and rounded heatmap axis labels and tooltips (previously long decimals such as 46.666666666666664).
-- No pharmacokinetic equation, parameter, export format or configuration schema (2) changed.
+### Added
+
+- **Graph navigation.** Click and drag zooms into a box by default with a mouse or trackpad; double-click resets. The toolbar adds pan, zoom in/out, undo and image download, and Shift + scroll zooms the time axis. Touch screens keep page scrolling and use the toolbar. (#40)
+- **Version history for imports.** Every JSON import, shared link, guided scenario and reset first stores the settings it replaces. *Undo last import* and a 10-entry history restore them. History lives only in the open tab. (#40, #42, #44)
+- **Shareable links.** *Copy shareable link* puts the scenario into the link itself after `#s=`. Nothing is uploaded; opening a link runs the same validation as a JSON import and removes the scenario from the address bar. Links never contain measured concentrations. Format documented in `docs/data-exchange.md`. (#42)
+- **Concentration units.** A *Units* selector switches graphs, the summary and the dialysis comparison table between mg/L and µmol/L (acyclovir 225.21 g/mol, CMMG 239.19 g/mol). The simulation, exports, saved files, Model validation and Research tools stay in mg/L. (#42)
+- **Time above a level.** Hours the selected scenario's median plasma curve is above a level you enter. No default level is offered; it is a descriptive statistic, not a target. (#43)
+- **Accumulation ratio.** Plasma peak after the last dose relative to the peak after the first, for the median curve. (#44)
+- **Scenario description.** A one-line plain-language summary of the selected scenario above the summary tiles, including dose in mg/kg for repeat dosing. (#44)
+- **Guided scenarios.** Three teaching presets on Research tools that load a scenario, open the Concentration tab and show a dismissible note on what to look at. The regimens are deliberately unadjusted illustrations, not recommendations. (#44)
+- **Hemodialysis timing explorer.** Moves one HD session hourly across the first 96 hours and reruns the scenario with nominal parameters each time, plotting drug removed and plasma AUC against session start time. The simulation keeps its full duration, kidney-function trajectory and dose schedule. (#44)
+- **Kidney injury example** for the custom CrCl trajectory editor: steady to the halfway point, a fall to one fifth by three quarters, then steady. Illustrative only. (#43)
+- **Compare with a published study.** A selector above the plasma graph loads a published regimen (Laskin 1982 normal kidney function [41], Laskin 1982 anuric [1], or the US label 5 and 10 mg/kg q8h means [10]) and draws the published group means as dots. The points hide, with a note, as soon as the settings no longer match the study. The previous settings go to version history. Overlay state is not saved in files or links. (draft PR)
+- **Evidence scorecard** on References & methods. For each published study above: predicted/observed geometric mean ratio of the nominal curve, and how many published means fall inside the 90% model interval from 400 draws. Calculated in the browser when the tab opens and recalculated if calibration multipliers change. No study is used to fit anything. (draft PR)
+- **What did the study report?** Loading a published case shows each input needed to reproduce it, marked Reported, Calculated, Assumed or Unknown, with the source or reason. Recorded so far for the Vasquez Vasquez HD case and the three Boelaert CAPD subjects; the scorecard gains a column with the counts per study and says "Not yet recorded" for the rest. (draft PR) Each input now shows what the paper reports alongside what AyFlux uses, and the panel states the source checks still pending (the final Br J Clin Pharmacol 2025 version of Vasquez Vasquez; the original Boelaert 1987 paper). From #68: readers can vary the one unreported assumption for each case (Vasquez last-dose-to-admission gap, 0–24 h; Boelaert residual CrCl, 0–30 mL/min). Exploring saves the original reconstruction as a regimen when there is room, leaves the published values unchanged, hides the measured points because the settings no longer match, and can be undone.
+- **Prediction exercise** in Compare regimens. With two or more saved regimens, hide results, ask which has the highest trough, peak, acyclovir AUC or CMMG AUC, record a prediction, then reveal. While hidden, the concentration graphs, summary values and comparison table are covered and the table shows each regimen's dose and dialysis timeline instead of its numbers. (draft PR)
+- **Compare regimens** on the Concentration tab. Save up to four named regimens; each keeps a frozen copy of its inputs and median curves, so later edits leave it unchanged. The table compares them with the current settings over one common window (0 to the shortest simulation): plasma acyclovir AUC (mg·h/L), peak, trough (plasma acyclovir at the start of the last dose before the window ends, with its hour), plasma CMMG AUC (mg·h/L) and peak CMMG. Saved curves are drawn dashed on the plasma acyclovir and CMMG graphs. (draft PR)
+- **Dose timing around hemodialysis.** Previews, then applies on request, the label rule for intermittent HD: IV acyclovir adds one dose at the end of each session and keeps scheduled doses [10]; oral valacyclovir moves that day's scheduled dose to the end of the session [8]. Current and proposed dose times are shown side by side, with flags for a dose that would overlap another, fall outside the simulation, or have no session match. A moved valacyclovir dose landing within an hour of the next one blocks applying. Not offered for peritoneal dialysis, where the acyclovir injection label says no supplemental dose appears necessary. (draft PR) Doses that would start within 1 hour of each other are flagged under an AyFlux interface rule (not a label rule; the labels set no minimum spacing): the flag only asks for review when the IV label requires the added dose, and blocks applying when a valacyclovir move would crowd the next dose.
+- **Errors by sample type and time since dose** on References & methods: predicted/observed for every published value against hours since the most recent dose, with a line at 1, twofold lines, and markers for peak, trough, post-infusion, HD-inlet and serial samples as each source reports them. (draft PR) A table under the figure gives each study's median predicted ÷ observed, range, direction (all below 1, all above 1, or mixed) and its reported peak and trough ratios, marking author-fitted values from the study's recorded provenance, so readers can see which studies share the pattern and which differ (from #71).
+- **Label kidney adjustment** in the Medication controls. For a repeating every-8-hour IV acyclovir regimen at a constant CrCl, one button applies the US injection label band (100% every 12 h at >25–50 mL/min/1.73 m², every 24 h at >10–25, 50% every 24 h at ≤10) [10]. Body surface area must be entered to convert absolute CrCl to the label's indexed units. The previous curve is kept as the baseline and the previous settings go to version history. Oral valacyclovir is not adjusted automatically because its label bands depend on indication. Teaching comparison only. (draft PR)
+- **Probenecid option.** Lowers renal acyclovir clearance by 32% in every parameter draw, as measured by Laskin et al. in three adults [41]; CMMG clearance is unchanged. Off by default, so default outputs and every validation result are unchanged. (draft PR)
+- **Dialysis and single-patient studies** in the study comparison and scorecard: Boelaert 1987 CAPD patients 1, 4 and 5 (author-fitted peaks and troughs) [6], Vasquez 2025 intermittent HD (4-hour admission gap assumed) [22], and Kacirova 2022 with paired acyclovir and CMMG levels, shown on the CMMG graph too [42]. Each reproduces its `research/validation` reconstruction, and tests check that. (draft PR)
+- **Predicted-versus-observed figure and scorecard CSV.** A log-scale plot of every published point against the AyFlux nominal prediction, with lines for perfect agreement and twofold error, plus a CSV with one row per point (observed, predicted, interval, inside or not, calibration multipliers). The caption gives the overall ratio and the counts within twofold and inside the interval. (draft PR)
+- **CMMG/acyclovir AUC ratio** in the simulation summary, over the last 24 simulated hours of the median curves, shown next to Kably 2025 population-model values (≈30% at eGFR above 90, ≈130% below 30 mL/min/1.73 m²) [29]. With default parameters AyFlux gives lower ratios than Kably at normal kidney function; see issue #46. (draft PR)
+- **Reference [41]**, Laskin 1982 *Antimicrob Agents Chemother* (probenecid study, normal-function serial plasma means). (draft PR)
+- **Reset to defaults** on Research tools, undoable through version history. (#44)
+- **Colorblind-friendly graph colors** (Okabe–Ito curves, viridis heatmaps), shared between the simulator and the visual explorer. (#40, #41)
+- **CRRT evidence.** Drug reference rows and references [38]–[40]: Boulieu 1997 (adult CVVHD), Bleyzac 1999 (CRRT variability), Collignon 2023 (pediatric CVVHDF). The first two are cited at abstract level and say so. (#40)
+- **Pediatric research module.** An isolated Abdalla (2020) IV pediatric model with weight/eGFR comparisons, conditional variability bands, accessible numeric results and CSV export; a source-audited Abdalla/Zeng comparison with nine reproducible covariate scenarios and 12 bibliography entries; equation verification with independent RK4 and exposure checks. Population target-attainment and clinical validation remain unperformed.
+
+### Changed
+
+- **Layout.** The primary dialysis mode is the first sidebar control. Research tools is the second tab from the right. Drug references and Methods and References are one **References & methods** tab with jump links. (#40)
+- **Dialysis comparison table** is the last panel on the Concentration tab instead of its own tab; all scenarios are still calculated only while it is open. (#40, #41)
+- **Baseline comparison** lists baseline → current values and percent change for peak plasma, plasma AUC, peak CSF, peak CMMG and drug removed by dialysis. It previously showed peak plasma only. (#43)
+- **Drug reference table** is grouped by kidney function and modality: normal, intermittent HD, PD, CRRT, CNS/metabolite. (#40)
+- **Heatmaps** use multi-hue colors with value labels; cell text is chosen to keep at least 4.5:1 contrast. (#40)
+- Shorter top notice with the same warnings and limitations link. Example schedules load from compact chips. The "Why upper uncertainty bands can be wide" note is a collapsed panel. (#40)
+- Graph colors are chosen under **Advanced settings → Graph colors** and on the visual explorer's Scenario card, not in the page header. (#41)
+- The published-study reference library is the last item on Research tools, styled as a source list. (#40)
+- Import validation lives in one function used by file imports and shared links. File import behavior is unchanged. (#42)
+- Reference [22] (Vasquez Vasquez et al.) cites the peer-reviewed article, Br J Clin Pharmacol 2025;91(8):2469–2473, and keeps the preprint as a secondary link. (#44)
+
+### Fixed
+
+- The HD timing explorer cancels an in-progress sweep when its source settings or selected scenario change, clearing the previous output. (#44)
+
+- The two-parameter sensitivity heatmap no longer shortens the simulation to 96 hours, which made it fail for custom dose schedules with later doses. (#44)
+- Visual explorer heatmap axis labels and tooltips are rounded; they previously showed values such as 46.666666666666664. (#40)
+- The event timeline strip stays in step with the plasma chart when zooming with the new controls. (#40)
+
+### Security and privacy
+
+- The third-party measurement pixel is disabled (`ENABLED = false` in `public/assets/measurement-pixel.js`). Pages load the file but it requests nothing from other servers. (#43)
 
 ## [0.26.0] - 2026-11-09 (preview)
 
@@ -127,13 +169,19 @@ This changelog distinguishes the application version from the configuration sche
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
-[0.24.2]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.24.1]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.24.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
+[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/4d9879d...main
+[0.26.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0260---2026-11-09-preview
+[0.25.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0250---2026-11-08-preview
+[0.24.2]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0242---2026-11-08-preview
+[0.24.1]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0241---2026-11-08-preview
+[0.24.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0240---2026-11-08-preview
+[0.23.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0230---2026-11-08-preview
+[0.22.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0220---2026-11-07-preview
+[0.21.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0210---2026-11-07-preview
+[0.20.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0200---2026-11-07-preview
 
-[0.26.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
-[0.25.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md
+### Study comparison review
+- Corrected the paired Kacirova case citation to its source publication [42], distinct from cohort [32].
+- Distinguished nine comparison scenarios from six reference sources and added error magnitude and separate dialysis, no-dialysis and CMMG summaries. Band inclusion is descriptive, not validated predictive coverage.
+- Added Stathoulopoulou 2002 urinary/CAPD mass-recovery sensitivity results separately from concentration metrics, retaining both denominator interpretations.
+
