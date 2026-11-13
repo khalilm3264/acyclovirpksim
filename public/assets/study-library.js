@@ -25,7 +25,7 @@
   group:'dialysis',mode:'Peritoneal dialysis',regimen:b.dose+' mg IV daily ×5, CAPD 4/4/4/12 h dwells, CrCl 0',
   config:{age:b.age,sex:b.sex,weight:b.weight,crcl:0,crclSource:'manual',renalMode:'constant',route:'Acyclovir IV',dosingMode:'repeat',
    dose:b.dose,every:24,doseCount:5,infusion:1,horizon:120,pdMethod:'manual',pdRxEnabled:true,pdRxRows:CAPD_ROWS,pdVolume:2,pdGlucose:1.36},
-  points:[1,24,97,120].map((t,i)=>[t,b.values[i]*ACV_MW/1000]),
+  points:[1,24,97,120].map((t,i)=>[t,b.values[i]*ACV_MW/1000]),kinds:['peak','trough','peak','trough'],
   note:'One continuous ambulatory PD patient ('+b.weight+' kg) given '+b.dose+' mg IV over 1 hour daily for 5 days, with four 2 L, 1.36% exchanges a day (dwells of 4, 4, 4 and 12 hours). The dots are the day-1 and day-5 peaks and troughs the authors derived from their own curve fits, not raw samples. No urinary recovery was reported, so CrCl is set to 0; that is an assumption.'});
  // Vasquez Vasquez J et al. Br J Clin Pharmacol 2025 [22], Table 1A: dialyzer-inlet plasma at the start and
  // end of the first HD session. The last dose to admission gap is not reported; 4 h is assumed.
@@ -44,23 +44,23 @@
    regimen:'2.5 mg/kg IV over 1 h, single dose, CrCl 0',
    note:'Six anuric hemodialysis patients received 2.5 mg/kg IV over 1 hour, sampled before their next dialysis session. Weight is a nominal 70 kg and CrCl is set to 0; neither is patient-matched. Published means were converted from µmol/L at 225.21 g/mol.'},
   {id:'label-5',pointsLabel:'published means',legend:'Label 5 mg/kg means',label:'US IV label: 5 mg/kg every 8 hours, steady state',short:'US label 5 mg/kg q8h (steady state)',
-   ref:'ref10',cite:'[10]',n:8,statistic:'mean',mode:'No dialysis',config:iv(70,95,350,8,10,80),points:[[73,9.8],[80,0.7]],
+   ref:'ref10',cite:'[10]',n:8,statistic:'mean',mode:'No dialysis',config:iv(70,95,350,8,10,80),points:[[73,9.8],[80,0.7]],kinds:['peak','trough'],
    regimen:'5 mg/kg IV over 1 h every 8 h',
    note:'The label reports a mean steady-state peak and trough for 8 adults with normal kidney function. AyFlux places them at the end of the tenth infusion (hour 73) and just before an eleventh dose (hour 80). Weight and CrCl are nominal assumptions.'},
   {id:'label-10',pointsLabel:'published means',legend:'Label 10 mg/kg means',label:'US IV label: 10 mg/kg every 8 hours, steady state',short:'US label 10 mg/kg q8h (steady state)',
-   ref:'ref10',cite:'[10]',n:7,statistic:'mean',mode:'No dialysis',config:iv(70,95,700,8,10,80),points:[[73,22.9],[80,1.9]],
+   ref:'ref10',cite:'[10]',n:7,statistic:'mean',mode:'No dialysis',config:iv(70,95,700,8,10,80),points:[[73,22.9],[80,1.9]],kinds:['peak','trough'],
    regimen:'10 mg/kg IV over 1 h every 8 h',
    note:'The label reports a mean steady-state peak and trough for 7 adults with normal kidney function. AyFlux places them at the end of the tenth infusion (hour 73) and just before an eleventh dose (hour 80). Weight and CrCl are nominal assumptions.'},
   {id:'kacirova',legend:'Kacirova 2022 measured',short:'Kacirova 2022, one patient (with CMMG)',label:'Kacirova 2022: IV acyclovir, paired acyclovir and CMMG levels',
    ref:'ref42',cite:'[42]',n:1,pointsLabel:'measured concentrations',mode:'No dialysis',regimen:'750 mg IV q8h ×6, then 850 mg; estimated CrCl',
    config:{age:36,sex:'male',weight:86,scr:87/88.4,crclSource:'estimated',renalMode:'constant',dosingMode:'custom',customDoses:KACIROVA_DOSES,horizon:72},
-   points:[[64,1.7],[65+25/60,8.9]],cmmgPoints:[[64,0.27],[65+25/60,0.64]],
+   points:[[64,1.7],[65+25/60,8.9]],cmmgPoints:[[64,0.27],[65+25/60,0.64]],kinds:['trough','post-infusion'],cmmgKinds:['trough','post-infusion'],
    note:'A 36-year-old man (86 kg, serum creatinine 87 µmol/L) given 750 mg IV every 8 hours for two days, then 850 mg. The dots are a measured trough and a sample 25 minutes after the ninth infusion, for both acyclovir and CMMG (shown on the CMMG graph). AyFlux estimates CrCl by Cockcroft–Gault. The infusion length (1 hour) and which infusion was sampled are read from the paper\'s figure, and the preceding oral course is not simulated.'},
   {id:'vasquez',legend:'Vasquez 2025 measured',short:'Vasquez 2025, HD patient',label:'Vasquez 2025: oral valacyclovir with stage 5 CKD and hemodialysis',
    ref:'ref22',cite:'[22]',n:1,pointsLabel:'measured concentrations',group:'dialysis',mode:'Custom sequence',regimen:'Valacyclovir 1,000 mg q8h ×4, then two HD sessions; estimated CrCl',
    config:{age:69,sex:'female',weight:49.9,scr:11.3,crclSource:'estimated',renalMode:'constant',route:'Valacyclovir oral',dosingMode:'repeat',
     dose:1000,every:8,doseCount:4,schedule:VASQUEZ_HD,horizon:VASQUEZ_HD[1].end},
-   points:[[VASQUEZ_HD[0].start,8.8],[VASQUEZ_HD[0].end,3.2]],
+   points:[[VASQUEZ_HD[0].start,8.8],[VASQUEZ_HD[0].end,3.2]],kinds:['hd-start','hd-end'],
    note:'A 69-year-old woman (49.9 kg, serum creatinine 11.3 mg/dL) took four 1,000 mg valacyclovir doses 8 hours apart. The dots are dialyzer-inlet plasma levels at the start and end of her first 2-hour HD session. The paper does not give the time from the last dose to admission; AyFlux assumes 4 hours, so the first session starts at hour 44. research/validation/vasquez-hd.cjs shows how the result changes for 0 and 8 hours.'},
   ...BOELAERT.map(boelaert)
  ];
@@ -75,9 +75,17 @@
  function matches(study,config,mode){
   return !!study&&!config.probenecid&&mode===study.mode&&Object.entries(study.config).every(([key,value])=>JSON.stringify(config[key])===JSON.stringify(value));
  }
+ // Sample type as the source reports it: peak, trough, post-infusion, HD inlet at the start or end of
+ // a session, or serial (a time course without a peak/trough label).
  function pointsOf(study){
-  return study.points.map(([time,observed])=>({analyte:'plasma',time,observed}))
-   .concat((study.cmmgPoints||[]).map(([time,observed])=>({analyte:'cmmg',time,observed})));
+  return study.points.map(([time,observed],i)=>({analyte:'plasma',time,observed,kind:study.kinds?.[i]||'serial'}))
+   .concat((study.cmmgPoints||[]).map(([time,observed],i)=>({analyte:'cmmg',time,observed,kind:study.cmmgKinds?.[i]||'serial'})));
+ }
+ // Hours from the start of the most recent earlier dose to each sample. A sample taken at the moment
+ // a dose starts (a trough) counts from the dose before it.
+ function sinceDose(study,E,time){
+  const starts=E.buildDoses(E.effectiveConfig(configFor(study,E))).map(d=>d.time).filter(t=>t<time-1e-9);
+  return starts.length?time-Math.max(...starts):null;
  }
  // One row per published point for the CSV export, in mg/L.
  function csv(scores,calibration={}){
@@ -116,13 +124,13 @@
   const config=configFor(study,E,options.calibration),mode=study.mode;
   const nominal=E.simulateMany({...config,variability:0,draws:1,requestedModes:[mode]})[mode];
   const band=E.simulateMany({...config,draws:options.draws||200,requestedModes:[mode]})[mode];
-  const rows=pointsOf(study).map(({analyte,time,observed})=>{
+  const rows=pointsOf(study).map(({analyte,time,observed,kind})=>{
    const predicted=interp(nominal.time,nominal[analyte].median,time),lower=interp(band.time,band[analyte].lower,time),upper=interp(band.time,band[analyte].upper,time);
-   return {analyte,time,observed,predicted,lower,upper,inside:observed>=lower&&observed<=upper};
+   return {analyte,time,observed,kind,sinceDose:sinceDose(study,E,time),predicted,lower,upper,inside:observed>=lower&&observed<=upper};
   });
   const gmr=Math.exp(rows.reduce((sum,row)=>sum+Math.log(row.predicted/row.observed),0)/rows.length);
   return {id:study.id,rows,gmr,inside:rows.filter(row=>row.inside).length,total:rows.length,coverage:config.coverage};
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,csv,summarize};
+ return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,csv,summarize};
 });
 

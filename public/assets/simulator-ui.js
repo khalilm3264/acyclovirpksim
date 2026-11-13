@@ -46,6 +46,8 @@ let pendingCsvExport=false, migratedPayload=null;
 // Small, bounded cache of completed summaries; the engine retains its own raw ensemble cache.
 const completedResults=new Map();
 let baseline=null,baselineRevision=0;
+// Up to four frozen regimens (inputs, dose list and median curves) for side-by-side comparison.
+let savedRegimens=[],savedRevision=0;
 const presentationKeys=new Set(['virus','showBands','showShades','showStudy','showIC50','requestedModes']);
 function resultKey(config){return JSON.stringify(Object.keys(config).sort().filter(k=>!presentationKeys.has(k)).map(k=>[k,config[k]]));}
 function rememberResult(key,data){
@@ -155,7 +157,8 @@ function setBusy(busy){
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
  $('saveBaseline').disabled=busy||!dataIsCurrent;
- refreshLabelAdjust();
+ if(typeof refreshLabelAdjust==='function')refreshLabelAdjust();
+ if(typeof renderRegimens==='function'){renderRegimens();renderPostHd();}
  if(busy)$('status').textContent='Updating simulation';
 }
 function calculationError(error){
@@ -337,6 +340,49 @@ function refreshLabelAdjust(){
  const state=labelAdjustmentState();button.disabled=!state.ok||!dataIsCurrent;
  tip.textContent=state.text+(state.ok?' The current curve is kept as a baseline for comparison.':'');
 }
+// ---------- Regimen comparison ----------
+const REG=window.AyFluxRegimens,REGIMEN_COLORS=['#7a3e9d','#a8740b','#2e7d4f','#c2185b'];
+const regimenEscape=text=>String(text).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+function regimenRow(name,config,mode,data,T,color,index){
+ const m=REG.metrics(data,E.buildDoses(E.effectiveConfig(config)),T),f=v=>v===null?'—':Number(v.toPrecision(3)).toString();
+ return `<tr><td>${color?`<span class="swatch" style="border-color:${color}"></span>`:''}${regimenEscape(name)}</td><td>${regimenEscape(describeScenario(config,mode))}</td><td>${f(m.auc)}</td><td>${f(m.peak)}</td><td>${f(m.trough)}${m.troughTime===null?'':' <span class="tip">(h '+Number(m.troughTime.toFixed(2))+')</span>'}</td><td>${f(m.cmmgAuc)}</td><td>${f(m.cmmgPeak)}</td><td>${index===null?'':`<button type="button" class="btn secondary" data-remove-regimen="${index}">Remove</button>`}</td></tr>`;
+}
+function renderRegimens(){
+ const body=$('regimenRows');if(!body||!REG)return;
+ const current=dataIsCurrent&&results?.[primary]?results[primary]:null;
+ $('saveRegimen').disabled=!current||savedRegimens.length>=REG.MAX_SAVED;
+ $('regimenStatus').textContent=savedRegimens.length>=REG.MAX_SAVED?'Four regimens saved. Remove one to save another.':'Save the selected scenario under a name, change the dose, interval, timing or kidney function, and save again. Saved regimens are frozen: later edits do not change them. Up to four; they last until removed or the page is closed.';
+ if(!savedRegimens.length&&!current){body.innerHTML='';$('regimenCaption').textContent='';return;}
+ const T=Math.min(c.horizon,...savedRegimens.map(r=>r.config.horizon));
+ body.innerHTML=savedRegimens.map((r,i)=>regimenRow(r.name,r.config,r.primary,r.data,T,REGIMEN_COLORS[i],i)).join('')+(current?regimenRow('Current settings (not saved)',c,primary,current,T,null,null):'');
+ $('regimenCaption').textContent=`All values are from median curves of the selected scenario, in mg/L, over the common window 0–${Number(T.toFixed(2))} h (the shortest simulation among the rows). AUC is the plasma area under the curve from 0 to ${Number(T.toFixed(2))} h (mg·h/L). Trough is plasma acyclovir at the start of the last dose that begins after hour 0 and before hour ${Number(T.toFixed(2))}, immediately before that dose; its hour is shown. CMMG values are plasma 9-carboxymethoxymethylguanine: AUC over the same window (mg·h/L) and the highest concentration in it (mg/L). Saved curves appear as dashed lines on the plasma acyclovir and plasma CMMG graphs.`;
+}
+$('saveRegimen').addEventListener('click',()=>{
+ if(!dataIsCurrent||!results?.[primary]||savedRegimens.length>=REG.MAX_SAVED)return;
+ const d=results[primary],name=($('regimenName').value.trim()||'Regimen '+(savedRegimens.length+1)).slice(0,40);
+ savedRegimens.push({name,primary,config:structuredClone(c),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
+ savedRevision++;$('regimenName').value='';renderRegimens();render();
+});
+$('regimenRows').addEventListener('click',e=>{const b=e.target.closest('[data-remove-regimen]');if(!b)return;savedRegimens.splice(+b.dataset.removeRegimen,1);savedRevision++;renderRegimens();render();});
+// ---------- Dose timing around intermittent hemodialysis ----------
+function currentPostHdPlan(){return REG.postHdPlan(E.effectiveConfig(c),E.scheduleFor(primary,E.effectiveConfig(c)),E.buildDoses(E.effectiveConfig(c)));}
+function renderPostHd(){
+ const panel=$('postHdRows');if(!panel||!REG)return;
+ const plan=currentPostHdPlan(),n=v=>v===null?'—':String(Number(Number(v).toFixed(2)));
+ $('applyPostHd').disabled=!plan.ok||!plan.apply;
+ if(!plan.ok){$('postHdRule').textContent=plan.reason;panel.innerHTML='';$('postHdFlags').replaceChildren();return;}
+ $('postHdRule').textContent=plan.ruleText+' '+plan.cite+(plan.apply?'':' No change is proposed for the current settings.');
+ panel.innerHTML=plan.rows.map(r=>`<tr class="${r.change==='unchanged'?'':'changed'}"><td>${r.dose??'new'}</td><td>${n(r.original)}</td><td>${n(r.proposed)}</td><td>${regimenEscape(String(Number(r.amount.toPrecision(6))))} mg</td><td>${r.change==='added'?'Added after HD ('+n(r.session.start)+'–'+n(r.session.end)+' h)':r.change==='moved'?'Moved to end of HD ('+n(r.session.start)+'–'+n(r.session.end)+' h)':'Unchanged'}</td></tr>`).join('');
+ $('postHdFlags').replaceChildren(...plan.flags.map(f=>{const li=document.createElement('li');li.className='flag-'+f.kind;li.textContent=({duplicate:'Check: ',drop:'Left out: ',gap:'Note: ',info:'Note: '})[f.kind]+f.text;return li;}));
+}
+$('applyPostHd').addEventListener('click',()=>{
+ const plan=currentPostHdPlan();if(!plan.ok||!plan.apply)return;
+ rememberVersion('Before post-dialysis dose timing');studyOverlay=null;
+ c.dosingMode='custom';c.customDoses=structuredClone(plan.customDoses);
+ renderInputs();
+ showScenarioNote('Dose timing after hemodialysis',plan.ruleText+' '+plan.cite+' The regimen is now a custom schedule; open Medication schedule to see every dose. Teaching comparison only, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ defer();
+});
 function applyLabelAdjustment(){
  const state=labelAdjustmentState();if(!state.ok)return;
  if(!dataIsCurrent||!results?.[primary])return;
@@ -345,7 +391,7 @@ function applyLabelAdjustment(){
  const before=c.dose+' mg every '+c.every+' h';
  c.dose=Number(state.dose.toPrecision(6));c.every=state.every;
  renderInputs();
- showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label using body surface area '+c.labelBsa+' m² [10]. The previous curve is shown as the baseline. The label specifies an additional dose after each hemodialysis session. Add those supplemental doses explicitly in the custom medication schedule. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label using body surface area '+c.labelBsa+' m² [10]. The previous curve is shown as the baseline. The label specifies an additional dose after each hemodialysis session. Preview and apply those supplemental doses in Dose timing around hemodialysis on the Concentration tab. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
  defer();
 }
 function updateDrugCaution(){
@@ -391,7 +437,7 @@ if(typeof IntersectionObserver!=='undefined'){
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
-function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
+function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,key==='plasma'||key==='cmmg'?savedRevision:0,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
 let chartWait=null;
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
@@ -483,8 +529,9 @@ function curve(key,unit,where,ref=null){if(!results)return;
   series.push(charts.line(m+(m===primary?' (selected)':''),d.time,scale(z.median),color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
  }
  const comparison=baseline&&['plasma','csf','cmmg','csfCmmg'].includes(key);
- const horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
+ let horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
  if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,scale(baseline.data[key].median),'#303846',2.5,[10,4,2,4]));
+ if(key==='plasma'||key==='cmmg')savedRegimens.forEach((r,i)=>{series.push(charts.line(r.name,r.data.time,scale(r.data[key].median),REGIMEN_COLORS[i],2.6,'dashed'));horizon=Math.max(horizon,r.config.horizon);});
  const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
  const study=key==='plasma'||key==='cmmg'?overlayStudy():null,studyPoints=study?(key==='plasma'?study.points:study.cmmgPoints):null;
@@ -1287,7 +1334,7 @@ function renderScorecard(){
    summary.scenarios+' comparison scenarios from '+summary.sources+' reference sources. '+(overall?description(overall):'No results.')+
    ' The pooled ratio measures bias, not accuracy; opposite errors cancel. Repeated samples, group means and author-fitted values have equal point weight, not independent patient weight. Band inclusion is descriptive, not validated predictive coverage. Label values are not independent after label-based calibration.';
   $('scorecardGroups').textContent=summary.groups.filter(r=>r.total).map(r=>r.name+': '+description(r)).join('\n');
-  drawScorecardFigure();
+  drawScorecardFigure();drawResidualFigure();
  },30);
  next(0);
 }
@@ -1312,6 +1359,36 @@ async function drawScorecardFigure(){
    yAxis:{type:'log',min:lo,max:hi,name:'AyFlux nominal prediction (mg/L)',nameLocation:'middle',nameGap:46}});
   status.textContent='Points above the solid line are overpredicted, points below underpredicted. Dashed lines mark twofold error.';
  }catch{status.textContent='Figure unavailable. The table and CSV contain the same values.';}
+}
+// Residuals: predicted/observed for each published value against hours since the most recent dose,
+// marked by the sample type each source reports.
+async function drawResidualFigure(){
+ const target=$('residualFigure');if(!target||!scorecardScores.length)return;
+ const KIND={peak:['Peak','triangle'],trough:['Trough','path://M0,0L10,0L5,10Z'],'post-infusion':['Post-infusion','rect'],'hd-start':['HD inlet','diamond'],'hd-end':['HD inlet','diamond'],serial:['Serial (no peak/trough label)','circle']};
+ const SETTING=[['No dialysis','#2367a0',(s,r)=>r.analyte==='plasma'&&s.mode==='No dialysis'],['Dialysis','#ba591d',(s,r)=>r.analyte==='plasma'&&s.mode!=='No dialysis'],['CMMG','#6b3fa0',(s,r)=>r.analyte==='cmmg']];
+ const series=[],ratios=[];
+ for(const [setting,color,test] of SETTING)for(const kind of ['peak','trough','post-infusion','hd','serial']){
+  const data=[];
+  for(const score of scorecardScores){const study=STUDIES.find(score.id);for(const r of score.rows){
+   const k=r.kind.startsWith('hd-')?'hd':r.kind;
+   if(k!==kind||!test(study,r)||r.sinceDose===null)continue;
+   const ratio=r.predicted/r.observed;ratios.push(ratio);
+   data.push([r.sinceDose,ratio,study.short+' '+study.cite+' · '+KIND[r.kind][0].toLowerCase()+' '+(r.analyte==='cmmg'?'CMMG':'acyclovir')+' at hour '+Number(r.time.toFixed(2))]);
+  }}
+  if(data.length)series.push({name:setting+' · '+KIND[kind==='hd'?'hd-start':kind][0],type:'scatter',symbol:KIND[kind==='hd'?'hd-start':kind][1],symbolSize:kind==='serial'?8:12,itemStyle:{color,borderColor:'#fff',borderWidth:1},data});
+ }
+ const lo=Math.min(.25,...ratios)/1.15,hi=Math.max(4,...ratios)*1.15,xmax=Math.ceil(Math.max(...scorecardScores.flatMap(s=>s.rows.map(r=>r.sinceDose??0)))+1);
+ const guide=(name,y,width,type)=>({name,type:'line',silent:true,showSymbol:false,tooltip:{show:false},itemStyle:{color:'#5b6670'},lineStyle:{color:'#5b6670',width,type},data:[[0,y],[xmax,y]]});
+ series.push(guide('Predicted = observed',1,1.8,'solid'),guide('Twofold',2,1,'dashed'),{...guide('Twofold',.5,1,'dashed'),name:'Twofold '});
+ try{
+  await window.AyFluxCharts.ensure();
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true,label:{description:'Predicted over observed ratio for each published value against hours since the most recent dose, by sample type.'}},series,
+   legend:{bottom:0,itemGap:12},grid:{top:16,left:70,right:20,bottom:110},
+   tooltip:{trigger:'item',confine:true,formatter:p=>p.data?.[2]?p.data[2]+'\nPredicted/observed '+p.data[1].toFixed(2)+', '+Number(p.data[0].toFixed(2))+' h after dose start':''},
+   xAxis:{type:'value',min:0,max:xmax,name:'Hours since the start of the most recent dose',nameLocation:'middle',nameGap:30},
+   yAxis:{type:'log',min:lo,max:hi,name:'Predicted / observed',nameLocation:'middle',nameGap:46,axisLabel:{formatter:v=>Number(v.toPrecision(2))}}});
+  $('residualFigureStatus').textContent='Points above 1 are overpredicted, below 1 underpredicted; dashed lines mark twofold. Shape gives the sample type as each source reports it; serial time courses have no peak or trough label.';
+ }catch{$('residualFigureStatus').textContent='Figure unavailable. The CSV contains the same values.';}
 }
 $('scorecardCsv').addEventListener('click',()=>{
  if(!scorecardScores.length)return;
