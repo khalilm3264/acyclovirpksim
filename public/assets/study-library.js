@@ -25,10 +25,51 @@
   group:'dialysis',mode:'Peritoneal dialysis',regimen:b.dose+' mg IV daily ×5, CAPD 4/4/4/12 h dwells, CrCl 0',
   config:{age:b.age,sex:b.sex,weight:b.weight,crcl:0,crclSource:'manual',renalMode:'constant',route:'Acyclovir IV',dosingMode:'repeat',
    dose:b.dose,every:24,doseCount:5,infusion:1,horizon:120,pdMethod:'manual',pdRxEnabled:true,pdRxRows:CAPD_ROWS,pdVolume:2,pdGlucose:1.36},
+  provenance:boelaertProvenance(b),sourceCheck:SOURCE_CHECK.boelaert,explore:EXPLORE.boelaert,
   points:[1,24,97,120].map((t,i)=>[t,b.values[i]*ACV_MW/1000]),kinds:['peak','trough','peak','trough'],
   note:'One continuous ambulatory PD patient ('+b.weight+' kg) given '+b.dose+' mg IV over 1 hour daily for 5 days, with four 2 L, 1.36% exchanges a day (dwells of 4, 4, 4 and 12 hours). The dots are the day-1 and day-5 peaks and troughs the authors derived from their own curve fits, not raw samples. No urinary recovery was reported, so CrCl is set to 0; that is an assumption.'});
  // Vasquez Vasquez J et al. Br J Clin Pharmacol 2025 [22], Table 1A: dialyzer-inlet plasma at the start and
  // end of the first HD session. The last dose to admission gap is not reported; 4 h is assumed.
+ // Input provenance: how each reconstruction input was obtained. reported = stated in the source;
+ // calculated = derived by AyFlux or the authors from reported values; assumed = set by AyFlux because
+ // the source gives no value; unknown = not reported and with no effect assumed beyond what is listed.
+ // Each row keeps two things apart: what the paper reports, and what AyFlux uses.
+ const P=(input,status,reported,used,source)=>({input,status,reported,used,source});
+ const BOELAERT_SOURCE='Boelaert 1987, Methods and Tables I–II';
+ const boelaertProvenance=b=>[
+  P('Dose','reported',b.dose+' mg IV over 1 h',b.dose+' mg IV over 1 h',BOELAERT_SOURCE),
+  P('Dose times','reported','Every 24 h for 5 days','Every 24 h, five doses',BOELAERT_SOURCE+' (Methods)'),
+  P('Weight','reported',b.weight+' kg',b.weight+' kg',BOELAERT_SOURCE+' (Table I)'),
+  P('Residual kidney function','assumed','No urinary recovery reported for this patient; no measured CrCl','CrCl 0 mL/min (an absent value is not proof of no function)',BOELAERT_SOURCE+' (Tables I–II)'),
+  P('PD prescription','reported','Four 2 L exchanges of 1.36% dextrose; dwells 4, 4, 4 and 12 h','Repeating 4/4/4/12 h dwells of 2 L, 1.36%',BOELAERT_SOURCE+' (Methods)'),
+  P('Exchange times on the clock','assumed','Not reported','First exchange starts with the first infusion','Not reported'),
+  P('Peritoneal transport and ultrafiltration','assumed','Per-exchange drained volume and transport type not reported','AyFlux default membrane parameters','Not reported'),
+  P('Plasma values compared','calculated','Day-1 and day-5 peaks and troughs fitted by the authors; not raw samples','The fitted values, converted from µmol/L',BOELAERT_SOURCE+' (Tables I–II)'),
+  P('Sample times','calculated','Not stated; implied by the fitted Cmax and Cmin','Hours 1, 24, 97 and 120: end of infusion and just before the next dose','Implied by the fitted values'),
+  P('Dialysate recovery','reported','Percent of dose recovered in dialysate','Not used in the scorecard; used in case study 3',BOELAERT_SOURCE+' (Table II)')];
+ const VASQUEZ_SOURCE='Vasquez Vasquez 2024 preprint (Authorea), case report';
+ const VASQUEZ_PROVENANCE=[
+  P('Dose','reported','Valacyclovir 1,000 mg, four doses','Valacyclovir 1,000 mg, four doses',VASQUEZ_SOURCE),
+  P('Dose interval','assumed','Three times daily; clock times not given','Every 8 h',VASQUEZ_SOURCE),
+  P('Time from last dose to admission','unknown','Not reported: she presented after the fourth dose','4 h (0 and 8 h in research/validation/vasquez-hd.cjs)',VASQUEZ_SOURCE),
+  P('Weight','reported','49.9 kg','49.9 kg',VASQUEZ_SOURCE),
+  P('Serum creatinine','reported','11.3 mg/dL; author eGFR 3.3 mL/min','11.3 mg/dL',VASQUEZ_SOURCE),
+  P('Residual kidney function','calculated','No measured CrCl; urinary recovery 17.7 mg over 30 h','Cockcroft–Gault CrCl 3.70 mL/min from age, sex, weight and creatinine; urinary recovery not used',VASQUEZ_SOURCE),
+  P('Admission to first HD','reported','16 h','16 h (first session at simulation hour 44)','Urine collected from admission to just before the first session'),
+  P('First HD duration','calculated','4.5 h of HD in total; second session 2.5 h','2 h (4.5 − 2.5)',VASQUEZ_SOURCE),
+  P('Gap between sessions','reported','14 h','14 h','Urine collected over 14 h between sessions'),
+  P('Second HD duration','reported','2.5 h','2.5 h',VASQUEZ_SOURCE),
+  P('HD drug clearance','assumed','Blood flow 250 and dialysate flow 500 mL/min; drug clearance not reported','AyFlux default 81.8 mL/min',VASQUEZ_SOURCE),
+  P('Plasma values compared','reported','8.8 and 3.2 mg/L, dialyzer-inlet plasma at the start and end of the first session','Same values',VASQUEZ_SOURCE+', Table 1A'),
+  P('Sample times','reported','Start and end of the first session','Simulation hours 44 and 46',VASQUEZ_SOURCE)];
+ // Source checks still outstanding for the provenance rows, shown on the page.
+ const SOURCE_CHECK={
+  vasquez:'Pending source check: these rows were checked against the 2024 Authorea preprint. They have not yet been checked against the final Br J Clin Pharmacol 2025 article.',
+  boelaert:'Pending source check: these rows come from the manuscript and research/validation/boelaert-capd.cjs. They have not yet been checked against the original Boelaert 1987 paper.'};
+ // Assumptions a reader can vary. Bounds are interface limits for exploration, not plausibility claims.
+ const EXPLORE={
+  vasquez:{input:'Time from last dose to admission',label:'Hypothetical last-dose-to-admission gap',unit:'h',value:4,min:0,max:24},
+  boelaert:{input:'Residual kidney function',label:'Hypothetical residual CrCl',unit:'mL/min',value:0,min:0,max:30}};
  const VASQUEZ_ADMISSION=28,VASQUEZ_HD=[{type:'HD',start:VASQUEZ_ADMISSION+16,end:VASQUEZ_ADMISSION+18},{type:'HD',start:VASQUEZ_ADMISSION+32,end:VASQUEZ_ADMISSION+34.5}];
  // Kacirova I et al. Klinicka farmakologie a farmacie 2022 [42]: one trough and one sample 25 min after the ninth infusion.
  const KACIROVA_DOSES=Array.from({length:9},(_,i)=>({time:i*8,route:'Acyclovir IV',amount:i<6?750:850,infusion:1}));
@@ -60,6 +101,7 @@
    ref:'ref22',cite:'[22]',n:1,pointsLabel:'measured concentrations',group:'dialysis',mode:'Custom sequence',regimen:'Valacyclovir 1,000 mg q8h ×4, then two HD sessions; estimated CrCl',
    config:{age:69,sex:'female',weight:49.9,scr:11.3,crclSource:'estimated',renalMode:'constant',route:'Valacyclovir oral',dosingMode:'repeat',
     dose:1000,every:8,doseCount:4,schedule:VASQUEZ_HD,horizon:VASQUEZ_HD[1].end},
+   provenance:VASQUEZ_PROVENANCE,sourceCheck:SOURCE_CHECK.vasquez,explore:EXPLORE.vasquez,
    points:[[VASQUEZ_HD[0].start,8.8],[VASQUEZ_HD[0].end,3.2]],kinds:['hd-start','hd-end'],
    note:'A 69-year-old woman (49.9 kg, serum creatinine 11.3 mg/dL) took four 1,000 mg valacyclovir doses 8 hours apart. The dots are dialyzer-inlet plasma levels at the start and end of her first 2-hour HD session. The paper does not give the time from the last dose to admission; AyFlux assumes 4 hours, so the first session starts at hour 44. research/validation/vasquez-hd.cjs shows how the result changes for 0 and 8 hours.'},
   ...BOELAERT.map(boelaert)
@@ -80,6 +122,14 @@
  function pointsOf(study){
   return study.points.map(([time,observed],i)=>({analyte:'plasma',time,observed,kind:study.kinds?.[i]||'serial'}))
    .concat((study.cmmgPoints||[]).map(([time,observed],i)=>({analyte:'cmmg',time,observed,kind:study.cmmgKinds?.[i]||'serial'})));
+ }
+ const STATUSES=['reported','calculated','assumed','unknown'];
+ // Count of reconstruction inputs by provenance status, or null when not yet recorded.
+ function provenanceCounts(study){
+  if(!study.provenance)return null;
+  const counts=Object.fromEntries(STATUSES.map(k=>[k,0]));
+  for(const row of study.provenance)counts[row.status]++;
+  return counts;
  }
  // Hours from the start of the most recent earlier dose to each sample. A sample taken at the moment
  // a dose starts (a trough) counts from the dose before it.
@@ -131,6 +181,37 @@
   const gmr=Math.exp(rows.reduce((sum,row)=>sum+Math.log(row.predicted/row.observed),0)/rows.length);
   return {id:study.id,rows,gmr,inside:rows.filter(row=>row.inside).length,total:rows.length,coverage:config.coverage};
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,csv,summarize};
+ // Configuration with one reconstruction assumption changed (from #68). Vasquez: the hypothetical
+ // gap from the last dose to admission shifts both HD sessions and the simulation end, relative to the
+ // 4 h used by the reconstruction. Boelaert: residual CrCl replaces the assumed 0 mL/min.
+ function exploreConfig(study,E,value,calibration={}){
+  const spec=study.explore;
+  if(!spec)throw new Error('No editable assumption for this study.');
+  if(!Number.isFinite(value)||value<spec.min||value>spec.max)throw new Error('Enter a number from '+spec.min+' to '+spec.max+' '+spec.unit+'.');
+  const config=configFor(study,E,calibration);
+  if(study.id==='vasquez'){
+   const shift=value-spec.value;
+   config.schedule=config.schedule.map(session=>({...session,start:session.start+shift,end:session.end+shift}));
+   config.horizon+=shift;
+  }else{config.crcl=value;config.crclSource='manual';}
+  return config;
+ }
+ // Per-study residual summary for the table under the residuals figure: predicted ÷ observed for
+ // every scored point, the median (geometric mean of the two middle values when the count is even),
+ // range, direction, and the samples the source reports as a peak or a trough. A study whose compared
+ // plasma values are recorded as calculated (author-fitted) in its provenance is marked as such.
+ function residualsByStudy(scores){
+  return scores.map(score=>{
+   const study=find(score.id),rows=score.rows.map(r=>({...r,ratio:r.predicted/r.observed}));
+   const ratios=rows.map(r=>r.ratio).sort((a,b)=>a-b),mid=ratios.length>>1;
+   const below=rows.filter(r=>r.ratio<1).length,above=rows.filter(r=>r.ratio>1).length;
+   const fitted=study.provenance?.find(p=>p.input==='Plasma values compared')?.status==='calculated';
+   return {id:study.id,short:study.short,cite:study.cite,total:rows.length,
+    median:ratios.length%2?ratios[mid]:Math.sqrt(ratios[mid-1]*ratios[mid]),min:ratios[0],max:ratios[ratios.length-1],
+    direction:below===rows.length?'below':above===rows.length?'above':'mixed',fitted:Boolean(fitted),
+    peaks:rows.filter(r=>r.kind==='peak'),troughs:rows.filter(r=>r.kind==='trough')};
+  });
+ }
+ return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,residualsByStudy,exploreConfig,csv,summarize};
 });
 
