@@ -1411,7 +1411,19 @@ async function drawScorecardFigure(){
 }
 // Residuals: predicted/observed for each published value against hours since the most recent dose,
 // marked by the sample type each source reports.
+function renderResidualTable(){
+ const body=$('residualRows');if(!body||!scorecardScores.length)return;
+ const two=v=>v.toFixed(2),h=v=>String(Number(v.toFixed(2)));
+ const listed=(list,fitted)=>list.length?list.map(r=>two(r.ratio)+' at '+h(r.time)+' h'+(r.analyte==='cmmg'?' (CMMG)':'')).join('; ')+(fitted?' (author-fitted)':''):'—';
+ const direction={below:'All below 1 (underpredicted)',above:'All above 1 (overpredicted)',mixed:'Mixed'};
+ body.replaceChildren(...STUDIES.residualsByStudy(scorecardScores).map(s=>{
+  const tr=document.createElement('tr'),cell=text=>{const td=document.createElement('td');td.textContent=text;tr.append(td);};
+  cell(s.short+' '+s.cite);cell(String(s.total));cell(two(s.median));cell(two(s.min)+'–'+two(s.max));cell(direction[s.direction]);
+  cell(listed(s.peaks,s.fitted));cell(listed(s.troughs,s.fitted));return tr;
+ }));
+}
 async function drawResidualFigure(){
+ renderResidualTable();
  const target=$('residualFigure');if(!target||!scorecardScores.length)return;
  const KIND={peak:['Peak','triangle'],trough:['Trough','path://M0,0L10,0L5,10Z'],'post-infusion':['Post-infusion','rect'],'hd-start':['HD inlet','diamond'],'hd-end':['HD inlet','diamond'],serial:['Serial (no peak/trough label)','circle']};
  const SETTING=[['No dialysis','#2367a0',(s,r)=>r.analyte==='plasma'&&s.mode==='No dialysis'],['Dialysis','#ba591d',(s,r)=>r.analyte==='plasma'&&s.mode!=='No dialysis'],['CMMG','#6b3fa0',(s,r)=>r.analyte==='cmmg']];

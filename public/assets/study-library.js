@@ -172,6 +172,22 @@
   const gmr=Math.exp(rows.reduce((sum,row)=>sum+Math.log(row.predicted/row.observed),0)/rows.length);
   return {id:study.id,rows,gmr,inside:rows.filter(row=>row.inside).length,total:rows.length,coverage:config.coverage};
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,csv,summarize};
+ // Per-study residual summary for the table under the residuals figure: predicted ÷ observed for
+ // every scored point, the median (geometric mean of the two middle values when the count is even),
+ // range, direction, and the samples the source reports as a peak or a trough. A study whose compared
+ // plasma values are recorded as calculated (author-fitted) in its provenance is marked as such.
+ function residualsByStudy(scores){
+  return scores.map(score=>{
+   const study=find(score.id),rows=score.rows.map(r=>({...r,ratio:r.predicted/r.observed}));
+   const ratios=rows.map(r=>r.ratio).sort((a,b)=>a-b),mid=ratios.length>>1;
+   const below=rows.filter(r=>r.ratio<1).length,above=rows.filter(r=>r.ratio>1).length;
+   const fitted=study.provenance?.find(p=>p.input==='Plasma values compared')?.status==='calculated';
+   return {id:study.id,short:study.short,cite:study.cite,total:rows.length,
+    median:ratios.length%2?ratios[mid]:Math.sqrt(ratios[mid-1]*ratios[mid]),min:ratios[0],max:ratios[ratios.length-1],
+    direction:below===rows.length?'below':above===rows.length?'above':'mixed',fitted:Boolean(fitted),
+    peaks:rows.filter(r=>r.kind==='peak'),troughs:rows.filter(r=>r.kind==='trough')};
+  });
+ }
+ return {STUDIES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,residualsByStudy,csv,summarize};
 });
 

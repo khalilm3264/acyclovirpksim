@@ -74,6 +74,13 @@ async function main(){
   assert.equal(points,await page.evaluate(()=>window.AyFluxStudies.STUDIES.reduce((n,s)=>n+s.points.length+(s.cmmgPoints||[]).length,0)));
   assert.ok(doseRows>0);
   assert.deepEqual(errors,[]);
+  // Per-study table under the residuals figure: one row per study, label peaks/troughs, Boelaert author-fitted.
+  await page.waitForFunction(n=>document.querySelectorAll('#residualRows tr').length===n,await page.evaluate(()=>window.AyFluxStudies.STUDIES.length),{timeout:120000});
+  const residualText=await page.textContent('#residualRows');
+  assert.match(residualText,/US label 5 mg\/kg[^]*?All below 1 \(underpredicted\)[^]*?0\.\d\d at 73 h[^]*?0\.\d\d at 80 h/);
+  assert.match(residualText,/Boelaert 1987 CAPD, patient 1[^]*?All above 1 \(overpredicted\)[^]*?\(author-fitted\)/);
+  assert.match(residualText,/\(CMMG\)/);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   console.log('Regimen comparison, post-HD timing and residual figure checks passed.');
  }finally{await browser?.close();server.close();}
 }
