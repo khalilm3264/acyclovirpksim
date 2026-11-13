@@ -142,3 +142,16 @@ test('case observations cite the case publication and mass endpoints remain sepa
  const scores=S.STUDIES.map(s=>({id:s.id,rows:S.pointsOf(s).map(r=>({...r,predicted:r.observed,inside:true}))}));
  const summary=S.summarize(scores);assert.equal(summary.scenarios,9);assert.equal(summary.sources,6);
 });
+
+test('component ablation reuses the scorecard predictions and moves bias in the expected directions',()=>{
+ const A=require('../research/validation/ablation-study.cjs'),results=A.run(),by=Object.fromEntries(results.map(r=>[r.variant.id,r]));
+ // The reference variant reproduces the scorecard's nominal predictions exactly.
+ let i=0;for(const study of S.STUDIES)for(const row of S.score(study,E,{draws:5}).rows)assert.ok(Math.abs(row.predicted/by.full.rows[i++].predicted-1)<1e-12);
+ assert.equal(i,by.full.rows.length);
+ // Less clearance means higher predictions; more renal clearance assumed means lower.
+ assert.ok(by['no-dialysis'].groups['plasma-dialysis'].bias>by.full.groups['plasma-dialysis'].bias);
+ assert.equal(by['no-dialysis'].groups['plasma-no-dialysis'].bias,by.full.groups['plasma-no-dialysis'].bias);
+ assert.ok(by['gfr-only'].groups['plasma-no-dialysis'].bias>by.full.groups['plasma-no-dialysis'].bias);
+ assert.equal(by['no-cmmg'].groups.cmmg,null,'zero CMMG predictions have no fold error');
+ assert.ok(results.every(r=>r.rows.length===37));
+});
