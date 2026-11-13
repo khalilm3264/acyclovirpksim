@@ -239,6 +239,14 @@
     peaks:rows.filter(r=>r.kind==='peak'),troughs:rows.filter(r=>r.kind==='trough')};
   });
  }
- return {STUDIES,CASES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,residualsByStudy,exploreConfig,csv,summarize};
+ // Classification follows how the source values entered the comparison.
+ function evidenceKind(study){
+  if(study.pointsLabel.includes('author-fitted'))return 'fitted';
+  return study.n>1?'means':'individual';
+ }
+ function filterEvidence(studies,kind){
+  return studies.filter(study=>kind==='all'||(kind==='measured'?evidenceKind(study)!=='fitted':evidenceKind(study)===kind));
+ }
+ return {evidenceKind,filterEvidence,STUDIES,CASES,find,configFor,matches,score,interp,pointsOf,sinceDose,provenanceCounts,STATUSES,residualsByStudy,exploreConfig,csv,summarize};
 });
 

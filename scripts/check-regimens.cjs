@@ -41,7 +41,18 @@ async function main(){
   await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>{const s=window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))?.getOption()?.series||[];return s.some(x=>x.name==='Unadjusted')&&s.some(x=>x.name==='Label');},null,{timeout:60000});
   // Prediction exercise: results hidden, then revealed with a verdict.
+  await page.locator('#scenarioDifference summary').click();
+  assert.equal(await page.locator('#differenceOutcomes tr').count(),6);
+  assert.match(await page.textContent('#differenceInputs'),/Dose/);
+  const differences=await page.$$eval('#differenceOutcomes tr',rows=>rows.map(row=>row.textContent));
+  await page.selectOption('#differenceTo','0');
+  const zeroChanges=await page.$$eval('#differenceOutcomes tr',rows=>rows.map(row=>row.cells[3].textContent));
+  assert.ok(zeroChanges.every(value=>value==='0'||value==='Unavailable'));
+  await page.selectOption('#differenceTo','1');
+  assert.deepEqual(await page.$$eval('#differenceOutcomes tr',rows=>rows.map(row=>row.textContent)),differences);
   await page.check('#predictMode');
+  assert.equal(await page.locator('#differenceOutcomes tr').count(),0);
+
   assert.equal(await page.evaluate(()=>getComputedStyle(document.querySelector('#plasmaChart')).visibility),'hidden');
   assert.equal(await page.locator('#regimenRows tr').count(),2,'current row hidden while predicting');
   assert.match(await page.textContent('#regimenRows'),/\?/);assert.match(await page.textContent('#regimenRows'),/Doses at hour 0, 8, 16/);

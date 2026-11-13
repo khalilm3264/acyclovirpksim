@@ -182,3 +182,15 @@ test('teaching cases load as valid regimens but are never scored',()=>{
  assert.match(ui,/for\(const \[label,list\] of \[\['Measured concentrations',STUDIES\.STUDIES\],\['Teaching cases \(no measured levels\)',STUDIES\.CASES\|\|\[\]\]\]\)/);
  assert.match(ui,/if\(studyPoints\?\.length\)series\.push/);
 });
+
+
+test('evidence filters partition group means, individual samples and fitted endpoints',()=>{
+ const S=require('../public/assets/study-library.js');
+ const count=kind=>S.filterEvidence(S.STUDIES,kind).reduce((sum,study)=>sum+S.pointsOf(study).length,0);
+ assert.equal(count('all'),37);
+ assert.equal(count('measured'),25);
+ assert.equal(count('means'),19);
+ assert.equal(count('individual'),6);
+ assert.equal(count('fitted'),12);
+ assert.deepEqual(S.filterEvidence(S.STUDIES,'fitted').map(s=>s.id),['boelaert-1','boelaert-4','boelaert-5']);
+});
