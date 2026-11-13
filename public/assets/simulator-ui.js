@@ -132,7 +132,19 @@ function renderStudyProvenance(study){
  const n=STUDIES.provenanceCounts(study),esc=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
  if(!n){$('studyProvenanceCounts').textContent='Input provenance has not yet been recorded for this study. The study note above lists its assumptions.';$('studyProvenanceRows').innerHTML='';return;}
  $('studyProvenanceCounts').textContent=`Of ${study.provenance.length} inputs needed to reproduce this case: ${n.reported} reported by the source, ${n.calculated} calculated from reported values, ${n.assumed} assumed by AyFlux, ${n.unknown} unknown.`;
- $('studyProvenanceRows').innerHTML=study.provenance.map(r=>`<tr><td>${esc(r.input)}</td><td><span class="prov prov-${r.status}">${PROVENANCE_LABEL[r.status]}</span></td><td>${esc(r.value)}<br><span class="tip">${esc(r.source)}</span></td></tr>`).join('');
+ // The study's main source is named once; a row shows its own location only when it differs.
+ const tally=new Map();for(const r of study.provenance)tally.set(r.source,(tally.get(r.source)||0)+1);
+ const main=[...tally].sort((x,y)=>y[1]-x[1])[0][0];
+ $('studyMainSource').textContent='Source for rows without their own location: '+main+'.';
+ $('studyProvenanceRows').innerHTML=study.provenance.map(r=>`<tr><td>${esc(r.input)}<br><span class="prov prov-${r.status}">${PROVENANCE_LABEL[r.status]}</span></td><td>${esc(r.reported)}${r.source!==main?`<br><span class="tip">${esc(r.source)}</span>`:''}</td><td>${esc(r.used)}</td></tr>`).join('');
+ $('studySourceCheck').textContent=study.sourceCheck||'';$('studySourceCheck').classList.toggle('hidden',!study.sourceCheck);
+ const spec=study.explore;$('studyExplore').classList.toggle('hidden',!spec);
+ if(spec&&$('studyExplore').dataset.study!==study.id){
+  $('studyExplore').dataset.study=study.id;
+  $('studyExploreLabel').textContent=spec.label+' ('+spec.min+'–'+spec.max+' '+spec.unit+')';
+  $('studyExploreValue').min=spec.min;$('studyExploreValue').max=spec.max;$('studyExploreValue').value=spec.value;$('studyExploreUnit').textContent=spec.unit;
+  $('studyExploreStatus').textContent='Changes only “'+spec.input+'”. The reconstruction uses '+spec.value+' '+spec.unit+'. Exploring saves the original reconstruction as a regimen when there is room, and Undo restores your settings.';
+ }
 }
 function renderStudyStatus(){
  const select=$('studySelect'),status=$('studyStatus');if(!select||!status)return;
@@ -1360,6 +1372,30 @@ function loadStudy(id){
 }
 if(STUDIES)for(const study of STUDIES.STUDIES){const option=document.createElement('option');option.value=study.id;option.textContent=study.label;$('studySelect').append(option);}
 $('studySelect').addEventListener('change',e=>loadStudy(e.target.value));
+// Vary one reconstruction assumption (from #68). The published values are unchanged; the measured
+// points hide because the settings no longer match the reconstruction.
+$('studyExploreRun').addEventListener('click',()=>{
+ const study=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;if(!study?.explore)return;
+ try{
+  const raw=$('studyExploreValue').value;if(!raw.trim())throw new Error('Enter a value for the assumption.');
+  const value=Number(raw),calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale};
+  const original=STUDIES.configFor(study,E,calibration),config=STUDIES.exploreConfig(study,E,value,calibration);
+  const errors=E.validate(config,study.mode);if(errors.length)throw new Error(errors[0]);
+  let kept=false;
+  if(savedRegimens.length<REG.MAX_SAVED&&!savedRegimens.some(r=>r.name===('Original: '+study.short).slice(0,40))){
+   const d=E.simulateMany({...original,variability:0,draws:1,requestedModes:[study.mode]})[study.mode];
+   savedRegimens.push({name:('Original: '+study.short).slice(0,40),primary:study.mode,config:structuredClone(original),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
+   savedRevision++;kept=true;
+  }
+  rememberVersion('Before exploring an assumption: '+study.short);
+  applyVersion({config,primary:study.mode,visible:[study.mode],palette:paletteMode,unit:concUnit});
+  studyOverlay=study.id;
+  const spec=study.explore;
+  showScenarioNote('Hypothetical assumption: '+study.short,spec.label+' set to '+value+' '+spec.unit+' (the reconstruction uses '+spec.value+' '+spec.unit+'). '+(kept?'The original reconstruction is saved as a regimen for comparison. ':'')+'The published measurements are unchanged but hidden, because the settings no longer match the reconstruction. Use Undo last import in Research tools to return to your previous settings.');
+  $('studyExploreStatus').textContent='Exploring '+value+' '+spec.unit+'.';
+  renderRegimens();renderStudyStatus();switchTab('concentration');defer();
+ }catch(error){$('studyExploreStatus').textContent=error.message;}
+});
 // Evidence scorecard on the Methods tab. Recomputed only when calibration multipliers change.
 let scorecardKey='',scorecardRun=0,scorecardScores=[],scorecardCalibration=null;
 function renderScorecard(){
