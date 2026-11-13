@@ -66,6 +66,7 @@ jobs:
           node scripts/check-concentrations.cjs
           node scripts/check-study-overlay.cjs
           node scripts/check-label-probenecid.cjs
+          node scripts/check-usability.cjs
           node scripts/check-regimens.cjs
           node scripts/check-literature.cjs
 
