@@ -88,7 +88,7 @@ async function main(){
   await page.click('[data-tab="concentration"]');
   // Boelaert: residual CrCl replaces the assumed 0 mL/min.
   await page.selectOption('#studySelect','boelaert-4');await ready();
-  assert.match(await page.textContent('#studySourceCheck'),/original Boelaert 1987 paper/);
+  assert.ok(await page.$eval('#studySourceCheck',e=>e.classList.contains('hidden')),'Boelaert has no pending source-check note');
   assert.equal(await page.inputValue('#studyExploreValue'),'0');
   await page.fill('#studyExploreValue','5');await page.click('#studyExploreRun');await ready();
   assert.equal(await page.evaluate(()=>window.AyFluxResearchBridge.snapshot().config.crcl),5);
