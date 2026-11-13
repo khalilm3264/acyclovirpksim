@@ -46,7 +46,8 @@ test('new studies have direct DOI citations, accurate evidence labels and no fal
  assert.match(html,/ref20[\s\S]*?oral acyclovir/);
  assert.match(html,/ref21[\s\S]*?oral acyclovir/i);
  assert.match(html,/ref24[\s\S]*?not an independent PK validation cohort/);
- assert.match(html,/release notes">v0\.26\.0/);
+ const version=read('public/assets/ayflux-version.js').match(/version:"([^"]+)"/)[1];
+ assert.ok(html.includes('release notes">v'+version+'</a>'),'footer shows the current app version');
 });
 test('model-methods and software-citation pages link the expanded bibliography',()=>{
  assert.ok(methods.includes('id="new-research-evidence"'));

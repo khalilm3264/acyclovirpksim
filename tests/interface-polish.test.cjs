@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
-const read=file=>fs.readFileSync(path.join(root,file),'utf8');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8').replaceAll('\r\n','\n');
 function charts(storage={}){
  const window={localStorage:{getItem:key=>storage[key]??null,setItem:(key,value)=>{storage[key]=String(value);}}};
  vm.runInNewContext(read('public/assets/charts.js'),{window,document:{}});
@@ -56,7 +56,7 @@ test('heatmap cell text keeps WCAG AA contrast against its fill in both palettes
 test('page layout: primary mode first, merged reference tab, table under Concentration, library last',()=>{
  const html=read('public/index.html');
  const tabs=[...html.slice(html.indexOf('id="tabs"'),html.indexOf('id="alerts"')).matchAll(/data-tab="([a-z]+)"/g)].map(m=>m[1]);
- assert.deepEqual(tabs,['concentration','clearance','timeline','validation','research','method']);
+ assert.deepEqual(tabs,['concentration','clearance','timeline','validation','research','experimental','method']);
  const aside=html.slice(html.indexOf('<aside>'),html.indexOf('</aside>'));
  assert.ok(aside.indexOf('id="primary"')<aside.indexOf('id="patientControls"'),'primary dialysis mode precedes patient inputs');
  const concentration=html.slice(html.indexOf('<section id="concentration">'),html.indexOf('<section id="clearance"'));

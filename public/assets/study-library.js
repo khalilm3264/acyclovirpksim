@@ -40,10 +40,10 @@
   P('Dose','reported',b.dose+' mg IV over 1 h',b.dose+' mg IV over 1 h',BOELAERT_SOURCE),
   P('Dose times','reported','Every 24 h for 5 days','Every 24 h, five doses',BOELAERT_SOURCE+' (Methods)'),
   P('Weight','reported',b.weight+' kg',b.weight+' kg',BOELAERT_SOURCE+' (Table I)'),
-  P('Residual kidney function','assumed','No urinary recovery reported for this patient; no measured CrCl','CrCl 0 mL/min (an absent value is not proof of no function)',BOELAERT_SOURCE+' (Tables I–II)'),
+  P('Residual kidney function','assumed','No CrCl reported. Urine was collected only from patients who were not anuric, and none is listed for this patient, which implies anuria','CrCl 0 mL/min',BOELAERT_SOURCE+' (Methods, Table II)'),
   P('PD prescription','reported','Four 2 L exchanges of 1.36% dextrose; dwells 4, 4, 4 and 12 h','Repeating 4/4/4/12 h dwells of 2 L, 1.36%',BOELAERT_SOURCE+' (Methods)'),
-  P('Exchange times on the clock','assumed','Not reported','First exchange starts with the first infusion','Not reported'),
-  P('Peritoneal transport and ultrafiltration','assumed','Per-exchange drained volume and transport type not reported','AyFlux default membrane parameters','Not reported'),
+  P('Exchange times on the clock','reported','Fresh dialysate instilled over 10 min just before the infusion at time 0; each daily infusion started after the morning exchange','First exchange starts with the first infusion',BOELAERT_SOURCE+' (Methods)'),
+  P('Peritoneal transport and ultrafiltration','assumed','Drained volumes were recorded but not published; transport type not reported','AyFlux default membrane parameters','Not reported'),
   P('Plasma values compared','calculated','Day-1 and day-5 peaks and troughs fitted by the authors; not raw samples','The fitted values, converted from µmol/L',BOELAERT_SOURCE+' (Tables I–II)'),
   P('Sample times','calculated','Not stated; implied by the fitted Cmax and Cmin','Hours 1, 24, 97 and 120: end of infusion and just before the next dose','Implied by the fitted values'),
   P('Dialysate recovery','reported','Percent of dose recovered in dialysate','Not used in the scorecard; used in case study 3',BOELAERT_SOURCE+' (Table II)')];
@@ -64,8 +64,10 @@
   P('Sample times','reported','Start and end of the first session','Simulation hours 44 and 46',VASQUEZ_SOURCE)];
  // Source checks still outstanding for the provenance rows, shown on the page.
  const SOURCE_CHECK={
-  vasquez:'Pending source check: these rows were checked against the 2024 Authorea preprint. They have not yet been checked against the final Br J Clin Pharmacol 2025 article.',
-  boelaert:'Pending source check: these rows come from the manuscript and research/validation/boelaert-capd.cjs. They have not yet been checked against the original Boelaert 1987 paper.'};
+  vasquez:'Pending source check: these rows were checked against the 2024 Authorea preprint. They have not yet been checked against the final Br J Clin Pharmacol 2025 article.'};
+ // Boelaert 1987 rows were checked against the original paper on 2026-11-13: Table I (age, weight, dose,
+ // fitted day-1 and day-5 Cmax/Cmin), Table II (dialysate recovery, peritoneal clearance, no urine listed)
+ // and Methods (2 L 1.36% exchanges at 4/4/4/12 h, 60 min infusions for 5 days).
  // Assumptions a reader can vary. Bounds are interface limits for exploration, not plausibility claims.
  const EXPLORE={
   vasquez:{input:'Time from last dose to admission',label:'Hypothetical last-dose-to-admission gap',unit:'h',value:4,min:0,max:24},
@@ -164,10 +166,10 @@
  }
  // One row per published point for the CSV export, in mg/L.
  function csv(scores,calibration={}){
-  const head=['study_id','citation','analyte','time_h','observed_mg_L','predicted_nominal_mg_L','interval_lower_mg_L','interval_upper_mg_L','inside_interval','point_type','central_volume_multiplier','clearance_multiplier'];
+  const head=['study_id','citation','analyte','time_h','observed_mg_L','predicted_nominal_mg_L','interval_lower_mg_L','interval_upper_mg_L','inside_interval','point_type','central_volume_multiplier','clearance_multiplier','reference_id','regimen','scenario','subjects','assumptions','study_configuration_json','model_interval_fraction'];
   const cell=v=>typeof v==='string'&&/[",\n]/.test(v)?'"'+v.replaceAll('"','""')+'"':String(v);
   const lines=[head.join(',')];
-  for(const score of scores){const study=find(score.id);for(const r of score.rows)lines.push([study.id,study.short+' '+study.cite,r.analyte,+r.time.toFixed(4),r.observed,+r.predicted.toPrecision(6),+r.lower.toPrecision(6),+r.upper.toPrecision(6),r.inside,study.pointsLabel,calibration.vcScale??1,calibration.clearanceScale??1].map(cell).join(','));}
+  for(const score of scores){const study=find(score.id);for(const r of score.rows)lines.push([study.id,study.short+' '+study.cite,r.analyte,+r.time.toFixed(4),r.observed,+r.predicted.toPrecision(6),+r.lower.toPrecision(6),+r.upper.toPrecision(6),r.inside,study.pointsLabel,calibration.vcScale??1,calibration.clearanceScale??1,study.ref,study.regimen,study.mode,study.n,study.note,JSON.stringify(study.config),score.coverage].map(cell).join(','));}
   return lines.join('\n')+'\n';
  }
  // Bias and error magnitude are distinct: opposite errors cancel in GMR, not absolute fold error.

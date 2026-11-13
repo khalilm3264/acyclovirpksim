@@ -39,8 +39,8 @@ test('kidney injury example is a valid CrCl trajectory at every supported horizo
 
 test('exposure tools stay descriptive and the measurement pixel is off',()=>{
  const html=read('public/index.html');
- assert.match(html,/id="timeAboveLevel"[^>]*placeholder="level"/,'no default level is suggested');
- assert.match(html,/no therapeutic or toxic level is established/);
+ assert.match(html,/id="timeAboveLevel"[^>]*placeholder="Enter a level"/,'no default level is suggested');
+ assert.match(html,/no established therapeutic or toxic cutoff/);
  assert.match(ui,/id="renalExample"/);
  const pixel=read('public/assets/measurement-pixel.js');
  assert.match(pixel,/const ENABLED = false;/);
@@ -195,6 +195,7 @@ test('HD timing stops after a settings change during a yielded sweep',async()=>{
   }
   const snapshot={...current,config:{...E.DEFAULTS}};
   const context={
+   performance, researchRunner:()=>({summary:async()=>{calls++;return {auc:{median:100}};},close(){}}),
    $:id=>elements[id],bridge:{snapshot:()=>current},getSnapshot:()=>snapshot,
    updateText:(id,text)=>{elements[id].textContent=text;},
    pause:async()=>{current=change;},

@@ -60,10 +60,12 @@ test('dialysis and single-patient studies reproduce the research/validation reco
 test('scorecard CSV has one row per published point and quotes text safely',()=>{
  const scores=['laskin-anuric','kacirova'].map(id=>S.score(S.find(id),E,{draws:20}));
  const lines=S.csv(scores,{vcScale:1.1,clearanceScale:0.9}).trim().split('\n');
- assert.equal(lines[0],'study_id,citation,analyte,time_h,observed_mg_L,predicted_nominal_mg_L,interval_lower_mg_L,interval_upper_mg_L,inside_interval,point_type,central_volume_multiplier,clearance_multiplier');
+ assert.equal(lines[0],'study_id,citation,analyte,time_h,observed_mg_L,predicted_nominal_mg_L,interval_lower_mg_L,interval_upper_mg_L,inside_interval,point_type,central_volume_multiplier,clearance_multiplier,reference_id,regimen,scenario,subjects,assumptions,study_configuration_json,model_interval_fraction');
  assert.equal(lines.length,1+3+4);
  assert.match(lines[1],/^laskin-anuric,"Laskin 1982 \(anuric, before dialysis\) \[1\]",plasma,1,/);
- assert.match(lines.at(-1),/^kacirova,.*,cmmg,65\.4167,0\.64,.*,measured concentrations,1\.1,0\.9$/);
+ assert.match(lines.at(-1),/^kacirova,.*cmmg,65\.4167,0\.64,/);
+ assert.match(lines.at(-1),/,ref42,"750 mg IV q8h ×6, then 850 mg; estimated CrCl",No dialysis,1,/);
+ assert.match(lines.at(-1),/,"A 36-year-old man .* preceding oral course is not simulated\.","\{.*\}",0\.9$/);
 });
 
 test('study data agree with the existing benchmark tables instead of duplicating different numbers',()=>{
