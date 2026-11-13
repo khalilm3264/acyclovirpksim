@@ -346,7 +346,7 @@ function buildResearchReportHtml({date,values,metrics,charts,diagnostic,scenario
   '</style></head><body>'+
   '<p class="screen-help">Use your browser Print command (Ctrl+P / Cmd+P) and select Save as PDF.</p>'+
   '<section class="report-summary"><h1>AyFlux — educational PK research report</h1>'+
-  '<p class="meta">Generated '+escapeHtml(date)+' · AyFlux '+escapeHtml(window.AyFluxVersion?.version||'0.25.0')+
+  '<p class="meta">Generated '+escapeHtml(date)+' · AyFlux '+escapeHtml(window.AyFluxVersion?.version||'unknown')+
   ' · Configuration schema 2</p>'+
   '<p class="note"><strong>EDUCATIONAL USE ONLY.</strong> Simulated, non-validated concentration estimates. Not for prescribing, toxicity assessment, clinical decisions, or dialysis planning.</p>'+
   '<h2>Simulation assumptions</h2><table>'+values.map(r=>tableRow(...r)).join('')+'</table>'+
@@ -374,7 +374,7 @@ $('printResearchReport').addEventListener('click',async ()=>{
   const snap=getSnapshot(),config=snap.config,sim=snap.results[snap.primary];
   await window.AyFluxCharts.ensure();
   const values=[
-   ['Release','v0.25.0 (research preview)'],['Scenario',snap.primary],
+   ['Release','v'+(window.AyFluxVersion?.version||'unknown')+' ('+(window.AyFluxVersion?.channel||'preview')+')'],['Scenario',snap.primary],
    ['Medication schedule',config.dosingMode==='custom'?'Custom doses':'Repeating regimen'],
    ['Drug and route',config.dosingMode==='custom'?'See saved configuration':config.route],
    ['Dose (mg)',config.dosingMode==='custom'?'See custom schedule':config.dose],

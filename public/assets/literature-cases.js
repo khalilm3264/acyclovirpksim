@@ -40,7 +40,7 @@ function runCase(id,dt=.125){
 function configuration(id){
  const study=cases().find(s=>s.id===id);
  if(!study)throw Error('Unknown literature case.');
- return {format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.26.0',
+ return {format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:(typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown',
   config:{...study.config,draws:30},primary:study.mode,visibleScenarios:[study.mode],appearance:{palette:'standard'},
   literature:{id:study.id,doi:study.doi,note:study.note}};
 }

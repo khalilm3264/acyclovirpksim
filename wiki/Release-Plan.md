@@ -2,7 +2,7 @@
 
 ## Release identity
 
-The current application metadata identifies **v0.26.0 preview**. The main branch includes later changes; **v0.27.0 is planned** under [#55](https://github.com/khalilm3264/acyclovirpksim/issues/55). Configuration schema 2 and AGPL-3.0-only are tracked separately.
+The current application metadata identifies **v0.27.0 preview** (released 2026-11-13, [#55](https://github.com/khalilm3264/acyclovirpksim/issues/55)). Configuration schema 2 and AGPL-3.0-only are tracked separately.
 
 ## Before merging
 
