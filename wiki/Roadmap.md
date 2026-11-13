@@ -16,7 +16,7 @@ None of these changed a model equation, parameter or default. See the [changelog
 | --- | --- | --- | --- |
 | P0 | Review CMMG behavior at CrCl 0 without dialysis | The unadjusted guided scenario reaches a median peak plasma CMMG near 162 mg/L in 96 hours, about 60 times the 2.58 mg/L reference level. CMMG has no elimination path in that state. | Scientific review of the CMMG elimination terms |
 | P1 | Published case library | Load a reported case and overlay its measured levels: Ito 2025 (CHDF), Vasquez Vasquez 2025 (HD with dialysate recovery), Boulieu 1997 (CVVHD), Moyses Neto 2026 (cycler PD) | Full-text access; only abstracts reviewed so far |
-| P1 | Adult population-model comparison | An adult two-compartment model with CrCl on clearance (Infect Drug Resist 2022;15:53–62) would mirror the existing pediatric comparison | Full-text review of population and covariates |
+| P1 | Adult population-model comparison | Would mirror the existing pediatric comparison. No suitable adult acyclovir model identified yet (an earlier candidate turned out to be a meropenem study) | Finding a model |
 | P1 | Valacyclovir in hemodialysis benchmark | Hara 2008 measured valacyclovir, acyclovir and CMMG in 18 HD patients after 1,000 mg | Not yet in the bibliography |
 | P2 | Body-weight scalar | Turner 2016: ideal-weight dosing underexposes obese patients | Design decision on how weight enters volumes and clearance |
 | P2 | Prolonged or continuous infusion | Reported in pediatric and neonatal CRRT cases | Infusion input is capped at 4 hours |
