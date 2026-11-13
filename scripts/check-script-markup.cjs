@@ -18,6 +18,8 @@ const expectedSources = [
   './assets/simulator-ui.js',
   './assets/analysis-views.js',
   './assets/research-workspace.js',
+  './assets/literature-cases.js',
+  './assets/literature-workspace.js',
   './assets/pwa-register.js',
 ];
 

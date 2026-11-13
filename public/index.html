@@ -691,6 +691,19 @@ html body .shell .study-assumptions p{margin:6px 0 0}
  <div id="tornado" style="width:100%" role="img" aria-label="Sensitivity tornado plot"></div><p id="tornadoStatus" role="status"></p>
  <div class="scroll"><table><thead><tr><th>Parameter</th><th>Plasma AUC</th><th>Peak CSF acyclovir</th><th>Peak plasma CMMG</th><th>Dialysis removal</th></tr></thead><tbody id="sensitivityRows"></tbody></table></div><p id="sensitivityCaption" class="caption"></p>
  </div>
+<div class="card">
+ <h2>Replay published study cases</h2>
+ <label>Study <select id="literatureCase"></select></label>
+ <p id="literatureNote" class="research-note"></p>
+ <p><a id="literatureSource" target="_blank" rel="noopener"></a></p>
+ <div class="timeline-actions"><button class="btn" id="runLiterature" type="button">Compare with published measurements</button>
+ <button class="btn secondary" id="downloadLiterature" type="button">Download scenario</button></div>
+ <p class="tip">Import the downloaded JSON through Load configuration to explore the scenario in the main simulator. Smith cases compare the default CMMG CSF coefficient of 0.25 with an exploratory value of 0.025. These comparisons use the same study that informed the alternative.</p>
+ <div class="chart hidden" id="literaturePlot"></div>
+ <div class="scroll"><table><thead><tr><th>Endpoint</th><th>Published</th><th>Default model</th><th>Exploratory 0.025</th></tr></thead><tbody id="literatureRows"></tbody></table></div>
+ <p id="literatureStatus" role="status"></p>
+</div>
+
 <div class="card source-library" id="referenceLibraryPanel">
  <h2>Published-study reference library</h2>
  <p class="tip">Reference values are aggregate measurements from the original publications. They are not fitted patient records or evidence that a simulated regimen is safe. The benchmarks above compare these source-level values with nominal model scenarios.</p>
@@ -715,6 +728,8 @@ html body .shell .study-assumptions p{margin:6px 0 0}
 <script src="./assets/simulator-ui.js"></script>
 <script src="./assets/analysis-views.js"></script>
 <script src="./assets/research-workspace.js"></script>
+<script src="./assets/literature-cases.js"></script>
+<script src="./assets/literature-workspace.js"></script>
 <script src="./assets/pwa-register.js"></script>
 </body></html>
 

@@ -1,7 +1,8 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.26.0-interface-study-print-merge-20261113";
+const CACHE = "ayflux-static-v0.26.0-literature-presets-final-20261113";
 const CORE = [
+ "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js",
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
  "/assets/pk-engine.js", "/assets/simulator-ui.js", "/assets/study-library.js", "/assets/regimen-tools.js",

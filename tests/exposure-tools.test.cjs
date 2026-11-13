@@ -195,6 +195,7 @@ test('HD timing stops after a settings change during a yielded sweep',async()=>{
   }
   const snapshot={...current,config:{...E.DEFAULTS}};
   const context={
+   performance, researchRunner:()=>({summary:async()=>{calls++;return {auc:{median:100}};},close(){}}),
    $:id=>elements[id],bridge:{snapshot:()=>current},getSnapshot:()=>snapshot,
    updateText:(id,text)=>{elements[id].textContent=text;},
    pause:async()=>{current=change;},
