@@ -2,7 +2,7 @@
 
 ## Versioning
 
-AyFlux uses semantic-style versions for app releases, e.g., `v0.21.0`. Its configuration `schemaVersion: 2` is separately tracked; an application release does not automatically change the file schema. The GNU AGPLv3 is the **license** version, not the application version.
+AyFlux uses semantic-style versions for app releases, e.g., `v0.25.0`. Its configuration `schemaVersion: 2` is separately tracked; an application release does not automatically change the file schema. The GNU AGPLv3 is the **license** version, not the application version.
 
 ## Before merging
 
@@ -19,7 +19,7 @@ AyFlux uses semantic-style versions for app releases, e.g., `v0.21.0`. Its confi
 ## After merging
 
 - [ ] Verify the GitHub Actions test and Cloudflare deployment jobs.
-- [ ] Check https://ayflux.org/ in a browser, including the Research tab, CSV import/export and print report.
+- [ ] Check https://ayflux.org/ in a browser, including the Research tools tab, CSV import/export and print report.
 - [ ] Check service-worker update and an offline reload after the site has been successfully cached.
 - [ ] Confirm help pages, citation, license, source links and custom-domain email contact.
 - [ ] Create a GitHub release tag only after the production site and release artifacts are checked.
@@ -35,3 +35,4 @@ AyFlux uses semantic-style versions for app releases, e.g., `v0.21.0`. Its confi
 There are **no fixed dates** for these milestones. None makes AyFlux clinical decision support without further evidence, review and applicable compliance work.
 
 See [Roadmap](Roadmap) · [Home](Home).
+

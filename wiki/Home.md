@@ -1,29 +1,38 @@
-# AyFlux Wiki
+# AyFlux documentation
 
-AyFlux is an open-source, browser-based **educational acyclovir and valacyclovir pharmacokinetics simulator**. It explores modeled drug concentrations across kidney function, hemodialysis, peritoneal dialysis and CRRT.
+AyFlux is an open-source educational simulator for acyclovir pharmacokinetics across kidney function and dialysis. It models IV acyclovir, oral valacyclovir, and the CMMG metabolite in the browser.
 
-> **Educational use only.** AyFlux has not undergone the external clinical validation needed to support prescribing, dialysis decisions, or toxicity assessment. Predictions and uncertainty intervals are model-dependent, not measured patient outcomes.
+**Educational use only.** Predictions are model outputs, not patient measurements or validated guidance for prescribing, dialysis, or toxicity assessment.
 
-## Start here
+## Find a guide
 
-| Resource | Purpose |
+| Page | What you will learn |
 | --- | --- |
-| [Open AyFlux](https://ayflux.org/) | Run the browser simulator |
-| [Learning center](https://ayflux.org/learn/) | Understand the drug, dialysis, and core model concepts |
-| [Model methods](https://ayflux.org/learn/model-methods/) | Assumptions and evidence limitations |
-| [Interoperability](https://ayflux.org/learn/interoperability/) | CSV, R, and PK-Sim/MoBi result comparisons |
-| [Roadmap](Roadmap) | Current priorities and longer-term ideas |
-| [Release plan](Release-Plan) | Quality gates and reproducibility targets |
-| [GitHub source](https://github.com/khalilm3264/acyclovirpksim) | Code, issues, contributions and releases |
+| [Getting started](Getting-Started) | Configure a simulation and read its charts |
+| [Kidney function and dialysis](Kidney-Function-and-Dialysis) | Constant and changing CrCl, HD, PD, CRRT, and custom schedules |
+| [Model and uncertainty](Model-and-Uncertainty) | Compartments, intervals, observation fitting, and limitations |
+| [Worked examples](Worked-Examples) | Reproducible exercises using hypothetical inputs |
+| [Research and data exchange](Research-and-Data-Exchange) | CSV, JSON, Excel, R, and comparisons with PK-Sim/MoBi |
+| [Visual explorer](Visual-Explorer) | Heatmaps, drug accounting, and optional 3D surfaces |
+| [Performance and troubleshooting](Performance-and-Troubleshooting) | Lite, chart errors, offline behavior, and reproducible bug reports |
+| [Development and verification](Development-and-Verification) | Run locally, stage optional assets, and understand tests |
+| [Roadmap](Roadmap) | Remaining scientific and engineering priorities |
+| [Release plan](Release-Plan) | Release and verification checklist |
 
-## Simulation scope
+## Choose an interface
 
-AyFlux includes IV acyclovir, oral valacyclovir (with an exploratory first-order absorption model), plasma/peripheral drug distribution, CMMG formation, simplified CSF effects, residual kidney clearance, and modeled dialysis drug removal. Research tools include Monte Carlo bands, Bayesian reweighting against user-entered observations, parameter sweeps, CSV exports and local CSV overlays.
+| Interface | Best suited to |
+| --- | --- |
+| [Full simulator](https://ayflux.org/) | Custom dosing and dialysis, uncertainty, CSF outputs, and research tools |
+| [AyFlux Lite](https://ayflux.org/lite/) | Fast comparison of five dialysis scenarios with basic inputs and Canvas charts |
+| [Visual explorer](https://ayflux.org/explore/) | Deterministic parameter grids and drug accounting; open from Research tools to copy your settings |
 
-Version 0.21.0 adds an optional **time-varying CrCl trajectory** and a compact CSV format selector. Changing CrCl over time means specifying a hypothetical kidney function path; AyFlux does not predict acute kidney injury or recovery from creatinine alone.
+These pages describe the **0.25.0 preview** implementation. Application version and configuration schema are separate; this release uses configuration schema 2. Consult the [changelog](https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md) for later changes.
 
-## Community
+## Methods, citation, and contributions
 
-Suggestions and reproducible bug reports are welcome at [GitHub Issues](https://github.com/khalilm3264/acyclovirpksim/issues). Read [CONTRIBUTING.md](https://github.com/khalilm3264/acyclovirpksim/blob/main/CONTRIBUTING.md) before proposing scientific changes. Please share **synthetic or appropriately licensed public data only**; never submit patient-identifying information, API tokens, or credentials.
+The [model methods guide](https://ayflux.org/learn/model-methods/) contains equations, parameter provenance, references, and limitations. Use [Cite AyFlux](https://ayflux.org/cite/) for software attribution and record the version used in your work.
 
-Project contact: [contact@ayflux.org](mailto:contact@ayflux.org) · License: GNU AGPLv3-only.
+Report reproducible problems through [GitHub Issues](https://github.com/khalilm3264/acyclovirpksim/issues). Share synthetic or appropriately licensed public examples without patient identifiers. Read [CONTRIBUTING.md](https://github.com/khalilm3264/acyclovirpksim/blob/main/CONTRIBUTING.md) for scientific and code changes.
+
+License: **AGPL-3.0-only**. Project contact: [contact@ayflux.org](mailto:contact@ayflux.org).

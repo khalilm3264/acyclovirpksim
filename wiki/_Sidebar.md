@@ -1,12 +1,17 @@
 **AyFlux Wiki**
 
 - [Home](Home)
+- [Getting Started](Getting-Started)
+- [Kidney Function and Dialysis](Kidney-Function-and-Dialysis)
+- [Model and Uncertainty](Model-and-Uncertainty)
+- [Worked Examples](Worked-Examples)
+- [Research and Data Exchange](Research-and-Data-Exchange)
+- [Visual Explorer](Visual-Explorer)
+- [Performance and Troubleshooting](Performance-and-Troubleshooting)
+- [Development and Verification](Development-and-Verification)
 - [Roadmap](Roadmap)
-- [Release plan](Release-Plan)
-- [User guide](https://ayflux.org/learn/)
-- [Model methods](https://ayflux.org/learn/model-methods/)
-- [CSV / R / OSP](https://ayflux.org/learn/interoperability/)
-- [Contributing](https://github.com/khalilm3264/acyclovirpksim/blob/main/CONTRIBUTING.md)
-- [GitHub repository](https://github.com/khalilm3264/acyclovirpksim)
+- [Release Plan](Release-Plan)
 
-*Educational modeling only — not for clinical care.*
+[Open simulator](https://ayflux.org/) · [User guide](https://ayflux.org/learn/)
+
+*Educational modeling only.*

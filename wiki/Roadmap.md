@@ -2,15 +2,11 @@
 
 This is a **living plan**, not a promise of release dates, clinical utility, or completion. The priority is scientific transparency, reliable numerical behavior, and a compact interface.
 
-## v0.21.0 preview additions
+## Implemented through the 0.25.0 preview
 
-- An optional user-entered CrCl time trajectory, interpolated into the acyclovir and CMMG renal elimination models
-- A dual-axis CrCl / modeled renal drug-clearance chart instead of an uninformative constant renal-clearance trace
-- A single CSV export button with a format selector; detailed CSV includes the entered CrCl at every time sample
-- Uniform spacing between sidebar fields, buttons, blocks and mobile layouts; short-page footer alignment
-- A refreshed GitHub README, roadmap and verification documentation
+The current app includes a time-varying CrCl editor, custom medication and dialysis timelines, detailed/tidy CSV and XLSX result export, external CSV comparison, research reports, Lite, and a visual explorer with parameter grids, drug accounting, and optional 3D surfaces. See [Home](Home) for usage guides.
 
-The CrCl trajectory is a **hypothetical model input**, never a prediction of kidney injury or recovery.
+These features are implemented; their availability does not imply independent scientific validation. Remaining work focuses on evidence, numerical coverage, usability, and reproducibility rather than presenting existing controls as future features.
 
 ## Scientific follow-up following the source audit
 
@@ -36,11 +32,11 @@ The CrCl trajectory is a **hypothetical model input**, never a prediction of kid
 
 ## Research-oriented extensions to investigate
 
-- **Renal trajectory editor:** interpolate user-entered CrCl time points, optionally display entered CrCl and modeled renal clearance on separate axes, and show concentration changes without implying a renal recovery forecast.
+- **Renal trajectory evaluation:** extend tests and examples for the existing interpolated CrCl editor, particularly transitions and alignment with exported results. Do not imply a renal recovery forecast.
 - **HD and CRRT:** investigate time-varying prescriptions, interruptions, delivered treatment, post-dialysis rebound and extracorporeal model parameter provenance.
 - **PD:** refine per-exchange dwell/fill, membrane mass balance and dialysate concentration comparisons using public measurements.
 - **CMMG and CNS:** explicitly separate observed exposure–toxicity associations from speculative CNS model assumptions; assess parameter identifiability.
-- **Open Systems Pharmacology:** explore whether a mapping to OSP models is scientifically meaningful. Native PK-Sim/MoBi import/export is **not currently supported**.
+- **Open Systems Pharmacology:** explore whether a mapping to OSP models is scientifically meaningful. Native PK-Sim/MoBi model import/export is **not currently supported**; CSV comparison and XLSX result export are available.
 - **Educational case library:** synthetic examples illustrating how parameter changes alter modeled concentrations, without dosing recommendations.
 
 ## Validation criteria before any clinical claims
@@ -56,3 +52,4 @@ The CrCl trajectory is a **hypothetical model input**, never a prediction of kid
 ## How to propose a change
 
 Create a [feature request](https://github.com/khalilm3264/acyclovirpksim/issues/new/choose) describing the use case, units, input/output examples, primary references, failure cases, and a feasible test. Source changes should follow [CONTRIBUTING.md](https://github.com/khalilm3264/acyclovirpksim/blob/main/CONTRIBUTING.md).
+
