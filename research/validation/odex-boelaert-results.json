@@ -1,0 +1,288 @@
+{
+  "node": "v24.22.1",
+  "odex": "3.0.0-rc.4",
+  "scope": "Boelaert patients 1, 4 and 5; default coefficients. ODEX restarts at every output/event interval. AUC and CSF retain the production updates. Timings include a VM context and are not browser benchmarks.",
+  "rows": [
+    {
+      "patient": 1,
+      "method": "rk4",
+      "stepHours": 0.25,
+      "day1PeakMgL": 5.726096439676357,
+      "day1TroughMgL": 1.1248229816822612,
+      "day5PeakMgL": 7.3571014676464985,
+      "day5TroughMgL": 1.744400717314351,
+      "aucMgHL": 332.04928648260494,
+      "drainedMg": 70.95016013686664,
+      "maxMassResidualMg": 3.410605131648481e-13,
+      "medianRuntimeMs": 4.216145999999995
+    },
+    {
+      "patient": 1,
+      "method": "rk4-half",
+      "stepHours": 0.125,
+      "day1PeakMgL": 5.7261683534384815,
+      "day1TroughMgL": 1.1248213372489158,
+      "day5PeakMgL": 7.357170289818751,
+      "day5TroughMgL": 1.7443963914082117,
+      "aucMgHL": 332.0457661515266,
+      "drainedMg": 70.95094271872385,
+      "maxMassResidualMg": 2.2737367544323206e-13,
+      "medianRuntimeMs": 6.840814000000023
+    },
+    {
+      "patient": 1,
+      "method": "odex",
+      "stepHours": 0.25,
+      "day1PeakMgL": 5.726159020275692,
+      "day1TroughMgL": 1.124822936780754,
+      "day5PeakMgL": 7.3571634793982135,
+      "day5TroughMgL": 1.7444006404908303,
+      "aucMgHL": 332.04925345834437,
+      "drainedMg": 70.95017522224514,
+      "maxMassResidualMg": 4.661160346586257e-12,
+      "medianRuntimeMs": 86.38615000000004
+    },
+    {
+      "patient": 1,
+      "method": "odex-half",
+      "stepHours": 0.125,
+      "day1PeakMgL": 5.726171880521763,
+      "day1TroughMgL": 1.1248213346994362,
+      "day5PeakMgL": 7.357173784800071,
+      "day5TroughMgL": 1.7443963870201882,
+      "aucMgHL": 332.04576427965145,
+      "drainedMg": 70.95094357558501,
+      "maxMassResidualMg": 2.0179413695586845e-12,
+      "medianRuntimeMs": 109.98138500000005
+    },
+    {
+      "patient": 4,
+      "method": "rk4",
+      "stepHours": 0.25,
+      "day1PeakMgL": 5.908703812259109,
+      "day1TroughMgL": 1.2361506302449332,
+      "day5PeakMgL": 7.785748959388584,
+      "day5TroughMgL": 2.0019855915606106,
+      "aucMgHL": 361.73751801537634,
+      "drainedMg": 77.02240296977267,
+      "maxMassResidualMg": 2.2737367544323206e-13,
+      "medianRuntimeMs": 2.9623659999999745
+    },
+    {
+      "patient": 4,
+      "method": "rk4-half",
+      "stepHours": 0.125,
+      "day1PeakMgL": 5.908763147066271,
+      "day1TroughMgL": 1.2361491801859377,
+      "day5PeakMgL": 7.785805329900237,
+      "day5TroughMgL": 2.0019814362721657,
+      "aucMgHL": 361.7345388740103,
+      "drainedMg": 77.02327656381769,
+      "maxMassResidualMg": 6.821210263296962e-13,
+      "medianRuntimeMs": 4.9106839999999465
+    },
+    {
+      "patient": 4,
+      "method": "odex",
+      "stepHours": 0.25,
+      "day1PeakMgL": 5.90875561872185,
+      "day1TroughMgL": 1.2361505940731068,
+      "day5PeakMgL": 7.785800338008431,
+      "day5TroughMgL": 2.001985526358777,
+      "aucMgHL": 361.73749246440497,
+      "drainedMg": 77.0224179491663,
+      "maxMassResidualMg": 5.343281372915953e-12,
+      "medianRuntimeMs": 60.11489900000015
+    },
+    {
+      "patient": 4,
+      "method": "odex-half",
+      "stepHours": 0.125,
+      "day1PeakMgL": 5.908766085310062,
+      "day1TroughMgL": 1.2361491781204599,
+      "day5PeakMgL": 7.785808243843333,
+      "day5TroughMgL": 2.001981432526193,
+      "aucMgHL": 361.7345374171429,
+      "drainedMg": 77.02327742002224,
+      "maxMassResidualMg": 3.865352482534945e-12,
+      "medianRuntimeMs": 106.38601400000016
+    },
+    {
+      "patient": 5,
+      "method": "rk4",
+      "stepHours": 0.25,
+      "day1PeakMgL": 6.164256594349799,
+      "day1TroughMgL": 1.2216722120709875,
+      "day5PeakMgL": 7.946812089728578,
+      "day5TroughMgL": 1.9056152198032168,
+      "aucMgHL": 360.13402391713333,
+      "drainedMg": 76.91265251831575,
+      "maxMassResidualMg": 5.684341886080801e-13,
+      "medianRuntimeMs": 1.8763989999999922
+    },
+    {
+      "patient": 5,
+      "method": "rk4-half",
+      "stepHours": 0.125,
+      "day1PeakMgL": 6.164331734721544,
+      "day1TroughMgL": 1.2216704775688525,
+      "day5PeakMgL": 7.9468839327589915,
+      "day5TroughMgL": 1.9056106039129297,
+      "aucMgHL": 360.13033150828875,
+      "drainedMg": 76.91350424192582,
+      "maxMassResidualMg": 2.2737367544323206e-13,
+      "medianRuntimeMs": 3.8764249999999265
+    },
+    {
+      "patient": 5,
+      "method": "odex",
+      "stepHours": 0.25,
+      "day1PeakMgL": 6.1643220118302375,
+      "day1TroughMgL": 1.2216721652708256,
+      "day5PeakMgL": 7.946876919903562,
+      "day5TroughMgL": 1.9056151391746123,
+      "aucMgHL": 360.1339897007161,
+      "drainedMg": 76.91266868448753,
+      "maxMassResidualMg": 2.8990143619012088e-12,
+      "medianRuntimeMs": 59.491849999999886
+    },
+    {
+      "patient": 5,
+      "method": "odex-half",
+      "stepHours": 0.125,
+      "day1PeakMgL": 6.164335424879007,
+      "day1TroughMgL": 1.2216704749095202,
+      "day5PeakMgL": 7.946887589743384,
+      "day5TroughMgL": 1.9056105993038894,
+      "aucMgHL": 360.1303295672669,
+      "drainedMg": 76.91350516096625,
+      "maxMassResidualMg": 5.343281372915953e-12,
+      "medianRuntimeMs": 104.72981699999991
+    }
+  ],
+  "comparisons": [
+    {
+      "patient": 1,
+      "relativeDifferencePct": [
+        {
+          "method": "rk4",
+          "day1PeakMgL": -0.001317474343773158,
+          "day1TroughMgL": 0.00014642172709588124,
+          "day5PeakMgL": -0.0009829474698769618,
+          "day5TroughMgL": 0.0002482402620770818,
+          "aucMgHL": 0.0010607582846695431,
+          "drainedMg": -0.0011041977440898242
+        },
+        {
+          "method": "rk4-half",
+          "day1PeakMgL": -6.159583322041468e-05,
+          "day1TroughMgL": 2.2665639757541084e-07,
+          "day5PeakMgL": -4.750440076165584e-05,
+          "day5TroughMgL": 2.515496783164226e-07,
+          "aucMgHL": 5.637401098227509e-07,
+          "drainedMg": -1.2076811387906977e-06
+        },
+        {
+          "method": "odex",
+          "day1PeakMgL": -0.0002245871472085635,
+          "day1TroughMgL": 0.0001424298480486136,
+          "day5PeakMgL": -0.00014007283446930917,
+          "day5TroughMgL": 0.00024383624466293728,
+          "aucMgHL": 0.0010508125891881357,
+          "drainedMg": -0.0010829360416616247
+        },
+        {
+          "method": "odex-half",
+          "day1PeakMgL": 0,
+          "day1TroughMgL": 0,
+          "day5PeakMgL": 0,
+          "day5TroughMgL": 0,
+          "aucMgHL": 0,
+          "drainedMg": 0
+        }
+      ]
+    },
+    {
+      "patient": 4,
+      "relativeDifferencePct": [
+        {
+          "method": "rk4",
+          "day1PeakMgL": -0.0010539095651121873,
+          "day1TroughMgL": 0.0001174716206616222,
+          "day5PeakMgL": -0.0007614425232815828,
+          "day5TroughMgL": 0.0002077459036421704,
+          "aucMgHL": 0.0008239739159835481,
+          "drainedMg": -0.0011353064669012219
+        },
+        {
+          "method": "rk4-half",
+          "day1PeakMgL": -4.972685919465824e-05,
+          "day1TroughMgL": 1.6708968669498108e-07,
+          "day5PeakMgL": -3.7426340404649845e-05,
+          "day5TroughMgL": 1.8711326710485117e-07,
+          "aucMgHL": 4.0274489433988376e-07,
+          "drainedMg": -1.111617915380583e-06
+        },
+        {
+          "method": "odex",
+          "day1PeakMgL": -0.00017713661466737835,
+          "day1TroughMgL": 0.00011454545066019782,
+          "day5PeakMgL": -0.00010154160820156684,
+          "day5TroughMgL": 0.00020448903858585093,
+          "aucMgHL": 0.0008169104568085115,
+          "drainedMg": -0.0011158585881200448
+        },
+        {
+          "method": "odex-half",
+          "day1PeakMgL": 0,
+          "day1TroughMgL": 0,
+          "day5PeakMgL": 0,
+          "day5TroughMgL": 0,
+          "aucMgHL": 0,
+          "drainedMg": 0
+        }
+      ]
+    },
+    {
+      "patient": 5,
+      "relativeDifferencePct": [
+        {
+          "method": "rk4",
+          "day1PeakMgL": -0.0012788163488015464,
+          "day1TroughMgL": 0.00014219558408087182,
+          "day5PeakMgL": -0.000950057666648226,
+          "day5TroughMgL": 0.00024246817944105752,
+          "aucMgHL": 0.0010258369159982723,
+          "drainedMg": -0.0011085733886598624
+        },
+        {
+          "method": "rk4-half",
+          "day1PeakMgL": -5.986302186381583e-05,
+          "day1TroughMgL": 2.1768000164813093e-07,
+          "day5PeakMgL": -4.601781957204699e-05,
+          "day5TroughMgL": 2.418668463664652e-07,
+          "aucMgHL": 5.389776039765087e-07,
+          "drainedMg": -1.194901245743112e-06
+        },
+        {
+          "method": "odex",
+          "day1PeakMgL": -0.0002175911569528822,
+          "day1TroughMgL": 0.00013836475056813803,
+          "day5PeakMgL": -0.00013426438592276641,
+          "day5TroughMgL": 0.00023823706294280077,
+          "aucMgHL": 0.001016335795309797,
+          "drainedMg": -0.0010875547499414294
+        },
+        {
+          "method": "odex-half",
+          "day1PeakMgL": 0,
+          "day1TroughMgL": 0,
+          "day5PeakMgL": 0,
+          "day5TroughMgL": 0,
+          "aucMgHL": 0,
+          "drainedMg": 0
+        }
+      ]
+    }
+  ]
+}
