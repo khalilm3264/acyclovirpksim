@@ -6,8 +6,8 @@ Selected multipliers: {"clearanceScale":0.7,"vcScale":2}
 |---|---:|---:|---:|
 | Kacířová ACV trough (mg/L) | 1.700 | 0.445 | 1.411 |
 | Kacířová ACV +25 min (mg/L) | 8.900 | 9.053 | 10.225 |
-| Kacířová CMMG trough (mg/L) | 0.270 | 0.112 | 0.264 |
-| Kacířová CMMG +25 min (mg/L) | 0.640 | 0.708 | 0.666 |
+| Kacířová CMMG trough (mg/L) | 0.270 | 0.108 | 0.258 |
+| Kacířová CMMG +25 min (mg/L) | 0.640 | 0.702 | 0.659 |
 | Vasquez HD1 inlet at start (mg/L) | 8.800 | 8.272 | 10.448 |
 | Vasquez HD1 inlet at 2 h (mg/L) | 3.200 | 5.033 | 7.628 |
 | Vasquez HD2 removal (mg) | 66.600 | 25.972 | 52.210 |
