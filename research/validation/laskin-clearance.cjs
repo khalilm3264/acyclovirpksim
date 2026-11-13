@@ -8,6 +8,9 @@ const assert = require('node:assert/strict');
 const engine = require('../../public/assets/pk-engine.js');
 
 const ML_MIN_PER_L_H = 1000 / 60;
+const COHORT_WEIGHT_KG = 79.1;
+const COHORT_BSA_M2 = 1.89;
+const TO_INDEXED = 1.73 / COHORT_BSA_M2;
 const MODE = 'No dialysis';
 
 // Published values (Laskin 1982, n = 3, mean ± SD, mL/min per 1.73 m²)
@@ -32,7 +35,7 @@ function totalClearance(cfg) {
   const c = run.cols.plasma;
   let auc = 0;
   for (let i = 1; i < run.t.length; i++) auc += 0.5 * (c[i] + c[i - 1]) * (run.t[i] - run.t[i - 1]);
-  const tail = c[c.length - 1] / (Math.log(2) / 20); // negligible by 168 h; kept for completeness
+  const tail = c[c.length - 1] / (Math.log(2) / run.summary.modelHalfLife); // negligible by 168 h; kept for completeness
   return { auc: auc + tail, cl: (cfg.dose / (auc + tail)) * ML_MIN_PER_L_H };
 }
 
@@ -47,18 +50,19 @@ function terms(cfg) {
 }
 
 function report() {
-  const nominal = config(LASKIN.crcl);
+  const nominal = config(LASKIN.crcl / TO_INDEXED, {weight:COHORT_WEIGHT_KG, dose:5*COHORT_WEIGHT_KG});
   const t = terms(nominal);
   const total = totalClearance(nominal);
-  const probenecid = config(LASKIN.crcl * (LASKIN.renalClProbenecid / LASKIN.renalCl));
+  const probenecid = {...nominal, crcl:nominal.crcl * 0.68};
   const totalProb = totalClearance(probenecid);
   const anuric = terms(config(0));
   const anuricTotal = totalClearance(config(0));
   return {
+    cohort: {weightKg:COHORT_WEIGHT_KG, bsaM2:COHORT_BSA_M2, absoluteCrCl:nominal.crcl, indexedCrCl:LASKIN.crcl},
     engineAtLaskinCrCl: {
-      renal: t.renal, nonrenal: t.nonrenal, formationToCMMG: t.formation, otherNonrenal: t.other,
-      totalFromParameters: t.renal + t.nonrenal, totalFromSimulatedAUC: total.cl,
-      renalToCrClRatio: t.renal / LASKIN.crcl, renalFraction: t.renal / (t.renal + t.nonrenal)
+      renal: t.renal * TO_INDEXED, nonrenal: t.nonrenal * TO_INDEXED, formationToCMMG: t.formation * TO_INDEXED, otherNonrenal: t.other * TO_INDEXED,
+      totalFromParameters: (t.renal + t.nonrenal) * TO_INDEXED, totalFromSimulatedAUC: total.cl * TO_INDEXED,
+      renalToCrClRatio: t.renal / nominal.crcl, renalFraction: t.renal / (t.renal + t.nonrenal)
     },
     laskinDerived: {
       nonrenalBySubtraction: LASKIN.totalCl - LASKIN.renalCl,
@@ -80,9 +84,9 @@ if (require.main === module) {
   const f = (x, d = 1) => x.toFixed(d);
   console.log('| Quantity | Laskin 1982 | Engine |');
   console.log('|---|---:|---:|');
-  console.log('| Renal clearance at CrCl 90 (mL/min) | 248 ± 80 | ' + f(r.engineAtLaskinCrCl.renal) + ' |');
-  console.log('| Nonrenal clearance (mL/min) | 52 (300 − 248, derived) | ' + f(r.engineAtLaskinCrCl.nonrenal) + ' |');
-  console.log('| Total clearance (mL/min) | 300 ± 69 | ' + f(r.engineAtLaskinCrCl.totalFromSimulatedAUC) + ' |');
+  console.log('| Renal clearance at indexed CrCl 90 (mL/min/1.73 m²) | 248 ± 80 | ' + f(r.engineAtLaskinCrCl.renal) + ' |');
+  console.log('| Nonrenal clearance (mL/min/1.73 m²) | 52 (300 − 248, derived) | ' + f(r.engineAtLaskinCrCl.nonrenal) + ' |');
+  console.log('| Total clearance (mL/min/1.73 m²) | 300 ± 69 | ' + f(r.engineAtLaskinCrCl.totalFromSimulatedAUC) + ' |');
   console.log('| Renal fraction of total | 83% | ' + f(100 * r.engineAtLaskinCrCl.renalFraction, 0) + '% |');
   console.log('| Renal clearance / CrCl | ' + f(r.laskinDerived.renalToCrClRatio, 2) + ' | ' + f(r.engineAtLaskinCrCl.renalToCrClRatio, 2) + ' |');
   console.log('| Anuric total clearance (mL/min) | 28.7 (Sadjadi [23]) | ' + f(r.anuric.totalFromSimulatedAUC) + ' |');
