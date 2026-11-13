@@ -54,7 +54,7 @@ const renal = {
 };
 
 // 4. CrCl 0: nominal CMMG half-life between sessions (70 kg) and the guided-scenario peak.
-const nominalHalfLifeH = r1(Math.LN2 * 0.4 * 70 / 0.25);
+const nominalHalfLifeH = r1(Math.LN2 * 0.4 * 70 / engine.CMMG_NONRENAL_CL);
 
 const results = {
   purpose: 'Evidence check for #46; no parameter is changed by this script.',
@@ -66,7 +66,7 @@ const results = {
     source: 'Helldén 2008 thesis, Paper I (7 of 49 symptomatic patients above 40 µmol/L; range 40–158)'}
 };
 
-// Conclusions the write-up relies on; fail loudly if the engine changes them.
+// Section 1-2 conclusions the write-up relies on; fail loudly if the engine changes them.
 assert.ok(Math.abs(matched.hara.cmmgDeclinePct - observed.hara.cmmgDeclinePct) <= 6,
   'with the dialyzer matched to Hara acyclovir, CMMG decline is within 6 points');
 assert.ok(matched.hara.cmmgDeclinePct > observed.hara.cmmgDeclinePct &&
