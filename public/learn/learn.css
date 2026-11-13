@@ -234,3 +234,6 @@ html body .site-header.ay-header .ayflux-logo:focus-visible{outline:2px solid #f
 .model-parameter-table td{overflow-wrap:anywhere}
 .card:target{scroll-margin-top:12px;outline:2px solid #3d729a;outline-offset:3px}
 @media(max-width:640px){.model-equation{padding:8px}.model-equation pre{font-size:10.5px}.model-parameter-table{font-size:11px}}
+
+/* Long DOI identifiers remain readable on small screens. */
+ol.refs{padding-left:1.6rem;line-height:1.7;overflow-wrap:anywhere}ol.refs li{margin-bottom:1rem;scroll-margin-top:1rem}

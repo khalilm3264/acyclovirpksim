@@ -47,3 +47,7 @@ Run `node research/validation/compare-benchmarks.cjs` to reproduce the [benchmar
 ## CRRT clearance
 
 [Collignon CRRT comparison](COLLIGNON-CRRT.md) evaluates the extracorporeal clearance calculation against blood- and effluent-based estimates.
+
+## Oral valacyclovir and hemodialysis
+
+[Hara 2008](HARA-HD.md) compares the model with acyclovir and CMMG endpoints after oral valacyclovir. Run `node research/validation/hara-hd.cjs`.
