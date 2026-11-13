@@ -16,6 +16,9 @@ Changes merged to `main` since 0.26.0 (pull requests #40–#44). **No pharmacoki
 
 ### Added
 
+- Replayable Laskin and Smith literature cases with DOI provenance, published endpoints, importable scenario JSON and a CMMG CSF coefficient comparison. Heatmaps and HD timing sweeps now run in a dedicated worker and report elapsed time. PD interruption tests verify cavity retention and drainage accounting.
+
+
 - **Graph navigation.** Click and drag zooms into a box by default with a mouse or trackpad; double-click resets. The toolbar adds pan, zoom in/out, undo and image download, and Shift + scroll zooms the time axis. Touch screens keep page scrolling and use the toolbar. (#40)
 - **Version history for imports.** Every JSON import, shared link, guided scenario and reset first stores the settings it replaces. *Undo last import* and a 10-entry history restore them. History lives only in the open tab. (#40, #42, #44)
 - **Shareable links.** *Copy shareable link* puts the scenario into the link itself after `#s=`. Nothing is uploaded; opening a link runs the same validation as a JSON import and removes the scenario from the address bar. Links never contain measured concentrations. Format documented in `docs/data-exchange.md`. (#42)
