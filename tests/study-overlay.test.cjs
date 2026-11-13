@@ -153,3 +153,24 @@ test('component ablation reuses the scorecard predictions and moves bias in the 
  assert.equal(by['no-cmmg'].groups.cmmg,null,'zero CMMG predictions have no fold error');
  assert.ok(results.every(r=>r.rows.length===37));
 });
+
+test('exploring source assumptions preserves the original study and validates hypothetical inputs',()=>{
+ const studies=require('../public/assets/study-library.js');
+ const engine=require('../public/assets/pk-engine.js');
+ const hd=studies.find('vasquez');
+ const before=JSON.stringify(hd);
+ const changed=studies.exploreConfig(hd,engine,8);
+ assert.equal(changed.schedule[0].start,48);
+ assert.equal(changed.horizon,hd.config.horizon+4);
+ assert.equal(JSON.stringify(hd),before);
+ assert.deepEqual(engine.validate(changed,hd.mode),[]);
+ for(const study of studies.STUDIES.filter(s=>s.id.startsWith('boelaert-'))){
+  const config=studies.exploreConfig(study,engine,5);
+  assert.equal(config.crcl,5);
+  assert.equal(study.config.crcl,0);
+  assert.deepEqual(engine.validate(config,study.mode),[]);
+  assert.ok(studies.inputsFor(study).some(row=>row[1]==='Unknown'));
+ }
+ assert.throws(()=>studies.exploreConfig(hd,engine,-1));
+ assert.throws(()=>studies.exploreConfig(hd,engine,NaN));
+});

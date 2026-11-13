@@ -1277,7 +1277,7 @@ function renderScorecard(){
   if(run!==scorecardRun)return;
   const study=STUDIES.STUDIES[index];
   try{const r=STUDIES.score(study,E,{calibration,draws:400});scores.push(r);
-   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
+   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}</td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button>${STUDIES.inputsFor(study).length?` <button type="button" class="btn secondary" data-inputs="${study.id}">Study inputs</button>`:""}</td></tr>`);
   }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="5">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
   if(index+1<STUDIES.STUDIES.length){body.innerHTML=rows.join('')+'<tr><td colspan="6">Calculating…</td></tr>';next(index+1);return;}
   body.innerHTML=rows.join('');scorecardScores=scores;scorecardCalibration=calibration;$('scorecardCsv').disabled=!scores.length;
@@ -1317,6 +1317,48 @@ $('scorecardCsv').addEventListener('click',()=>{
  if(!scorecardScores.length)return;
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([STUDIES.csv(scorecardScores,scorecardCalibration)],{type:'text/csv;charset=utf-8'}));
  a.href=url;a.download='ayflux_evidence_scorecard.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+});
+let inputStudy=null;
+function showStudyInputs(id){
+ inputStudy=STUDIES.find(id);
+ const panel=$('studyInputs');panel.hidden=false;
+ $('studyInputsTitle').textContent='Study inputs — '+inputStudy.short;
+ const rows=$('studyInputsRows');rows.replaceChildren();
+ for(const values of STUDIES.inputsFor(inputStudy)){
+  const row=document.createElement('tr');
+  for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
+  rows.append(row);
+ }
+ $('studyInputsSource').href='#'+inputStudy.ref;
+ $('studyInputsSource').textContent='Source '+inputStudy.cite;
+ const hd=id==='vasquez';
+ $('studyAssumptionLabel').textContent=hd?'Hypothetical last-dose-to-admission gap (hours)':'Hypothetical residual CrCl (mL/min)';
+ $('studyAssumptionValue').value=hd?'4':'0';
+ $('studyInputsStatus').textContent='Explore saves the original reconstruction as the baseline, replacing any saved baseline. The original uses the active calibration multipliers.';
+ panel.scrollIntoView({block:'nearest'});
+}
+$('scorecardRows').addEventListener('click',event=>{
+ const button=event.target.closest('[data-inputs]');if(button)showStudyInputs(button.dataset.inputs);
+});
+$('exploreStudyAssumption').addEventListener('click',()=>{
+ if(!inputStudy)return;
+ try{
+  const raw=$('studyAssumptionValue').value;
+  if(!raw.trim())throw new Error('Enter a value for the assumption.');
+  const calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale};
+  const original=STUDIES.configFor(inputStudy,E,calibration);
+  const config=STUDIES.exploreConfig(inputStudy,E,Number(raw),calibration);
+  const errors=E.validate(config,inputStudy.mode);
+  if(errors.length)throw new Error(errors[0]);
+  const data=E.simulateMany({...original,variability:0,draws:1,requestedModes:[inputStudy.mode]})[inputStudy.mode];
+  rememberVersion('Before exploring study assumption');
+  applyVersion({config,primary:inputStudy.mode,visible:[inputStudy.mode],palette:paletteMode,unit:concUnit});
+  baseline={primary:inputStudy.mode,config:structuredClone(original),data:structuredClone(data)};baselineRevision++;
+  $('saveBaseline').textContent='Replace baseline with selected curve';
+  studyOverlay=null;
+  showScenarioNote('Hypothetical assumption — '+inputStudy.short,'Original reconstruction retained as a deterministic baseline. Changed '+$('studyAssumptionLabel').textContent.toLowerCase()+' to '+raw+'.');
+  renderStudyStatus();switchTab('concentration');defer();
+ }catch(error){$('studyInputsStatus').textContent=error.message;}
 });
 $('scorecardRows').addEventListener('click',e=>{const button=e.target.closest('[data-study]');if(button)loadStudy(button.dataset.study);});
 $('saveConfig').addEventListener('click',()=>{

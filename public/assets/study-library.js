@@ -64,6 +64,38 @@
    note:'A 69-year-old woman (49.9 kg, serum creatinine 11.3 mg/dL) took four 1,000 mg valacyclovir doses 8 hours apart. The dots are dialyzer-inlet plasma levels at the start and end of her first 2-hour HD session. The paper does not give the time from the last dose to admission; AyFlux assumes 4 hours, so the first session starts at hour 44. research/validation/vasquez-hd.cjs shows how the result changes for 0 and 8 hours.'},
   ...BOELAERT.map(boelaert)
  ];
+ // Evidence descriptions follow the existing source-specific reconstructions.
+ function inputsFor(study){
+  if(study.id==='vasquez')return [
+   ['Patient covariates','Reported','69 years, female, 49.9 kg; serum creatinine 11.3 mg/dL','Same values','Case description'],
+   ['Creatinine clearance','Calculated','Measured CrCl unavailable','Cockcroft–Gault estimate, approximately 3.70 mL/min','Case description; reconstruction'],
+   ['Medication','Reported','Four 1,000 mg oral valacyclovir doses','Every 8 hours, four doses','Case description; reconstruction'],
+   ['Last dose to admission','Unknown','Timing unavailable','4 hours assumed','Case chronology'],
+   ['Dialysis timing','Reported','First HD 16 hours after admission, for 2 hours','First HD at simulation hours 44–46','Case chronology; reconstruction'],
+   ['Plasma samples','Reported','8.8 and 3.2 mg/L at first HD start and end','Simulation hours 44 and 46','Table 1A'],
+   ['Drug clearance during HD','Assumed','Blood/dialysate flow does not directly specify drug clearance','Default model clearance','Reconstruction']
+  ];
+  if(study.id.startsWith('boelaert-'))return [
+   ['Patient covariates','Reported','Patient-specific age, sex and weight','Values from patient '+study.id.split('-')[1],'Tables I–II, pp. 70 and 73'],
+   ['Medication','Reported',study.config.dose+' mg IV daily for five days',study.config.dose+' mg over 1 hour every 24 hours','Tables I–II; protocol'],
+   ['Peritoneal dialysis','Reported','Four daily 2 L exchanges, 1.36% glucose','Repeating 4/4/4/12-hour dwells','Protocol; reconstruction'],
+   ['Residual creatinine clearance','Unknown','Urinary recovery does not establish measured CrCl','0 mL/min assumed','Tables I–II; reconstruction'],
+   ['Concentration endpoints','Calculated','Author-fitted day-1 and day-5 peaks/troughs','Hours 1, 24, 97 and 120; converted from µmol/L','Tables I–II, pp. 70 and 73']
+  ];
+  return [];
+ }
+ function exploreConfig(study,E,value,calibration={}){
+  if(!Number.isFinite(value)||value<0)throw new Error('Enter a nonnegative number.');
+  const config=configFor(study,E,calibration);
+  if(study.id==='vasquez'){
+   const shift=value-4;
+   config.schedule=config.schedule.map(session=>({...session,start:session.start+shift,end:session.end+shift}));
+   config.horizon+=shift;
+  }else if(study.id.startsWith('boelaert-')){
+   config.crcl=value;config.crclSource='manual';
+  }else throw new Error('No editable assumption for this study.');
+  return config;
+ }
  function find(id){return STUDIES.find(study=>study.id===id)||null;}
  // Full simulator configuration for a study. Calibration multipliers carry over so the scorecard
  // reflects whatever calibration is active; every other setting comes from the defaults.
@@ -123,6 +155,6 @@
   const gmr=Math.exp(rows.reduce((sum,row)=>sum+Math.log(row.predicted/row.observed),0)/rows.length);
   return {id:study.id,rows,gmr,inside:rows.filter(row=>row.inside).length,total:rows.length,coverage:config.coverage};
  }
- return {STUDIES,find,configFor,matches,score,interp,pointsOf,csv,summarize};
+ return {STUDIES,inputsFor,exploreConfig,find,configFor,matches,score,interp,pointsOf,csv,summarize};
 });
 
