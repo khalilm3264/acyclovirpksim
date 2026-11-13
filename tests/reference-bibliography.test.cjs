@@ -8,10 +8,10 @@ const html=read('public/index.html');
 const methods=read('public/learn/model-methods/index.html');
 const cite=read('public/cite/index.html');
 
-test('References [1]-[40] are sequential and have unique stable anchors',()=>{
+test('References [1]-[41] are sequential and have unique stable anchors',()=>{
  const ids=[...html.matchAll(/<li id="ref(\d+)"/g)].map(m=>Number(m[1]));
- assert.deepEqual(ids,Array.from({length:40},(_,i)=>i+1));
- for(let i=17;i<=40;i++){
+ assert.deepEqual(ids,Array.from({length:41},(_,i)=>i+1));
+ for(let i=17;i<=41;i++){
   const entry=html.match(new RegExp('<li id="ref'+i+'">([\\s\\S]*?)<\\/li>'))?.[1];
   assert.ok(entry,'Missing reference entry '+i);
   assert.match(entry,/https:\/\/doi\.org\//);
@@ -30,7 +30,8 @@ test('new studies have direct DOI citations, accurate evidence labels and no fal
   '10.1097/00007691-199712000-00016',
   '10.1097/00007691-199910000-00005',
   '10.1007/s00467-023-05881-6',
-  '10.1002/bcp.70138'
+  '10.1002/bcp.70138',
+ '10.1128/AAC.21.5.804'
  ]) assert.ok(html.includes('https://doi.org/'+doi),'Missing DOI '+doi);
  // [22] is cited as the peer-reviewed 2025 article, with the preprint kept as a secondary link.
  // Cites the final journal article; the 2024 preprint is publication history, and "not peer-reviewed"
