@@ -30,6 +30,10 @@ Publisher or PubMed records were checked for journal, volume, issue and pages/ar
 
 Reference 22 previously described only the 2024 Vasquez Vasquez preprint. The final case is published in *British Journal of Clinical Pharmacology* 2025;91(8):2469–2473, DOI https://doi.org/10.1002/bcp.70138, PubMed https://pubmed.ncbi.nlm.nih.gov/40511631/. The existing `research/validation/VASQUEZ-HD.md` already cites that final article. The bibliography now leads with the final publication and retains the preprint as publication history. These are one case, not independent cohorts. No numerical reconstruction or benchmark output is changed.
 
+## Added 2026-11-13
+
+[45] Helldén 2007, *BMJ* 335:1305, checked against the full text (printed page 1305). [46] Helldén 2010 thesis, checked against the open-access copy at core.ac.uk: title, year and ISBN 978-91-7409-994-2 from the title page. Both support the CMMG benchmarks; neither is used to fit a parameter.
+
 ## Evidence boundaries
 
 References 38–39 retain abstract-only labels. Full-text collection remains tracked in issue #53. Cohort overlap, source-author fitted values, model assumptions and limited pediatric/dialysis applicability remain explicit. Do not introduce fixed clinical toxicity or efficacy thresholds from model-only analyses.
