@@ -367,7 +367,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
     mass+=pdAmount;
     if(accounting){
      removed.pdDrained+=pdAmount;
-     drains.push({start:timeline.pdAt[i-1].start,end:t,mass:pdAmount,complete:t>=pdScheduledEnd-1e-8});
+     drains.push({start:timeline.pdAt[i-1].start,end:t,mass:pdAmount,volume:pdVol,concentration:pdAmount/pdVol,complete:t>=pdScheduledEnd-1e-8});
     }
    }
    pdAmount=0;
@@ -389,7 +389,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   if(accounting){
    const parts={central:a,peripheral:b,depot:oralDepot,pdFluid:pdAmount,...removed};
    const accounted=Object.values(parts).reduce((sum,v)=>sum+v,0);
-   accounting.push({time:t,input:administeredAcyclovirEqMg,parts,residual:administeredAcyclovirEqMg-accounted});
+   accounting.push({time:t,pdVolume:pdVol,input:administeredAcyclovirEqMg,parts,residual:administeredAcyclovirEqMg-accounted});
   }
   if(i===tarr.length-1)break;
   const step=tarr[i+1]-t,mid=t+step/2,midPD=timeline.midPD[i],midActive=timeline.midActive[i],ivRate=timeline.ivRate[i],midDial=midActive.active?(midActive.type==='HD'?p.hd:midActive.type==='CRRT'?p.crrt:0):0;
