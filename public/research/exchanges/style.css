@@ -1,1 +1,1 @@
-#chart {height:360px;width:100%} label {display:inline-block;margin:0.5rem 1rem 0.5rem 0} input,select,button {font:inherit;max-width:100%} input[type=number] {width:6rem} .scroll {overflow-x:auto} th,td {padding:0.5rem;text-align:left} main {min-width:0} #status {color:#8b2626}
+#chart {height:360px;width:100%} label {display:inline-block;margin:0.5rem 1rem 0.5rem 0} input,select,button {font:inherit;max-width:100%} input[type=number] {width:6rem} .scroll {overflow-x:auto} th,td {padding:0.5rem;text-align:left} main,.card {min-width:0;max-width:100%} #status {color:#8b2626}

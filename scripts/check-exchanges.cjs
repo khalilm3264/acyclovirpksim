@@ -30,6 +30,7 @@ const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
  await page.selectOption('#patient','boelaert-5');
  assert.match(await page.locator('#protocol').textContent(),/patient 5/);
  await page.setViewportSize({width:390,height:844});
+ await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
 
  assert.deepEqual(errors,[]);console.log('Exchange inspector, replay, timing and mobile layout passed');
