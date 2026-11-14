@@ -66,3 +66,12 @@ Run `npm run benchmark:report` for pinned, separately labeled manuscript and ext
 evaluations. See the [report](BENCHMARK-REPORT.md), [reproduction guide](BENCHMARK-REPORT-GUIDE.md)
 and [artifact audit](REPRODUCIBILITY-AUDIT.md). The generator does not change model
 parameters or merge new observations into the 37-point frozen scorecard.
+
+## Source-specific comparison runs
+
+Run `bash research/validation/check-source-comparisons.sh /tmp/ayflux-comparisons`
+from the repository root. The CI artifact `ayflux-source-comparisons` includes each
+runner's output, the checked-out commit, the engine blob and the Node version.
+The job reproduces the tracked Boelaert grid and three summaries, and the
+Lindström paired CSF summary. Several reports revisit the same participants.
+The pinned manuscript and external evaluations above retain their original denominators.

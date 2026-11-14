@@ -41,7 +41,9 @@ function report(){
   })};
 }
 if(require.main===module){
- const r=report();fs.writeFileSync(path.join(__dirname,'boelaert-followup-results.json'),JSON.stringify(r,null,2)+'\n');
+ const out=process.argv[2] || __dirname;
+ fs.mkdirSync(out,{recursive:true});
+ const r=report();fs.writeFileSync(path.join(out,'boelaert-followup-results.json'),JSON.stringify(r,null,2)+'\n');
  console.log(JSON.stringify({patient4:r.patient4,ranges:r.ranges,maxStepDifferenceMg:Math.max(...r.external.map(r=>r.stepDifferenceMg))},null,2));
 }
 module.exports={report};
