@@ -14,10 +14,12 @@ test('provenance keeps what the paper reports apart from what AyFlux uses',()=>{
  assert.match(row('Dose interval').reported,/Three times daily/);assert.equal(row('Dose interval').used,'Every 8 h');
 });
 
-test('pending source checks are recorded for Vasquez and Boelaert only',()=>{
- assert.match(S.find('vasquez').sourceCheck,/Authorea preprint[^]*not yet been checked against the final Br J Clin Pharmacol 2025 article/);
- for(const id of ['boelaert-1','boelaert-4','boelaert-5'])assert.equal(S.find(id).sourceCheck,undefined,'Boelaert rows were checked against the original paper');
- assert.ok(S.STUDIES.filter(s=>s.sourceCheck).every(s=>s.provenance),'a source check note only where provenance is recorded');
+test('published source records identify the reported duration of the first Vasquez session',()=>{
+ const study=S.find('vasquez'),duration=study.provenance.find(r=>r.input==='First HD duration');
+ assert.match(duration.source,/Br J Clin Pharmacol 2025, p. 2470/);
+ assert.equal(duration.status,'reported');assert.equal(duration.used,'2 h');
+ assert.deepEqual(study.points.map(point=>point[1]),[8.8,3.2]);
+ for(const id of ['vasquez','boelaert-1','boelaert-4','boelaert-5'])assert.equal(S.find(id).sourceCheck,undefined);
 });
 
 test('exploring the Vasquez admission gap shifts both HD sessions and the simulation end',()=>{
