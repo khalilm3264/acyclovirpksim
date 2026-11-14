@@ -30,6 +30,17 @@ AyFlux uses CMMG kidney clearance ≈ 2.0 × CrCl and acyclovir ≈ 3.37 × CrCl
 
 Run `node research/validation/kably-auc-comparison.cjs` to compare both analytes at day 11 (2000 mg valacyclovir every eight hours). At absolute CrCl 104 mL/min, AyFlux predicts acyclovir and CMMG AUCs of 99.84 and 13.08 mg·h/L. Kably’s simulated medians for indexed eGFR above 90 are 44.8 and 13.3 mg·h/L. At CrCl 25, AyFlux gives 335.33 and 162.84 mg·h/L, compared with 88.7 and 103.1 for Kably’s below-30 stratum. A lower metabolite/parent ratio can coexist with similar or higher absolute metabolite exposure. These model comparisons do not isolate formation or elimination.
 
+### Paper V figure check
+
+The preliminary crossover study included six healthy participants, six with chronic kidney disease and four receiving HD. For the IV arm, the healthy group received 100 mg and the other groups 50 mg. Figure 8 plots measured CrCl in absolute mL/min. We read the vector marker centers and refit the two renal-clearance slopes through zero, as drawn. Total acyclovir clearance was fitted with a free intercept. Six nonzero markers fall near 23–62 mL/min and six near 115–191 mL/min. Plotting precision limits the recovered values. [Helldén thesis, printed pp. 20–21](https://files01.core.ac.uk/download/pdf/70338802.pdf) · [Reproduction script](hellden-renal-clearance.cjs)
+
+| Renal clearance divided by CrCl | Printed slope | Digitized slope | Six lower CrCl values | Six higher CrCl values | Omit one marker |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Acyclovir | 1.539 | 1.548 | 1.456 | 1.557 | 1.475–1.581 |
+| CMMG | 3.747 | 3.748 | 4.048 | 3.721 | 3.559–3.949 |
+
+The upper six markers supply about 92% of the sum of squared CrCl in both origin-constrained fits, so they dominate the pooled slopes. The lower six still give a steeper CMMG slope than the nominal AyFlux value of 2.0 at 70 kg. At 50–90 kg the model slope ranges from 1.55 to 2.41 because clearance also scales with weight. Individual weights and raw assay data are unavailable here. Total parent clearance gives a digitized slope of 2.04 and intercept of 41.9 mL/min, compared with 2.04 and 40.2 in the figure. These are parent-drug quantities. They cannot identify nonrenal CMMG clearance. This check reuses Paper V and supplies no independent cohort.
+
 ## 3. CrCl 0 accumulation: not identifiable from the data in hand at the time
 
 With no kidney function, CMMG leaves only through the non-kidney term (0.25 L/h before the change, volume 0.4 L/kg): a nominal half-life of 77.6 h at 70 kg, 38.8 h at the current 0.5 L/h. Single-dose data fit: the Hara CMMG peak is predicted at 8.57 vs 7.47 mg/L observed. Without repeated-dose data with known dosing and no dialysis in between, the half-life cannot be tested. The guided "no kidney function" scenario (700 mg IV every 8 h, about 162 mg/L CMMG by 96 h) uses a regimen many times the labeled anuric dose, far outside any observed data. Its interface note now says the CMMG height is an untested extrapolation and gives the highest measured symptomatic level (about 38 mg/L).
