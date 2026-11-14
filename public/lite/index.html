@@ -61,7 +61,7 @@ summary{cursor:pointer;font-weight:700;color:#2b5f7c}
 .legend-option{display:flex;gap:5px;align-items:center;font-size:11.5px;white-space:nowrap;cursor:pointer}
 .legend-option input{accent-color:#257ca8;margin:0}
 .swatch{width:18px;height:0;border-top:3px solid var(--line)}
-.chart{width:100%;height:300px;display:block;touch-action:pan-y}
+.chart{width:100%;height:300px;display:block;touch-action:pan-y pinch-zoom}
 .chart.mini{height:250px}
 .graphs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 .graphs .panel{min-width:0}
@@ -80,6 +80,11 @@ footer{margin-top:auto;text-align:center;padding:10px 15px;border-top:1px solid 
 footer a{margin-left:7px}
 @media(max-width:1050px){.layout{grid-template-columns:245px minmax(0,1fr)}.graphs{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.workspace{padding:10px}.layout{grid-template-columns:1fr}.side{position:static;max-height:none}.graphs{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart{height:255px}.chart.mini{height:220px}.panel{padding:10px}.side{padding:10px}.legend{gap:8px}}
+@media (max-width:319px) {
+ header, .side-head, .topline, .control label {flex-wrap:wrap}
+ .workspace {padding-inline:6px;overflow-wrap:anywhere}
+ .topline select {min-width:0;max-width:100%}
+}
 </style>
 <script defer src="/assets/pk-engine.js"></script><script defer src="/assets/charts.js"></script><script defer src="/lite/lite.js"></script>
 </head><body>
