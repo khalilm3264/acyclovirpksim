@@ -19,7 +19,7 @@ function cases(){
   smith('smith-ckd','Smith 2010 renal impairment',26,1500,12,3.8)
  ];
 }
-function runCase(id,dt=.125){
+function runCase(id,dt=.125,calibration=null){
  const study=cases().find(s=>s.id===id);
  if(!study)throw Error('Unknown literature case.');
  const config=study.config,errors=pk.validate(config,study.mode);
@@ -33,9 +33,19 @@ function runCase(id,dt=.125){
    sum+=(sim.t[i]-sim.t[i-1])*(sim.cols[study.analyte][i-1]+sim.cols[study.analyte][i])/2;
   return sum;
  }
- const alternative=study.alternative?simulate({...config,csfMetRatio:study.alternative}):null;
- return {study,time:run.t,values:run.cols[study.analyte],alternative:alternative?.cols[study.analyte],
-  auc:study.interval?area(run):null,alternativeAuc:alternative?area(alternative):null};
+ let alternative=null,alternativeLabel=null;
+ if(study.alternative){
+  alternative=simulate({...config,csfMetRatio:study.alternative});
+  alternativeLabel='Previous CSF coefficient 0.25';
+ }else if(study.id==='laskin'&&calibration){
+  const comparison={...config,vcScale:calibration.vcScale,clearanceScale:calibration.clearanceScale};
+  const errors=pk.validate(comparison,study.mode);
+  if(errors.length)throw Error(errors.join('; '));
+  alternative=simulate(comparison);
+  alternativeLabel='Calibration (volume ×'+comparison.vcScale+', clearance ×'+comparison.clearanceScale+')';
+ }
+ return {study,alternativeLabel,time:run.t,values:run.cols[study.analyte],alternative:alternative?.cols[study.analyte],
+  auc:study.interval?area(run):null,alternativeAuc:alternative&&study.interval?area(alternative):null};
 }
 function configuration(id){
  const study=cases().find(s=>s.id===id);
