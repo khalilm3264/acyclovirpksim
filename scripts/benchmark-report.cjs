@@ -101,7 +101,7 @@ const f=n=>n.toFixed(3);
 function markdown(report) {
   const lines=['# Unified AyFlux benchmark report','','Generated from pinned normalized endpoint inputs. No new model fitting and no change to application parameters.','',
     'GMR = exp(mean(log(predicted/observed))); absolute fold error = exp(mean(abs(log(predicted/observed)))). Bounds are inclusive. Counts refer to endpoints, not independent patients. The 0.80–1.25 band is descriptive and is not a clinical or regulatory acceptance rule. The model band is seeded parameter variability, not a validated prediction interval.','',
-    'The frozen paper uses CMMG nonrenal clearance 0.5 L/h and CSF CMMG partition 0.25. Later evaluations use their separately pinned engine; they do not replace the paper results. No grand total is formed across studies, ablations or sensitivity reconstructions.','',
+    'The frozen paper uses CMMG nonrenal clearance 0.5 L/h and CSF CMMG partition 0.25. Later evaluations use their separately pinned engine; they do not replace the paper results. No new grand total combines the frozen set with later studies, ablations or sensitivity reconstructions.','',
     '## Pinned sources','', '| Input | Source commit | Model commit | Engine blob |','|---|---|---|---|'];
   for(const p of report.provenance)lines.push(`| ${p.id} | ${p.sourceCommit} | ${p.modelCommit} | ${p.engineBlob} |`);
   for(const scope of ['frozen manuscript','frozen ablation','subsequent external evaluation']) {
