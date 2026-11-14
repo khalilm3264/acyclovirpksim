@@ -11,6 +11,8 @@ Each sample is simulated at its weight, dose, estimated CrCl and time since the 
 - Constant CrCl for the whole course, at the value reported for the sample.
 - Courses longer than 13 days are simulated as 13 days (the engine's 336-hour limit); every sample is at steady state well before that.
 
+Patient 7’s supplementary case history records a switch to 12-hour dosing. A separate analysis reconstructs this change and the serial CrCl estimates. The cohort results below use the original Table 1 assumptions. [Patient 7 follow-up](LINDSTROM-PATIENT7-COURSE.md)
+
 **Barrier intact** means an albumin ratio at or below the paper's upper reference: 6.8 × 10⁻³ at 45 years or younger, 10.2 × 10⁻³ above 45. Values reported as below 0.15 µmol/L count as consistent when the prediction is at or below that limit.
 
 ## CSF CMMG
