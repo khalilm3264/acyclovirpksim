@@ -16,7 +16,7 @@ const declines = overrides => {
 };
 
 // Hara 2008 (doi 10.2133/dmpk.23.306), p. 310: pre/post-HD declines 69.4% (acyclovir), 77.6% (CMMG).
-// Helldén 2008 thesis, Paper V (preliminary, n = 4 HD patients): one HD session lowered serum
+// Helldén 2010 thesis, Paper V (preliminary, n = 4 HD patients): one HD session lowered serum
 // acyclovir by 56% and CMMG by 73%. Dose 50 mg IV; session timing and dialyzer not given.
 const observed = {
   hara: {acyclovirDeclinePct: 69.4, cmmgDeclinePct: 77.6},
@@ -63,7 +63,7 @@ const results = {
     identifiable: false,
     note: 'No source in hand reports CMMG nonrenal clearance or an interdialytic CMMG half-life.'},
   clinicalAnchor: {maxSymptomaticCmmgUmolL: 158, maxSymptomaticCmmgMgL: r1(158 * 239.19 / 1000),
-    source: 'Helldén 2008 thesis, Paper I (7 of 49 symptomatic patients above 40 µmol/L; range 40–158)'}
+    source: 'Helldén 2010 thesis, Paper I (7 of 49 symptomatic patients above 40 µmol/L; range 40–158)'}
 };
 
 // Section 1-2 conclusions the write-up relies on; fail loudly if the engine changes them.

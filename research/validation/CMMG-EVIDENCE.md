@@ -5,7 +5,7 @@
 ## Sources
 
 - **Hara 2008** ([doi 10.2133/dmpk.23.306](https://doi.org/10.2133/dmpk.23.306)): 18 HD patients (CrCl 0.93 mL/min), one 1,000 mg valacyclovir dose, HD at 48–52 h. Over the session, plasma acyclovir fell 69.4% and serum CMMG 77.6%. This is already the `hara-hd.cjs` benchmark.
-- **Helldén 2008 thesis** (Karolinska Institutet; [open copy](https://core.ac.uk/download/70338802.pdf)):
+- **Helldén 2010 thesis** (Karolinska Institutet; [open copy](https://core.ac.uk/download/70338802.pdf)):
   - Paper V (preliminary, single dose; 6 healthy, 6 CKD and 4 HD patients): one HD session lowered serum acyclovir by 56% and CMMG by 73%. The dose was 50 mg IV; session timing and dialyzer are not given. The linear fit of CMMG kidney clearance against measured CrCl has slope 3.7474 (R² 0.854); the acyclovir fit has slope 1.5392.
   - Paper I: 7 of 49 patients with neuropsychiatric symptoms had serum CMMG above 40 µmol/L, at most 158 µmol/L (about 38 mg/L).
   - The thesis reports **no** CMMG non-kidney clearance and no CMMG half-life between or during dialysis.
