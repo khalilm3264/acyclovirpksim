@@ -39,7 +39,7 @@ async function main(){
   assert.ok(await page.locator('#levelGuide details p').isVisible());
   await page.locator('#levelGuide summary').click();
   await page.locator('.graph-help summary').click();
-  assert.ok(await page.locator('.zoom-hint').isVisible());
+  assert.ok(await page.locator('.graph-help .zoom-hint').isVisible());
   await page.locator('.graph-help summary').click();
   // Start-here strip can be dismissed.
   assert.ok(await page.isVisible('#startHere'));await page.click('#startHereClose');assert.ok(!(await page.isVisible('#startHere')));
