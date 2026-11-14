@@ -16,13 +16,13 @@
    : `${run.doses.length} custom administrations. `+run.doses.slice(0,6).map(d=>`${number(d.time)} h: ${number(d.amount)} mg ${d.route}${d.route==='Acyclovir IV'?' over '+number(d.infusion)+' h':''}`).join('; ')+(run.doses.length>6?'; additional doses are in the saved configuration.':'.');
   const kidney=c.renalMode==='profile'
    ? 'Time-varying CrCl: '+c.renalProfile.slice(0,5).map(p=>`${number(p.time)} h → ${number(p.crcl)} mL/min`).join('; ')+(c.renalProfile.length>5?'; further knots in configuration.':'.')
-   : `${number(c.crcl)} mL/min${c.crclSource==='estimated'?' (Cockcroft–Gault; '+(c.cgWeight||'actual')+' weight)':' (entered)'}.`;
+   : `${number(c.crcl)} mL/min${c.crclSource==='estimated'?' (Cockcroft–Gault; '+(c.cgWeight||'actual')+' weight requested; '+number(E.cgWeightOf(c))+' kg used)':' (entered)'}.`;
   const windows=run.rows.map(r=>({type:r.type,start:r.start,end:Math.min(c.horizon,r.end)}));
   let dialysis=mode==='No dialysis'?'No dialysis in this scenario.':windows.length+' dialysis windows: '+windows.slice(0,5).map(r=>`${r.type} ${number(r.start)}–${number(r.end)} h`).join('; ')+(windows.length>5?'; further windows in configuration.':'.');
   if(windows.some(r=>r.type==='HD'))dialysis+=` HD clearance: ${number(c.hdCl)} mL/min.`;
   if(windows.some(r=>r.type==='CRRT'))dialysis+=` CRRT: ${number(c.effluent)} mL/kg/h; sieving ${number(c.sieving)}, delivered fraction ${number(c.delivered)}.`;
   if(windows.some(r=>['CAPD','APD'].includes(r.type)))dialysis+=c.pdRxEnabled?` Exchange-level prescription: ${c.pdRxRows.length} rows; see saved configuration for the complete exchange table.`:` PD fill ${number(c.pdVolume)} L; ${c.pdMethod==='cycler'?c.apdCycles+' cycles/night':c.capdExchanges+' exchanges/day'}; dextrose ${number(c.pdGlucose)}%.`;
-  const modifiers=[['vcScale','Central volume ×'],['clearanceScale','Parent clearance ×'],['formFactor','CMMG formation ×'],['metRenal','CMMG renal clearance ×'],['metDial','CMMG dialytic clearance ×'],['valF','Oral bioavailability '],['valKa','Oral absorption rate /h ']].filter(([k])=>c[k]!==E.DEFAULTS[k]).map(([k,label])=>label+number(c[k],4));
+  const modifiers=[['vcScale','Central volume ×'],['clearanceScale','Renal/other clearance ×'],['formFactor','CMMG formation ×'],['metRenal','CMMG renal clearance ×'],['metDial','CMMG dialytic clearance ×'],['valF','Oral bioavailability '],['valKa','Oral absorption rate /h ']].filter(([k])=>c[k]!==E.DEFAULTS[k]).map(([k,label])=>label+number(c[k],4));
   if(c.probenecid)modifiers.push('Probenecid renal modifier enabled');
   const metric=(key,label,unit)=>{
    const value=run.summary[key];if(!Number.isFinite(value?.median))throw Error('Summary metrics are incomplete.');
