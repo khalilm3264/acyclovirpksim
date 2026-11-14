@@ -18,7 +18,7 @@ Every script in `research/validation/` and `research/ayflux-paper/run_study.cjs`
 
 ## Barrier damage (added in #89)
 
-CNS infection with blood–brain barrier damage raises CSF CMMG several-fold: Lindström's disrupted-barrier samples imply a partition of about 0.11, and one patient with severe damage implies above 0.7. #89 added a **Blood–brain barrier** setting: *Intact* (default; 0.30 / 0.025) or *Damaged (CNS infection; exploratory)* (0.37 / 0.11). The damaged values are fitted in-sample to those samples and have no independent test (`LINDSTROM-CSF.md`).
+CNS infection with blood–brain barrier damage raises CSF CMMG several-fold: Lindström's disrupted-barrier samples imply a partition of about 0.11, and one patient with severe damage implies above 0.7. #89 added a **Blood–brain barrier** setting: *Intact* (default; 0.30 / 0.025) or *Damaged (CNS infection; exploratory)* (0.37 / 0.11). The damaged values were chosen in-sample using separate CSF and serum summaries. On the 16 disrupted visits with both CMMG concentrations quantified, the implied partition is 0.087 when visits are weighted equally and 0.102 when the eight patients are weighted equally. See the [same-visit analysis](LINDSTROM-CSF.md#same-visit-ratio-check).
 
 ## Effect on users
 
