@@ -2,6 +2,7 @@
 "use strict";
 const CACHE = "ayflux-static-v0.27.0-combined-20261114";
 const CORE = [
+ "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
  "/assets/academic-exports.js", "/references/ayflux.bib",
  "/research/exchanges/", "/research/exchanges/view.js", "/research/exchanges/style.css",
