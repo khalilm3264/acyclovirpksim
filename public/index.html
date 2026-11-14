@@ -536,6 +536,45 @@ html body #concentration .difference-fields {display:grid;grid-template-columns:
  html body #concentration .comparison-actions .btn {flex:1 1 100%;}
  html body #concentration .prediction-exercise>.check {min-height:40px;}
 }
+/* Timeline editors share a readable row style and touch-friendly controls. */
+html body #timeline .intervals,
+html body #timeline .dose-row {padding:10px;background:#f7f9fb;border:1px solid #d3dce4;gap:9px;}
+html body #timeline .intervals label,
+html body #timeline .dose-row label {font-size:12px;font-weight:600;color:#40586b;margin:0 0 4px;}
+html body #timeline .intervals input,
+html body #timeline .intervals select,
+html body #timeline .dose-row input,
+html body #timeline .dose-row select,
+html body #timeline .rx-table input,
+html body #timeline .rx-table select {min-height:36px;min-width:0;padding:7px;font-size:12px;}
+html body #timeline .intervals button,
+html body #timeline .dose-row button {min-height:36px;min-width:36px;}
+html body #timeline .btn.secondary {background:#fff;}
+html body #timeline .timeline-tip {background:#f0f5f9;border-left:3px solid #6f95af;}
+html body #timeline input:focus-visible,
+html body #timeline select:focus-visible,
+html body #timeline button:focus-visible,
+html body #timeline .scroll:focus-visible {outline:2px solid #387da8;outline-offset:2px;}
+html body #timeline .rx-table {min-width:880px;}
+html body #timeline .rx-table th {vertical-align:bottom;}
+html body #timeline .rx-table input {width:100%;min-width:64px;}
+html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
+@media(max-width:650px) {
+ html body #timeline .intervals {grid-template-columns:repeat(2,minmax(0,1fr));}
+ html body #timeline .intervals>div:first-child {grid-column:1/-1;}
+ html body #timeline .intervals>button {grid-column:1/-1;}
+ html body #timeline .intervals input,
+ html body #timeline .intervals select,
+ html body #timeline .dose-row input,
+ html body #timeline .dose-row select,
+ html body #timeline .rx-table input,
+ html body #timeline .rx-table select,
+ html body #timeline button {min-height:40px;}
+ html body #timeline .rx-table button {min-width:40px;}
+ html body #timeline .timeline-actions>.btn {flex:1 1 100%;}
+ html body #timeline #pdRxEnable {width:20px;height:20px;flex-shrink:0;}
+ html body #timeline #pdRxPanel>.check {min-height:40px;}
+}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
@@ -584,12 +623,12 @@ html body #concentration .difference-fields {display:grid;grid-template-columns:
 </section>
 <section id="timeline" role="tabpanel" aria-labelledby="tab-timeline" tabindex="0" class="hidden"><div class="card"><div class="topline"><h2>Dialysis sessions</h2><button id="applyFullTimeline" class="btn" type="button">Apply custom timeline</button></div><p class="tip">Applies dialysis windows and PD exchanges together; custom medication doses are applied if edited. Otherwise the repeating dose regimen remains in effect.</p><p class="tip">Enter exact treatment times <strong>from the beginning of the simulation</strong>. For example, HD from 18 to 24 hours, or PD from 0–24 followed by HD from 30–34. Sequential HD, PD, and CRRT treatments are allowed; simultaneous modalities are not modeled.</p>
 <div class="timeline-tip">Enter each treatment interval as <strong>start hour → end hour</strong>. Each row may span at most <strong>24 hours</strong>. To model a longer continuous treatment, use adjacent 24-hour rows. Invalid or overlapping intervals are rejected instead of silently adjusted. Times appear as Day 1 00:00 = hour 0.</div>
-<div id="scheduleRows"></div><div class="advisory hidden" id="timelinePending">The timeline has unapplied edits. Click <strong>Apply timeline</strong> to update the graphs.</div><div class="timeline-actions"><button class="btn secondary" id="addRow">+ Add session</button><button class="btn" id="applySchedule">Apply timeline</button></div><p class="example-row"><span class="example-label">Load an example:</span><button class="example-chip" type="button" id="presetSwitch" title="Replace the rows above with PD from 0–48 h followed by HD from 54–58 h">PD → HD</button><button class="example-chip" type="button" id="presetHD" title="Replace the rows above with one HD session from 18–24 h">HD at 18–24 h</button></p><div id="timelineErrors" class="warning hidden" role="alert"></div><h3>Timeline preview</h3><div class="schedulebar" id="scheduleBar"></div><div class="keyline" id="scheduleLegend"></div>
+<div id="scheduleRows"></div><div class="advisory hidden" id="timelinePending">The timeline has unapplied edits. Click <strong>Apply custom timeline</strong> to update the graphs.</div><div class="timeline-actions"><button class="btn secondary" id="addRow">+ Add session</button><button class="btn" id="applySchedule">Apply timeline</button></div><p class="example-row"><span class="example-label">Load an example:</span><button class="example-chip" type="button" id="presetSwitch" title="Replace the rows above with PD from 0–48 h followed by HD from 54–58 h">PD → HD</button><button class="example-chip" type="button" id="presetHD" title="Replace the rows above with one HD session from 18–24 h">HD at 18–24 h</button></p><div id="timelineErrors" class="warning hidden" role="alert"></div><h3>Timeline preview</h3><div class="schedulebar" id="scheduleBar"></div><div class="keyline" id="scheduleLegend"></div>
 <div class="advisory">The medication amounts carry forward through modality switches. Configure individual PD exchanges below, or use the uniform manual-exchange / cycler settings in the sidebar. Membrane-transfer and ultrafiltration parameters require patient-level calibration <a class="source-id" href="#ref2">[2]</a><a class="source-id" href="#ref7">[7]</a>.</div>
 </div>
  <div class="card" id="pdRxPanel"><h2>Individual PD exchange prescription</h2><p class="tip">This table supports separate prescriptions for each custom PD window. Select a specific PD session or “Each PD window” for a repeated template. Exchange start times are offsets in hours from the start of that PD session, not absolute simulation hours. Apply the custom timeline to commit medication doses, dialysis windows and PD exchanges together. Measured net UF is optional; if provided, the model uses it as the net fluid-volume change over the dwell. It does not establish measured acyclovir transport or membrane sieving.</p>
  <label class="check"><input type="checkbox" id="pdRxEnable"> Use exchange-specific PD settings</label><p id="pdRxMode" class="tip"></p>
- <div class="scroll"><table class="rx-table"><thead><tr><th>#</th><th>PD session</th><th>Offset (h)</th><th>Dwell (h)</th><th>Fill (L)</th><th>Dextrose (%)</th><th>Net UF (mL, optional)</th><th></th></tr></thead><tbody id="pdRxRows"></tbody></table></div>
+ <p class="tip rx-scroll-hint" id="pdRxScrollHint">Scroll horizontally to see every exchange field.</p><div class="scroll" id="pdRxTableWrap" role="region" tabindex="0" aria-label="Peritoneal dialysis exchange prescription" aria-describedby="pdRxScrollHint"><table class="rx-table"><thead><tr><th>#</th><th>PD session</th><th>Offset (h)</th><th>Dwell (h)</th><th>Fill (L)</th><th>Dextrose (%)</th><th>Net UF (mL, optional)</th><th></th></tr></thead><tbody id="pdRxRows"></tbody></table></div>
  <p class="tip">For cycler PD, start times are relative to cycler treatment start and can include turnover gaps. The table repeats with each PD session. Dialysate solute transfer remains a research approximation; observed net UF constrains water balance, not acyclovir clearance. <a href="#ref12">[12]</a></p>
  <div class="timeline-actions"><button class="btn secondary" id="generatePdRx">Generate from PD settings</button><button class="btn secondary" id="addPdRx">Add exchange</button><button class="btn" id="applyPdRx">Apply exchange prescription</button></div><p id="pdRxStatus" class="tip" role="status" aria-live="polite"></p><p id="pdRxErrors" class="warning hidden" role="alert"></p>
  </div>
@@ -598,7 +637,7 @@ html body #concentration .difference-fields {display:grid;grid-template-columns:
 <p class="tip">Enter the <strong>exact hour from the beginning of the simulation</strong> for each administration, its route and amount. Example: 1,000 mg oral valacyclovir at hour 12, followed by 250 mg IV acyclovir at hours 24 and 48. Oral and IV drugs become acyclovir in the same central and peripheral compartments; the predicted plasma, CSF and CMMG levels carry forward across doses and dialysis transitions.</p>
 <div class="timeline-tip">Oral amounts are in <strong>mg valacyclovir free base</strong>; IV amounts are in <strong>mg acyclovir</strong>. They are not directly equivalent. An IV dose begins at its entered hour and is infused over its specified duration; the oral dose enters a modeled absorption depot at its hour [8]. Doses may share an administration time. Values are for teaching, not prescriptions [9].</div>
 <div id="doseRows"></div><p class="tip" id="doseCountPreview"></p>
-<div class="advisory hidden" id="dosePending">The medication schedule contains unapplied edits. Click <strong>Apply medication doses</strong> to update all graphs.</div>
+<div class="advisory hidden" id="dosePending">The medication schedule contains unapplied edits. Click <strong>Apply custom timeline</strong> to update all graphs.</div>
 <div class="timeline-actions"><button class="btn secondary" id="addDose">+ Add medication dose</button><button class="btn" id="applyDoses">Apply medication doses</button><button class="btn secondary" id="exportDoses">Export doses CSV</button></div><p class="example-row"><span class="example-label">Load an example:</span><button class="example-chip" type="button" id="oralIVPreset" title="1,000 mg oral valacyclovir at 12 h, then 250 mg IV acyclovir at 24 h and 48 h">Oral → IV switch</button></p>
 <div class="warning hidden" id="doseErrors" role="alert"></div>
 <h3>Medication administration timeline</h3><div class="schedulebar" id="doseBar"></div><div class="keyline"><span><i style="background:#159b87"></i>Oral valacyclovir</span><span><i style="background:#da5982"></i>IV acyclovir</span><span>Dotted markers also appear on graphs for up to 24 administrations.</span></div>
