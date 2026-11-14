@@ -12,6 +12,17 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+### Combined export and evidence candidate
+
+- Retain the existing print preview alongside nominal Python/R scripts, detailed/tidy CSV, XLSX, pharmacometric event CSV, LaTeX summary tables and the full BibTeX catalogue.
+- Add a local teaching-note clipboard action with a manual-copy fallback; keep one print renderer so printing does not hide the normal page after closing the preview.
+- Preserve missing-data values as unavailable and omit empty distributions; reject invalid renal trajectories in numerical diagnostics. Genuine zero-dose values remain zero.
+- Add unified, separately labeled pinned benchmark reports and the Smith/Turner adult obesity evaluations. No pharmacokinetic equations, parameters or defaults change.
+
+
+### Clarified
+- Cockcroft–Gault weight selection changes estimated CrCl while the entered dose and actual-weight model scaling stay unchanged. The guide distinguishes label observations from therapeutic targets and identifies troughs within the simulated window, without assuming steady state.
+
 ### Printable scenario teaching handout
 
 - Add an on-demand preview and one-page print/PDF summary of the current primary

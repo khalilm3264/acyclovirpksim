@@ -1,0 +1,5100 @@
+{
+  "modelCommit": "304ce5308ea78907d18b07d8670c164295829eb3",
+  "engineBlob": "17971df66e0a97b4d382572a582d35c444a3c83f",
+  "protocolCommit": "4d30000eb7201f02572c88fd131eea7e4ef95735",
+  "runtime": "v24.22.1",
+  "sourceDoi": "10.1128/AAC.02010-15",
+  "scope": "Retrospective aggregate reconstruction. Published outcomes known before execution. No model fitting.",
+  "inputs": [
+    {
+      "id": "obese",
+      "n": 7,
+      "female": 6,
+      "weight": 120.5,
+      "ibw": 57.1,
+      "bmi": 45,
+      "age": 54.3,
+      "bsa": 2.3,
+      "scr": 0.78,
+      "gfrIndexed": 93.4,
+      "dose": 285,
+      "observed": {
+        "peak": 5.8,
+        "aucInfinity": 15.2,
+        "clearance": 19.4
+      }
+    },
+    {
+      "id": "normal",
+      "n": 7,
+      "female": 6,
+      "weight": 61.2,
+      "ibw": 58.5,
+      "bmi": 22.5,
+      "age": 53,
+      "bsa": 1.7,
+      "scr": 0.76,
+      "gfrIndexed": 93.7,
+      "dose": 303,
+      "observed": {
+        "peak": 8.2,
+        "aucInfinity": 24,
+        "clearance": 14.3
+      }
+    }
+  ],
+  "variants": [
+    {
+      "id": "default",
+      "renalFactor": 1
+    },
+    {
+      "id": "renal-x0.75",
+      "renalFactor": 0.75
+    }
+  ],
+  "results": [
+    {
+      "group": "obese",
+      "kidney": "absolute-egfr",
+      "variant": "default",
+      "prediction": {
+        "peak": 4.001254768855627,
+        "sampledPeak": 4.001254768855627,
+        "aucInfinity": 7.075289753546336,
+        "auc120": 7.075289753542503,
+        "clearance": 40.28103582007365
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 4.001254768855627,
+          "observed": 5.8,
+          "ratio": 0.6898715118716597,
+          "relativeErrorPercent": -31.012848812834026
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 7.075289753546336,
+          "observed": 15.2,
+          "ratio": 0.4654795890491011,
+          "relativeErrorPercent": -53.452041095089896
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 40.28103582007365,
+          "observed": 19.4,
+          "ratio": 2.076342052581116,
+          "relativeErrorPercent": 107.63420525811158
+        }
+      ],
+      "tailPercent": 5.4179803131092155e-11,
+      "convergence": {
+        "peakDifference": 2.5927587188334655e-8,
+        "peakRelativePercent": 6.47986420077018e-7,
+        "auc120RelativePercent": -7.771561172376096e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 1,
+          "crcl": 124.17341040462428,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 124.17341040462428,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 37.69612715678283,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 22.3937389050195,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.001254768855627,
+            "sampledPeak": 4.001254768855627,
+            "aucInfinity": 7.075289753546336,
+            "auc120": 7.075289753542503,
+            "clearance": 40.28103582007365,
+            "massBalanceResidualMg": -1.8758328224066645e-12
+          },
+          "fine": {
+            "peak": 4.001254794783214,
+            "sampledPeak": 4.001254794783214,
+            "aucInfinity": 7.075289753546336,
+            "auc120": 7.075289753542448,
+            "clearance": 40.28103582007365,
+            "massBalanceResidualMg": 1.4210854715202004e-12
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "absolute-egfr",
+      "variant": "default",
+      "prediction": {
+        "peak": 8.55076426339627,
+        "sampledPeak": 8.55076426339627,
+        "aucInfinity": 16.49287743607696,
+        "auc120": 16.49287743607437,
+        "clearance": 18.371566827824097
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 8.55076426339627,
+          "observed": 8.2,
+          "ratio": 1.042776129682472,
+          "relativeErrorPercent": 4.277612968247202
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 16.49287743607696,
+          "observed": 24,
+          "ratio": 0.6872032265032066,
+          "relativeErrorPercent": -31.279677349679336
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 18.371566827824097,
+          "observed": 14.3,
+          "ratio": 1.284724952994692,
+          "relativeErrorPercent": 28.4724952994692
+        }
+      ],
+      "tailPercent": 1.570331363877286e-11,
+      "convergence": {
+        "peakDifference": 5.3350266426832604e-8,
+        "peakRelativePercent": 6.239239569438837e-7,
+        "auc120RelativePercent": -8.215650382226158e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 1,
+          "crcl": 92.07514450867052,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 92.07514450867052,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 16.8164304393306,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 9.989958676830058,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 8.55076426339627,
+            "sampledPeak": 8.55076426339627,
+            "aucInfinity": 16.49287743607696,
+            "auc120": 16.49287743607437,
+            "clearance": 18.371566827824097,
+            "massBalanceResidualMg": 6.821210263296962e-13
+          },
+          "fine": {
+            "peak": 8.550764316746536,
+            "sampledPeak": 8.550764316746536,
+            "aucInfinity": 16.49287743607696,
+            "auc120": 16.492877436074235,
+            "clearance": 18.371566827824097,
+            "massBalanceResidualMg": 5.684341886080801e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "obese",
+      "kidney": "absolute-egfr",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 4.406397191747719,
+        "sampledPeak": 4.406397191747719,
+        "aucInfinity": 9.236152664555725,
+        "auc120": 9.236152664441882,
+        "clearance": 30.85700403087794
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 4.406397191747719,
+          "observed": 5.8,
+          "ratio": 0.7597236537496068,
+          "relativeErrorPercent": -24.02763462503932
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 9.236152664555725,
+          "observed": 15.2,
+          "ratio": 0.6076416226681398,
+          "relativeErrorPercent": -39.23583773318602
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 30.85700403087794,
+          "observed": 19.4,
+          "ratio": 1.5905672180864918,
+          "relativeErrorPercent": 59.05672180864918
+        }
+      ],
+      "tailPercent": 1.2325820204376116e-9,
+      "convergence": {
+        "peakDifference": 1.669323079767082e-8,
+        "peakRelativePercent": 3.7884080317240887e-7,
+        "auc120RelativePercent": 5.551115123125783e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 1,
+          "crcl": 124.17341040462428,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 124.17341040462428,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 28.27209536758712,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 22.3937389050195,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.406397191747719,
+            "sampledPeak": 4.406397191747719,
+            "aucInfinity": 9.236152664555725,
+            "auc120": 9.236152664441882,
+            "clearance": 30.85700403087794,
+            "massBalanceResidualMg": -3.979039320256561e-13
+          },
+          "fine": {
+            "peak": 4.40639720844095,
+            "sampledPeak": 4.40639720844095,
+            "aucInfinity": 9.236152664555725,
+            "auc120": 9.236152664441933,
+            "clearance": 30.85700403087794,
+            "massBalanceResidualMg": 1.6484591469634324e-12
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "absolute-egfr",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 9.310505572830513,
+        "sampledPeak": 9.310505572830513,
+        "aucInfinity": 21.387038800522273,
+        "auc120": 21.387038800374487,
+        "clearance": 14.167459217991446
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 9.310505572830513,
+          "observed": 8.2,
+          "ratio": 1.13542750888177,
+          "relativeErrorPercent": 13.542750888177002
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 21.387038800522273,
+          "observed": 24,
+          "ratio": 0.8911266166884281,
+          "relativeErrorPercent": -10.887338331157192
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 14.167459217991446,
+          "observed": 14.3,
+          "ratio": 0.9907314138455556,
+          "relativeErrorPercent": -0.9268586154444369
+        }
+      ],
+      "tailPercent": 6.910062911894764e-10,
+      "convergence": {
+        "peakDifference": 3.6768634359418684e-8,
+        "peakRelativePercent": 3.9491554471027257e-7,
+        "auc120RelativePercent": 4.218847493575595e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 1,
+          "crcl": 92.07514450867052,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 92.07514450867052,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 12.612322829497948,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 9.989958676830058,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 9.310505572830513,
+            "sampledPeak": 9.310505572830513,
+            "aucInfinity": 21.387038800522273,
+            "auc120": 21.387038800374487,
+            "clearance": 14.167459217991446,
+            "massBalanceResidualMg": 1.3073986337985843e-12
+          },
+          "fine": {
+            "peak": 9.310505609599147,
+            "sampledPeak": 9.310505609599147,
+            "aucInfinity": 21.387038800522273,
+            "auc120": 21.387038800374576,
+            "clearance": 14.167459217991446,
+            "massBalanceResidualMg": 2.1600499167107046e-12
+          }
+        }
+      ]
+    },
+    {
+      "group": "obese",
+      "kidney": "cg-actual",
+      "variant": "default",
+      "prediction": {
+        "peak": 3.5992707693776733,
+        "sampledPeak": 3.5992707693776733,
+        "aucInfinity": 5.579469700480299,
+        "auc120": 5.57946970048002,
+        "clearance": 51.230186626164745
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 3.5992707693776733,
+          "observed": 5.8,
+          "ratio": 0.6205639257547713,
+          "relativeErrorPercent": -37.943607424522874
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 5.579469700480299,
+          "observed": 15.2,
+          "ratio": 0.3670703750315986,
+          "relativeErrorPercent": -63.29296249684013
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 51.230186626164745,
+          "observed": 19.4,
+          "ratio": 2.6407312693899354,
+          "relativeErrorPercent": 164.07312693899354
+        }
+      ],
+      "tailPercent": 4.998468291024714e-12,
+      "convergence": {
+        "peakDifference": 3.87632095311119e-8,
+        "peakRelativePercent": 0.0000010769739766658404,
+        "auc120RelativePercent": 6.661338147750939e-14
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 156.3002581908832,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 156.3002581908832,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 47.44908260313113,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 28.187573823642254,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 3.6382499439810854,
+            "sampledPeak": 3.6382499439810854,
+            "aucInfinity": 5.696127628164353,
+            "auc120": 5.696127628164035,
+            "clearance": 50.03399126642195,
+            "massBalanceResidualMg": -5.115907697472721e-13
+          },
+          "fine": {
+            "peak": 3.6382499812289186,
+            "sampledPeak": 3.6382499812289186,
+            "aucInfinity": 5.696127628164353,
+            "auc120": 5.696127628164043,
+            "clearance": 50.03399126642195,
+            "massBalanceResidualMg": 1.2505552149377763e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 183.8826566951567,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "male",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 183.8826566951567,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 55.82245012133074,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 33.16185155722618,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 3.3653957217572033,
+            "sampledPeak": 3.3653957217572033,
+            "aucInfinity": 4.879522134375976,
+            "auc120": 4.879522134375932,
+            "clearance": 58.40735878462156,
+            "massBalanceResidualMg": 3.979039320256561e-13
+          },
+          "fine": {
+            "peak": 3.3653957696126686,
+            "sampledPeak": 3.3653957696126686,
+            "aucInfinity": 4.879522134375976,
+            "auc120": 4.879522134375912,
+            "clearance": 58.40735878462156,
+            "massBalanceResidualMg": 3.922195901395753e-12
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "cg-actual",
+      "variant": "default",
+      "prediction": {
+        "peak": 8.783100307732216,
+        "sampledPeak": 8.783100307732216,
+        "aucInfinity": 17.828233873753764,
+        "auc120": 17.828233873743496,
+        "clearance": 17.041440630038117
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 8.783100307732216,
+          "observed": 8.2,
+          "ratio": 1.07110979362588,
+          "relativeErrorPercent": 7.110979362587999
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 17.828233873753764,
+          "observed": 24,
+          "ratio": 0.7428430780730735,
+          "relativeErrorPercent": -25.71569219269265
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 17.041440630038117,
+          "observed": 14.3,
+          "ratio": 1.1917091349677005,
+          "relativeErrorPercent": 19.170913496770048
+        }
+      ],
+      "tailPercent": 5.7590351374337466e-11,
+      "convergence": {
+        "peakDifference": 4.7842831918387674e-8,
+        "peakRelativePercent": 5.447146289583316e-7,
+        "auc120RelativePercent": -1.2212453270876722e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 82.70723684210527,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 82.70723684210527,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 15.105493481506636,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 8.973560484063348,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 8.848428580936613,
+            "sampledPeak": 8.848428580936613,
+            "aucInfinity": 18.186587323783908,
+            "auc120": 18.18658732377213,
+            "clearance": 16.660629870000136,
+            "massBalanceResidualMg": -1.5916157281026244e-12
+          },
+          "fine": {
+            "peak": 8.848428627165497,
+            "sampledPeak": 8.848428627165497,
+            "aucInfinity": 18.186587323783908,
+            "auc120": 18.1865873237721,
+            "clearance": 16.660629870000136,
+            "massBalanceResidualMg": -5.115907697472721e-13
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 97.30263157894738,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "male",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 97.30263157894738,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 17.771168801772514,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 10.557129981250998,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 8.391130668505836,
+            "sampledPeak": 8.391130668505836,
+            "aucInfinity": 15.678113173572907,
+            "auc120": 15.678113173571699,
+            "clearance": 19.326305190266012,
+            "massBalanceResidualMg": 3.979039320256561e-13
+          },
+          "fine": {
+            "peak": 8.391130726032356,
+            "sampledPeak": 8.391130726032356,
+            "aucInfinity": 15.678113173572907,
+            "auc120": 15.678113173571731,
+            "clearance": 19.326305190266012,
+            "massBalanceResidualMg": -3.410605131648481e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "obese",
+      "kidney": "cg-actual",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 4.051619795353545,
+        "sampledPeak": 4.051619795353545,
+        "aucInfinity": 7.315572587228802,
+        "auc120": 7.315572587222188,
+        "clearance": 39.06886713544627
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 4.051619795353545,
+          "observed": 5.8,
+          "ratio": 0.6985551371299217,
+          "relativeErrorPercent": -30.144486287007833
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 7.315572587228802,
+          "observed": 15.2,
+          "ratio": 0.4812876702124212,
+          "relativeErrorPercent": -51.87123297875789
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 39.06886713544627,
+          "observed": 19.4,
+          "ratio": 2.0138591306931066,
+          "relativeErrorPercent": 101.38591306931066
+        }
+      ],
+      "tailPercent": 9.041349276000239e-11,
+      "convergence": {
+        "peakDifference": 2.4678890042650892e-8,
+        "peakRelativePercent": 6.091116944162422e-7,
+        "auc120RelativePercent": -2.1094237467877974e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 156.3002581908832,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 156.3002581908832,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 35.58681195234835,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 28.187573823642254,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.08696131718085,
+            "sampledPeak": 4.08696131718085,
+            "aucInfinity": 7.466260241966507,
+            "auc120": 7.466260241958994,
+            "clearance": 38.17172061563917,
+            "massBalanceResidualMg": 6.252776074688882e-13
+          },
+          "fine": {
+            "peak": 4.086961340875008,
+            "sampledPeak": 4.086961340875008,
+            "aucInfinity": 7.466260241966507,
+            "auc120": 7.46626024195897,
+            "clearance": 38.17172061563917,
+            "massBalanceResidualMg": -3.808509063674137e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 183.8826566951567,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "male",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 183.8826566951567,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 41.86683759099805,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 33.16185155722618,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 3.8395706643897194,
+            "sampledPeak": 3.8395706643897194,
+            "aucInfinity": 6.41144665880257,
+            "auc120": 6.411446658801353,
+            "clearance": 44.45174625428887,
+            "massBalanceResidualMg": -1.3073986337985843e-12
+          },
+          "fine": {
+            "peak": 3.839570694977004,
+            "sampledPeak": 3.839570694977004,
+            "aucInfinity": 6.41144665880257,
+            "auc120": 6.411446658801389,
+            "clearance": 44.45174625428887,
+            "massBalanceResidualMg": 1.1937117960769683e-12
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "cg-actual",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 9.50686141998611,
+        "sampledPeak": 9.50686141998611,
+        "aucInfinity": 23.0657906598711,
+        "auc120": 23.065790659302955,
+        "clearance": 13.169864569651962
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 9.50686141998611,
+          "observed": 8.2,
+          "ratio": 1.1593733439007452,
+          "relativeErrorPercent": 15.93733439007452
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 23.0657906598711,
+          "observed": 24,
+          "ratio": 0.9610746108279625,
+          "relativeErrorPercent": -3.8925389172037472
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 13.169864569651962,
+          "observed": 14.3,
+          "ratio": 0.9209695503253119,
+          "relativeErrorPercent": -7.903044967468809
+        }
+      ],
+      "tailPercent": 2.463156052953063e-9,
+      "convergence": {
+        "peakDifference": 3.335886411548472e-8,
+        "peakRelativePercent": 3.508925150441655e-7,
+        "auc120RelativePercent": 2.220446049250313e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 82.70723684210527,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 82.70723684210527,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 11.329120111129978,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 8.973560484063348,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 9.56230297948809,
+            "sampledPeak": 9.56230297948809,
+            "aucInfinity": 23.51707294936691,
+            "auc120": 23.517072948715466,
+            "clearance": 12.884256499623476,
+            "massBalanceResidualMg": 8.526512829121202e-13
+          },
+          "fine": {
+            "peak": 9.562303011845383,
+            "sampledPeak": 9.562303011845383,
+            "aucInfinity": 23.51707294936691,
+            "auc120": 23.517072948715523,
+            "clearance": 12.884256499623476,
+            "massBalanceResidualMg": 3.0127011996228248e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 97.30263157894738,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "male",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 97.30263157894738,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 13.328376601329385,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 10.557129981250998,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 9.174212062974236,
+            "sampledPeak": 9.174212062974236,
+            "aucInfinity": 20.358096922896276,
+            "auc120": 20.358096922827897,
+            "clearance": 14.883512989822883,
+            "massBalanceResidualMg": 9.663381206337363e-13
+          },
+          "fine": {
+            "peak": 9.17421210234253,
+            "sampledPeak": 9.17421210234253,
+            "aucInfinity": 20.358096922896276,
+            "auc120": 20.358096922827936,
+            "clearance": 14.883512989822883,
+            "massBalanceResidualMg": -1.7053025658242404e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "obese",
+      "kidney": "cg-ideal",
+      "variant": "default",
+      "prediction": {
+        "peak": 4.658198777660759,
+        "sampledPeak": 4.658198777660759,
+        "aucInfinity": 11.146660643902791,
+        "auc120": 11.146660642320054,
+        "clearance": 25.63590759839539
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 4.658198777660759,
+          "observed": 5.8,
+          "ratio": 0.8031377202863379,
+          "relativeErrorPercent": -19.68622797136621
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 11.146660643902791,
+          "observed": 15.2,
+          "ratio": 0.7333329370988679,
+          "relativeErrorPercent": -26.666706290113208
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 25.63590759839539,
+          "observed": 19.4,
+          "ratio": 1.3214385359997625,
+          "relativeErrorPercent": 32.14385359997625
+        }
+      ],
+      "tailPercent": 1.4199207701591393e-8,
+      "convergence": {
+        "peakDifference": 1.2509763003265562e-8,
+        "peakRelativePercent": 2.68553645987879e-7,
+        "auc120RelativePercent": 3.552713678800501e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 74.06427172364671,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 74.06427172364671,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 22.484171092438068,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 13.356933322240433,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.68596240354549,
+            "sampledPeak": 4.68596240354549,
+            "aucInfinity": 11.36858643304889,
+            "auc120": 11.368586431244617,
+            "clearance": 25.069079755728886,
+            "massBalanceResidualMg": -1.4210854715202004e-12
+          },
+          "fine": {
+            "peak": 4.6859624156156015,
+            "sampledPeak": 4.6859624156156015,
+            "aucInfinity": 11.36858643304889,
+            "auc120": 11.368586431244676,
+            "clearance": 25.069079755728886,
+            "massBalanceResidualMg": -1.7053025658242404e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 87.13443732193733,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "male",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 87.13443732193733,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 26.451965991103613,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 15.714039202635808,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.491617022352376,
+            "sampledPeak": 4.491617022352376,
+            "aucInfinity": 9.815105909026205,
+            "auc120": 9.815105908772674,
+            "clearance": 29.03687465439443,
+            "massBalanceResidualMg": -1.1368683772161603e-13
+          },
+          "fine": {
+            "peak": 4.491617037500047,
+            "sampledPeak": 4.491617037500047,
+            "aucInfinity": 9.815105909026205,
+            "auc120": 9.815105908772608,
+            "clearance": 29.03687465439443,
+            "massBalanceResidualMg": 3.979039320256561e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "cg-ideal",
+      "variant": "default",
+      "prediction": {
+        "peak": 8.904748385973578,
+        "sampledPeak": 8.904748385973578,
+        "aucInfinity": 18.572450765579976,
+        "auc120": 18.572450765560525,
+        "clearance": 16.35822132526409
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 8.904748385973578,
+          "observed": 8.2,
+          "ratio": 1.0859449251187292,
+          "relativeErrorPercent": 8.59449251187292
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 18.572450765579976,
+          "observed": 24,
+          "ratio": 0.773852115232499,
+          "relativeErrorPercent": -22.614788476750103
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 16.35822132526409,
+          "observed": 14.3,
+          "ratio": 1.143931561207279,
+          "relativeErrorPercent": 14.393156120727891
+        }
+      ],
+      "tailPercent": 1.0473096758711655e-10,
+      "convergence": {
+        "peakDifference": 4.508919637657982e-8,
+        "peakRelativePercent": 5.063500285729106e-7,
+        "auc120RelativePercent": 5.773159728050814e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 79.05838815789474,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 79.05838815789474,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 14.439074651440167,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 8.577668109766435,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 8.968558527409236,
+            "sampledPeak": 8.968558527409236,
+            "aucInfinity": 18.94435425689223,
+            "auc120": 18.944354256869907,
+            "clearance": 15.994211039933665,
+            "massBalanceResidualMg": 1.4210854715202004e-12
+          },
+          "fine": {
+            "peak": 8.96855857099883,
+            "sampledPeak": 8.96855857099883,
+            "aucInfinity": 18.94435425689223,
+            "auc120": 18.944354256870056,
+            "clearance": 15.994211039933665,
+            "massBalanceResidualMg": -2.1600499167107046e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 93.00986842105263,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "male",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 93.00986842105263,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 16.987146648753136,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 10.09137424678404,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 8.521887537359634,
+            "sampledPeak": 8.521887537359634,
+            "aucInfinity": 16.341029817706463,
+            "auc120": 16.341029817704253,
+            "clearance": 18.542283037246634,
+            "massBalanceResidualMg": 9.094947017729282e-13
+          },
+          "fine": {
+            "peak": 8.521887591446445,
+            "sampledPeak": 8.521887591446445,
+            "aucInfinity": 16.341029817706463,
+            "auc120": 16.34102981770411,
+            "clearance": 18.542283037246634,
+            "massBalanceResidualMg": 9.663381206337363e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "obese",
+      "kidney": "cg-ideal",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 4.9599339160010425,
+        "sampledPeak": 4.9599339160010425,
+        "aucInfinity": 14.37661071237377,
+        "auc120": 14.376610664672757,
+        "clearance": 19.873157864619248
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 4.9599339160010425,
+          "observed": 5.8,
+          "ratio": 0.8551610200001798,
+          "relativeErrorPercent": -14.48389799998202
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 14.37661071237377,
+          "observed": 15.2,
+          "ratio": 0.9458296521298534,
+          "relativeErrorPercent": -5.4170347870146625
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 19.873157864619248,
+          "observed": 19.4,
+          "ratio": 1.0243895806504768,
+          "relativeErrorPercent": 2.4389580650476805
+        }
+      ],
+      "tailPercent": 3.317959557487691e-7,
+      "convergence": {
+        "peakDifference": 8.676620311121042e-9,
+        "peakRelativePercent": 1.7493420045866515e-7,
+        "auc120RelativePercent": 1.5543122344752192e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 74.06427172364671,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 74.06427172364671,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 16.863128319328553,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 13.356933322240433,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.982856524407837,
+            "sampledPeak": 4.982856524407837,
+            "aucInfinity": 14.654435316772757,
+            "auc120": 14.654435262468777,
+            "clearance": 19.44803698261937,
+            "massBalanceResidualMg": 3.410605131648481e-13
+          },
+          "fine": {
+            "peak": 4.982856532822839,
+            "sampledPeak": 4.982856532822839,
+            "aucInfinity": 14.654435316772757,
+            "auc120": 14.654435262468812,
+            "clearance": 19.44803698261937,
+            "massBalanceResidualMg": 3.581135388230905e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 87.13443732193733,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "male",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 87.13443732193733,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 19.83897449332771,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 15.714039202635808,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.822398265560282,
+            "sampledPeak": 4.822398265560282,
+            "aucInfinity": 12.709663085979857,
+            "auc120": 12.709663077896643,
+            "clearance": 22.42388315661853,
+            "massBalanceResidualMg": -1.1368683772161603e-12
+          },
+          "fine": {
+            "peak": 4.822398275806605,
+            "sampledPeak": 4.822398275806605,
+            "aucInfinity": 12.709663085979857,
+            "auc120": 12.70966307789659,
+            "clearance": 22.42388315661853,
+            "massBalanceResidualMg": -2.5011104298755527e-12
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "cg-ideal",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 9.609201633635248,
+        "sampledPeak": 9.609201633635248,
+        "aucInfinity": 23.998938316508493,
+        "auc120": 23.998938315455938,
+        "clearance": 12.657450091071441
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 9.609201633635248,
+          "observed": 8.2,
+          "ratio": 1.1718538577603963,
+          "relativeErrorPercent": 17.18538577603963
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 23.998938316508493,
+          "observed": 24,
+          "ratio": 0.9999557631878538,
+          "relativeErrorPercent": -0.004423681214615893
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 12.657450091071441,
+          "observed": 14.3,
+          "ratio": 0.8851363700049958,
+          "relativeErrorPercent": -11.486362999500422
+        }
+      ],
+      "tailPercent": 4.38584141643812e-9,
+      "convergence": {
+        "peakDifference": 3.1655440935196566e-8,
+        "peakRelativePercent": 3.294284178778639e-7,
+        "auc120RelativePercent": -1.1102230246251565e-14
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 79.05838815789474,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 79.05838815789474,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 10.829305988580126,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 8.577668109766435,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 9.66308239424682,
+            "sampledPeak": 9.66308239424682,
+            "aucInfinity": 24.466180290920555,
+            "auc120": 24.466180289713968,
+            "clearance": 12.384442377073624,
+            "massBalanceResidualMg": -1.9326762412674725e-12
+          },
+          "fine": {
+            "peak": 9.66308242497378,
+            "sampledPeak": 9.66308242497378,
+            "aucInfinity": 24.466180290920555,
+            "auc120": 24.466180289713975,
+            "clearance": 12.384442377073624,
+            "massBalanceResidualMg": 6.821210263296962e-13
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 93.00986842105263,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "male",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 93.00986842105263,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 12.740359986564851,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 10.09137424678404,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 9.285917069965828,
+            "sampledPeak": 9.285917069965828,
+            "aucInfinity": 21.195486470036144,
+            "auc120": 21.195486469907767,
+            "clearance": 14.295496375058349,
+            "massBalanceResidualMg": 4.547473508864641e-13
+          },
+          "fine": {
+            "peak": 9.285917107192155,
+            "sampledPeak": 9.285917107192155,
+            "aucInfinity": 21.195486470036144,
+            "auc120": 21.195486469907696,
+            "clearance": 14.295496375058349,
+            "massBalanceResidualMg": 1.3073986337985843e-12
+          }
+        }
+      ]
+    },
+    {
+      "group": "obese",
+      "kidney": "cg-adjusted",
+      "variant": "default",
+      "prediction": {
+        "peak": 4.184782275716315,
+        "sampledPeak": 4.184782275716315,
+        "aucInfinity": 7.966896793992394,
+        "auc120": 7.966896793973161,
+        "clearance": 35.87361920950313
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 4.184782275716315,
+          "observed": 5.8,
+          "ratio": 0.7215141854683301,
+          "relativeErrorPercent": -27.848581453166986
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 7.966896793992394,
+          "observed": 15.2,
+          "ratio": 0.5241379469731838,
+          "relativeErrorPercent": -47.58620530268162
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 35.87361920950313,
+          "observed": 19.4,
+          "ratio": 1.8491556293558318,
+          "relativeErrorPercent": 84.91556293558318
+        }
+      ],
+      "tailPercent": 2.4140661034656897e-10,
+      "convergence": {
+        "peakDifference": 2.1407566386244525e-8,
+        "peakRelativePercent": 5.115574630565334e-7,
+        "auc120RelativePercent": -5.551115123125783e-14
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 106.9586663105413,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 106.9586663105413,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 32.47013569671529,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 19.28918952280116,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.2187168870033585,
+            "sampledPeak": 4.2187168870033585,
+            "aucInfinity": 8.130071012694344,
+            "auc120": 8.130071012672465,
+            "clearance": 35.05504436000611,
+            "massBalanceResidualMg": -1.1937117960769683e-12
+          },
+          "fine": {
+            "peak": 4.218716907566501,
+            "sampledPeak": 4.218716907566501,
+            "aucInfinity": 8.130071012694344,
+            "auc120": 8.13007101267246,
+            "clearance": 35.05504436000611,
+            "massBalanceResidualMg": -1.4210854715202004e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 125.83372507122507,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "male",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 125.83372507122507,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 38.20015964319446,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 22.693164144471954,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 3.981174607994058,
+            "sampledPeak": 3.981174607994058,
+            "aucInfinity": 6.9878514817806945,
+            "auc120": 6.987851481777342,
+            "clearance": 40.78506830648528,
+            "massBalanceResidualMg": 6.821210263296962e-13
+          },
+          "fine": {
+            "peak": 3.9811746344681684,
+            "sampledPeak": 3.9811746344681684,
+            "aucInfinity": 6.9878514817806945,
+            "auc120": 6.987851481777343,
+            "clearance": 40.78506830648528,
+            "massBalanceResidualMg": -1.7053025658242404e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "cg-adjusted",
+      "variant": "default",
+      "prediction": {
+        "peak": 8.855789492372832,
+        "sampledPeak": 8.855789492372832,
+        "aucInfinity": 18.26743035707553,
+        "auc120": 18.267430357060633,
+        "clearance": 16.6315090471737
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 8.855789492372832,
+          "observed": 8.2,
+          "ratio": 1.0799743283381504,
+          "relativeErrorPercent": 7.9974328338150436
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 18.26743035707553,
+          "observed": 24,
+          "ratio": 0.7611429315448137,
+          "relativeErrorPercent": -23.885706845518627
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 16.6315090471737,
+          "observed": 14.3,
+          "ratio": 1.1630425907114474,
+          "relativeErrorPercent": 16.304259071144745
+        }
+      ],
+      "tailPercent": 8.154692895512052e-11,
+      "convergence": {
+        "peakDifference": 4.618101279163511e-8,
+        "peakRelativePercent": 5.214782161644393e-7,
+        "auc120RelativePercent": -7.993605777301127e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 80.51792763157894,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 80.51792763157894,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 14.705642183466754,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 8.736025059485199,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 8.920217720365889,
+            "sampledPeak": 8.920217720365889,
+            "aucInfinity": 18.633794111340208,
+            "auc120": 18.63379411132314,
+            "clearance": 16.260778571960252,
+            "massBalanceResidualMg": -9.663381206337363e-13
+          },
+          "fine": {
+            "peak": 8.920217765001809,
+            "sampledPeak": 8.920217765001809,
+            "aucInfinity": 18.633794111340208,
+            "auc120": 18.633794111322942,
+            "clearance": 16.260778571960252,
+            "massBalanceResidualMg": 1.1368683772161603e-13
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 94.72697368421053,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "male",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 94.72697368421053,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 17.300755509960887,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 10.277676540570823,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 8.469220124414493,
+            "sampledPeak": 8.469220124414493,
+            "aucInfinity": 16.069247831487456,
+            "auc120": 16.069247831485594,
+            "clearance": 18.855891898454384,
+            "massBalanceResidualMg": 1.2505552149377763e-12
+          },
+          "fine": {
+            "peak": 8.469220179866058,
+            "sampledPeak": 8.469220179866058,
+            "aucInfinity": 16.069247831487456,
+            "auc120": 16.069247831485768,
+            "clearance": 18.855891898454384,
+            "massBalanceResidualMg": 1.7053025658242404e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "obese",
+      "kidney": "cg-adjusted",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 4.563810748369675,
+        "sampledPeak": 4.563810748369675,
+        "aucInfinity": 10.372089319537794,
+        "auc120": 10.37208931893395,
+        "clearance": 27.551441572950054
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 4.563810748369675,
+          "observed": 5.8,
+          "ratio": 0.7868639221327026,
+          "relativeErrorPercent": -21.313607786729737
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 10.372089319537794,
+          "observed": 15.2,
+          "ratio": 0.6823742973380128,
+          "relativeErrorPercent": -31.76257026619872
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 27.551441572950054,
+          "observed": 19.4,
+          "ratio": 1.4201774006675287,
+          "relativeErrorPercent": 42.01774006675287
+        }
+      ],
+      "tailPercent": 5.8218172563094885e-9,
+      "convergence": {
+        "peakDifference": 1.397673532466115e-8,
+        "peakRelativePercent": 3.0625142422024965e-7,
+        "auc120RelativePercent": -5.329070518200751e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 106.9586663105413,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "female",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 106.9586663105413,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 24.352601772536467,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 19.28918952280116,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.592946463390526,
+            "sampledPeak": 4.592946463390526,
+            "aucInfinity": 10.58004230490973,
+            "auc120": 10.58004230422141,
+            "clearance": 26.937510435827285,
+            "massBalanceResidualMg": 1.4210854715202004e-12
+          },
+          "fine": {
+            "peak": 4.592946476859302,
+            "sampledPeak": 4.592946476859302,
+            "aucInfinity": 10.58004230490973,
+            "auc120": 10.580042304221344,
+            "clearance": 26.937510435827285,
+            "massBalanceResidualMg": 0
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 125.83372507122507,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 54.3,
+              "sex": "male",
+              "scr": 0.78,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 120.5,
+              "crcl": 125.83372507122507,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 285,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 38.56,
+              "vp": 44.585,
+              "q": 15.028538740062896,
+              "other": 0.18034246488075473,
+              "renal": 28.650119732395844,
+              "form": 2.4045661984100635,
+              "vm": 48.2,
+              "mr": 22.693164144471954,
+              "mn": 0.7514269370031448,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 2.43259375,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 4.388996458244565,
+            "sampledPeak": 4.388996458244565,
+            "aucInfinity": 9.12437140730618,
+            "auc120": 9.124371407209207,
+            "clearance": 31.235028395686662,
+            "massBalanceResidualMg": -3.410605131648481e-13
+          },
+          "fine": {
+            "peak": 4.388996475269061,
+            "sampledPeak": 4.388996475269061,
+            "aucInfinity": 9.12437140730618,
+            "auc120": 9.124371407209201,
+            "clearance": 31.235028395686662,
+            "massBalanceResidualMg": 9.094947017729282e-13
+          }
+        }
+      ]
+    },
+    {
+      "group": "normal",
+      "kidney": "cg-adjusted",
+      "variant": "renal-x0.75",
+      "prediction": {
+        "peak": 9.568072545346537,
+        "sampledPeak": 9.568072545346537,
+        "aucInfinity": 23.61676286555223,
+        "auc120": 23.61676286473198,
+        "clearance": 12.86241588250365
+      },
+      "endpoints": [
+        {
+          "endpoint": "peak",
+          "predicted": 9.568072545346537,
+          "observed": 8.2,
+          "ratio": 1.166838115286163,
+          "relativeErrorPercent": 16.68381152861631
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 23.61676286555223,
+          "observed": 24,
+          "ratio": 0.9840317860646762,
+          "relativeErrorPercent": -1.5968213935323772
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 12.86241588250365,
+          "observed": 14.3,
+          "ratio": 0.8994696421331223,
+          "relativeErrorPercent": -10.053035786687769
+        }
+      ],
+      "tailPercent": 3.4731558517031375e-9,
+      "convergence": {
+        "peakDifference": 3.2330559562865346e-8,
+        "peakRelativePercent": 3.379004409609365e-7,
+        "auc120RelativePercent": 1.9984014443252818e-13
+      },
+      "individuals": [
+        {
+          "sex": "female",
+          "fraction": 0.8571428571428571,
+          "crcl": 80.51792763157894,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "female",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 80.51792763157894,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 11.029231637600066,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 8.736025059485199,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 9.622585321537823,
+            "sampledPeak": 9.622585321537823,
+            "aucInfinity": 24.07749037311468,
+            "auc120": 24.077490372174296,
+            "clearance": 12.584368026093564,
+            "massBalanceResidualMg": -1.1368683772161603e-12
+          },
+          "fine": {
+            "peak": 9.622585352910933,
+            "sampledPeak": 9.622585352910933,
+            "aucInfinity": 24.07749037311468,
+            "auc120": 24.077490372174363,
+            "clearance": 12.584368026093564,
+            "massBalanceResidualMg": 1.1368683772161603e-12
+          }
+        },
+        {
+          "sex": "male",
+          "fraction": 0.14285714285714285,
+          "crcl": 94.72697368421053,
+          "coarse": {
+            "config": {
+              "virus": "VZV",
+              "age": 53,
+              "sex": "male",
+              "scr": 0.76,
+              "crclSource": "manual",
+              "pdMethod": "manual",
+              "route": "Acyclovir IV",
+              "dosingMode": "repeat",
+              "doseCount": 1,
+              "customDoses": [
+                {
+                  "time": 12,
+                  "route": "Valacyclovir oral",
+                  "amount": 1000
+                },
+                {
+                  "time": 24,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                },
+                {
+                  "time": 48,
+                  "route": "Acyclovir IV",
+                  "amount": 250,
+                  "infusion": 1
+                }
+              ],
+              "weight": 61.2,
+              "crcl": 94.72697368421053,
+              "renalMode": "constant",
+              "renalProfile": [
+                {
+                  "time": 0,
+                  "crcl": 95
+                },
+                {
+                  "time": 96,
+                  "crcl": 95
+                }
+              ],
+              "dose": 303,
+              "every": 24,
+              "infusion": 1,
+              "horizon": 120,
+              "valF": 0.545,
+              "valKa": 1.8,
+              "hdStart": 24,
+              "hdDuration": 4,
+              "hdRepeat": 48,
+              "hdCl": 81.8,
+              "pdRxEnabled": false,
+              "pdRxRows": [],
+              "vcScale": 1,
+              "clearanceScale": 1,
+              "pdCl": 6,
+              "pdVolume": 2,
+              "capdDwell": 6,
+              "capdExchanges": 4,
+              "pdGlucose": 2.5,
+              "pdTransport": 1,
+              "pdUfBase": 120,
+              "pdAbsorb": 20,
+              "pdSmallPore": 0.5,
+              "pdSigma": 0.12,
+              "apdStart": 20,
+              "apdHours": 10,
+              "apdCycles": 5,
+              "apdDwell": 1.5,
+              "apdTurnover": 0.25,
+              "apdFactor": 1,
+              "effluent": 25,
+              "sieving": 0.95,
+              "delivered": 0.85,
+              "csfRatio": 0.3,
+              "csfLag": 4,
+              "csfMetRatio": 0.025,
+              "csfMetLag": 6,
+              "formFactor": 1,
+              "metRenal": 1,
+              "metDial": 1,
+              "variability": 0,
+              "draws": 1,
+              "coverage": 0.9,
+              "assayCV": 0.15,
+              "observations": [],
+              "fitMode": "No dialysis",
+              "showBands": true,
+              "showShades": true,
+              "showStudy": true,
+              "showIC50": false,
+              "probenecid": false,
+              "labelBsa": 0,
+              "height": 0,
+              "cgWeight": "actual",
+              "schedule": [
+                {
+                  "type": "PD",
+                  "start": 0,
+                  "end": 24
+                },
+                {
+                  "type": "PD",
+                  "start": 24,
+                  "end": 48
+                },
+                {
+                  "type": "HD",
+                  "start": 54,
+                  "end": 58
+                }
+              ]
+            },
+            "params": {
+              "vc": 19.584,
+              "vp": 22.644000000000002,
+              "q": 9.041490630776153,
+              "other": 0.10849788756931382,
+              "renal": 12.975566632470665,
+              "form": 1.4466385009241844,
+              "vm": 24.480000000000004,
+              "mr": 10.277676540570823,
+              "mn": 0.4520745315388076,
+              "hd": 4.9079999999999995,
+              "pd": 0.36,
+              "crrt": 1.2354749999999999,
+              "kp": 0.3,
+              "km": 0.025,
+              "oralF": 0.545,
+              "oralKa": 1.8
+            },
+            "uiWarnings": [],
+            "peak": 9.240995888198821,
+            "sampledPeak": 9.240995888198821,
+            "aucInfinity": 20.85239782017752,
+            "auc120": 20.852397820078114,
+            "clearance": 14.530703020964163,
+            "massBalanceResidualMg": 1.0231815394945443e-12
+          },
+          "fine": {
+            "peak": 9.240995926274078,
+            "sampledPeak": 9.240995926274078,
+            "aucInfinity": 20.85239782017752,
+            "auc120": 20.852397820078007,
+            "clearance": 14.530703020964163,
+            "massBalanceResidualMg": -5.115907697472721e-13
+          }
+        }
+      ]
+    }
+  ],
+  "bands": [
+    {
+      "variant": "default",
+      "total": 4,
+      "withinNarrow": 1,
+      "withinTwofold": 3,
+      "groupRatios": [
+        {
+          "endpoint": "peak",
+          "predicted": 0.4679411857936512,
+          "observed": 0.7073170731707318,
+          "obeseLower": true
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 0.42899062222275774,
+          "observed": 0.6333333333333333,
+          "obeseLower": true
+        }
+      ]
+    },
+    {
+      "variant": "renal-x0.75",
+      "total": 4,
+      "withinNarrow": 2,
+      "withinTwofold": 4,
+      "groupRatios": [
+        {
+          "endpoint": "peak",
+          "predicted": 0.47327152723115956,
+          "observed": 0.7073170731707318,
+          "obeseLower": true
+        },
+        {
+          "endpoint": "aucInfinity",
+          "predicted": 0.43185747922850254,
+          "observed": 0.6333333333333333,
+          "obeseLower": true
+        }
+      ]
+    }
+  ]
+}

@@ -16,3 +16,7 @@ The bibliography page is generated from the simulator source using `node scripts
 ## Oral valacyclovir with paired acyclovir and CMMG during HD
 
 Hara et al. (2008), [doi:10.2133/dmpk.23.306](https://doi.org/10.2133/dmpk.23.306), is implemented in [the Hara benchmark](https://github.com/khalilm3264/acyclovirpksim/blob/main/research/validation/HARA-HD.md). Run `node research/validation/hara-hd.cjs` for the source comparison and documented assumptions.
+
+## Bibliography export
+
+The integration candidate adds a complete UTF-8 `.bib` catalogue containing the software citation, the numbered source entries and the additional Hara benchmark. It preserves evidence limitations in notes and omits unavailable metadata; it does not select references by scenario. Generate both the HTML and BibTeX outputs with `node scripts/references.cjs` and verify with `node scripts/references.cjs --check`. Use BibLaTeX/Biber for Unicode metadata.

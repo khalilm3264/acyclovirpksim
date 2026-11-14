@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "id": "manders",
+  "provenance": {
+    "sourceCommit": "c5eb2984fd9e024dd780310d44f3b00bf370b431",
+    "modelCommit": "304ce5308ea78907d18b07d8670c164295829eb3",
+    "engineBlob": "17971df66e0a97b4d382572a582d35c444a3c83f",
+    "files": {
+      "public/assets/pk-engine.js": "019c02b31fb273fa0d019d9c0766d4f8dccacd08b0d758e0cdd2f247cdf3755c",
+      "research/validation/manders2026-sadjadi2018.cjs": "7d15584d1c9a12cff30a3672df7a3215eaa6bb2fa1268dfe987a9739e8cfe7dd",
+      "research/validation/MANDERS2026-SADJADI2018-PROTOCOL.md": "86f25be7b6ddd9d8eaf374974086f3cd87f9cd1b1a8ea7201c67434dd5582310"
+    }
+  },
+  "combinations": [
+    {
+      "kidney": "during-raw",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.128385001040631
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.473482909022947
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.762535501308322
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 5.138478926469378
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 5.083413415690534
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 4.381196573038249
+        }
+      ]
+    },
+    {
+      "kidney": "during-raw",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 5.350365452341816
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 5.797610543116647
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 6.1505718370988935
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 6.640744448302132
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 6.56729999079095
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 5.678007932495011
+        }
+      ]
+    },
+    {
+      "kidney": "during-raw",
+      "variant": "no-allometric",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 3.417085427135657
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.711055276381868
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.242561375721203
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 6.152527375290279
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 5.697706935122977
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 4.334170854271328
+        }
+      ]
+    },
+    {
+      "kidney": "before-raw",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.128385001040631
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.473482909022947
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.817584263683252
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 5.255909941646073
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 6.764768671669154
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 4.381196573038249
+        }
+      ]
+    },
+    {
+      "kidney": "before-raw",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 5.350365452341816
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 5.797610543116647
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 6.219406263731121
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 6.787739777800291
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 8.650559805134316
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 5.678007932495011
+        }
+      ]
+    },
+    {
+      "kidney": "before-raw",
+      "variant": "no-allometric",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 3.417085427135657
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.711055276381868
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.2915999084458365
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 6.293132707319768
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 7.582241738612598
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 4.334170854271328
+        }
+      ]
+    },
+    {
+      "kidney": "during-censored-105",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 3.582854841723015
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 3.88235106365271
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.762535501308322
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 5.138478926469378
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 5.083413415690534
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 3.8022595640410453
+        }
+      ]
+    },
+    {
+      "kidney": "during-censored-105",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.660607659662945
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 5.050194859711041
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 6.1505718370988935
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 6.640744448302132
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 6.56729999079095
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 4.946011164570198
+        }
+      ]
+    },
+    {
+      "kidney": "during-censored-105",
+      "variant": "no-allometric",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 2.9655473179241048
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.088530309638005
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.242561375721203
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 6.152527375290279
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 5.697706935122977
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 3.761447884866961
+        }
+      ]
+    },
+    {
+      "kidney": "during-bsa-scaled",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.486027820560185
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.198453288597278
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.947606535944948
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 4.3095319604369156
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 4.596595853308011
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 4.272136997013521
+        }
+      ]
+    },
+    {
+      "kidney": "during-bsa-scaled",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 5.799798464150468
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 5.4505577017061135
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 6.381791322402135
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 5.5972000699323035
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 5.956098409766646
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 5.5405295454513865
+        }
+      ]
+    },
+    {
+      "kidney": "during-bsa-scaled",
+      "variant": "no-allometric",
+      "rows": [
+        {
+          "case": "A",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 3.713108222100732
+        },
+        {
+          "case": "B",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 2.9,
+          "predicted": 4.421419712590125
+        },
+        {
+          "case": "C",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 5.1,
+          "predicted": 4.407426335383639
+        },
+        {
+          "case": "D",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.4,
+          "predicted": 5.159992624411604
+        },
+        {
+          "case": "E",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 8.1,
+          "predicted": 5.152061012883963
+        },
+        {
+          "case": "G",
+          "endpoint": "steady-state plasma",
+          "unit": "mg/L",
+          "observed": 6.1,
+          "predicted": 4.226281872824013
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "case": "Manders F plasma",
+      "reason": "PICC-contaminated sample; excluded by source protocol"
+    },
+    {
+      "case": "Manders H",
+      "reason": "No measured concentration"
+    },
+    {
+      "case": "Manders F CSF",
+      "reason": "Bounded sensitivity analysis; unknown paired regimen/kidney timing; no pooled scoring"
+    },
+    {
+      "case": "Sadjadi 2018",
+      "reason": "Unreported weight, dose, PD prescription and blood-draw times; non-scorable sensitivity grid"
+    }
+  ]
+}
