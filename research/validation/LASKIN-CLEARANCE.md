@@ -24,3 +24,18 @@ The reconstruction activates the simulator’s probenecid switch while holding C
 At a separate nominal 70-kg, CrCl-zero setting, nonrenal clearance is 28.7 mL/min. Its similarity to the cited Sadjadi intercept is a construction anchor. A BSA of 1.73 m² would make this numerically identical in indexed units, but no matched patient is represented. About 93% of that nonrenal clearance is assigned to CMMG formation. Parent-drug clearance alone does not identify this formation fraction or metabolite elimination, so #46 remains unresolved.
 
 This comparison supports reporting clearance bias and studying alternatives. It supplies no basis for a unique parameter correction.
+
+## Whitley multiday IV comparison
+
+Whitley et al. reported three sequential studies in 43 immunocompromised patients. The multiday arm enrolled 20 and used one-hour infusions every eight hours for five days plus a sixteenth dose. Table II gives the dose-specific group sizes. The published peaks are group means in µmol/L. AyFlux uses a nominal 70 kg, BSA 1.73 m² and the **whole arm's** mean indexed CrCl of 70.2 mL/min/1.73 m². Here, the end of dose 16 represents the reported steady-state peak. [Whitley et al., pp. 166–169](https://doi.org/10.1016/0002-9343(82)90084-5)
+
+| IV dose (mg/kg) | n | First peak, observed / predicted | Steady peak, observed / predicted | Observed ratio of means |
+|---|---:|---:|---:|---:|
+| 2.5 | 3 | 22.5 / 21.1 | 30.1 / 22.3 | 1.34 |
+| 5 | 6 | 36.2 / 42.2 | 43.2 / 44.6 | 1.19 |
+| 10 | 7 | 66.6 / 84.3 | 66.9 / 89.2 | 1.00 |
+| 15 | 4 | 94.6 / 126.5 | 91.7 / 133.8 | 0.97 |
+
+The fixed-parameter linear model gives the same ratio of 1.057 at each dose. Varying assumed weight from 50 to 90 kg and BSA from 1.50 to 2.10 m² gives 1.035–1.081. The apparent trend in the source ratios compares four small groups with different participants. It cannot establish dose-dependent accumulation. The authors described dose-proportional kinetics and excluded two unusual CrCl values from their steady-state dose-correlation analysis. The individual paired peaks and dose-specific CrCl distributions are unavailable.
+
+For the single-dose, single-day multidose and multiday arms, the reported ratios of mean renal acyclovir clearance to mean CrCl are 125/57 = 2.19, 177/62.9 = 2.81 and 184/70.2 = 2.62, respectively. At 70 kg the current model uses 3.37. Multiday cumulative urinary parent recovery averaged 68% (SD 14). Under constant inputs the model's eventual renal fraction is 89.2%. Collection completeness and follow-up differ from an infinite-time fraction. The paper also reports two measured CSF concentrations two hours after infusion ended, 16.6 and 17.8 µmol/L. Their corresponding plasma values, 35.0 and 36.1, were **author-predicted**. The resulting ratios of 0.474 and 0.493 cannot be treated as measured pairs. AyFlux gives 0.358 after the first dose and 0.442 after dose 16 at that lag with the intact-barrier default. Individual sampling dose and barrier status are unknown. The report summarizes earlier phase-I work. We do not add its endpoints to the independent scorecard or assume independence from the label. [Source transcription and sensitivity runner](whitley-iv-course.cjs)
