@@ -39,3 +39,20 @@ Reference 22 previously described only the 2024 Vasquez Vasquez preprint. The fi
 References 38–39 retain abstract-only labels. Full-text collection remains tracked in issue #53. Cohort overlap, source-author fitted values, model assumptions and limited pediatric/dialysis applicability remain explicit. Do not introduce fixed clinical toxicity or efficacy thresholds from model-only analyses.
 
 Manuscript alignment is tracked in issue #49. Match DOI identities and publication versions rather than assuming manuscript numbering equals website numbering.
+
+## Added 2026-11-14
+
+References 52–56 preserve five sources from the older reference PR after comparison
+with the current bibliography. Existing anchors remain stable. Publisher/PubMed
+identities and supplied full-text PDFs were checked for the stated scope.
+
+| Reference | Source | Scope constraint |
+| --- | --- | --- |
+| 52 | Davenport 1992, DOI 10.1016/S0272-6386(12)70234-2 | Case trajectories and concentration changes around HD |
+| 53 | Strong 1997, DOI 10.1007/s004670050379 | Pediatric pre/post-dose samples after HD |
+| 54 | Berry 2014, DOI 10.1016/j.jcv.2014.09.001 | CSF day 5 and serum day 8 with intervening changes |
+| 55 | Yang 2007, DOI 10.1111/j.1365-4632.2007.03269.x | Limited serum sampling over three HD sessions |
+| 56 | Ueno 2025, DOI 10.7759/cureus.92365 | Whole blood sampled 5 h 40 min apart around four-hour HDF |
+
+These entries add source coverage. Benchmark point counts and fitted model
+parameters are separate records. HTML and BibTeX are regenerated together.
