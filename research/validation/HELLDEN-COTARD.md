@@ -27,14 +27,14 @@ A 35-year-old woman with a failing kidney transplant on chronic haemodialysis to
 | 159 | **0.5 (current default)** | 21.0 / 84.4 | 17.1 | 15.3 | 3.0 | 0.38 |
 | 159 | 0.75 | 21.0 / 64.6 | 12.9 | 10.0 | 1.9 | 0.27 |
 
-- **Acyclovir fits.** The level 30 h after the last dose is predicted within 8% at CrCl 0, so acyclovir exposure and CMMG formation input are about right.
+- **Parent concentration at 30 h.** At CrCl 0 the predicted acyclovir level is within 8% of this measurement. Reassigning nonrenal clearance between CMMG formation and other loss leaves the parent curve identical, so this agreement cannot identify the conversion fraction. [Fixed-total formation sensitivity](cmmg-formation-bound.cjs)
 - **CMMG leaves too slowly between sessions.** Measured CMMG fell from 21.1 to 8.9 µmol/L over the gap, an apparent half-life of about 35 h. Post-dialysis rebound would make the true half-life shorter still. With the former 0.25 L/h (nominal half-life 67 h at 60 kg), AyFlux predicted CMMG *rising* after the first session, and day-6 CMMG was 2.6–3 times the measured value at 50, 60 and 80 kg.
 - **Residual kidney function does not explain it.** At CrCl 2 mL/min, the acyclovir level before session 1 drops to 15.0 against 19.4 measured.
-- **No single value fits everything.** 0.75 L/h fits the between-session data best but underpredicts the first peak (64.6 vs 90.2). 0.5 L/h was chosen as the value that also fits Hara.
+- **No single value fits everything.** 0.75 L/h fits the between-session data best but underpredicts the first peak (64.6 vs 90.2). The 0.5 L/h scenario gives an intermediate result for this case. Hara's separate peak measurement had also been compared before the change merged.
 
 ## Independent check against Hara 2008
 
-Hara was not used to choose the value. Hara's single-dose CMMG peak (7.47 mg/L measured) is predicted at 8.57 with 0.25 L/h, **7.06 with 0.5 L/h** and 6.08 with 0.75 L/h. Both sources favor 0.5 L/h: a nominal CMMG half-life of about 39 h at 70 kg with no kidney function, instead of 78 h.
+The recorded rationale attributes the change to Helldén 2007 and identifies Hara as the separate cohort check. Hara’s result was already available in [the pre-change comparison](https://github.com/khalilm3264/acyclovirpksim/pull/82). Hara's single-dose CMMG peak (7.47 mg/L measured) is predicted at 8.57 with 0.25 L/h, **7.06 with 0.5 L/h** and 6.08 with 0.75 L/h. Both sources favor 0.5 L/h: a nominal CMMG half-life of about 39 h at 70 kg with no kidney function, instead of 78 h.
 
 ## Limits
 
