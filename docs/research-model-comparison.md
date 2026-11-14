@@ -10,6 +10,7 @@ Files:
 - `interop/compare_mrgsolve.R` — run and compare deterministic IV curves.
 - `interop/fixtures/iv_700mg_constant_crcl50.csv` — AyFlux RK4 output, 700 mg IV over 1 h, single dose, 70 kg, CrCl 50 mL/min, 24 hours.
 - `interop/fixtures/iv_700mg_dynamic_crcl50_to10_to95.csv` — same regimen with user-entered CrCl knots `(0 h,50), (12 h,10), (24 h,95)`.
+- `interop/fixtures/iv_700mg_anuric_hd8_to12.csv` — same regimen with CrCl 0 and HD at 81.8 mL/min from 8 to 12 h, followed through hour 24. The nominal CMMG dialysis-clearance multiplier is 1.
 
 Run from the repository root with R and a working C++ toolchain:
 
@@ -23,7 +24,9 @@ Rscript interop/compare_mrgsolve.R
 
 The script writes comparison CSVs to `interop/results/` and prints acyclovir/CMMG RMSE, max absolute difference, and normalized RMSE. Its **2% normalized RMSE investigation threshold** is only a unit/regression check: not a clinical equivalence margin or proven scientific accuracy. mrgsolve uses its own ODE solver; AyFlux uses RK4 integration with event boundaries. Small solver discrepancies are expected.
 
-Scope: **IV acyclovir and modeled plasma CMMG, no dialysis**, nominal parameters, one infusion; both constant and piecewise-linear residual kidney clearance. The mrgsolve code contains an illustrative constant HD window for future work, but the included comparisons **do not verify HD, PD, CRRT, oral valacyclovir, CSF, Monte Carlo bands or Bayesian fitting**.
+The three fixtures cover nominal IV acyclovir and plasma CMMG with constant CrCl, a piecewise-linear CrCl profile, or one anuric HD session. The HD fixture includes the pre-HD distribution phase, dialysis and twelve hours of follow-up. At hours 8, 12 and 24 its parent concentrations are 10.173, 5.491 and 4.248 mg/L, with CMMG at 6.028, 3.970 and 6.564 mg/L.
+
+`node interop/check-mrgsolve-fixtures.cjs` checks all 97 time points per case against the current production engine before CI runs the independent R comparison.
 
 The parameters for this comparison are directly copied as a hypothesis from AyFlux, not independently estimated from patient data. Agreement therefore means **implementation parity**, not independent pharmacokinetic validation.
 
@@ -65,6 +68,6 @@ The user-facing [equation and parameter provenance guide](https://ayflux.org/lea
 
 ## Status and reproducibility
 
-The two deterministic AyFlux CSV fixtures are generated from the existing browser PK model with `variability = 0` and `draws = 1`. The comparison scripts are **separate, optional research tools**, not website/server dependencies, and require local installation of their R packages. This repository does not distribute the OSPSuite Aciclovir PBPK model itself.
+The three deterministic AyFlux CSV fixtures are generated from the existing browser PK model with `variability = 0` and `draws = 1`. The comparison scripts are **separate, optional research tools**, not website/server dependencies, and require local installation of their R packages. This repository does not distribute the OSPSuite Aciclovir PBPK model itself.
 
 `Rscript interop/compare_mrgsolve.R` can be run in CI to verify mathematical parity. OSPSuite-R requires a separate approved environment and remains a manual workflow; no claim of completed PBPK validation is made merely by shipping the script.

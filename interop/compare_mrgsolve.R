@@ -1,6 +1,6 @@
 # AyFlux independent IV acyclovir / CMMG implementation check with mrgsolve.
 # Copyright (C) 2026 Muhammad Khalil; SPDX-License-Identifier: AGPL-3.0-only
-# Educational, deterministic, no-dialysis regression. Not clinical validation.
+# Educational, deterministic IV regression. Not clinical validation.
 #
 # Run from repository root: Rscript interop/compare_mrgsolve.R
 # Install mrgsolve first: install.packages("mrgsolve")
@@ -23,6 +23,11 @@ cases <- list(
   list(
     name = "iv_700mg_dynamic_crcl50_to10_to95",
     CRCL0 = 50, CRCL1 = 10, CRCL2 = 95, T1 = 12, T2 = 24
+  ),
+  list(
+    name = "iv_700mg_anuric_hd8_to12",
+    CRCL0 = 0, CRCL1 = 0, CRCL2 = 0, T1 = 12, T2 = 24,
+    hd = 81.8
   )
 )
 # Match the single-draw nominal AyFlux inputs. AUC/peak and RMSE compare
@@ -38,10 +43,10 @@ for (case in cases) {
     model, WT = 70, CRCL0 = case$CRCL0, CRCL1 = case$CRCL1,
     CRCL2 = case$CRCL2, T1 = case$T1, T2 = case$T2,
     VCSCALE = 1, CLSCALE = 1, FORMFACTOR = 1, METRENAL = 1,
-    HDCL = 0, HDSTART = 30, HDEND = 30, METDIAL = 1
+    HDCL = if (is.null(case$hd)) 0 else case$hd, HDSTART = 8, HDEND = 12, METDIAL = 1
   )
   output <- mrgsolve::mrgsim(mod, events = regimen, end = 24, delta = 0.25,
-                            atol = 1e-11, rtol = 1e-9, output = "df")
+                            atol = 1e-11, rtol = 1e-9, hmax = 0.05, output = "df")
   # mrgsolve may emit two rows at the administration boundary (t=0).
   output <- output[!duplicated(output$time, fromLast = TRUE), , drop = FALSE]
   output <- output[order(output$time), , drop = FALSE]
