@@ -20,18 +20,21 @@ function describe(values) {
   const median=(sorted[Math.floor((n-1)/2)]+sorted[Math.floor(n/2)])/2;
   return {mean,median,sd,min:sorted[0],max:sorted.at(-1)};
 }
-const observedStats=printedMeans.map((m,i)=>{
-  const values=observed.map(row=>row[i]), stats=describe(values);
-  const tolerance=i<5?.050001:.005001;
-  assert.ok(Math.abs(stats.mean-m)<tolerance);
-  assert.ok(Math.abs(stats.sd-printedSDs[i])<tolerance);
-  const omit=values.map((_,j)=>describe(values.filter((x,k)=>k!==j)).mean);
-  return {...stats,omitOneMean:[Math.min(...omit),Math.max(...omit)]};
-});
-const results={};
-for (const fitted of [false,true]) {
-  const curves=subjects.map(subj=>profile(subj,fitted,1/64));
-  results[fitted?'sourceFit':'weightOnly']=hours.slice(0,6).map((hour,i)=>({
-    hour,...describe(curves.map(curve=>curve[i]))}));
+if (require.main === module) {
+  const observedStats=printedMeans.map((m,i)=>{
+    const values=observed.map(row=>row[i]), stats=describe(values);
+    const tolerance=i<5?.050001:.005001;
+    assert.ok(Math.abs(stats.mean-m)<tolerance);
+    assert.ok(Math.abs(stats.sd-printedSDs[i])<tolerance);
+    const omit=values.map((_,j)=>describe(values.filter((x,k)=>k!==j)).mean);
+    return {...stats,omitOneMean:[Math.min(...omit),Math.max(...omit)]};
+  });
+  const results={};
+  for (const fitted of [false,true]) {
+    const curves=subjects.map(subj=>profile(subj,fitted,1/64));
+    results[fitted?'sourceFit':'weightOnly']=hours.slice(0,6).map((hour,i)=>({
+      hour,...describe(curves.map(curve=>curve[i]))}));
+  }
+  console.log(JSON.stringify({observed,observedStats,results},null,2));
 }
-console.log(JSON.stringify({observed,observedStats,results},null,2));
+module.exports = {observed};
