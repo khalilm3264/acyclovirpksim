@@ -31,7 +31,7 @@
 
 ## Where it moves away from data
 
-The Kably 2025 CMMG/acyclovir AUC ratio (`ayflux-sources/data/extracted/kably2025/cmmg-ratio.cjs`; observed median 129.9% at eGFR < 30) falls slightly further below observation: at CrCl 25, 52% → 49%; at CrCl 15, 83% → 74%. Kably's population (early post–liver transplant, oral valaciclovir) is not directly comparable, and the gap was already more than twofold before the change. The two Kacířová CMMG points move by ≤ 0.006 mg/L.
+[Kably 2025](https://doi.org/10.1093/jac/dkaf070) reports a simulated median CMMG/acyclovir AUC ratio of 129.9% for indexed CKD-EPI eGFR below 30 mL/min/1.73 m² (Table 5). One of the 50 enrolled patients had eGFR below 30. With the model change, AyFlux’s ratio fell from 52% to 49% at absolute CrCl 25 mL/min and from 83% to 74% at CrCl 15 mL/min. The comparison spans different kidney-function measures, and Kably’s population received oral valacyclovir soon after liver transplantation. The two Kacířová CMMG points move by ≤ 0.006 mg/L.
 
 ## Effect on users
 
