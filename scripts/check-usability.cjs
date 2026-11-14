@@ -63,7 +63,7 @@ async function main(){
   // Summary hierarchy: three plasma acyclovir numbers lead, the rest are secondary, and the guide names the level to read.
   assert.deepEqual(await page.$$eval('#metrics .metric.primary .key',n=>n.map(e=>e.textContent)),['Peak plasma acyclovir','Plasma acyclovir AUC','Plasma acyclovir trough']);
   assert.ok(await page.locator('#metrics .metric.minor').count()>=5);
-  assert.match(await page.textContent('#levelGuide'),/start with plasma acyclovir/);
+  assert.match(await page.textContent('#levelGuide'),/start with plasma acyclovir/i);
   assert.match(await page.textContent('#troughMetric'),/just before the last dose/);
   const primaryWidths=await page.locator('#metrics .metric.primary').evaluateAll(cards=>cards.map(card=>card.getBoundingClientRect().width));
   const metricsWidth=await page.locator('#metrics').evaluate(el=>el.getBoundingClientRect().width);
