@@ -22,6 +22,7 @@ studies=(
   laskin-anuric-course laskin-clearance laskin-fitted-distribution laskin-individual-spread laskin-prior-band lindstrom-course-6-20
   lindstrom-patient19 lindstrom-patient4-course lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
   stathoulopoulou-1996-recovery sun-cns-comparison ueno-hdf-blood unita-hd-sampling vasquez-hd-extraction vasquez-urine-intervals weller-single-dose whitley-iv-course yang-three-hd
+  davenport-case2-course
 )
 for study in "${studies[@]}"; do
   echo "Checking $study"
