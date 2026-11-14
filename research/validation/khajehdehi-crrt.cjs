@@ -1,8 +1,9 @@
 // Khajehdehi et al. Clin Nephrol 2000;54:351–355. PMID 11076113.
 // One anuric patient studied on separate occasions. The abstract gives the two
 // clearances, extraction percentages and estimated daily removal percentages.
-// Detailed inputs are from the project's existing Table 1 / pp. 352–353
-// transcription, not a new reading of the primary scan.
+// Detailed inputs verified directly against the primary five-page scan
+// (papers/acyclovir-pk/khajehdehi2000.pdf; Table 1 p. 352, text pp. 352–353).
+// See research/validation/KHAJEHDEHI-CRRT-AUDIT.md.
 'use strict';
 const assert = require('node:assert/strict');
 const engine = require('../../public/assets/pk-engine.js');

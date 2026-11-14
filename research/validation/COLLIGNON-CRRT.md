@@ -29,7 +29,7 @@ Kidney function was preserved before CKRT, with creatinine 22 µmol/L. Endogenou
 
 ## Adult comparison from Khajehdehi 2000
 
-One anuric adult received CVVHD and CVVHDF on separate occasions. The authors report extracorporeal clearance of 14 and 17 mL/min, extraction of 84% and 60%, and estimated 24-hour removal of 18% and 65% of the respective daily doses. The two prescriptions had different flows, dialyzers and daily doses. The endpoints were verified against the authors' abstract. Detailed flow and concentration inputs below come from the project's prior transcription of Table 1 and pp. 352–353. The primary scan was unavailable for this reanalysis. [Primary abstract](https://pubmed.ncbi.nlm.nih.gov/11076113/)
+One anuric adult received CVVHD and CVVHDF on separate occasions. The authors report extracorporeal clearance of 14 and 17 mL/min, extraction of 84% and 60%, and estimated 24-hour removal of 18% and 65% of the respective daily doses. The two prescriptions had different flows, dialyzers and daily doses. Detailed flow and concentration inputs below were verified directly against the archived primary five-page scan (`papers/acyclovir-pk/khajehdehi2000.pdf`, Clin Nephrol 2000;54:351–355). See [Khajehdehi primary audit](KHAJEHDEHI-CRRT-AUDIT.md). [Primary abstract](https://pubmed.ncbi.nlm.nih.gov/11076113/)
 
 | Occasion | Outflow, L/h | Effluent / inlet concentration, mg/L | Default coefficient and delivery, mL/min | Measured ratio and full delivery, mL/min |
 | --- | ---: | ---: | ---: | ---: |
