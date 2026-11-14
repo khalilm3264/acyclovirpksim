@@ -34,3 +34,19 @@ The Stathoulopoulou rows use 70 kg and CrCl 1 mL/min with the standard illustrat
 The other studies were excluded from grid selection, but their outcomes were already known when this experiment was designed. This is an exploratory cross-study comparison. Prospective parameter selection and independent evaluation would be needed to quantify predictive performance.
 
 All reconstructions and source links are documented in the accompanying study files. Differences in dose history, sampling time and unreported patient inputs remain sources of uncertainty.
+
+## Sun 2025 CNS model comparison
+
+Sun et al. simulated 10 mg/kg IV over one hour every eight hours using LeiCNS3.0. Figure 3 reports posterior median steady-state profiles. For AyFlux, use the same regimen with an illustrative weight of 70 kg and absolute CrCl of 111 mL/min. The latter is the mean in Smith’s normal-kidney cohort, one of Sun’s source cohorts. Sun’s IV results are simulations. They do not identify a patient with these covariates. [Primary paper, §3.2 and Figure 3](https://doi.org/10.1007/s40262-025-01545-w)
+
+| Model concentration compartment | AUC over 8 h (mg·h/L) | Peak (mg/L) | Trough (mg/L) |
+|---|---:|---:|---:|
+| Sun plasma | 26.1 | 11.2 | 0.3 |
+| AyFlux plasma | 29.0 | 16.85 | 0.53 |
+| Sun subarachnoid CSF | 5.9 | 1.0 | 0.5 |
+| AyFlux CSF proxy | 8.70 | 1.55 | 0.61 |
+| Sun brain extracellular fluid | 17.1 | 6.6 | 0.2 |
+
+Sun’s subarachnoid-to-plasma ratio of reported AUCs is 0.226. At periodic steady state the corresponding AyFlux ratio equals its assigned CSF partition (0.30). This follows by integrating the first-order CSF equation over a complete interval. Across the illustrative 50/70/90 kg and CrCl 90/111/120 grid, AyFlux plasma AUC spans 24.79–37.46 mg·h/L and its peak spans 15.48–18.96 mg/L. Sun’s plasma AUC lies within that grid and the peak lies below it.
+
+Sun fitted aggregate oral-valacyclovir results from Smith’s normal-kidney group and Lycke’s multiple-sclerosis cohort. AyFlux uses these sources elsewhere. Both cohorts lacked viral encephalitis, and Sun excluded Smith’s CKD group. AyFlux has a single lagged CSF concentration and no brain extracellular-fluid output. The comparison therefore provides neither independently observed IV endpoints nor a validation of clinical target attainment. The runner checks consecutive dosing intervals, integration-step sensitivity and the closed-form plasma and CSF AUC relations. [Reproduction script](sun-cns-comparison.cjs)
