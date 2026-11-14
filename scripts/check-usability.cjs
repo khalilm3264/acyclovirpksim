@@ -50,6 +50,14 @@ async function main(){
   const order=await page.evaluate(()=>{const top=s=>document.querySelector(s).getBoundingClientRect().top+scrollY;
    return {summary:top('.summary-card'),chart:top('#plasmaChart'),tools:top('#comparisonTools'),baseline:top('#baselinePanel'),regimen:top('#regimenPanel')};});
   assert.ok(order.summary<order.chart&&order.chart<order.tools&&order.tools<order.baseline&&order.baseline<order.regimen,JSON.stringify(order));
+  // Comparison instructions precede actions and every form field has a visible label.
+  for(const [status,action] of [['baselineStatus','saveBaseline'],['regimenStatus','regimenName'],['postHdRule','applyPostHd']]) {
+   const boxes=await page.evaluate(([status,action])=>({text:document.getElementById(status).getBoundingClientRect().bottom,action:document.getElementById(action).getBoundingClientRect().top}),[status,action]);
+   assert.ok(boxes.action>=boxes.text,'Comparison action follows its instructions: '+action);
+  }
+  for(const id of ['regimenName','predictMetric','predictChoice']) {
+   assert.ok(await page.locator('label[for="'+id+'"]').isVisible(),'Visible comparison field label: '+id);
+  }
   // Summary hierarchy: three plasma acyclovir numbers lead, the rest are secondary, and the guide names the level to read.
   assert.deepEqual(await page.$$eval('#metrics .metric.primary .key',n=>n.map(e=>e.textContent)),['Peak plasma acyclovir','Plasma acyclovir AUC','Plasma acyclovir trough']);
   assert.ok(await page.locator('#metrics .metric.minor').count()>=5);
@@ -104,6 +112,19 @@ async function main(){
    const height=await page.locator('#'+id).evaluate(el=>el.getBoundingClientRect().height);
    assert.ok(height>=39.9,'Phone picker '+id+' target height '+height);
   }
+  await page.locator('#scenarioDifference summary').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('#scenarioDifference').evaluate(el=>el.open),true,'Comparison details opens by keyboard');
+  await page.locator('#differenceFrom').waitFor({state:'visible'});
+  for(const id of ['saveBaseline','clearBaseline','regimenName','saveRegimen','predictMetric','predictChoice','revealPrediction','differenceFrom','differenceTo','applyPostHd']) {
+   const bounds=await page.locator('#'+id).boundingBox();
+   assert.ok(bounds.height>=39.9,'Comparison phone target '+id+' '+JSON.stringify(bounds));
+   assert.ok(bounds.x>=0&&bounds.x+bounds.width<=390,'Comparison phone field fits '+id);
+  }
+  const predictionFields=await page.locator('.predict-row .comparison-field').evaluateAll(fields=>fields.map(field=>field.getBoundingClientRect().top));
+  assert.ok(predictionFields[1]>predictionFields[0],'Prediction fields stack on a phone');
+  await page.locator('#scenarioDifference summary').focus();
+  await page.keyboard.press('Enter');
   // Guide navigation follows all content at desktop and phone widths.
   for (const width of [1280,390]) {
    await page.setViewportSize({width,height:900});
