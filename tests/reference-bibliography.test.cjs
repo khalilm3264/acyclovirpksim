@@ -8,10 +8,10 @@ const html=read('public/index.html');
 const methods=read('public/learn/model-methods/index.html');
 const cite=read('public/cite/index.html');
 
-test('References [1]-[56] are sequential and have unique stable anchors',()=>{
+test('References [1]-[58] are sequential and have unique stable anchors',()=>{
  const ids=[...html.matchAll(/<li id="ref(\d+)"/g)].map(m=>Number(m[1]));
- assert.deepEqual(ids,Array.from({length:56},(_,i)=>i+1));
- for(let i=17;i<=56;i++){
+ assert.deepEqual(ids,Array.from({length:58},(_,i)=>i+1));
+ for(let i=17;i<=58;i++){
   const entry=html.match(new RegExp('<li id="ref'+i+'">([\\s\\S]*?)<\\/li>'))?.[1];
   assert.ok(entry,'Missing reference entry '+i);
   if(i===42)assert.match(entry,/https:\/\/www\.klinickafarmakologie\.cz\/incpdfs\/far-202204-0002_10_001\.pdf/);
@@ -36,7 +36,9 @@ test('new studies have direct DOI citations, accurate evidence labels and no fal
   '10.1002/bcp.70138',
  '10.1128/AAC.21.5.804',
  '10.1177/08968608261415988',
- '10.1136/bmj.39408.393137.BE'
+ '10.1136/bmj.39408.393137.BE',
+ '10.1097/MD.0000000000026147',
+ '10.2147/IJGM.S291320'
  ]) assert.ok(html.includes('https://doi.org/'+doi),'Missing DOI '+doi);
  // [22] is cited as the peer-reviewed 2025 article, with the preprint kept as a secondary link.
  // Cites the final journal article; the 2024 preprint is publication history, and "not peer-reviewed"
