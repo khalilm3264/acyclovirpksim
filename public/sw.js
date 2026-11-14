@@ -1,8 +1,8 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-laskin-overlay-20261114";
+const CACHE = "ayflux-static-v0.27.0-safe-update-20261114";
 const CORE = [
- "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
+ "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
  "/assets/academic-exports.js", "/references/ayflux.bib",
  "/research/exchanges/", "/research/exchanges/view.js", "/research/exchanges/style.css",
@@ -21,32 +21,61 @@ const CORE = [
  "/license/", "/cite/", "/references/", "/disclaimer/"
 ];
 self.addEventListener("install", event => {
- event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
+ // Fill a separate release cache before this worker can serve an application shell.
+ event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(
+   CORE.map(path => new Request(path, {cache: "reload"}))
+ )));
 });
+
+self.addEventListener("message", event => {
+ if (event.data !== "ayflux-apply-update" || !event.source) return;
+ event.waitUntil((async () => {
+   // Other tabs can have their own unsaved measurements and lazy-loaded scripts.
+   const tabs = await self.clients.matchAll({type: "window", includeUncontrolled: true});
+   if (tabs.some(tab => tab.id !== event.source.id)) {
+     event.source.postMessage("ayflux-other-tabs-open");
+     return;
+   }
+   await self.skipWaiting();
+ })());
+});
+
 self.addEventListener("activate", event => {
- event.waitUntil(Promise.all([
-   caches.keys().then(names => Promise.all(names.filter(name => name.startsWith("ayflux-static-") && name !== CACHE).map(name => caches.delete(name)))),
-   self.clients.claim()
- ]));
+ event.waitUntil((async () => {
+   const names = await caches.keys();
+   await Promise.all(names.filter(name => name.startsWith("ayflux-static-") && name !== CACHE)
+     .map(name => caches.delete(name)));
+   await self.clients.claim();
+ })());
 });
+
 self.addEventListener("fetch", event => {
  const request = event.request;
- if(request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
  const url = new URL(request.url);
- if(url.pathname.startsWith("/cdn-cgi/") || request.headers.has("range")) return;
- if(request.mode === "navigate") {
-   event.respondWith(fetch(request).then(response => {
-     if(response.ok) { const copy=response.clone(); caches.open(CACHE).then(cache => cache.put(request,copy)).catch(()=>{}); }
-     return response;
-   }).catch(async () => (await caches.match(request,{ignoreSearch:true})) || (await caches.match("/"))));
-   return;
- }
- event.respondWith(caches.match(request,{ignoreSearch:true}).then(cached => cached || fetch(request).then(response => {
-   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || ["/assets/vendor/echarts-6.1.0.min.js","/assets/vendor/echarts-gl-2.1.0.min.js"].includes(url.pathname))) {
-     const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(request,copy)).catch(()=>{});
+ if (request.method !== "GET" || url.origin !== self.location.origin ||
+     url.pathname.startsWith("/cdn-cgi/") || request.headers.has("range")) return;
+ event.respondWith((async () => {
+   const cache = await caches.open(CACHE);
+   const shellPath = url.pathname.replace(/\/index\.html$/, "/").replace(/([^/])$/, "$1/");
+   if (CORE.includes(url.pathname) || (request.mode === "navigate" && CORE.includes(shellPath))) {
+     const cached = await cache.match(CORE.includes(url.pathname) ? url.pathname : shellPath);
+     if (cached) return cached;
    }
+   if (request.mode === "navigate") {
+     try {
+       const response = await fetch(request);
+       if (response.ok && !url.search) await cache.put(url.pathname, response.clone()).catch(() => {});
+       return response;
+     } catch {
+       return await cache.match(url.pathname) || await cache.match("/") || Response.error();
+     }
+   }
+   const vendor = ["/assets/vendor/echarts-6.1.0.min.js", "/assets/vendor/echarts-gl-2.1.0.min.js"];
+   if (!vendor.includes(url.pathname)) return fetch(request);
+   const cached = await cache.match(url.pathname);
+   if (cached) return cached;
+   const response = await fetch(request);
+   if (response.ok && response.type === "basic") await cache.put(url.pathname, response.clone()).catch(() => {});
    return response;
- })));
+ })());
 });
-
-
