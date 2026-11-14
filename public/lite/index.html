@@ -82,7 +82,10 @@ footer a{margin-left:7px}
 @media(max-width:700px){.workspace{padding:10px}.layout{grid-template-columns:1fr}.side{position:static;max-height:none}.graphs{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart{height:255px}.chart.mini{height:220px}.panel{padding:10px}.side{padding:10px}.legend{gap:8px}}
 @media (max-width:319px) {
  header, .side-head, .topline, .topline label, .control label {flex-wrap:wrap}
- .topline label {min-width:0;max-width:100%}
+ .topline label, .actions > *, .legend-option {min-width:0;max-width:100%}
+ .legend-option, .control output {white-space:normal}
+ .stats, .graphs, .layout {grid-template-columns:minmax(0,1fr)}
+ footer, header {overflow-wrap:anywhere}
  .workspace {padding-inline:6px;overflow-wrap:anywhere}
  .topline select {min-width:0;max-width:100%}
 }
