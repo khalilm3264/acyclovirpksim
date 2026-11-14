@@ -116,3 +116,19 @@ Kably et al. collected 255 plasma samples from 50 early liver-transplant recipie
 AUC units are mg·h/L and concentrations are mg/L. Kably reports simulated median troughs and the median **individual** AUC ratio. Dividing 103.1 by 88.7 gives 116.2%, the ratio of the low-stratum AUC medians, whereas Table 5 gives 129.9%. The two summaries have different denominators. AyFlux reports central plasma at hour 264 just before a hypothetical next dose, plus the minimum over hours 240–264 in the script output.
 
 At CrCl 25 the higher slope brings both absolute CMMG endpoints closer to the low-stratum medians despite taking the ratio farther away. At CrCl 104 the higher slope makes CMMG AUC and trough both lower than Kably’s normal-stratum medians. With 2,000 mg q12h the low-stratum CMMG AUC and trough medians were 68.8 and 2.3. At CrCl 25 AyFlux gives 108.6 and 3.62 with the default slope, or 62.1 and 1.77 with Paper V. A renal metabolite coefficient cannot correct the several-fold difference in parent exposure in the low stratum. The source provides no dialysis cases or measured anuric formation fraction. [Reproduction script with all strata and both regimens](kably-renal-slope.cjs)
+
+## Yang 2007 course across three HD sessions
+
+A 70-year-old man on chronic HD received 250 mg IV acyclovir at 0, 12 and 24 h, then stopped treatment. Figure 1 places the first blood draw after the third dose and before HD on day 2. The authors measured 1.6 mg/L acyclovir and 5 mg/L CMMG. The next blood draw followed four-hour HD sessions on days 2, 3 and 4. Serum acyclovir was below 0.5 mg/L and CMMG was undetectable. The paper gives no CMMG detection limit. These two assays span the entire treatment sequence. [Yang et al., pp. 883–884 and Figure 1](https://doi.org/10.1111/j.1365-4632.2007.03269.x)
+
+The reconstruction infers 64.9 kg from the reported 500 mg/day and 7.7 mg/kg/day. It assumes one-hour infusions, starts HD at hours 48, 72 and 96, and represents serum with the nominal plasma compartments. ESRD and thrice-weekly HD are reported, but measured residual CrCl, dialyzer clearance and exact draw times are unavailable. The table uses an illustrative draw at hour 42 and a second just after the third four-hour session. Neither sample initializes the model.
+
+| CrCl (mL/min) | HD clearance (mL/min) | ACV / CMMG before HD, mg/L | ACV / CMMG after third HD, mg/L |
+|---:|---:|---:|---:|
+| Source | Unknown | 1.60 / 5.00 | <0.50 / undetectable |
+| 0 | 81.8 | 5.78 / 13.00 | 0.232 / 1.249 |
+| 5 | 81.8 | 3.37 / 6.75 | 0.049 / 0.214 |
+| 10 | 81.8 | 2.08 / 3.69 | 0.012 / 0.040 |
+| 0 | 159 | 5.78 / 13.00 | 0.092 / 0.229 |
+
+At assumed CrCl 0, moving the first draw between 36 and 48 h gives parent concentrations from 7.10 to 4.70 mg/L and CMMG from 11.99 to 13.49 mg/L. Both exceed the observed pair throughout the tested range. Assuming residual CrCl narrows the parent gap but at 10 mL/min CMMG falls below the observation. The 159 mL/min alternative comes from the separate Hara sensitivity, not a measurement in Yang. Across all six CrCl/HD combinations and draws 0, 6 or 12 h after the third session, parent stays below the reported limit. This bound cannot distinguish those clearances. A numerical error for final CMMG cannot be calculated. [Scenario runner](yang-three-hd.cjs)
