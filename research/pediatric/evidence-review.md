@@ -52,3 +52,15 @@ Regenerate with `node research/pediatric/compare.cjs`; full precision results ar
 - Sun M, et al. (2025). [Revisiting Acyclovir Dosing for Adult Viral Encephalitis Using a Full Bayesian LeiCNS PBPK Modeling Approach](https://doi.org/10.1007/s40262-025-01545-w). CNS PBPK analysis distinguishes CSF from brain extracellular fluid. Reuses published observations; model code is available on reasonable request, not supplied in this PDF.
 - Laskin OL, et al. (1982). [Effect of Renal Failure on the Pharmacokinetics of Acyclovir](https://doi.org/10.1016/0002-9343(82)90090-0). Six anuric participants; likely overlapping with the other 1982 Laskin/Krasny reports. Treat as potentially shared evidence, not three independent cohorts.
 - Krasny HC, et al. (1982). [Influence of Hemodialysis on Acyclovir Pharmacokinetics in Patients with Chronic Renal Failure](https://doi.org/10.1016/0002-9343(82)90091-2). Historical dialysis experiment. The reported concentration reduction is not the fraction of the initial dose removed; match timing and the amount denominator before comparison.
+
+## Funaki neonatal CRRT and plasma exchange
+
+Figure 1C provides nine serum acyclovir concentrations in a single full-term neonate. The y-axis is µg/mL, numerically equal to mg/L. Three labeled one-hour infusions began at 15:19, 23:15 and 06:33. The first and third peak markers, at 16:00 and 07:00, fall **during** those infusions. The 01:00 marker follows the end of the 23:15 infusion by 45 minutes. Pooling these as equal-time post-infusion peaks would mix different phases of the dose. [Funaki et al., Figure 1C and Table 1](https://doi.org/10.1542/peds.2014-3380)
+
+| CRRT alone, clock time | Approximate serum acyclovir (mg/L) | Two-point apparent half-life (h) |
+|---|---:|---:|
+| 01:00 to 03:00 | 18.95 to 9.79 | 2.10 |
+| 03:00 to 05:00 | 9.79 to 6.20 | 3.03 |
+| 01:00 to 05:00 | 18.95 to 6.20 | 2.48 |
+
+The four-hour decline reproduces the authors’ estimate of about two to three hours under CRRT. Moving each plotted ordinate by one rendering pixel gives 2.44–2.52 h for this interval. This quantifies digitization precision only. Other intervals include plasma exchange, an infusion or unexplained concentration changes. For example, between 18:00 and 23:00 the plotted concentration rises before the next labeled infusion. The figure/text label Qb 15, Qd 2000 and Qf 200 in mL/min. Effective effluent delivery, a timed filtrate concentration and residual renal clearance are unavailable. The observed serum decline includes distribution and all elimination pathways. It supplies no measured filter clearance or causal estimate of the dosing effect on viral decline. [Source coordinates and arithmetic](funaki-crrt-sampling.cjs)
