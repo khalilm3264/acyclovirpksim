@@ -94,6 +94,8 @@
     "showIC50": false,
     "probenecid": false,
     "labelBsa": 0,
+    "height": 0,
+    "cgWeight": "actual",
     "schedule": [
       {
         "type": "HD",

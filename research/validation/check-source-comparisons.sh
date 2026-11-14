@@ -17,10 +17,10 @@ cd "$root"
 # These runners print standalone reports and check their own numerical assumptions.
 studies=(
   almond-paired-post-hd boulieu-cvvhd burgess-iv-terminal cmmg-formation-bound cmmg-identifiability collignon-crrt davenport-dialysis-washout
-  de-miranda-iv-recovery hara-genotype-terminal hellden-ms-sampling hellden-iv-profiles hellden-renal-clearance ito2025 izzedine-capd jamez-oral-sampling
+  de-miranda-iv-recovery hara-genotype-terminal hellden-ms-sampling hellden-iv-profiles hellden-renal-clearance izzedine-capd jamez-oral-sampling
   kably-auc-comparison kably-renal-slope kacirova-iv-cohort kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
   laskin-anuric-course laskin-clearance laskin-fitted-distribution lindstrom-course-6-20
-  lindstrom-patient19 lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
+  lindstrom-patient19 lindstrom-patient4-course lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
   stathoulopoulou-1996-recovery sun-cns-comparison unita-hd-sampling vasquez-hd-extraction vasquez-urine-intervals weller-single-dose yang-three-hd
 )
 for study in "${studies[@]}"; do
@@ -37,6 +37,14 @@ for study in boelaert-joint boelaert-followup boelaert-steady-state; do
 done
 cmp research/validation/boelaert-joint-grid.csv "$output/boelaert-joint-grid.csv"
 
-# This runner already supports an output directory and has a tracked numerical reference.
-node research/validation/lindstrom-csf.cjs "$output" > "$output/lindstrom-csf.txt"
-cmp research/validation/lindstrom-csf-results.json "$output/lindstrom-csf-results.json"
+# Compare tracked reference outputs without writing into the checkout.
+for study in lindstrom-csf hellden-cotard cmmg-evidence; do
+  node "research/validation/$study.cjs" "$output" > "$output/$study.txt"
+  cmp "research/validation/$study-results.json" "$output/$study-results.json"
+done
+for study in hara-hd ito2025; do
+  node "research/validation/$study.cjs" > "$output/$study-results.json"
+  cmp "research/validation/$study-results.json" "$output/$study-results.json"
+done
+node -e "console.log(JSON.stringify(require('./research/validation/laskin-clearance.cjs').report(),null,2))" > "$output/laskin-clearance-results.json"
+cmp research/validation/laskin-clearance-results.json "$output/laskin-clearance-results.json"
