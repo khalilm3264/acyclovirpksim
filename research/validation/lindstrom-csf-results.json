@@ -134,6 +134,34 @@
       "csfRatio": 0.3,
       "csfMetRatio": 0.025,
       "group": "intact",
+      "paired": {
+        "acyclovir": {
+          "quantifiedPairs": 10,
+          "patients": 8,
+          "ratioGmr": 1.15153,
+          "visitWeighted": 0.26052,
+          "patientWeighted": 0.28724,
+          "leaveOnePatientOutRange": [
+            0.23774,
+            0.35263
+          ],
+          "belowLimitPairs": 0,
+          "belowLimitConsistent": 0
+        },
+        "cmmg": {
+          "quantifiedPairs": 3,
+          "patients": 3,
+          "ratioGmr": 0.83413,
+          "visitWeighted": 0.02997,
+          "patientWeighted": 0.02997,
+          "leaveOnePatientOutRange": [
+            0.02232,
+            0.03944
+          ],
+          "belowLimitPairs": 7,
+          "belowLimitConsistent": 7
+        }
+      },
       "gmr": {
         "csf": {
           "n": 10,
@@ -157,6 +185,34 @@
       "csfRatio": 0.37,
       "csfMetRatio": 0.11,
       "group": "disrupted",
+      "paired": {
+        "acyclovir": {
+          "quantifiedPairs": 21,
+          "patients": 12,
+          "ratioGmr": 0.98089,
+          "visitWeighted": 0.37721,
+          "patientWeighted": 0.41785,
+          "leaveOnePatientOutRange": [
+            0.34936,
+            0.45584
+          ],
+          "belowLimitPairs": 0,
+          "belowLimitConsistent": 0
+        },
+        "cmmg": {
+          "quantifiedPairs": 16,
+          "patients": 8,
+          "ratioGmr": 1.26427,
+          "visitWeighted": 0.08701,
+          "patientWeighted": 0.10187,
+          "leaveOnePatientOutRange": [
+            0.07546,
+            0.12275
+          ],
+          "belowLimitPairs": 5,
+          "belowLimitConsistent": 3
+        }
+      },
       "gmr": {
         "csf": {
           "n": 23,
