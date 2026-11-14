@@ -187,12 +187,14 @@
   ctx.font="24px system-ui,sans-serif";
   ctx.fillText(config.route+" · "+config.dose+" mg every "+config.every+" h · "+config.weight+" kg · CrCl "+config.crcl+" mL/min · "+config.horizon+" h",100,108,1720);
   ctx.font="22px system-ui,sans-serif";
+  ctx.font="21px system-ui,sans-serif";
+  ctx.fillText("HD "+config.hdDuration+" h from "+config.hdStart+" h, every "+config.hdRepeat+" h, clearance "+config.hdCl+" mL/min · PD fill "+config.pdVolume+" L · CRRT effluent "+config.effluent+" mL/kg/h",100,140,1720);
   let x=100;
   for(const scenario of scenarios.filter(s=>visibility.has(s.id))){
-   ctx.fillStyle=scenario.color;ctx.fillRect(x,143,32,6);ctx.fillStyle="#24485d";
-   ctx.fillText(scenario.label,x+44,154);x+=340;
+   ctx.fillStyle=scenario.color;ctx.fillRect(x,172,32,6);ctx.fillStyle="#24485d";
+   ctx.fillText(scenario.label,x+44,183);x+=340;
   }
-  for(const [key,title,y] of [["plasma","Plasma acyclovir",210],["cmmg","Plasma CMMG (exploratory)",730]]){
+  for(const [key,title,y] of [["plasma","Plasma acyclovir",236],["cmmg","Plasma CMMG (exploratory)",756]]){
    ctx.font="bold 28px system-ui,sans-serif";ctx.fillText(title,100,y);
    const chart=document.createElement("canvas");
    draw(chart,scenarios,key,config.horizon,active,visibility,null,{width:860,height:220,scale:2});
