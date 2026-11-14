@@ -8,7 +8,7 @@ const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const ui=read('public/assets/simulator-ui.js'),html=read('public/index.html');
 const E=require('../public/assets/pk-engine.js'),S=require('../public/assets/study-library.js');
-const fn=(start,end,name)=>{const i=ui.indexOf(start),j=ui.indexOf(end,i);assert.ok(i>=0&&j>i,start);const c={};vm.runInNewContext(ui.slice(i,j)+';this.f='+name+';',c);return c.f;};
+const fn=(start,end,name)=>{const i=ui.indexOf(start),j=ui.indexOf(end,i);assert.ok(i>=0&&j>i,start);const c={REG:require('../public/assets/regimen-tools.js')};vm.runInNewContext(ui.slice(i,j)+';this.f='+name+';',c);return c.f;};
 
 test('every published study loads as a valid regimen with positive, time-ordered points',()=>{
  assert.ok(S.STUDIES.length>=4);
@@ -103,6 +103,12 @@ test('CMMG/acyclovir AUC ratio uses the last 24 hours and rises as kidney functi
  assert.deepEqual({...ratio([0,6],[1,1],[3,3])},{from:0,to:6,ratio:3});
  assert.equal(ratio([0,6],[0,0],[1,1]),null);
  assert.equal(ratio([],[],[]),null);
+ for(const missing of [undefined,[],[0,null],[0,NaN],[0,Infinity]]) {
+  assert.equal(ratio([0,1],[1,1],missing),null);
+  assert.equal(ratio([0,1],missing,[1,1]),null);
+ }
+ assert.equal(ratio([0,1],[1,1],[0,0]).ratio,0);
+ assert.equal(ratio([0,0],[1,1],[0,0]),null);
  // Engine: valacyclovir 2000 mg q8h for 11 days, as in Kably 2025.
  const run=crcl=>{const d=E.simulateMany({...E.DEFAULTS,route:'Valacyclovir oral',dose:2000,every:8,doseCount:33,horizon:264,crcl,crclSource:'manual',draws:1,variability:0,requestedModes:['No dialysis'],observations:[]})['No dialysis'];return ratio(d.time,d.plasma.median,d.cmmg.median).ratio;};
  const values=[120,60,15].map(run);

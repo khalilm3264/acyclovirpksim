@@ -98,5 +98,5 @@
   const blocking=flags.some(f=>f.kind==='duplicate'&&label.rule==='move')||customDoses.length>200;
   return {ok:true,apply:changed&&!blocking,rule:label.rule,ruleText:label.text,cite:label.cite,rows,flags,customDoses};
  }
- return {MAX_SAVED,CROWDING_H,interp,aucTo,metrics,postHdPlan,LABELS};
+ return {MAX_SAVED,CROWDING_H,validSeries,interp,aucTo,metrics,postHdPlan,LABELS};
 });

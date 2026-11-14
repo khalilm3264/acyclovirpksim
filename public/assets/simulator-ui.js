@@ -109,7 +109,7 @@ function describeScenario(config,mode){
 // Ratio of CMMG to acyclovir AUC (mg·h/L each) over the last 24 simulated hours, or the whole
 // horizon when it is shorter. Null when acyclovir exposure in that window is zero.
 function cmmgAucRatio(time,plasma,cmmg){
- if(!time?.length)return null;
+ if(!REG.validSeries(time,plasma)||!REG.validSeries(time,cmmg))return null;
  const to=time[time.length-1],from=Math.max(time[0],to-24);
  let parent=0,metabolite=0;
  for(let i=1;i<time.length;i++){
@@ -170,7 +170,7 @@ function renderTimeAbove(rewrite=false){
  }
  const cmmgRatio=$('cmmgRatioResult');
  if(cmmgRatio){
-  const window24=run?cmmgAucRatio(run.time,run.plasma.median,run.cmmg.median):null;
+  const window24=run?cmmgAucRatio(run.time,run.plasma?.median,run.cmmg?.median):null;
   cmmgRatio.textContent=window24===null?'':'CMMG/acyclovir AUC ratio over hours '+window24.from.toFixed(0)+'–'+window24.to.toFixed(0)+': '+Math.round(100*window24.ratio)+'% (median curves, mass basis). For comparison, Kably 2025 estimated about 30% with eGFR above 90 and about 130% below 30 mL/min/1.73 m², at steady state on valacyclovir in liver transplant recipients [29].';
  }
  renderStudyStatus();
