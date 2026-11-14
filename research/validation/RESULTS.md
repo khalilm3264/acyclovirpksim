@@ -44,6 +44,10 @@ Every dedicated CAPD mass-accounting test passed, including comparison against d
 5. External predictive validity, CNS CMMG distribution, and matched alternative-model comparisons remain unverified.
 6. **No change** to default clinical model equations, parameters, safety thresholds, or schema 2 was made for this release.
 
-## Next independent checks
+## External CAPD follow-up
 
-Use Shah (1986) and Burgess & Gill (1990) IV protocols with the current frozen model before any retuning. Do not simulate Burgess & Gill's intraperitoneal administration because AyFlux does not implement it. Acquire observed concentration-time points and actual exchanged effluent mass/volume data if available, and preregister an external error metric before model recalibration. Review with domain experts before submission to any clinical or pharmacometrics journal.
+Shah reported daily dialysate recovery in one patient treated with IV acyclovir. At an assumed absolute CrCl of 1.7 mL/min, modeled recovery ranged from 6.76–6.80% of the day's dose on day 1, 10.27–10.42% on day 4 and 10.04–10.19% on day 7 across all 54 possible orders of the reported bags. The corresponding observations were 5.7%, 10.8% and 11.0%. Mean modeled peritoneal clearance was 3.19–3.23 mL/min against the published 4.4 mL/min. The analysis uses nominal 6/6/12-hour dwells and modeled ultrafiltration. The order of the bags has little effect within these assumptions. [Source](https://doi.org/10.1016/S0272-6386(86)80193-7) · [Reproduction script](shah-mixed-exchanges.cjs)
+
+Burgess and Gill reported a mean IV half-life of 13.2 hours during CAPD in four participants. Model half-life estimates across three terminal sampling windows were 17.31–18.40 hours at assumed CrCl 0 mL/min and 11.86–12.40 hours at 5 mL/min. The reconstruction uses four 1.5-L exchanges and approximate weights derived from rounded published endpoints. Individual residual clearance and the original terminal fit windows remain unknown. [Source](https://doi.org/10.1002/j.1552-4604.1990.tb03585.x) · [Reproduction script](burgess-iv-terminal.cjs)
+
+Run both scripts from the repository root with Node. Both use the frozen engine. Comparing a new model calibration would require prespecified endpoints and independent measurements of concentration, effluent volume and recovered drug mass.
