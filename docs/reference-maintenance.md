@@ -56,3 +56,19 @@ identities and supplied full-text PDFs were checked for the stated scope.
 
 These entries add source coverage. Benchmark point counts and fitted model
 parameters are separate records. HTML and BibTeX are regenerated together.
+
+
+## Gorlitsky and Beales full-text audit, 2026-11-14
+
+References 59 and 60 were added from the supplied original PDFs, with DOI/PMID
+identities checked against publisher/PubMed records. Gorlitsky 2017 is
+DOI 10.1111/hdi.12534, PMID 28067468; Beales 1994 is
+DOI 10.1159/000187841, PMID 8190194. Existing anchors remain unchanged.
+The [research audit](../research/validation/GORLITSKY-BEALES-REBOUND.md) preserves
+Kenzaka case 7 and both Beales cases 32/33 separately, exact page/table locations,
+source hashes, dose and sample timing, and missing measurements. Gorlitsky's
+supplied early-online PDF is internally paginated 1–5; the final journal citation
+is E58–E62. It reports oral acyclovir, despite the secondary table's VACV label.
+The source HTML, standalone bibliography and BibTeX were regenerated together.
+No source PDF is distributed by this repository and no numerical model or
+validation endpoint is added from these incompletely timed observations.
