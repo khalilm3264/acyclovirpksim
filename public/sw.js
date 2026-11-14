@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-research-controls-20261114";
+const CACHE = "ayflux-static-v0.27.0-research-controls-css-20261114";
 const CORE = [
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
@@ -16,6 +16,7 @@ const CORE = [
  "/assets/charts.js", "/assets/analysis-views.js",
  "/lite/", "/lite/lite.js",
  "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
+ "/learn/research-controls-v1.css",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",
  "/learn/model-methods/", "/learn/dialysis/",
  "/license/", "/cite/", "/references/", "/disclaimer/"

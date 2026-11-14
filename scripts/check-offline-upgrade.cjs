@@ -10,6 +10,7 @@ const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const oldSimulation = 'document.documentElement.dataset.priorShell = "true";';
 const priorHtml = '<!doctype html><label>Measurement<input id="sample"></label>' +
  '<span id="connectivityStatus"></span><script src="/assets/pwa-register.js"></script>';
+const controlCssPath = '/learn/research-controls-v1.css';
 const bootstrap = '<script src="/assets/offline-update.js"></script>';
 const deadline = {timeout: 60000};
 
@@ -33,7 +34,8 @@ async function check(browser, legacy) {
            self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
            self.addEventListener('fetch', event => event.respondWith(event.request.mode === 'navigate'
              ? fetch(event.request) : caches.match(event.request).then(hit => hit || fetch(event.request))));`);
-       } else res.end(worker.replace(/^const CACHE = .+?;$/m, 'const CACHE = "ayflux-static-prior";'));
+       } else res.end(worker.replace(/^const CACHE = .+?;$/m, 'const CACHE = "ayflux-static-prior";')
+         .replace(' "'+controlCssPath+'",\n', ''));
        return;
      }
      if (pathname === '/' || pathname === '/index.html') {
@@ -56,6 +58,14 @@ async function check(browser, legacy) {
    await page.evaluate(async () => { await (await navigator.serviceWorker.ready).update(); });
    await page.waitForFunction(async () => !!(await navigator.serviceWorker.ready).waiting, null, deadline);
    assert.equal(await page.inputValue('#sample'), '7.15');
+   // The waiting release must deliver new research styles while old clients retain
+   // their cached guide stylesheet and unsaved observations.
+   const research = await context.newPage();
+   await research.goto(origin + '/research/exchanges/');
+   assert.equal(await research.locator('.tool-fields').first().evaluate(el => getComputedStyle(el).display), 'grid');
+   assert.equal(await research.locator('#download').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(255, 255, 255)');
+   assert.equal(await page.inputValue('#sample'), '7.15');
+   await research.close();
    // Old clients only acquire the new update bootstrap on their next chosen navigation.
    if (legacy) {
      await page.reload();
