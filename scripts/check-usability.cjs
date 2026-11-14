@@ -135,7 +135,7 @@ async function main(){
   assert.ok(await page.locator('#pdRxRows tr').count()>0,'Generated exchange rows');
   for(const control of await page.locator('#scheduleRows input, #scheduleRows select, #scheduleRows button, #doseRows input, #doseRows select, #doseRows button, #pdRxRows input, #pdRxRows select, #pdRxRows button, #addRow, #addDose, #generatePdRx, #applyFullTimelineBottom').all()) {
    const bounds=await control.boundingBox();
-   assert.ok(bounds.height>=39.9,'Timeline phone target '+JSON.stringify(bounds));
+   assert.ok(bounds.height>=39.9,'Timeline phone target '+await control.evaluate(el=>el.outerHTML)+' '+JSON.stringify(bounds));
   }
   const session=await page.locator('#scheduleRows .intervals').first().evaluate(row=>({width:row.getBoundingClientRect().width,mode:row.querySelector('select').getBoundingClientRect().width}));
   assert.ok(session.mode>session.width*0.9,'Phone session mode uses a full row');
