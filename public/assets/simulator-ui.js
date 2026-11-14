@@ -185,6 +185,8 @@ function setBusy(busy){
  if(typeof renderTimeAbove==='function')renderTimeAbove();
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
+ for(const id of ['copyTeaching','printTeaching'])$(id).disabled=busy||!dataIsCurrent;
+ if(busy){$('teachingFallback').hidden=true;$('teachingStatus').textContent='';}
  $('saveBaseline').disabled=busy||!dataIsCurrent;
  if(typeof refreshLabelAdjust==='function')refreshLabelAdjust();
  if(typeof renderRegimens==='function'){renderRegimens();renderPostHd();}
@@ -807,6 +809,60 @@ function download(){if(!results)return;const heads=['time_hours','day_hour','mod
  for(const mode of modes){let d=results[mode];for(let i=0;i<d.time.length;i++){lines.push([d.time[i],JSON.stringify(timeLabel(d.time[i])),JSON.stringify(mode),d.plasma.median[i],d.plasma.lower[i],d.plasma.upper[i],d.csf.median[i],d.csf.lower[i],d.csf.upper[i],d.cmmg.median[i],d.cmmg.lower[i],d.cmmg.upper[i],d.kidneyClear.median[i],d.cmmgKidneyClear.median[i],d.clearance.median[i],d.dialClear.median[i],d.dialRate.median[i],JSON.stringify(d.doses.filter(x=>Math.abs(x.time-d.time[i])<1e-7).map(x=>`${x.route}: ${x.amount} mg${x.route==='Acyclovir IV'?` / ${x.infusion} h infusion`:''}`).join('; ')),E.renalCrClAt(c,d.time[i])].join(','));}}
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='ayflux_simulation_data.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
 // Long-format result exchange is independent of AyFlux configuration JSON and the existing CSV.
+function downloadEvents(){
+ const csv=window.AyFluxTeaching.eventCSV(c,primary);
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='ayflux_events.csv';a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+function currentTeachingNote(compact){
+ const cfg=E.effectiveConfig(c),study=overlayStudy();
+ return window.AyFluxTeaching.teachingNote(cfg,primary,results[primary],results._validation,
+  describeScenario(cfg,primary),window.AyFluxVersion.version,study?study.short+' https://ayflux.org/references/#'+study.ref:'',compact);
+}
+$('copyTeaching').addEventListener('click',async ()=>{
+ if(!dataIsCurrent)return;
+ const note=currentTeachingNote(false),revision=resultsRevision;
+ try{
+  await navigator.clipboard.writeText(note);
+  if(dataIsCurrent&&revision===resultsRevision)$('teachingStatus').textContent='Teaching note copied.';
+ }catch{
+  if(!dataIsCurrent||revision!==resultsRevision)return;
+  const field=$('teachingFallback');field.value=note;field.hidden=false;field.focus();field.select();
+  $('teachingStatus').textContent='Select Copy to copy the teaching note.';
+ }
+});
+function printCurve(result,key,title){
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ svg.setAttribute('viewBox','0 0 660 145');
+ function element(tag,attrs,text){
+  const el=document.createElementNS(svg.namespaceURI,tag);
+  for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);
+  if(text)el.textContent=text;
+  svg.append(el);
+ }
+ const series=result[key],time=result.time,max=Math.max(0.01,...series.upper),end=time[time.length-1];
+ const points=values=>time.map((t,i)=>(64+572*t/end).toFixed(2)+','+(113-82*values[i]/max).toFixed(2));
+ element('text',{x:4,y:16},title+' (mg/L)');
+ element('polygon',{points:points(series.upper).concat(points(series.lower).reverse()).join(' '),fill:'#dedede'});
+ element('polyline',{points:points(series.median).join(' '),stroke:'#203d52',fill:'none','stroke-width':2});
+ element('path',{d:'M64 31 V113 H636',stroke:'#333',fill:'none'});
+ element('text',{x:2,y:39},Number(max.toPrecision(3)).toString());
+ element('text',{x:48,y:116},'0');
+ element('text',{x:62,y:134},'0 h');
+ element('text',{x:636,y:134,'text-anchor':'end'},end+' h');
+ return svg;
+}
+const printSection=document.createElement('section');printSection.id='teachingPrint';document.body.append(printSection);
+window.addEventListener('beforeprint',()=>{
+ printSection.replaceChildren();
+ if(!dataIsCurrent||!results?.[primary]){printSection.textContent='Run a successful simulation before printing.';return;}
+ const heading=document.createElement('h1');heading.textContent='AyFlux teaching summary';
+ const note=document.createElement('pre');note.textContent=currentTeachingNote(true);
+ const legend=document.createElement('p');legend.textContent='Line: median. Shading: '+Math.round(100*c.coverage)+'% model interval.';
+ printSection.append(heading,note,legend,printCurve(results[primary],'plasma','Plasma acyclovir'),printCurve(results[primary],'cmmg','Plasma CMMG'));
+});
+$('printTeaching').addEventListener('click',()=>{if(dataIsCurrent)window.print();});
 function downloadTidyCSV(){
  if(!results||!dataIsCurrent)return;
  try{
@@ -1052,7 +1108,7 @@ $('applyFullTimeline').addEventListener('click',()=>{
  pdStatusText('Applied dialysis sessions, exchange prescriptions and medication administrations together.');
 });
 $('applyFullTimelineBottom').addEventListener('click',()=>$('applyFullTimeline').click());
-$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent||!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
+$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(format==='events'&&dataIsCurrent){downloadEvents();return;}if(!dataIsCurrent||!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;

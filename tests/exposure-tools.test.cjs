@@ -121,7 +121,7 @@ test('HD timing sweep keeps the full simulation and places exactly one session i
 
 test('summary readouts never show values from stale results',()=>{
  const elements={};
- for(const id of ['timeAboveResult','timeAboveLevel','timeAboveUnit','scenarioWords','accumulationResult','calculationState','csv','saveBaseline','status'])elements[id]={textContent:'',value:'',disabled:false,classList:{toggle(){}}};
+ for(const id of ['timeAboveResult','timeAboveLevel','timeAboveUnit','scenarioWords','accumulationResult','calculationState','csv','saveBaseline','status','copyTeaching','printTeaching','teachingFallback','teachingStatus'])elements[id]={textContent:'',value:'',disabled:false,classList:{toggle(){}}};
  const run=E.simulateMany({...E.DEFAULTS,draws:1,requestedModes:['No dialysis']});
  const context={E,results:run,primary:'No dialysis',c:{...E.DEFAULTS},dataIsCurrent:true,$:id=>elements[id],
   document:{activeElement:null,getElementById:id=>elements[id]||null,querySelector:()=>({setAttribute(){}})}};
