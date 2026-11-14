@@ -22,6 +22,7 @@ const expectedSources = [
   './assets/literature-cases.js',
   './assets/literature-workspace.js',
   './assets/pwa-register.js',
+  './assets/offline-update.js',
 ];
 
 // JSON-LD blocks are inert data, not executed scripts, so script-src does not apply to them.
