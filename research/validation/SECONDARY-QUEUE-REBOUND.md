@@ -79,7 +79,7 @@ ACV levels obtained (p.386). There is no HD intervention in the reported index
 course, no end-HD anchor and no delayed post-HD pair. The falling drug-free
 washout measurements are useful exposure observations, but do not assess HD
 rebound. Estimated early peaks of 290/470 µM must not be relabeled as direct
-measurements or added to the five-point measured set.
+measurements or added to the five-point measured set. A separate [measured-point slope reproduction](FELDMAN-MEASURED-WASHOUT.md) digitizes horizontal sample coordinates, checks endpoint sensitivity, and distinguishes its descriptive log-linear estimate from the authors’ weighted nonlinear two-compartment fit.
 
 ## Case 31 — Rajan: an immediate treatment pair plus a later multi-session draw
 
