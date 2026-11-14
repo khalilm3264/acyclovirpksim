@@ -16,7 +16,7 @@ cd "$root"
 
 # These runners print standalone reports and check their own numerical assumptions.
 studies=(
-  almond-paired-post-hd boulieu-cvvhd burgess-iv-terminal cmmg-formation-bound collignon-crrt davenport-dialysis-washout
+  almond-paired-post-hd boulieu-cvvhd burgess-iv-terminal cmmg-formation-bound cmmg-identifiability collignon-crrt davenport-dialysis-washout
   de-miranda-iv-recovery hara-genotype-terminal hellden-ms-sampling hellden-iv-profiles hellden-renal-clearance ito2025 izzedine-capd jamez-oral-sampling
   kably-auc-comparison kably-renal-slope kacirova-iv-cohort kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
   laskin-anuric-course laskin-clearance laskin-fitted-distribution lindstrom-course-6-20
