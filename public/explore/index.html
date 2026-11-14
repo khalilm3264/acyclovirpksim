@@ -7,8 +7,17 @@
 <meta property="og:title" content="AyFlux visual explorer">
 <meta property="og:description" content="Explore modeled drug accounting, two-input heatmaps and optional 3D response surfaces in AyFlux.">
 <meta property="og:url" content="https://ayflux.org/explore/"><meta name="description" content="Explore modeled drug accounting, two-input heatmaps and optional 3D response surfaces in AyFlux."><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="/explore/style.css"></head>
-<body><header class="site-header ay-header"><div class="ay-header-brand"><img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" width="42" height="42" alt=""><div><a class="brand ayflux-logo" href="/">AyFlux</a><p class="site-subtitle">Visual explorer</p></div></div><a class="ay-guide-link" href="/">← Simulator</a></header>
-<div class="shell"><main><h1>Pharmacokinetic visualization explorer</h1><p>Deterministic model predictions for education. These views do not identify safe doses or establish clinical validation.</p>
+<body><header class="site-header ay-header">
+  <div class="ay-header-brand">
+    <img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" alt="" width="42" height="42">
+    <div class="ay-title-stack">
+      <a class="brand ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a>
+      <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function and dialysis</p>
+    </div>
+  </div>
+  <a class="ay-guide-link" href="/">← Simulator</a>
+</header>
+<div class="shell"><nav class="guide-topics" aria-label="Research navigation"><a href="/learn/">User guide</a><a href="/learn/model-methods/">Model methods</a><a href="/references/">References</a><span aria-current="page">Visual explorer</span></nav><main><h1>Pharmacokinetic visualization explorer</h1><p>Deterministic model predictions for education. These views do not identify safe doses or establish clinical validation.</p>
 <section class="card"><h2>Scenario</h2><p id="source" role="status"></p><div class="controls"><label>Dialysis mode<select id="mode"><option>No dialysis</option><option>Intermittent HD</option><option>Peritoneal dialysis</option><option>CRRT</option><option>Custom sequence</option></select></label><label>Graph colors<select id="graphColors"><option value="standard">Standard</option><option value="accessible">Colorblind-friendly</option></select></label></div><p id="settings"></p><p class="tip">Open this page from Research tools to copy your current settings. Sweeps use nominal parameters, without uncertainty sampling or fitting to observations. The full selected simulation duration is retained.</p></section>
 <section class="card"><h2>Two-input explorer</h2><p>Generate a grid, then select a heatmap cell to inspect its curves and drug accounting.</p><div class="controls">
 <label>X input<select id="xKey"></select></label><label>X minimum<input id="xMin" type="number" value="0" step="any"></label><label>X maximum<input id="xMax" type="number" value="140" step="any"></label>
@@ -26,5 +35,10 @@
 <details id="exchangePanel"><summary>Per-exchange PD removal</summary><div id="exchangeFigure" style="height:300px;contain:inline-size"></div><p id="exchangeStatus"></p></details>
 <h3>Where did the input go?</h3><div id="sankey" style="height:320px"></div><p id="balance" role="status"></p><div id="amounts" class="scroll"></div>
 <p class="tip">Widths show mg of acyclovir-equivalent input accounted for by the selected time. Oral input includes only the model-bioavailable acyclovir equivalent; unabsorbed tablet mass is outside this balance. CMMG formation is cumulative acyclovir converted, not current CMMG mass. PD fluid is counted separately from drug discarded at modeled exchange/session boundaries. CSF is excluded because it is not an integrated mass compartment. Intercompartmental recirculation is represented by amounts remaining, avoiding double counting.</p></section>
-<p><a href="/learn/model-methods/">Model methods and limitations</a> · <a href="/">Return to simulator</a></p></main></div>
+<div class="actions"><a class="btn" href="/">Open simulator</a></div>
+</main>
+<footer class="site-footer">
+    <span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a></span>
+    <span><a href="/learn/">User guide</a> · <a href="/disclaimer/">Disclaimer</a> · <a href="/cite/">Cite</a> · <a class="github-icon-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" title="AyFlux on GitHub" aria-label="AyFlux source code on GitHub"><img src="/github-mark.svg" width="19" height="19" alt=""></a></span>
+  </footer></div>
 <script src="/assets/pk-engine.js"></script><script src="/assets/charts.js"></script><script src="/explore/model.js"></script><script src="/explore/echarts-view.js"></script><script src="/explore/figures.js"></script><script src="/explore/view.js"></script></body></html>

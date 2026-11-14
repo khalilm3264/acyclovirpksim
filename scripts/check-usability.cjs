@@ -62,8 +62,12 @@ async function main(){
   // Guide navigation follows all content at desktop and phone widths.
   for (const width of [1280,390]) {
    await page.setViewportSize({width,height:900});
-   for (const guide of ['/learn/index.html','/learn/interoperability/index.html']) {
+   for (const guide of ['/learn/index.html','/learn/interoperability/index.html',
+    '/explore/index.html','/research/pediatric/index.html','/research/pediatric/evidence.html',
+    '/research/sampling/index.html','/research/exchanges/index.html','/research/mass-recovery/index.html']) {
     await page.goto('http://127.0.0.1:'+server.address().port+guide);
+    assert.equal(await page.locator('header.site-header .ay-guide-link[href="/"]').count(),1);
+    assert.equal(await page.locator('footer.site-footer').count(),1);
     assert.equal(await page.locator('main > :last-child.actions a[href="/"]').count(),1);
     await page.locator('main > .actions').scrollIntoViewIfNeeded();
     assert.ok(await page.locator('main > .actions a').isVisible());
