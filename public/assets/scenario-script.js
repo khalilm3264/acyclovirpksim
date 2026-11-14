@@ -12,7 +12,7 @@
   const doses=E.buildDoses(c),profile=c.renalMode==='profile'?c.renalProfile:[{time:0,crcl:c.crcl},{time:c.horizon,crcl:c.crcl}];
   const params=E.drawParams(c)[0];
   if(Object.values(params).some(v=>!Number.isFinite(v)))throw Error('Nominal parameters must be finite.');
-  const breaks=[...new Set([0,c.horizon,...doses.flatMap(d=>[d.time,...(d.route==='Acyclovir IV'?[Math.min(c.horizon,d.time+d.infusion)]:[])]),...windows.flatMap(w=>[w.start,Math.min(w.end,c.horizon)]),...profile.map(p=>p.time)].filter(t=>t>=0&&t<=c.horizon))].sort((a,b)=>a-b);
+  const breaks=[...new Set([0,c.horizon,...doses.flatMap(d=>[d.time,...(d.route==='Acyclovir IV'?[Math.min(c.horizon,d.time+d.infusion)]:[])]),...windows.flatMap(w=>[w.start,Math.min(w.end,c.horizon)]),...profile.map(p=>p.time)].filter(t=>t>=0&&t<=c.horizon).map(t=>+t.toFixed(9)))].sort((a,b)=>a-b);
   return {schemaVersion:1,version:String(version).replace(/[\r\n]/g,' '),mode,notice:NOTICE,horizon:c.horizon,params,profile,dynamic:c.renalMode==='profile',metDial:c.metDial,doses,windows,breaks};
  }
  function python(s){

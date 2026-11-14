@@ -26,3 +26,9 @@ test('dynamic CRRT/HD exports use per-CrCl renal parameters and include every tr
  for(const t of [12,12.7,16.3,18,24.7,28.2,30])assert.ok(s.breaks.includes(t));
  assert.equal(s.windows.length,2);assert.equal(s.doses[0].route,'Valacyclovir oral');
 });
+
+test('floating-point equivalent boundaries are merged at canonical engine precision',()=>{
+ const c={...config(),horizon:48,renalMode:'profile',crclSource:'manual',renalProfile:[{time:0,crcl:10},{time:.3,crcl:20},{time:48,crcl:20}],dosingMode:'custom',customDoses:[{time:.1,route:'Acyclovir IV',amount:500,infusion:.2}]};
+ const s=S.snapshot(E,c,'No dialysis');
+ assert.deepEqual(s.breaks,[0,.1,.3,48]);
+});
