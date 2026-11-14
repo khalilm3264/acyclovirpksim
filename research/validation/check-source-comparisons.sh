@@ -21,7 +21,7 @@ studies=(
   kably-auc-comparison kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
   laskin-anuric-course laskin-clearance laskin-fitted-distribution lindstrom-course-6-20
   lindstrom-patient19 lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
-  stathoulopoulou-1996-recovery unita-hd-sampling vasquez-hd-extraction weller-single-dose
+  stathoulopoulou-1996-recovery sun-cns-comparison unita-hd-sampling vasquez-hd-extraction weller-single-dose
 )
 for study in "${studies[@]}"; do
   echo "Checking $study"
