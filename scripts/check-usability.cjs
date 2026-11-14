@@ -113,6 +113,7 @@ async function main(){
    assert.ok(height>=39.9,'Phone picker '+id+' target height '+height);
   }
   await page.locator('#scenarioDifference summary').click();
+  await page.locator('#differenceFrom').waitFor({state:'visible'});
   for(const id of ['saveBaseline','clearBaseline','regimenName','saveRegimen','predictMetric','predictChoice','revealPrediction','differenceFrom','differenceTo','applyPostHd']) {
    const bounds=await page.locator('#'+id).boundingBox();
    assert.ok(bounds.height>=39.9,'Comparison phone target '+id+' '+JSON.stringify(bounds));
