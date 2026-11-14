@@ -23,6 +23,8 @@ async function main(){
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('http://127.0.0.1:'+server.address().port);
   await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});
+  assert.equal(await page.locator('#jumpToWorkspace').isVisible(),false,'Mobile shortcut stays hidden on desktop');
+  assert.equal(await page.locator('#jumpToInputs').isVisible(),false,'Mobile return stays hidden on desktop');
   // Tabs expose selection, support manual keyboard activation and return to results.
   assert.equal(await page.locator('#tabs[role="tablist"] [role="tab"]').count(),7);
   assert.equal(await page.locator('#tabs [aria-selected="true"]').getAttribute('id'),'tab-concentration');
@@ -99,6 +101,22 @@ async function main(){
   // Phone width: no sideways scrolling.
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=window.innerWidth+2,null,{timeout:10000});
+  const beforeJump=await Promise.all(['#num_weight','#num_dose','#primary'].map(selector=>page.inputValue(selector)));
+  await page.locator('#jumpToWorkspace').click();
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'tabs','Workspace shortcut moves keyboard focus');
+  const returnBounds=await page.locator('#jumpToInputs').boundingBox();
+  assert.ok(returnBounds.y>=-2&&returnBounds.y+returnBounds.height<=844,'Return link stays in view after jumping');
+  await page.locator('#tab-timeline').click();
+  await page.locator('#jumpToInputs').click();
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'patientInputs');
+  await page.locator('#jumpToWorkspace').click();
+  assert.equal(await page.locator('#tab-timeline').getAttribute('aria-selected'),'true','Jump retains the chosen workspace tab');
+  assert.deepEqual(await Promise.all(['#num_weight','#num_dose','#primary'].map(selector=>page.inputValue(selector))),beforeJump,'Jump links retain entered settings');
+  for(const id of ['jumpToWorkspace','jumpToInputs']) {
+   const height=await page.locator('#'+id).evaluate(el=>el.getBoundingClientRect().height);
+   assert.ok(height>=39.9,'Mobile navigation target '+id);
+  }
+  await page.locator('#tab-concentration').click();
   const navBounds=await page.locator('#tabs').boundingBox();
   const finalTabBounds=await page.locator('#tab-method').boundingBox();
   assert.ok(finalTabBounds.width>navBounds.width*0.98,'Final phone tab fills its row');

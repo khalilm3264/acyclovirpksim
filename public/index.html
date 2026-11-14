@@ -86,8 +86,16 @@ header h1{margin:0;line-height:1.25;font-size:clamp(19px,2.1vw,25px)}
  .dose-key span{display:inline-block}
 }
 
-.mobile-skip{display:none;color:#1c567e;font-weight:700;padding:6px 0 10px;text-decoration:underline}
-@media(max-width:650px){.mobile-skip{display:block}}
+/* Native mobile navigation keeps long inputs and the workspace within reach. */
+html body .shell .mobile-workspace-link {display:none;}
+@media(max-width:810px) {
+ html body .shell .mobile-workspace-link {display:flex;align-items:center;min-height:40px;max-width:100%;margin:0 0 8px;padding:8px 10px;border:1px solid #a9bdcc;background:#fff;color:#245373;font-size:12px;font-weight:600;text-decoration:underline;}
+ html body .shell .mobile-workspace-link:focus-visible,
+ html body #patientInputs:focus,
+ html body #tabs:focus-visible {outline:2px solid #387da8;outline-offset:2px;}
+ html body #tabs {scroll-margin-top:56px;}
+ html body #patientInputs {scroll-margin-top:12px;}
+}
 
 /* Version 13 research extensions: compact, clinical style. */
 .rx-table{min-width:750px;table-layout:fixed}.rx-table th:first-child{width:36px}.rx-table th:last-child{width:48px}
@@ -586,14 +594,15 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
   <a class="ay-guide-link" href="/learn/" aria-label="Open AyFlux user guide">User guide</a>
 </header>
 <div class="shell"><div class="notice"><strong>Educational simulation only.</strong> Outputs are simplified model estimates, not clinical measurements or dosing recommendations. Do not use for prescribing, toxicity assessment, or dialysis decisions. <a href="/disclaimer/">Read the limitations</a>.</div>
-<a class="mobile-skip" href="#concentration">View concentration charts ↓</a>
+<a class="mobile-workspace-link" id="jumpToWorkspace" href="#tabs">Jump to results and tools</a>
 <div class="layout"><aside>
-<h2>Dialysis scenario</h2><label for="primary" class="tip">Primary mode for detailed modeling and uncertainty band</label><select id="primary"><option>No dialysis</option><option>Intermittent HD</option><option>Peritoneal dialysis</option><option>CRRT</option><option>Custom sequence</option></select><p id="modeHint" class="tip"></p><div id="modeControls"></div>
+<h2 id="patientInputs" tabindex="-1">Dialysis scenario</h2><label for="primary" class="tip">Primary mode for detailed modeling and uncertainty band</label><select id="primary"><option>No dialysis</option><option>Intermittent HD</option><option>Peritoneal dialysis</option><option>CRRT</option><option>Custom sequence</option></select><p id="modeHint" class="tip"></p><div id="modeControls"></div>
 <h2>Patient</h2><div id="patientControls"></div><div id="drugCaution" class="advisory hidden" role="note"></div>
 <details class="advanced" id="advanced"><summary>Advanced settings</summary><div id="advancedControls"></div></details>
 </aside>
 <main>
-<div class="tabs" id="tabs" role="tablist" aria-label="Simulator sections"><button type="button" id="tab-concentration" role="tab" aria-controls="concentration" aria-selected="true" tabindex="0" data-tab="concentration" class="active">Concentration</button><button type="button" id="tab-clearance" role="tab" aria-controls="clearance" aria-selected="false" tabindex="-1" data-tab="clearance">Clearance & sessions</button><button type="button" id="tab-timeline" role="tab" aria-controls="timeline" aria-selected="false" tabindex="-1" data-tab="timeline">Custom timeline</button><button type="button" id="tab-validation" role="tab" aria-controls="validation" aria-selected="false" tabindex="-1" data-tab="validation">Model validation</button><button type="button" id="tab-research" role="tab" aria-controls="research" aria-selected="false" tabindex="-1" data-tab="research">Research tools</button><button type="button" id="tab-experimental" role="tab" aria-controls="experimental" aria-selected="false" tabindex="-1" data-tab="experimental">Experimental</button><button type="button" id="tab-method" role="tab" aria-controls="method reference" aria-selected="false" tabindex="-1" data-tab="method">References &amp; methods</button></div>
+<a class="mobile-workspace-link" id="jumpToInputs" href="#patientInputs">Back to inputs</a>
+<div class="tabs" id="tabs" tabindex="-1" role="tablist" aria-label="Simulator sections"><button type="button" id="tab-concentration" role="tab" aria-controls="concentration" aria-selected="true" tabindex="0" data-tab="concentration" class="active">Concentration</button><button type="button" id="tab-clearance" role="tab" aria-controls="clearance" aria-selected="false" tabindex="-1" data-tab="clearance">Clearance & sessions</button><button type="button" id="tab-timeline" role="tab" aria-controls="timeline" aria-selected="false" tabindex="-1" data-tab="timeline">Custom timeline</button><button type="button" id="tab-validation" role="tab" aria-controls="validation" aria-selected="false" tabindex="-1" data-tab="validation">Model validation</button><button type="button" id="tab-research" role="tab" aria-controls="research" aria-selected="false" tabindex="-1" data-tab="research">Research tools</button><button type="button" id="tab-experimental" role="tab" aria-controls="experimental" aria-selected="false" tabindex="-1" data-tab="experimental">Experimental</button><button type="button" id="tab-method" role="tab" aria-controls="method reference" aria-selected="false" tabindex="-1" data-tab="method">References &amp; methods</button></div>
 <div id="alerts" class="warning hidden" role="alert"></div>
 <div id="scenarioNote" class="advisory scenario-note hidden" role="note"><div><strong id="scenarioNoteTitle"></strong><p id="scenarioNoteText"></p></div><button type="button" class="btn secondary" id="scenarioNoteClose">Dismiss</button></div>
 <p id="calculationState" class="progressbar hidden" role="status">Updating simulation…</p>
