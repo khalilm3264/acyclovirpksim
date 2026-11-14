@@ -14,6 +14,7 @@ const expectedSources = [
   './assets/osp-import.js',
   './assets/study-library.js',
   './assets/regimen-tools.js',
+  './assets/teaching-exports.js',
   './assets/scenario-script.js',
   './assets/simulator-ui.js',
   './assets/analysis-views.js',

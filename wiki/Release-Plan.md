@@ -4,6 +4,17 @@
 
 The current application metadata identifies **v0.27.0 preview** (released 2026-11-13, [#55](https://github.com/khalilm3264/acyclovirpksim/issues/55)). Configuration schema 2 and AGPL-3.0-only are tracked separately.
 
+## Combined candidate checks
+
+The `release/combined-review` branch is a review candidate, not a new model freeze or a published release. It combines the pending benchmark, teaching and academic-export changes with main's ECharts/print/script exports.
+
+- [ ] Verify all menu formats and copy-note fallback together, with only one print renderer.
+- [ ] Install the service worker from a clean browser profile; verify the merged cache list and offline export assets.
+- [ ] Run the complete browser and LaTeX workflows on the final combined tree.
+- [ ] Re-run `npm run benchmark:verify` against the four immutable source pins.
+- [ ] Confirm the live engine blob remains `17971df66e0a97b4d382572a582d35c444a3c83f`; keep manuscript results pinned separately to `8fc1c9d`.
+- [ ] After merge/deployment, check production exports and publish the reviewed wiki source pages.
+
 ## Before merging
 
 - [ ] Describe the actual behavior and identify dependencies or overlapping PRs.

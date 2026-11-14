@@ -108,3 +108,29 @@ test('prediction exercise hides results until revealed',()=>{
  assert.match(ui,/f=v=>hidden\?'\?'/,'metric cells hidden while predicting');
  assert.match(ui,/\$\('predictMode'\)\.checked=false;renderRegimens\(\);/,'reveal ends the exercise');
 });
+
+test('regimen-tools interpolation and AUC handle empty or singleton inputs safely',()=>{
+ assert.equal(R.interp([],[],5),null);
+ assert.equal(R.interp(null,null,5),null);
+ assert.equal(R.interp([0],[10],5),10);
+ assert.equal(R.aucTo([],[],10),null);
+ assert.equal(R.aucTo(null,null,10),null);
+ assert.equal(R.aucTo([0],[10],10),0);
+});
+
+test('missing or malformed curves stay unavailable while valid zero-dose curves remain zero',()=>{
+ const doses=[{time:0},{time:8}],empty={time:[],plasma:{median:[]},cmmg:{median:[]}};
+ for(const data of [undefined,empty,{...empty,time:[0,8,24],plasma:{median:[0,1]}}]){
+  const metrics=R.metrics(data,doses,24);
+  for(const key of ['auc','peak','trough','cmmgAuc','cmmgPeak','troughTime'])assert.equal(metrics[key],null,key);
+ }
+ const data={time:[0,8,24],plasma:{median:[0,0,0]},cmmg:{median:[0,0,0]}};
+ const zero=R.metrics(data,doses,24);
+ for(const key of ['auc','peak','trough','cmmgAuc','cmmgPeak'])assert.equal(zero[key],0,key);
+ const partial=R.metrics({...data,cmmg:{median:[]}},doses,24);
+ assert.equal(partial.auc,0);assert.equal(partial.cmmgAuc,null);assert.equal(partial.cmmgPeak,null);
+ for(const values of [[0,NaN,1],[0,Infinity,1],[0,undefined,1]]){
+  assert.equal(R.interp(data.time,values,8),null);assert.equal(R.aucTo(data.time,values,24),null);
+ }
+ assert.equal(R.interp([0,0],[1,2],0),null);
+});

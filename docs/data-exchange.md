@@ -149,3 +149,9 @@ The summary renderer and stylesheet load only when requested. Print styling is
 scoped to an open preview, so closing it restores the application's normal print
 behavior. Browser regression checks require a single PDF page for the default,
 mobile, 200-dose/dynamic-kidney, PD and fitted-result summaries.
+
+## Academic and teaching exports
+
+The integration candidate adds a primary-scenario LaTeX summary (`booktabs`) and the full audited BibTeX catalogue. AUC uses the actual simulated horizon; the last concentration is end-window, not automatically trough or steady state. The BibTeX catalogue is not scenario-specific and preserves source limitations.
+
+Copy teaching note uses the same current results, with a manual-copy field if clipboard permission is denied. It does not send a message. Pharmacometric event CSV includes explicitly entered observations only for the selected fitting scenario; result CSVs remain simulation outputs. The existing printable-summary menu opens the shared one-page preview.

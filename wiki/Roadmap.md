@@ -1,6 +1,6 @@
 # Development roadmap
 
-Reviewed 2026-11-13 against main. Current release metadata is **v0.27.0 preview**, released 2026-11-13. This page describes priorities rather than promised release dates.
+Reviewed 2026-11-14 against main and the combined release candidate. Current release metadata is **v0.27.0 preview**, released 2026-11-13. This page describes priorities rather than promised release dates.
 
 ## Already available
 
@@ -17,6 +17,15 @@ ECharts concentration and clearance charts, baseline comparison, unit switching,
 | P1 | Extend dialysis evidence comparisons | [#50](https://github.com/khalilm3264/acyclovirpksim/issues/50), [#51](https://github.com/khalilm3264/acyclovirpksim/issues/51); Hara measurements and Laskin renal/nonrenal split with study-specific assumptions |
 | P1 | Complete full-text review | [#53](https://github.com/khalilm3264/acyclovirpksim/issues/53); distinguish bibliographic verification, abstract review and reviewed full text |
 | P1 | Replayable literature cases | [#54](https://github.com/khalilm3264/acyclovirpksim/issues/54); keep observed samples, author-fitted values and reconstructed inputs distinct |
+
+## Current integration candidate
+
+- Combine #101 benchmark/usability changes with main's #109 export/print and ECharts work.
+- Retain #104's unique event table and teaching note; use #103's existing print preview.
+- Include #107 academic exports and #110's unavailable-data corrections on top of #108.
+- Check the combined export menu, mobile/desktop, clipboard fallback, single-page PDF and first-load offline cache installation.
+- Re-run the immutable benchmark pins. UI changes must not alter either the manuscript snapshot or current engine blob.
+- Review the combined candidate before merging; verify production and publish wiki sources after deployment.
 
 ## Planned release work
 
