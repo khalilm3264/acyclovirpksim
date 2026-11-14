@@ -33,37 +33,59 @@ formFactor. This preserves the default ratio of those processes at zero CrCl.
 It does not independently identify metabolism. PD transport is scaled through
 pdTransport. All other assumptions remain as in the reconstruction.
 
-Seven systemic multipliers (0.75–3) and seven transport multipliers (0.5–4)
-give 49 combinations per patient. The shared score averages the sum of squared
-log predicted/source ratios across the two endpoints and three patients.
-Equal log errors receive equal weight. This objective is an exploratory choice,
-with no sampling-error or digitization-error weighting. The observations were
-known before selecting the grid. These results describe calibration and
-sensitivity, with generalization still untested.
+Nineteen systemic multipliers (0.75–3 in steps of 0.125) and thirteen transport
+multipliers (0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8, 12, 16, 24, 32) give 247
+combinations per patient, 741 runs total. This extends the earlier 147-run grid
+because two individual minima reached its transport boundary.
 
-## Results
+The shared score averages the sum of squared log predicted/source ratios across
+trough and recovery. Peaks and AUC do not enter the fitting objective.
+Daily AUC is integrated over hours 96–120 and compared with Table II values of
+265, 194 and 218 µmol·h/L for patients 1, 4 and 5. These become 59.681, 43.691
+and 49.096 mg·h/L. All outcomes come from the same subjects and paper, so these
+additional checks do not constitute independent external validation.
 
-| Patient | Source trough, mg/L | Baseline trough | Shared-grid trough | Source recovery, % dose | Baseline recovery | Shared-grid recovery |
+A descriptive neighborhood contains grid scores within 0.01 of each individual's
+minimum. That threshold has no confidence-interval interpretation.
+
+## Extended results
+
+All ratios below are model/source at the individual trough-and-recovery minimum.
+
+| Patient | Systemic multiplier | Transport multiplier | Trough ratio | Recovery ratio | Peak ratio | Daily AUC ratio |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 1.419 | 1.744 | 0.908 | 10.6 | 14.35 | 13.61 |
-| 4 | 0.676 | 2.002 | 1.059 | 13.6 | 12.22 | 11.58 |
-| 5 | 0.653 | 1.906 | 0.994 | 12.3 | 14.05 | 13.33 |
+| 1 | 1.125 | 0.75 | 1.07 | 1.06 | 1.15 | 1.14 |
+| 4 | 1.875 | 6 | 1.06 | 0.82 | 1.25 | 1.02 |
+| 5 | 1.875 | 3 | 1.02 | 0.99 | 1.00 | 0.90 |
 
-The best shared point on this grid is systemic multiplier 1.5 and PD transport
-multiplier 2. Patients 4 and 5 improve from trough ratios of 2.96 and 2.92 to
-1.57 and 1.52. Patient 1 shifts from 1.23 to 0.64. The shared mean score falls
-from 0.830 to 0.224. The point is a compromise across patients.
+The expanded-grid minima for patients 4 and 5 are interior. Patient 4 still
+underpredicts daily recovery by about 18% and overpredicts peak by about 25%.
+Patient 5 simultaneously approaches trough, recovery and peak, with daily AUC
+about 10% below the source estimate.
 
-Separate grid minima differ. Patient 1 favors systemic 1.25 and transport 0.75,
-giving trough and recovery ratios 0.91 and 0.97. Patients 4 and 5 favor systemic
-2 and transport 4. Their recovery ratios are 0.77 and 0.98, with trough ratios
-0.94 and 0.90. Transport 4 is the upper grid edge, so these minima do not establish
-a bounded optimum. Predicted day-5 peaks at the shared point have ratios 1.03,
-1.36 and 1.06, respectively.
+Patient 5 has fourteen grid points within 0.01 of its minimum, spanning transport
+multipliers 3–32 and systemic multipliers 1.875–2. This broad range supports weak
+identifiability of transport under this objective. Patient 4 has four nearby
+points spanning transport 4–8 and systemic 1.75–1.875. Patient 1 has two,
+at transport 0.75 and systemic 1.125–1.25. These are sampled neighborhoods,
+rather than continuous parameter intervals.
 
-Halving the shared-point integration step from 0.25 to 0.125 h changes troughs
-by less than 0.000004 mg/L and recovery by less than 0.00023 percentage points.
-Mass-balance residuals remain below 1e-9 mg throughout the grid.
+The best shared grid point is systemic multiplier 1.625 and transport 2. Its
+trough ratios are 0.56, 1.37 and 1.33 for patients 1, 4 and 5. The corresponding
+recovery ratios are 1.20, 0.80 and 1.02. A common setting continues to compromise
+across patients.
+
+The JSON includes half-step repeats of both the shared and individual minima.
+These check numerical sensitivity within the same equations and event schedule.
+
+## Source review checklist for Gem
+
+- Confirm Table I day-5 troughs of 6.3, 3.0 and 2.9 µmol/L for patients 1, 4 and 5.
+- Confirm Table II daily recovery fractions of 10.6%, 13.6% and 12.3%.
+- Confirm 24-hour steady-state AUC values of 265, 194 and 218 µmol·h/L.
+- Check the recovery collection window and the four dwell durations against Methods.
+- Assess whether blank urine-recovery cells justify the inherited anuric subset.
+- Check the status of the plasma endpoints as source-derived/fitted values.
 
 ## Interpretation
 
@@ -74,5 +96,5 @@ patient heterogeneity or uncertainty in the inherited inputs and coefficients.
 It cannot identify a unique mechanism or justify adopting the shared multipliers
 as model defaults.
 
-The complete 147-row grid is in boelaert-joint-grid.csv. The JSON records the
+The complete 741-row grid is in boelaert-joint-grid.csv. The JSON records the
 baseline, shared and individual grid minima, numerical sensitivity and provenance.

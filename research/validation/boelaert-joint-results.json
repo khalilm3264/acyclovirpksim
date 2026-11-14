@@ -8,11 +8,23 @@
     "engineSha256": "019c02b31fb273fa0d019d9c0766d4f8dccacd08b0d758e0cdd2f247cdf3755c",
     "systemicScales": [
       0.75,
+      0.875,
       1,
+      1.125,
       1.25,
+      1.375,
       1.5,
+      1.625,
+      1.75,
+      1.875,
       2,
+      2.125,
+      2.25,
+      2.375,
       2.5,
+      2.625,
+      2.75,
+      2.875,
       3
     ],
     "transportScales": [
@@ -22,8 +34,19 @@
       1.5,
       2,
       3,
-      4
+      4,
+      6,
+      8,
+      12,
+      16,
+      24,
+      32
     ],
+    "sourceAucUmolHL": {
+      "1": 265,
+      "4": 194,
+      "5": 218
+    },
     "residualCrcl": 0,
     "objective": "Mean sum of squared log ratios for day-5 trough and daily dialysate recovery",
     "interpretation": "Exploratory calibration against known data; systemic multiplier scales both other and CMMG-formation clearance"
@@ -38,6 +61,8 @@
       "troughRatio": 1.2294702843937197,
       "recoveryRatio": 1.3538513927099827,
       "day5PeakRatio": 1.183613726648445,
+      "day5AucMgHL": 73.9456664224288,
+      "day5AucRatio": 1.2390224708080222,
       "score": 0.13445747791442658,
       "massResidualMg": 3.410605131648481e-13
     },
@@ -50,6 +75,8 @@
       "troughRatio": 2.9631389837050017,
       "recoveryRatio": 0.8986229655867168,
       "day5PeakRatio": 1.571411926522838,
+      "day5AucMgHL": 81.59109038424458,
+      "day5AucRatio": 1.8674687218445962,
       "score": 1.1913631088117578,
       "massResidualMg": 2.2737367544323206e-13
     },
@@ -62,134 +89,370 @@
       "troughRatio": 2.9177598529544326,
       "recoveryRatio": 1.1422846370298203,
       "day5PeakRatio": 1.2252163551254287,
+      "day5AucMgHL": 80.33565300403453,
+      "day5AucRatio": 1.6363046478543475,
       "score": 1.1643442904988153,
       "massResidualMg": 5.684341886080801e-13
     }
   ],
   "bestShared": {
-    "systemic": 1.5,
+    "systemic": 1.625,
     "transport": 2,
-    "score": 0.2242165204670127
+    "score": 0.2018773834146105
   },
   "sharedPredictions": [
     {
       "subject": 1,
-      "systemic": 1.5,
+      "systemic": 1.625,
       "transport": 2,
-      "day5TroughMgL": 0.9083598158365145,
-      "day5RecoveryPct": 13.612822996797512,
-      "troughRatio": 0.6402206729356054,
-      "recoveryRatio": 1.2842285846035388,
-      "day5PeakRatio": 1.0291024881691209,
-      "score": 0.2614437214143099,
-      "massResidualMg": 2.2737367544323206e-13
+      "day5TroughMgL": 0.7939061846885448,
+      "day5RecoveryPct": 12.759018565560487,
+      "troughRatio": 0.5595526606832175,
+      "recoveryRatio": 1.2036809967509894,
+      "day5PeakRatio": 1.007654265559306,
+      "day5AucMgHL": 46.64295014864841,
+      "day5AucRatio": 0.7815422611625109,
+      "score": 0.3714841982417243,
+      "massResidualMg": 4.547473508864641e-13
     },
     {
       "subject": 4,
-      "systemic": 1.5,
+      "systemic": 1.625,
       "transport": 2,
-      "day5TroughMgL": 1.0592871663771435,
-      "day5RecoveryPct": 11.582064303754096,
-      "troughRatio": 1.5678509929652966,
-      "recoveryRatio": 0.8516223752760366,
-      "day5PeakRatio": 1.359737283448981,
-      "score": 0.22803162282028072,
-      "massResidualMg": 3.410605131648481e-13
+      "day5TroughMgL": 0.9279139047702535,
+      "day5RecoveryPct": 10.840770482685032,
+      "troughRatio": 1.3734054212664526,
+      "recoveryRatio": 0.7971154766680171,
+      "day5PeakRatio": 1.3295774574690309,
+      "day5AucMgHL": 51.45644005188081,
+      "day5AucRatio": 1.1777424701866073,
+      "score": 0.15209323641534594,
+      "massResidualMg": 4.547473508864641e-13
     },
     {
       "subject": 5,
-      "systemic": 1.5,
+      "systemic": 1.625,
       "transport": 2,
-      "day5TroughMgL": 0.9944372926934263,
-      "day5RecoveryPct": 13.32528883389349,
-      "troughRatio": 1.5226207152151114,
-      "recoveryRatio": 1.0833568157636984,
-      "day5PeakRatio": 1.0645778840284568,
-      "score": 0.18317421716644758,
+      "day5TroughMgL": 0.8693954022464399,
+      "day5RecoveryPct": 12.487064387130173,
+      "troughRatio": 1.3311643266995858,
+      "recoveryRatio": 1.0152084867585507,
+      "day5PeakRatio": 1.0421975156269299,
+      "day5AucMgHL": 50.66970093438713,
+      "day5AucRatio": 1.0320581714841301,
+      "score": 0.08205471558676126,
       "massResidualMg": 2.2737367544323206e-13
     }
   ],
   "perSubject": [
     {
       "subject": 1,
-      "systemic": 1.25,
+      "systemic": 1.125,
       "transport": 0.75,
-      "day5TroughMgL": 1.2923232265518148,
-      "day5RecoveryPct": 10.298927289041277,
-      "troughRatio": 0.9108417516151166,
-      "recoveryRatio": 0.9715969140604979,
-      "day5PeakRatio": 1.109216206090619,
-      "score": 0.009551226117337596,
+      "day5TroughMgL": 1.514270084536919,
+      "day5RecoveryPct": 11.251421352478706,
+      "troughRatio": 1.0672720166905378,
+      "recoveryRatio": 1.0614548445734628,
+      "day5PeakRatio": 1.1474815206882119,
+      "day5AucMgHL": 68.28108986322451,
+      "day5AucRatio": 1.1441076775005719,
+      "score": 0.007795759771745452,
       "massResidualMg": 3.410605131648481e-13
     },
     {
       "subject": 4,
-      "systemic": 2,
-      "transport": 4,
-      "day5TroughMgL": 0.6346505380629572,
-      "day5RecoveryPct": 10.420350149442624,
-      "troughRatio": 0.9393462961427959,
-      "recoveryRatio": 0.7662022168707813,
-      "day5PeakRatio": 1.2436512971857154,
-      "score": 0.07483570463954087,
-      "massResidualMg": 4.547473508864641e-13
+      "systemic": 1.875,
+      "transport": 6,
+      "day5TroughMgL": 0.7166223030564569,
+      "day5RecoveryPct": 11.143113090323233,
+      "troughRatio": 1.060672709998752,
+      "recoveryRatio": 0.8193465507590613,
+      "day5PeakRatio": 1.252501420439937,
+      "day5AucMgHL": 44.4684383044513,
+      "day5AucRatio": 1.0178000716959998,
+      "score": 0.04316942690979888,
+      "massResidualMg": 2.2737367544323206e-13
     },
     {
       "subject": 5,
-      "systemic": 2,
-      "transport": 4,
-      "day5TroughMgL": 0.5903687101189091,
-      "day5RecoveryPct": 12.007227127937893,
-      "troughRatio": 0.9039359588045932,
-      "recoveryRatio": 0.9761973274746254,
-      "day5PeakRatio": 0.9750688848899287,
-      "score": 0.010780699953260664,
-      "massResidualMg": 3.410605131648481e-13
+      "systemic": 1.875,
+      "transport": 3,
+      "day5TroughMgL": 0.6670703861209134,
+      "day5RecoveryPct": 12.23235373073502,
+      "troughRatio": 1.0213768086504906,
+      "recoveryRatio": 0.9945003033117903,
+      "day5PeakRatio": 0.9967054369968129,
+      "day5AucMgHL": 44.056107342766914,
+      "day5AucRatio": 0.8973501865693326,
+      "score": 0.000477801055044498,
+      "massResidualMg": 2.8421709430404007e-13
+    }
+  ],
+  "profile": [
+    {
+      "minimum": {
+        "subject": 1,
+        "systemic": 1.125,
+        "transport": 0.75,
+        "day5TroughMgL": 1.514270084536919,
+        "day5RecoveryPct": 11.251421352478706,
+        "troughRatio": 1.0672720166905378,
+        "recoveryRatio": 1.0614548445734628,
+        "day5PeakRatio": 1.1474815206882119,
+        "day5AucMgHL": 68.28108986322451,
+        "day5AucRatio": 1.1441076775005719,
+        "score": 0.007795759771745452,
+        "massResidualMg": 3.410605131648481e-13
+      },
+      "nearMinimumCount": 2,
+      "nearMinimumSystemicRange": [
+        1.125,
+        1.25
+      ],
+      "nearMinimumTransportRange": [
+        0.75,
+        0.75
+      ]
+    },
+    {
+      "minimum": {
+        "subject": 4,
+        "systemic": 1.875,
+        "transport": 6,
+        "day5TroughMgL": 0.7166223030564569,
+        "day5RecoveryPct": 11.143113090323233,
+        "troughRatio": 1.060672709998752,
+        "recoveryRatio": 0.8193465507590613,
+        "day5PeakRatio": 1.252501420439937,
+        "day5AucMgHL": 44.4684383044513,
+        "day5AucRatio": 1.0178000716959998,
+        "score": 0.04316942690979888,
+        "massResidualMg": 2.2737367544323206e-13
+      },
+      "nearMinimumCount": 4,
+      "nearMinimumSystemicRange": [
+        1.75,
+        1.875
+      ],
+      "nearMinimumTransportRange": [
+        4,
+        8
+      ]
+    },
+    {
+      "minimum": {
+        "subject": 5,
+        "systemic": 1.875,
+        "transport": 3,
+        "day5TroughMgL": 0.6670703861209134,
+        "day5RecoveryPct": 12.23235373073502,
+        "troughRatio": 1.0213768086504906,
+        "recoveryRatio": 0.9945003033117903,
+        "day5PeakRatio": 0.9967054369968129,
+        "day5AucMgHL": 44.056107342766914,
+        "day5AucRatio": 0.8973501865693326,
+        "score": 0.000477801055044498,
+        "massResidualMg": 2.8421709430404007e-13
+      },
+      "nearMinimumCount": 14,
+      "nearMinimumSystemicRange": [
+        1.875,
+        2
+      ],
+      "nearMinimumTransportRange": [
+        3,
+        32
+      ]
+    }
+  ],
+  "individualConvergence": [
+    {
+      "subject": 1,
+      "systemic": 1.125,
+      "transport": 0.75,
+      "day5TroughMgL": 1.5142673956990107,
+      "day5RecoveryPct": 11.251541544505498,
+      "troughRatio": 1.0672701215719018,
+      "recoveryRatio": 1.061466183443915,
+      "day5PeakRatio": 1.1474929015044188,
+      "day5AucMgHL": 68.28054855851282,
+      "day5AucRatio": 1.1440986074801935,
+      "score": 0.007796802874300622,
+      "massResidualMg": 4.547473508864641e-13
+    },
+    {
+      "subject": 4,
+      "systemic": 1.875,
+      "transport": 6,
+      "day5TroughMgL": 0.7166187636176502,
+      "day5RecoveryPct": 11.143468926992794,
+      "troughRatio": 1.0606674712751805,
+      "recoveryRatio": 0.8193727152200584,
+      "day5PeakRatio": 1.25252391067836,
+      "day5AucMgHL": 44.46467528211411,
+      "day5AucRatio": 1.0177139430944429,
+      "score": 0.04315612098945389,
+      "massResidualMg": 5.684341886080801e-13
+    },
+    {
+      "subject": 5,
+      "systemic": 1.875,
+      "transport": 3,
+      "day5TroughMgL": 0.6670676622602022,
+      "day5RecoveryPct": 12.2326260961793,
+      "troughRatio": 1.0213726380438826,
+      "recoveryRatio": 0.9945224468438455,
+      "day5PeakRatio": 0.9967212916256758,
+      "day5AucMgHL": 44.05390865394456,
+      "day5AucRatio": 0.8973054029072266,
+      "score": 0.0004773832446929017,
+      "massResidualMg": 2.2737367544323206e-13
     }
   ],
   "convergence": [
     {
       "subject": 1,
-      "systemic": 1.5,
+      "systemic": 1.625,
       "transport": 2,
-      "day5TroughMgL": 0.9083566448606872,
-      "day5RecoveryPct": 13.613043976408306,
-      "troughRatio": 0.6402184380015599,
-      "recoveryRatio": 1.2842494317366326,
-      "day5PeakRatio": 1.0291157936687918,
-      "score": 0.2614549568269442,
-      "massResidualMg": 2.2737367544323206e-13
+      "day5TroughMgL": 0.7939035583053345,
+      "day5RecoveryPct": 12.759228037543616,
+      "troughRatio": 0.5595508095832492,
+      "recoveryRatio": 1.2037007582588317,
+      "day5PeakRatio": 1.0076679789580614,
+      "day5AucMgHL": 46.64149916074225,
+      "day5AucRatio": 0.7815179486272728,
+      "score": 0.371494127170455,
+      "massResidualMg": 6.821210263296962e-13
     },
     {
       "subject": 4,
-      "systemic": 1.5,
+      "systemic": 1.625,
       "transport": 2,
-      "day5TroughMgL": 1.0592840940354482,
-      "day5RecoveryPct": 11.582255577872386,
-      "troughRatio": 1.5678464455921852,
-      "recoveryRatio": 0.8516364395494402,
-      "day5PeakRatio": 1.3597508679855705,
-      "score": 0.22802370958525361,
-      "massResidualMg": 5.684341886080801e-13
+      "day5TroughMgL": 0.9279113562590239,
+      "day5RecoveryPct": 10.84095121627583,
+      "troughRatio": 1.3734016492148422,
+      "recoveryRatio": 0.7971287659026346,
+      "day5PeakRatio": 1.329591479479312,
+      "day5AucMgHL": 51.45517875654454,
+      "day5AucRatio": 1.1777136014758398,
+      "score": 0.15208393308541435,
+      "massResidualMg": 1.0231815394945443e-12
     },
     {
       "subject": 5,
-      "systemic": 1.5,
+      "systemic": 1.625,
       "transport": 2,
-      "day5TroughMgL": 0.9944339056454791,
-      "day5RecoveryPct": 13.32550568099139,
-      "troughRatio": 1.5226155291773333,
-      "recoveryRatio": 1.083374445609056,
-      "day5PeakRatio": 1.0645911824054937,
-      "score": 0.18317395926336086,
-      "massResidualMg": 4.547473508864641e-13
+      "day5TroughMgL": 0.8693925963823466,
+      "day5RecoveryPct": 12.48726984888469,
+      "troughRatio": 1.3311600305344842,
+      "recoveryRatio": 1.0152251909662349,
+      "day5PeakRatio": 1.0422112243645658,
+      "day5AucMgHL": 50.668174054908576,
+      "day5AucRatio": 1.0320270714694537,
+      "score": 0.08205336616669869,
+      "massResidualMg": 3.979039320256561e-13
     }
   ],
   "shared": [
     {
+      "systemic": 1.625,
+      "transport": 2,
+      "score": 0.2018773834146105
+    },
+    {
+      "systemic": 1.625,
+      "transport": 3,
+      "score": 0.20956066376873503
+    },
+    {
+      "systemic": 1.625,
+      "transport": 32,
+      "score": 0.2122833039887665
+    },
+    {
+      "systemic": 1.625,
+      "transport": 24,
+      "score": 0.21300017922933892
+    },
+    {
+      "systemic": 1.625,
+      "transport": 1.5,
+      "score": 0.21399713013980529
+    },
+    {
+      "systemic": 1.625,
+      "transport": 16,
+      "score": 0.21454990258335868
+    },
+    {
+      "systemic": 1.75,
+      "transport": 32,
+      "score": 0.21565845069545678
+    },
+    {
+      "systemic": 1.625,
+      "transport": 12,
+      "score": 0.2162222709717974
+    },
+    {
+      "systemic": 1.75,
+      "transport": 24,
+      "score": 0.2163571151657521
+    },
+    {
+      "systemic": 1.625,
+      "transport": 4,
+      "score": 0.2171995868697922
+    },
+    {
+      "systemic": 1.75,
+      "transport": 16,
+      "score": 0.21788153823431533
+    },
+    {
+      "systemic": 1.625,
+      "transport": 8,
+      "score": 0.219320774930735
+    },
+    {
+      "systemic": 1.75,
+      "transport": 12,
+      "score": 0.21955716062545405
+    },
+    {
+      "systemic": 1.75,
+      "transport": 3,
+      "score": 0.22061983541167077
+    },
+    {
+      "systemic": 1.625,
+      "transport": 6,
+      "score": 0.22077892235184268
+    },
+    {
+      "systemic": 1.75,
+      "transport": 2,
+      "score": 0.22212569786748812
+    },
+    {
+      "systemic": 1.75,
+      "transport": 8,
+      "score": 0.2228976727633966
+    },
+    {
       "systemic": 1.5,
       "transport": 2,
       "score": 0.2242165204670127
+    },
+    {
+      "systemic": 1.75,
+      "transport": 4,
+      "score": 0.2243431129913898
+    },
+    {
+      "systemic": 1.75,
+      "transport": 6,
+      "score": 0.22509440697768343
     },
     {
       "systemic": 1.5,
@@ -202,14 +465,194 @@
       "score": 0.24105349919900856
     },
     {
+      "systemic": 1.75,
+      "transport": 1.5,
+      "score": 0.2439417983618979
+    },
+    {
+      "systemic": 1.5,
+      "transport": 32,
+      "score": 0.25226391154545924
+    },
+    {
       "systemic": 1.5,
       "transport": 4,
       "score": 0.2526268812809584
     },
     {
       "systemic": 1.5,
+      "transport": 24,
+      "score": 0.2529423895846091
+    },
+    {
+      "systemic": 1.5,
+      "transport": 16,
+      "score": 0.2544028039735661
+    },
+    {
+      "systemic": 1.5,
+      "transport": 12,
+      "score": 0.2559571872821424
+    },
+    {
+      "systemic": 1.875,
+      "transport": 32,
+      "score": 0.2577401249010453
+    },
+    {
+      "systemic": 1.875,
+      "transport": 24,
+      "score": 0.2583655162704348
+    },
+    {
+      "systemic": 1.5,
+      "transport": 8,
+      "score": 0.2586052451855376
+    },
+    {
+      "systemic": 1.5,
+      "transport": 6,
+      "score": 0.2591730502103746
+    },
+    {
+      "systemic": 1.875,
+      "transport": 16,
+      "score": 0.2597530423301157
+    },
+    {
+      "systemic": 1.875,
+      "transport": 12,
+      "score": 0.2613199789814747
+    },
+    {
+      "systemic": 1.875,
+      "transport": 8,
+      "score": 0.26469722202175466
+    },
+    {
+      "systemic": 1.875,
+      "transport": 6,
+      "score": 0.26747775936341023
+    },
+    {
+      "systemic": 1.875,
+      "transport": 4,
+      "score": 0.26939036567093017
+    },
+    {
+      "systemic": 1.875,
+      "transport": 3,
+      "score": 0.26952473341601035
+    },
+    {
+      "systemic": 1.875,
+      "transport": 2,
+      "score": 0.28017561346597003
+    },
+    {
+      "systemic": 1.5,
       "transport": 1,
       "score": 0.28268564724379536
+    },
+    {
+      "systemic": 1.375,
+      "transport": 1.5,
+      "score": 0.28783282357654555
+    },
+    {
+      "systemic": 1.625,
+      "transport": 1,
+      "score": 0.2890291181039897
+    },
+    {
+      "systemic": 1.375,
+      "transport": 2,
+      "score": 0.29505780879019144
+    },
+    {
+      "systemic": 1.875,
+      "transport": 1.5,
+      "score": 0.31161277326620546
+    },
+    {
+      "systemic": 1.375,
+      "transport": 3,
+      "score": 0.3208962075426645
+    },
+    {
+      "systemic": 1.375,
+      "transport": 1,
+      "score": 0.3247770226468606
+    },
+    {
+      "systemic": 2,
+      "transport": 32,
+      "score": 0.3346959538131533
+    },
+    {
+      "systemic": 2,
+      "transport": 24,
+      "score": 0.335194568601169
+    },
+    {
+      "systemic": 2,
+      "transport": 16,
+      "score": 0.33633663487786186
+    },
+    {
+      "systemic": 1.375,
+      "transport": 4,
+      "score": 0.33636554583444506
+    },
+    {
+      "systemic": 2,
+      "transport": 12,
+      "score": 0.3376857860206808
+    },
+    {
+      "systemic": 1.75,
+      "transport": 1,
+      "score": 0.33769319239661444
+    },
+    {
+      "systemic": 2,
+      "transport": 8,
+      "score": 0.3408982724644609
+    },
+    {
+      "systemic": 1.375,
+      "transport": 32,
+      "score": 0.3413029593813903
+    },
+    {
+      "systemic": 1.375,
+      "transport": 24,
+      "score": 0.34188510554762513
+    },
+    {
+      "systemic": 1.375,
+      "transport": 16,
+      "score": 0.34313902985883776
+    },
+    {
+      "systemic": 2,
+      "transport": 6,
+      "score": 0.3441068893349595
+    },
+    {
+      "systemic": 1.375,
+      "transport": 12,
+      "score": 0.34445839463953437
+    },
+    {
+      "systemic": 1.375,
+      "transport": 6,
+      "score": 0.3459784924459423
+    },
+    {
+      "systemic": 1.375,
+      "transport": 8,
+      "score": 0.34644611226886113
     },
     {
       "systemic": 2,
@@ -237,6 +680,16 @@
       "score": 0.40515442331009327
     },
     {
+      "systemic": 1.625,
+      "transport": 0.75,
+      "score": 0.40637237408531096
+    },
+    {
+      "systemic": 1.375,
+      "transport": 0.75,
+      "score": 0.4069036087964393
+    },
+    {
       "systemic": 2,
       "transport": 1.5,
       "score": 0.4130514770445941
@@ -252,9 +705,59 @@
       "score": 0.4230114044146221
     },
     {
+      "systemic": 1.875,
+      "transport": 1,
+      "score": 0.4237682430965719
+    },
+    {
+      "systemic": 2.125,
+      "transport": 32,
+      "score": 0.44333153563613564
+    },
+    {
+      "systemic": 2.125,
+      "transport": 24,
+      "score": 0.44365133849462274
+    },
+    {
+      "systemic": 2.125,
+      "transport": 16,
+      "score": 0.4444422249352242
+    },
+    {
+      "systemic": 2.125,
+      "transport": 12,
+      "score": 0.4454671521973486
+    },
+    {
+      "systemic": 2.125,
+      "transport": 8,
+      "score": 0.4483172145775946
+    },
+    {
+      "systemic": 2.125,
+      "transport": 6,
+      "score": 0.4517983738463663
+    },
+    {
       "systemic": 1.25,
       "transport": 3,
       "score": 0.4563136316314995
+    },
+    {
+      "systemic": 2.125,
+      "transport": 4,
+      "score": 0.45848618601445534
+    },
+    {
+      "systemic": 2.125,
+      "transport": 3,
+      "score": 0.4660629562621539
+    },
+    {
+      "systemic": 1.75,
+      "transport": 0.75,
+      "score": 0.47198607813699844
     },
     {
       "systemic": 1.25,
@@ -263,8 +766,43 @@
     },
     {
       "systemic": 1.25,
+      "transport": 32,
+      "score": 0.4864703095206077
+    },
+    {
+      "systemic": 1.25,
+      "transport": 24,
+      "score": 0.4868974585642472
+    },
+    {
+      "systemic": 1.25,
       "transport": 0.75,
       "score": 0.48698699096448034
+    },
+    {
+      "systemic": 1.25,
+      "transport": 16,
+      "score": 0.4878263468161981
+    },
+    {
+      "systemic": 1.25,
+      "transport": 6,
+      "score": 0.4882768999844238
+    },
+    {
+      "systemic": 1.25,
+      "transport": 12,
+      "score": 0.4887926424053835
+    },
+    {
+      "systemic": 1.25,
+      "transport": 8,
+      "score": 0.48991222446620514
+    },
+    {
+      "systemic": 2.125,
+      "transport": 2,
+      "score": 0.4946729167449049
     },
     {
       "systemic": 2,
@@ -272,9 +810,99 @@
       "score": 0.5432615835479412
     },
     {
+      "systemic": 2.125,
+      "transport": 1.5,
+      "score": 0.5449841826961764
+    },
+    {
+      "systemic": 1.875,
+      "transport": 0.75,
+      "score": 0.5745475557363761
+    },
+    {
+      "systemic": 2.25,
+      "transport": 32,
+      "score": 0.5809546210887007
+    },
+    {
+      "systemic": 2.25,
+      "transport": 24,
+      "score": 0.5810449090772191
+    },
+    {
+      "systemic": 2.25,
+      "transport": 16,
+      "score": 0.5813814543820078
+    },
+    {
+      "systemic": 2.25,
+      "transport": 12,
+      "score": 0.5819780996324148
+    },
+    {
+      "systemic": 2.25,
+      "transport": 8,
+      "score": 0.5842716089886827
+    },
+    {
+      "systemic": 1.125,
+      "transport": 1,
+      "score": 0.5872176268242632
+    },
+    {
+      "systemic": 2.25,
+      "transport": 6,
+      "score": 0.5878705029289905
+    },
+    {
+      "systemic": 1.125,
+      "transport": 1.5,
+      "score": 0.5881465178571723
+    },
+    {
+      "systemic": 2.25,
+      "transport": 4,
+      "score": 0.5966519682307326
+    },
+    {
+      "systemic": 2.25,
+      "transport": 3,
+      "score": 0.6077824307004809
+    },
+    {
+      "systemic": 1.125,
+      "transport": 2,
+      "score": 0.6137851183900394
+    },
+    {
+      "systemic": 1.125,
+      "transport": 0.75,
+      "score": 0.6328481183307813
+    },
+    {
+      "systemic": 1.375,
+      "transport": 0.5,
+      "score": 0.6355131927655463
+    },
+    {
       "systemic": 1.5,
       "transport": 0.5,
       "score": 0.64228196112827
+    },
+    {
+      "systemic": 2.25,
+      "transport": 2,
+      "score": 0.6451453987958274
+    },
+    {
+      "systemic": 1.125,
+      "transport": 3,
+      "score": 0.6564065302492776
+    },
+    {
+      "systemic": 1.125,
+      "transport": 4,
+      "score": 0.679177947146752
     },
     {
       "systemic": 1.25,
@@ -282,9 +910,109 @@
       "score": 0.683395060075998
     },
     {
+      "systemic": 2.125,
+      "transport": 1,
+      "score": 0.6928842875434791
+    },
+    {
+      "systemic": 1.125,
+      "transport": 6,
+      "score": 0.6949561780831085
+    },
+    {
+      "systemic": 1.625,
+      "transport": 0.5,
+      "score": 0.6959047354623916
+    },
+    {
+      "systemic": 1.125,
+      "transport": 32,
+      "score": 0.6966189302945205
+    },
+    {
+      "systemic": 1.125,
+      "transport": 24,
+      "score": 0.6968329416578306
+    },
+    {
+      "systemic": 1.125,
+      "transport": 16,
+      "score": 0.6973194259510572
+    },
+    {
+      "systemic": 1.125,
+      "transport": 12,
+      "score": 0.6978162468752531
+    },
+    {
+      "systemic": 1.125,
+      "transport": 8,
+      "score": 0.6978686445913987
+    },
+    {
+      "systemic": 2.25,
+      "transport": 1.5,
+      "score": 0.7046700880348139
+    },
+    {
       "systemic": 2,
       "transport": 0.75,
       "score": 0.7100685867421018
+    },
+    {
+      "systemic": 2.375,
+      "transport": 16,
+      "score": 0.7448639687489934
+    },
+    {
+      "systemic": 2.375,
+      "transport": 12,
+      "score": 0.7449303411709068
+    },
+    {
+      "systemic": 2.375,
+      "transport": 24,
+      "score": 0.7450826764005584
+    },
+    {
+      "systemic": 2.375,
+      "transport": 32,
+      "score": 0.7452714215346061
+    },
+    {
+      "systemic": 2.375,
+      "transport": 8,
+      "score": 0.7464762836222096
+    },
+    {
+      "systemic": 2.375,
+      "transport": 6,
+      "score": 0.7500390318613683
+    },
+    {
+      "systemic": 2.375,
+      "transport": 4,
+      "score": 0.760711335360314
+    },
+    {
+      "systemic": 2.375,
+      "transport": 3,
+      "score": 0.7752708531274505
+    },
+    {
+      "systemic": 1.75,
+      "transport": 0.5,
+      "score": 0.7902593555458023
+    },
+    {
+      "systemic": 1.125,
+      "transport": 0.5,
+      "score": 0.7959740943082675
+    },
+    {
+      "systemic": 2.375,
+      "transport": 2,
+      "score": 0.8212112870218776
     },
     {
       "systemic": 1,
@@ -302,14 +1030,64 @@
       "score": 0.8573825855777913
     },
     {
+      "systemic": 2.25,
+      "transport": 1,
+      "score": 0.8698924317316631
+    },
+    {
+      "systemic": 2.125,
+      "transport": 0.75,
+      "score": 0.8752741769821267
+    },
+    {
       "systemic": 1,
       "transport": 2,
       "score": 0.8829606226917955
     },
     {
+      "systemic": 2.375,
+      "transport": 1.5,
+      "score": 0.8897868876533911
+    },
+    {
+      "systemic": 1.875,
+      "transport": 0.5,
+      "score": 0.9204763852464698
+    },
+    {
+      "systemic": 2.5,
+      "transport": 12,
+      "score": 0.9323536345278444
+    },
+    {
       "systemic": 1,
       "transport": 3,
       "score": 0.9327507813923921
+    },
+    {
+      "systemic": 2.5,
+      "transport": 16,
+      "score": 0.9329177645554556
+    },
+    {
+      "systemic": 2.5,
+      "transport": 8,
+      "score": 0.932963643997363
+    },
+    {
+      "systemic": 2.5,
+      "transport": 24,
+      "score": 0.9337906858865531
+    },
+    {
+      "systemic": 2.5,
+      "transport": 32,
+      "score": 0.9343069397944576
+    },
+    {
+      "systemic": 2.5,
+      "transport": 6,
+      "score": 0.9363372957008371
     },
     {
       "systemic": 2.5,
@@ -328,6 +1106,36 @@
     },
     {
       "systemic": 1,
+      "transport": 6,
+      "score": 0.9772767841557255
+    },
+    {
+      "systemic": 1,
+      "transport": 8,
+      "score": 0.9815368857523564
+    },
+    {
+      "systemic": 1,
+      "transport": 12,
+      "score": 0.9827302917906574
+    },
+    {
+      "systemic": 1,
+      "transport": 16,
+      "score": 0.9828127402885682
+    },
+    {
+      "systemic": 1,
+      "transport": 24,
+      "score": 0.9828800590682573
+    },
+    {
+      "systemic": 1,
+      "transport": 32,
+      "score": 0.9829344346118809
+    },
+    {
+      "systemic": 1,
       "transport": 0.5,
       "score": 0.9863275643386098
     },
@@ -335,6 +1143,16 @@
       "systemic": 2.5,
       "transport": 2,
       "score": 1.0208841056559261
+    },
+    {
+      "systemic": 2.25,
+      "transport": 0.75,
+      "score": 1.0674395509347183
+    },
+    {
+      "systemic": 2.375,
+      "transport": 1,
+      "score": 1.0719681088920987
     },
     {
       "systemic": 2,
@@ -347,9 +1165,184 @@
       "score": 1.098343965164755
     },
     {
+      "systemic": 2.625,
+      "transport": 8,
+      "score": 1.1420221204652377
+    },
+    {
+      "systemic": 2.625,
+      "transport": 12,
+      "score": 1.1425342188141847
+    },
+    {
+      "systemic": 2.625,
+      "transport": 16,
+      "score": 1.1438275994309708
+    },
+    {
+      "systemic": 2.625,
+      "transport": 6,
+      "score": 1.145054553301837
+    },
+    {
+      "systemic": 2.625,
+      "transport": 24,
+      "score": 1.1454520136254682
+    },
+    {
+      "systemic": 2.625,
+      "transport": 32,
+      "score": 1.1463433371526262
+    },
+    {
+      "systemic": 2.625,
+      "transport": 4,
+      "score": 1.1588890826904363
+    },
+    {
+      "systemic": 0.875,
+      "transport": 1,
+      "score": 1.1679602025100317
+    },
+    {
+      "systemic": 0.875,
+      "transport": 0.75,
+      "score": 1.1774027184357487
+    },
+    {
+      "systemic": 2.625,
+      "transport": 3,
+      "score": 1.1799103325258307
+    },
+    {
+      "systemic": 0.875,
+      "transport": 1.5,
+      "score": 1.2036823143258824
+    },
+    {
+      "systemic": 2.625,
+      "transport": 2,
+      "score": 1.2424398994605497
+    },
+    {
+      "systemic": 0.875,
+      "transport": 2,
+      "score": 1.244693081672524
+    },
+    {
+      "systemic": 0.875,
+      "transport": 0.5,
+      "score": 1.2716107653536008
+    },
+    {
+      "systemic": 2.125,
+      "transport": 0.5,
+      "score": 1.2735127774069557
+    },
+    {
+      "systemic": 2.375,
+      "transport": 0.75,
+      "score": 1.2842684469249204
+    },
+    {
       "systemic": 2.5,
       "transport": 1,
       "score": 1.2971295930038833
+    },
+    {
+      "systemic": 0.875,
+      "transport": 3,
+      "score": 1.3001911131352248
+    },
+    {
+      "systemic": 0.875,
+      "transport": 4,
+      "score": 1.328486863681196
+    },
+    {
+      "systemic": 2.625,
+      "transport": 1.5,
+      "score": 1.3286160304607388
+    },
+    {
+      "systemic": 0.875,
+      "transport": 6,
+      "score": 1.3496184185271414
+    },
+    {
+      "systemic": 0.875,
+      "transport": 8,
+      "score": 1.3552323779361573
+    },
+    {
+      "systemic": 0.875,
+      "transport": 12,
+      "score": 1.3578101022485018
+    },
+    {
+      "systemic": 0.875,
+      "transport": 16,
+      "score": 1.358566302912509
+    },
+    {
+      "systemic": 0.875,
+      "transport": 24,
+      "score": 1.3592843996996953
+    },
+    {
+      "systemic": 0.875,
+      "transport": 32,
+      "score": 1.3596553379282976
+    },
+    {
+      "systemic": 2.75,
+      "transport": 8,
+      "score": 1.372148277124544
+    },
+    {
+      "systemic": 2.75,
+      "transport": 12,
+      "score": 1.3739668842209614
+    },
+    {
+      "systemic": 2.75,
+      "transport": 6,
+      "score": 1.374688049706946
+    },
+    {
+      "systemic": 2.75,
+      "transport": 16,
+      "score": 1.3760870267761423
+    },
+    {
+      "systemic": 2.75,
+      "transport": 24,
+      "score": 1.3785587647471118
+    },
+    {
+      "systemic": 2.75,
+      "transport": 32,
+      "score": 1.3798719139002789
+    },
+    {
+      "systemic": 2.75,
+      "transport": 4,
+      "score": 1.3897905102777282
+    },
+    {
+      "systemic": 2.75,
+      "transport": 3,
+      "score": 1.4138371772954812
+    },
+    {
+      "systemic": 2.75,
+      "transport": 2,
+      "score": 1.4843671163653873
+    },
+    {
+      "systemic": 2.25,
+      "transport": 0.5,
+      "score": 1.4904655872566623
     },
     {
       "systemic": 2.5,
@@ -357,14 +1350,64 @@
       "score": 1.5238015734533972
     },
     {
+      "systemic": 2.625,
+      "transport": 1,
+      "score": 1.543662978354763
+    },
+    {
+      "systemic": 2.75,
+      "transport": 1.5,
+      "score": 1.5790919844918274
+    },
+    {
       "systemic": 0.75,
       "transport": 0.75,
       "score": 1.6149390375542676
     },
     {
+      "systemic": 2.875,
+      "transport": 8,
+      "score": 1.62200927725364
+    },
+    {
       "systemic": 0.75,
       "transport": 1,
       "score": 1.6223898984659453
+    },
+    {
+      "systemic": 2.875,
+      "transport": 6,
+      "score": 1.6239054691231483
+    },
+    {
+      "systemic": 2.875,
+      "transport": 12,
+      "score": 1.6253173850779152
+    },
+    {
+      "systemic": 2.875,
+      "transport": 16,
+      "score": 1.628360771369242
+    },
+    {
+      "systemic": 2.875,
+      "transport": 24,
+      "score": 1.6317744111015104
+    },
+    {
+      "systemic": 2.875,
+      "transport": 32,
+      "score": 1.6335554284891816
+    },
+    {
+      "systemic": 2.875,
+      "transport": 4,
+      "score": 1.6400655275662415
+    },
+    {
+      "systemic": 2.875,
+      "transport": 3,
+      "score": 1.6669974802584202
     },
     {
       "systemic": 0.75,
@@ -382,14 +1425,99 @@
       "score": 1.7188842391382593
     },
     {
+      "systemic": 2.375,
+      "transport": 0.5,
+      "score": 1.7312564244157107
+    },
+    {
+      "systemic": 2.875,
+      "transport": 2,
+      "score": 1.7453275835020199
+    },
+    {
       "systemic": 0.75,
       "transport": 3,
       "score": 1.7778779653261527
     },
     {
+      "systemic": 2.625,
+      "transport": 0.75,
+      "score": 1.7843471998667972
+    },
+    {
       "systemic": 0.75,
       "transport": 4,
       "score": 1.8075338292419516
+    },
+    {
+      "systemic": 2.75,
+      "transport": 1,
+      "score": 1.8100697366804148
+    },
+    {
+      "systemic": 0.75,
+      "transport": 6,
+      "score": 1.830451311866658
+    },
+    {
+      "systemic": 0.75,
+      "transport": 8,
+      "score": 1.837322058005073
+    },
+    {
+      "systemic": 0.75,
+      "transport": 12,
+      "score": 1.841350505652006
+    },
+    {
+      "systemic": 0.75,
+      "transport": 16,
+      "score": 1.8428450574572237
+    },
+    {
+      "systemic": 0.75,
+      "transport": 24,
+      "score": 1.844282242411191
+    },
+    {
+      "systemic": 0.75,
+      "transport": 32,
+      "score": 1.845003792152862
+    },
+    {
+      "systemic": 2.875,
+      "transport": 1.5,
+      "score": 1.8484352051264052
+    },
+    {
+      "systemic": 3,
+      "transport": 8,
+      "score": 1.8904132537172338
+    },
+    {
+      "systemic": 3,
+      "transport": 6,
+      "score": 1.8915153126981104
+    },
+    {
+      "systemic": 3,
+      "transport": 12,
+      "score": 1.8953927536585553
+    },
+    {
+      "systemic": 3,
+      "transport": 16,
+      "score": 1.8994550066529283
+    },
+    {
+      "systemic": 3,
+      "transport": 24,
+      "score": 1.9039040320908722
+    },
+    {
+      "systemic": 3,
+      "transport": 32,
+      "score": 1.9061983206402597
     },
     {
       "systemic": 3,
@@ -412,9 +1540,29 @@
       "score": 2.0241258889337934
     },
     {
+      "systemic": 2.75,
+      "transport": 0.75,
+      "score": 2.064428094134695
+    },
+    {
+      "systemic": 2.875,
+      "transport": 1,
+      "score": 2.0950261585056773
+    },
+    {
       "systemic": 3,
       "transport": 1.5,
       "score": 2.13545246333777
+    },
+    {
+      "systemic": 2.625,
+      "transport": 0.5,
+      "score": 2.2770186984742438
+    },
+    {
+      "systemic": 2.875,
+      "transport": 0.75,
+      "score": 2.3627406216076907
     },
     {
       "systemic": 3,
@@ -422,9 +1570,19 @@
       "score": 2.397351735291439
     },
     {
+      "systemic": 2.75,
+      "transport": 0.5,
+      "score": 2.5789280622776545
+    },
+    {
       "systemic": 3,
       "transport": 0.75,
       "score": 2.678122961436083
+    },
+    {
+      "systemic": 2.875,
+      "transport": 0.5,
+      "score": 2.8984572776502056
     },
     {
       "systemic": 3,
