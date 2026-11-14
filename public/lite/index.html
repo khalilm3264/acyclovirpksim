@@ -50,6 +50,7 @@ summary{cursor:pointer;font-weight:700;color:#2b5f7c}
 .panel{padding:12px}
 .topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .topline label{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600}
+.topline>.actions{flex-wrap:wrap;align-items:center;max-width:100%;margin-top:0}
 .topline select{border:1px solid #b0c4d0;border-radius:0;padding:5px 7px;min-width:126px;background:#fff}
 .subtitle{font-size:11px;color:#617a88;margin:2px 0 0}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -102,7 +103,7 @@ footer a{margin-left:7px}
 <main class="content">
 <section class="panel">
 <div class="topline"><div><h2>Dialysis scenario comparison</h2><p class="subtitle">Fixed model assumptions · independent scenario curves · no uncertainty sampling</p></div>
-<label for="liteHighlight">Focus scenario <select id="liteHighlight"><option value="none">No dialysis</option><option value="hd" selected>Hemodialysis</option><option value="capd">CAPD</option><option value="apd">APD</option><option value="crrt">CRRT</option></select></label></div>
+<div class="actions"><button class="btn" id="litePng" type="button" title="Download both charts with the visible scenarios and applied inputs">Download PNG</button><label for="liteHighlight">Focus scenario <select id="liteHighlight"><option value="none">No dialysis</option><option value="hd" selected>Hemodialysis</option><option value="capd">CAPD</option><option value="apd">APD</option><option value="crrt">CRRT</option></select></label></div></div>
 <div class="stats">
 <div class="metric"><div class="key">Peak plasma acyclovir</div><div class="val" id="stat_peak">—</div><div class="unit">mg/L</div></div>
 <div class="metric"><div class="key">Acyclovir AUC</div><div class="val" id="stat_auc">—</div><div class="unit">mg·h/L</div></div>

@@ -12,6 +12,26 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+### Printable scenario teaching handout
+
+- Add an on-demand preview and one-page print/PDF summary of the current primary
+  scenario, with five model metrics and systemic concentration charts. Applied
+  measurements are omitted and fitting is disclosed; full schedules stay in the
+  saved configuration. Print styling is isolated to the open preview.
+- No model equations, parameters or defaults change.
+
+
+### Nominal scenario scripts and Lite chart export
+
+- Add local Python/SciPy and R/mrgsolve exports for the primary nominal systemic
+  scenario: IV/oral schedules, HD/CRRT transitions and changing CrCl. Applied
+  fitting and exchange-resolved PD are rejected explicitly. CSF proxies and
+  ensemble bands are omitted and labeled; no equations or defaults change.
+- Add a 1920 × 1280 PNG of Lite's two concentration charts, applied inputs and
+  visible scenario legend. The image renderer works with ECharts or the offline
+  Canvas fallback; export does not add a charting dependency.
+
+
 ### Added
 - **Usability pass from inpatient pharmacist feedback.**
   - *Results first:* on the Concentration tab the plasma acyclovir graph now follows the summary. Baseline, regimen and hemodialysis-timing tools move below the graphs under "Comparison tools".
