@@ -71,3 +71,20 @@ Jamez et al. describe two anuric adults treated with oral acyclovir. The first, 
 To illustrate the timing effect, assume no further dose or dialysis from hour 7 to hour 12, completed absorption and monoexponential decline. Applying the seven **different** terminal half-lives in Almond Table 3 (10.0–42.8 h) to 4.4 mg/L gives 3.11–4.06 mg/L at hour 12. Using their mean half-life of 20.23 h gives 3.71 mg/L. The seven printed rows yield a standard error of 4.22 h, while the source summary lists 4.6 h. The range here uses the individual rows. It is neither a confidence interval nor an observed Jamez trough. In particular, the measured sample preceded a scheduled HD session and the time to dialysis is unavailable. The seven-source study involved oliguric patients after a single 800 mg oral dose.
 
 The calculation uses the observed concentration solely as a starting value. It cannot test oral absorption, identify an individual clearance, establish a toxicity cutoff or estimate HD removal. AyFlux models IV acyclovir and oral valacyclovir, so direct oral acyclovir has no matched route in the production simulator. [Almond et al., Table 3, p. 431](https://doi.org/10.1159/000188514) · [Reproduction script](jamez-oral-sampling.cjs)
+
+## Whole-blood partition sensitivity in the second HD session
+
+The blood-side mass calculation under a whole-blood/plasma concentration ratio of 1 gives 26.25 mg. The effluent fit gives 66.57 mg. With a constant ratio applied to both arterial and venous plasma curves, the blood-side mass scales directly with that ratio and requires 2.54 to match the effluent fit. As a separate bound, even complete extraction would require a time-averaged inlet blood/plasma ratio of at least 1.39, given 250 mL/min blood flow and the inlet plasma AUC of 191.55 mg·min/L. Both calculations depend on the same sparse samples and flow assumptions used in the original comparison. [Vasquez Vasquez et al., Table 1 and Figure 2](https://doi.org/10.1002/bcp.70138)
+
+De Miranda Table II supplies paired fitted clearance estimates for total radiolabel in plasma and whole blood after IV acyclovir in four adults with cancer. Dividing plasma clearance by blood clearance cancels the identical tracer dose and body-surface normalization within each participant, yielding the integrated whole-blood/plasma **radioactivity** AUC ratio.
+
+| Participant | Plasma / blood tracer clearance, mL/min/1.73 m² | Blood/plasma tracer AUC ratio | Illustrative Vasquez blood-side mass, mg |
+|---|---:|---:|---:|
+| VMB | 238 / 209 | 1.139 | 29.89 |
+| EJH | 260 / 244 | 1.066 | 27.97 |
+| MAM | 291 / 276 | 1.054 | 27.68 |
+| GSS | 265 / 248 | 1.069 | 28.05 |
+
+The fifth participant lacks a whole-blood row. The plasma and blood group means use different denominators. The four paired ratios are all below the inlet bound, even before allowing for circulating drug leaving the dialyzer. They describe total tracer exposure in a separate cohort. They cannot determine parent-specific red-cell partition on either side of the dialyzer in this patient.
+
+A further sensitivity interprets the “haematocrit 26.7 g/dL” entry in Vasquez Table 1B as 26.7% by volume. With equal haematocrit and cell/plasma concentration ratios on both sides, whole-blood/plasma = (1 − haematocrit) + haematocrit × cell/plasma. A whole-blood/plasma ratio of 2.54 would require a cell/plasma ratio of 6.75. No cell assay was reported. The source-unit ambiguity, differing assays, sample interpolation, effluent fit and lack of measured whole-blood concentrations preclude assigning the discrepancy to partition. [De Miranda et al., p. 668, Table II](https://doi.org/10.1038/clpt.1981.218) · [Reproduction script](vasquez-hd-extraction.cjs)
