@@ -6,6 +6,7 @@ const escapeTex=value=>String(value).replace(/[\\{}%&#_$~^]/g,ch=>({'\\':'\\text
 const text=node=>node.nodeName==='#text'?node.value:(node.childNodes||[]).map(text).join('');
 const attr=(node,name)=>node.attrs?.find(a=>a.name===name)?.value;
 function all(node,predicate){return [...(predicate(node)?[node]:[]),...(node.childNodes||[]).flatMap(n=>all(n,predicate))];}
+function verbatim(value){assert.ok(!/[{}\\\s]/.test(value),'Unsupported URL/DOI characters');return value;}
 function generate(main,cite,references){
  const nodes=all(parse(main),n=>n.tagName==='li'&&/^ref\d+$/.test(attr(n,'id')||''));
  assert.ok(nodes.length,'No numbered references');
@@ -21,7 +22,7 @@ function generate(main,cite,references){
   const doi=links.map(n=>attr(n,'href')).find(h=>h?.startsWith('https://doi.org/'))?.slice('https://doi.org/'.length);
   const fields={title,author,year,doi,url:attr(first,'href'),note:full};
   const key=i<nodes.length?`ayfluxRef${i+1}`:`ayfluxAdditional${i-nodes.length+1}`;
-  return `@misc{${key},\n`+Object.entries(fields).filter(([,v])=>v).map(([k,v])=>`  ${k} = {${escapeTex(v)}}`).join(',\n')+'\n}';
+  return `@misc{${key},\n`+Object.entries(fields).filter(([,v])=>v).map(([k,v])=>`  ${k} = {${['url','doi'].includes(k)?verbatim(v):escapeTex(v)}}`).join(',\n')+'\n}';
  });
  const software=all(parse(cite),n=>n.tagName==='pre').map(text).find(t=>t.startsWith('@software{'));
  assert.ok(software,'Software BibTeX missing');

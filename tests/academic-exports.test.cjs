@@ -41,5 +41,6 @@ test('bibliography keeps missing metadata absent and escapes note text without i
  const bib=generate('<li id="ref1"><a href="https://example.org/?a=1&amp;b=2">A &amp; B_guide</a>. Unverified 2026 note with 10%.</li>','<pre>@software{ayflux, title={AyFlux}}</pre>','');
  assert.match(bib,/title = \{A \\& B\\_guide\}/);
  assert.match(bib,/10\\%/);
+ assert.ok(bib.includes('url = {https://example.org/?a=1&b=2}'));
  assert.doesNotMatch(bib,/\n  (year|author|doi|journal) =/);
 });
