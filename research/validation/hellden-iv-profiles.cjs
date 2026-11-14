@@ -26,26 +26,29 @@ function summarize(parent, cmmg) {
   const parentAuc = auc(parent), cmmgAuc = auc(cmmg);
   return {parentAuc,cmmgAuc,ratio:cmmgAuc/parentAuc, parent8:parent[8],cmmg8:cmmg[8]};
 }
-function calculate(group, crcl, infusion, slope, step) {
+function calculate(group, crcl, infusion, slope, step, adjustParams = p => p) {
   const config = {...structuredClone(engine.DEFAULTS), dose:group.dose, infusion, doseCount:1, crcl,
     weight:70, renalMode:'constant', crclSource:'manual', schedule:[], variability:0,
     draws:1, horizon:24+infusion, metRenal:slope/2};
   assert.deepEqual(engine.validate(config,'No dialysis'),[]);
-  const out = engine.single(config,engine.drawParams(config)[0],[],step);
+  const out = engine.single(config,adjustParams(engine.drawParams(config)[0]),[],step);
   // Figure 7 starts with parent present. Assume plotted zero is end of IV administration.
   const values = (name,mw) => times.map(t => {
     const i=out.t.indexOf(t+infusion); assert.ok(i>=0); return out.cols[name][i]*1000/mw;
   });
   return summarize(values('plasma',225.21),values('cmmg',239.19));
 }
-const results = groups.map(g => {
-  const observed=summarize(g.parent,g.cmmg), scenarios=[];
-  for (const crcl of g.crcls) for (const infusion of [.25,1]) for (const slope of [2,3.7474]) {
-    const coarse=calculate(g,crcl,infusion,slope,.125);
-    const fine=calculate(g,crcl,infusion,slope,.0625);
-    for(const k of Object.keys(fine)) assert.ok(Math.abs(coarse[k]-fine[k])<.0001,k);
-    scenarios.push({crcl,infusion,slope,...fine});
-  }
-  return {...g,observed,scenarios};
-});
-console.log(JSON.stringify({times,results},null,2));
+if (require.main === module) {
+  const results = groups.map(g => {
+    const observed=summarize(g.parent,g.cmmg), scenarios=[];
+    for (const crcl of g.crcls) for (const infusion of [.25,1]) for (const slope of [2,3.7474]) {
+      const coarse=calculate(g,crcl,infusion,slope,.125);
+      const fine=calculate(g,crcl,infusion,slope,.0625);
+      for(const k of Object.keys(fine)) assert.ok(Math.abs(coarse[k]-fine[k])<.0001,k);
+      scenarios.push({crcl,infusion,slope,...fine});
+    }
+    return {...g,observed,scenarios};
+  });
+  console.log(JSON.stringify({times,results},null,2));
+}
+module.exports = {groups, calculate, summarize};
