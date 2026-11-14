@@ -124,6 +124,7 @@ Dependent PK descriptors are shown separately; no pooled fold-error score is ass
 - **Sadjadi 2018:** Unreported weight, dose, PD prescription and blood-draw times; non-scorable sensitivity grid.
 - **Turner clearance:** Derived exposure descriptor, excluded from co-primary Cmax/AUC count; group means are not independent patient records.
 - **Smith 2016 combined endpoint score:** Peak, extrapolated trough, AUC, dose/AUC clearance and fitted half-life are dependent descriptors; report ratios separately.
+- **Moysés Neto 2026:** Three automated-PD cases have reported doses, exchanges and symptom timelines. No measured acyclovir or CMMG concentrations are reported (Table 1 and case descriptions, p. 2). DOI 10.1177/08968608261415988.
 
 ## Interpretation notes
 
