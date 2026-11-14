@@ -95,7 +95,9 @@ function buildReport(inputs) {
   add('frozen manuscript','Excluding author-fitted CAPD','source sensitivity','default',m.scenarios.filter(s=>!s.id.startsWith('boelaert-')).flatMap(s=>s.rows));
   for(const a of m.ablations)for(const [name,filter] of [['Plasma, no dialysis',r=>r.analyte==='plasma'&&r.mode==='No dialysis'],['Plasma, dialysis',r=>r.analyte==='plasma'&&r.mode!=='No dialysis'],['Plasma CMMG',r=>r.analyte==='cmmg'],['All plasma acyclovir',r=>r.analyte==='plasma']])add('frozen ablation',name,'fixed 37-point set',a.variant,a.rows.filter(filter),a.label);
   for(const id of ['turner','manders'])for(const c of byId[id].combinations)add('subsequent external evaluation',id==='turner'?'Turner 2016':'Manders 2026',c.kidney,c.variant,c.rows,id==='turner'?'4 Cmax/AUC group-mean endpoints; two groups of 7 participants':'6 plasma levels; includes one 16-year-old; kidney-function surrogates are assumptions');
-  return {schemaVersion:1,provenance:inputs.map(({id,provenance})=>({id,...provenance})),groups,smith:byId.smith.comparisons,excluded:inputs.flatMap(x=>x.excluded||[])};
+  const excluded = inputs.flatMap(x => x.excluded || []);
+  excluded.push({case: 'Moysés Neto 2026', reason: 'Three automated-PD cases have reported doses, exchanges and symptom timelines. No measured acyclovir or CMMG concentrations are reported (Table 1 and case descriptions, p. 2). DOI 10.1177/08968608261415988'});
+  return {schemaVersion:1,provenance:inputs.map(({id,provenance})=>({id,...provenance})),groups,smith:byId.smith.comparisons,excluded};
 }
 const f=n=>n.toFixed(3);
 function markdown(report) {
