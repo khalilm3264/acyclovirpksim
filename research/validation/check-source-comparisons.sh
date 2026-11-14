@@ -17,7 +17,7 @@ cd "$root"
 # These runners print standalone reports and check their own numerical assumptions.
 studies=(
   almond-paired-post-hd berry-iv-aki boosman-icu-trough boulieu-cvvhd burgess-iv-terminal cmmg-formation-bound cmmg-identifiability collignon-crrt davenport-dialysis-washout
-  de-miranda-iv-recovery hara-genotype-terminal hellden-ms-sampling hellden-serum-hd hellden-iv-profiles hellden-renal-clearance izzedine-capd jamez-oral-sampling
+  de-miranda-iv-recovery hara-aldh2-cmmg hara-genotype-terminal hellden-ms-sampling hellden-serum-hd hellden-iv-profiles hellden-renal-clearance izzedine-capd jamez-oral-sampling
   kably-auc-comparison kably-renal-slope kacirova-iv-cohort kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
   laskin-anuric-course laskin-clearance laskin-fitted-distribution laskin-individual-spread laskin-prior-band lindstrom-course-6-20
   lindstrom-patient19 lindstrom-patient4-course lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
