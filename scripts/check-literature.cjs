@@ -40,6 +40,7 @@ const server=http.createServer((req,res)=>{
   return series.some(s=>s.type==='custom'&&s.data.length===3)&&series.some(s=>s.name.startsWith('Calibration'));
  });
  await page.click('#resetPublished');
+ await page.waitForFunction(()=>window.AyFluxResearchBridge.snapshot().updated);
  await page.selectOption('#literatureCase','smith-ckd');
  assert.equal(await page.locator('#laskinCompare').isVisible(),false);
  await page.click('#runLiterature');
