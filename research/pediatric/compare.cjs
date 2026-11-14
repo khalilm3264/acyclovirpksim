@@ -16,7 +16,7 @@ function compare() {
       abdalla: abdalla.summary(c), zeng: abdalla.summary(c, zengParameters(weight, egfr)) };
   }));
 }
-if (require.main === module) fs.writeFileSync(path.join(__dirname, 'model-comparison.json'), JSON.stringify({
+if (require.main === module) fs.writeFileSync(path.join(process.argv[2] || __dirname, 'model-comparison.json'), JSON.stringify({
   sources: ['10.1128/AAC.01426-20', '10.1128/AAC.01138-08'],
   interpretation: 'Typical IV predictions at equal numerical indexed renal inputs, not equal physiologic renal function. Different renal estimators and populations; no patient validation, random effects, or efficacy targets. Peaks and troughs are theoretical steady state.',
   rows: compare()
