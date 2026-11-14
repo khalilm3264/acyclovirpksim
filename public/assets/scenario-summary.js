@@ -62,7 +62,10 @@
   doc.getElementById('ayfluxScenarioSummary')?.remove();
   const dialog=element(doc,'dialog','ay-summary');dialog.id='ayfluxScenarioSummary';dialog.setAttribute('aria-labelledby','ay-summary-title');
   const tools=element(doc,'div','ay-summary-tools'),print=element(doc,'button','btn','Print / save PDF'),close=element(doc,'button','btn secondary','Close');
-  print.type=close.type='button';print.addEventListener('click',()=>doc.defaultView.print());close.addEventListener('click',()=>dialog.close());tools.append(print,close);dialog.append(tools);
+  const deactivate=()=>{if(!doc.querySelector('dialog.ay-summary[open]'))doc.body.classList.remove('ay-summary-open');};
+  const dismiss=()=>{dialog.close();deactivate();};
+  print.type=close.type='button';print.addEventListener('click',()=>doc.defaultView.print());close.addEventListener('click',dismiss);
+  dialog.addEventListener('cancel',event=>{event.preventDefault();dismiss();});tools.append(print,close);dialog.append(tools);
   const sheet=element(doc,'article','ay-summary-sheet'),title=element(doc,'h1',null,'AyFlux scenario summary');title.id='ay-summary-title';sheet.append(title);
   sheet.append(element(doc,'p','ay-summary-meta',`${s.mode} · AyFlux ${s.version} · ${new Date(s.generatedAt).toLocaleString(undefined,{timeZoneName:'short'})}`));
   sheet.append(element(doc,'p','ay-summary-notice','Educational model outputs only. Not validated for prescribing, toxicity assessment or dialysis decisions.'));
@@ -73,10 +76,10 @@
   for(const m of s.metrics){const card=element(doc,'div');card.append(element(doc,'span',null,m.label),element(doc,'strong',null,number(m.value.median)+' '+m.unit));metrics.append(card);}
   sheet.append(metrics,chart(doc,s,'plasma','Plasma acyclovir','#23658c'),chart(doc,s,'cmmg','Plasma CMMG (exploratory)','#9b6b1e'));
   const band=s.variability===0?'Nominal deterministic curves.':`Curves show model medians; shading is the assumed ${number(100*s.coverage)}% ${s.fitCount?'reweighted ':''}parameter band from ${s.draws} draws. Parameter bands are not validated clinical prediction intervals.`;
-  sheet.append(element(doc,'p','ay-summary-foot',band+' '+(s.fitCount?`${s.fitCount} fitting measurements informed reweighting; individual measurements are omitted. `:'')+'Peak metrics summarize draw-wise peaks and may differ from peaks of the median curve. Grey areas mark dialysis windows; dashed lines mark administrations when 24 or fewer.'));
+  sheet.append(element(doc,'p','ay-summary-foot',band+' '+(s.fitCount?`${s.fitCount} fitting measurement${s.fitCount===1?'':'s'} informed reweighting; individual measurements are omitted. `:'')+'Peak metrics summarize draw-wise peaks and may differ from peaks of the median curve. Grey areas mark dialysis windows; dashed lines mark administrations when 24 or fewer.'));
   sheet.append(element(doc,'p','ay-summary-foot','This handout summarizes the selected scenario; it is not a complete prescription or model file. Keep the saved configuration JSON and results CSV for the full inputs. Concentrations remain in mg/L. Methods and references: ayflux.org/learn/model-methods/.'));
   dialog.append(sheet);doc.body.append(dialog);doc.body.classList.add('ay-summary-open');
-  dialog.addEventListener('close',()=>doc.body.classList.remove('ay-summary-open'));
+  dialog.addEventListener('close',deactivate);
   dialog.showModal();return dialog;
  }
  return {snapshot,show,chart};

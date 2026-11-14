@@ -37,6 +37,7 @@ const server=http.createServer((req,res)=>{
   await page.getByRole('button',{name:'Print / save PDF',exact:true}).click();
   assert.equal(await page.evaluate(()=>window.printCalls),1);
   await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.body.classList.contains('ay-summary-open'));
   assert.equal(await page.evaluate(()=>document.body.classList.contains('ay-summary-open')),false);
   await page.emulateMedia({media:'print'});
   assert.equal(await page.locator('dialog.ay-summary').isVisible(),false,'Closed preview must not replace normal app printing');
@@ -63,7 +64,7 @@ const server=http.createServer((req,res)=>{
    },type);
    assert.equal(await page.locator('#ayfluxScenarioSummary img').count(),0,'Metadata must remain plain text');
    assert.ok(!(await page.textContent('#ayfluxScenarioSummary')).includes('987654.321987'));
-   if(type==='fitted')assert.ok((await page.textContent('#ayfluxScenarioSummary')).includes('1 fitting measurements'));
+   if(type==='fitted')assert.ok((await page.textContent('#ayfluxScenarioSummary')).includes('1 fitting measurement'));
    await onePage(type);await page.getByRole('button',{name:'Close',exact:true}).click();
   }
   assert.deepEqual(errors,[]);console.log('One-page scenario PDF: default, mobile, 200-dose profile, PD, fitted-data omission and print-close isolation passed.');
