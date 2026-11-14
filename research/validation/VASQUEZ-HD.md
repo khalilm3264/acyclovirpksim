@@ -41,6 +41,25 @@ Assumed last dose to admission: 8 h
 
 Across these timing assumptions, the predicted first-session concentration decline is about 39%, compared with 64% observed. The model underestimates second-session dialysate recovery and overestimates urinary recovery in all three reconstructions. This single case cannot identify which clearance or distribution assumptions explain the discrepancies.
 
+## Where the urine discrepancy occurs
+
+The final paper reports two separate collections. In the 16 h from admission to HD1, 4.51 mg was recovered (0.282 mg/h). In the 14 h between sessions, 600 mL at 22 mg/L yielded 13.2 mg (0.943 mg/h). The observed recovery rate increased 3.35-fold, whereas the reconstruction puts the higher rate before HD1 in every timing scenario. [Table 1A and results, pp. 2470–2472](https://doi.org/10.1002/bcp.70138)
+
+| Assumed last dose to admission | First 16 h, mg | Between sessions, mg | Between-session plasma AUC, mg·h/L |
+|---|---:|---:|---:|
+| Observed recovery | 4.51 | 13.20 | — |
+| AyFlux, 0 h | 152.24 | 41.85 | 72.15 |
+| AyFlux, 4 h | 119.82 | 34.03 | 58.67 |
+| AyFlux, 8 h | 97.14 | 27.67 | 47.71 |
+
+For the second collection only, use the post-HD1 concentration of 3.2 mg/L and the pre-HD2 concentration of 2.1 mg/L as interval endpoints. Linear and log-linear interpolation give AUCs of 37.10 and 36.56 mg·h/L. Dividing the 13.2 mg recovered by these AUCs gives apparent renal acyclovir clearances of 5.93 and 6.02 mL/min. These depend on the assumed unsampled plasma trajectory and alignment of the pre-HD2 draw with collection end. Rebound or incomplete collection could alter the estimates. The first interval lacks a starting plasma concentration.
+
+In the four-hour-delay scenario, modeled between-session exposure is 1.58 times the linear AUC estimate and modeled renal drug clearance is 1.63 times the corresponding estimate (9.67 vs 5.93 mL/min). Their product accounts for the 2.58-fold difference in recovered mass. Changing the last-dose timing alone leaves excess predicted recovery in both intervals. These measurements cannot establish how renal function evolved or single out a model coefficient for adjustment.
+
+During HD2, the measured inlet concentrations at 0, 1, 2 and 2.5 h were 2.00, 1.20, 0.99 and 1.00 mg/L. Relative to session start these are 1.000, 0.600, 0.495 and 0.500. The corresponding modeled fractions are 1.000, 0.748, 0.608 and 0.557 across all three timing assumptions. The reported pre-HD2 value of 2.1 mg/L is a separate draw. These are repeated measurements from the same session evaluated in the effluent analysis.
+
+Run `node research/validation/vasquez-urine-intervals.cjs` to reproduce the tables and compare step sizes. The runner also checks modeled urinary mass by independently integrating the modeled plasma curve over the interdialytic collection.
+
 ## Pediatric hemodialysis evidence
 
 Strong and Hébert report serum acyclovir of 7.02 µmol/L immediately before an infusion and 182.5 µmol/L one hour after infusion in a five-year-old receiving intermittent hemodialysis. These correspond to 1.58 and 41.10 mg/L using a molecular weight of 225.21 g/mol. After nephrectomy, the reported regimen was 460 mg/m² after hemodialysis three times weekly. The pediatric AyFlux model lacks an intermittent hemodialysis clearance term, so these concentrations are retained as observations only. [Strong and Hébert, Pediatric Nephrology (1997)](https://doi.org/10.1007/s004670050379)
