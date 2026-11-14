@@ -37,3 +37,20 @@ One anuric adult received CVVHD and CVVHDF on separate occasions. The authors re
 | CVVHDF | 1.7 | 7.9 / 13 | 22.88 | 17.22 |
 
 Holding these effluent concentrations constant for 24 hours gives 264 and 322 mg. The corresponding daily doses of 1500 and 500 mg yield 17.6% and 64.5%. The 24-hour figures are projections. The first circuit reportedly clotted after six hours, for which the same calculation gives 66 mg. The measured-ratio calculation reproduces the clearance arithmetic. The nominal coefficient of 0.95 with full delivery would give 15.83 and 26.92 mL/min. All calculations address the circuit term only. Reported outflow is specified in absolute volume per hour, so converting it to mL/kg/h and back cancels body weight. This comparison adds no systemic weight-scaling endpoint to the scorecard. [Reproduction script](khajehdehi-crrt.cjs)
+
+## Boulieu 1997 adult CVVHD series
+
+The primary abstract reports three adults given one-hour infusions during continuous venovenous hemodialysis. One received 5 mg/kg every 24 h with a reported peak of 9.3 mg/L. The two on 10 mg/kg every 48 h had peaks of 29.6 and 20.7 mg/L. Across the three, reported terminal half-lives ranged from 8.8 to 11.2 h, extracorporeal clearance from 17.4 to 22.3 mL/min and mean interval removal rates from 6.7 to 13.0 mg/h. Only the dose-to-peak assignments are available for individuals. [Boulieu et al., primary abstract](https://pubmed.ncbi.nlm.nih.gov/9421114/)
+
+The scenarios assume continuous therapy at either end of the reported absolute drug-clearance range, weights of 50, 70 or 90 kg, and residual CrCl of 0 or 10 mL/min. The effective circuit clearance is supplied directly. This bypasses any estimate of machine effluent flow, delivery or extraction from patient data. The model uses all six weight/CrCl combinations for both regimens. An end-infusion concentration is compared descriptively with each reported peak because clock times and prior dose count are unavailable.
+
+| Model quantity across the tested assumptions | 5 mg/kg q24h | 10 mg/kg q48h |
+|---|---:|---:|
+| First end-infusion concentration, mg/L | 11.32–12.42 | 22.65–24.85 |
+| Fifth end-infusion concentration, mg/L | 11.76–15.33 | 22.71–26.30 |
+| Mean circuit removal in the first interval, mg/h | 2.52–5.30 | 2.73–6.74 |
+| Mean circuit removal in the fifth interval, mg/h | 2.75–7.33 | 2.75–7.35 |
+
+Within this grid, all end-infusion predictions exceed the 5 mg/kg peak. The two 10 mg/kg peaks fall on opposite sides of the modeled range. The highest predicted mean removal rate is 7.35 mg/h, below the published upper value of 13.0. Higher absolute dose at a larger body weight, other residual clearances or a different observation interval could affect this comparison. No patient was assigned a weight, clearance or dose count from the ranges.
+
+The terminal half-life from the two-compartment equations spans 9.90–14.88 h at CrCl 0 and 6.63–8.88 h at CrCl 10. A late concentration-pair check agrees with the slow eigenvalue calculation. Terminal and removal ranges are unpaired summaries, so their overlap cannot establish agreement for an individual. The primary full text and individual timed rows remain outstanding for the case library. [Reproduction script](boulieu-cvvhd.cjs)
