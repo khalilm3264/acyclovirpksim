@@ -19,13 +19,13 @@ Checks cover published reference parameters, independent RK4 amount-state integr
 
 The benchmark emits illustrative concentration fixtures and steady-state summaries. These are generated model outputs, not patient observations or digitized published curves. The paper's Figure 5 target-attainment percentages and Figure 4 predictive check have **not** been reproduced: individual observations and the exact simulated covariate distribution were not available. No claim of matching these figures is made.
 
-The browser check exercises desktop/mobile layout, curve rendering, zero dose, CSV export, and invalid inputs. Run `node scripts/check-pediatric.cjs` with Playwright and Chromium installed. Local browser launch in the implementation environment was blocked by an OS socket restriction; CI runs the browser check.
+The browser check exercises desktop/mobile layout, curve rendering, zero dose, CSV export, and invalid inputs. Run `node scripts/check-pediatric.cjs` with Playwright and Chromium installed. The production workflow runs this browser check.
 
 ## Next research steps
 
 1. Resolve normalization and random-effect conventions against original model code or author clarification.
 2. Obtain authorized deidentified data or a complete published simulation specification before attempting population-level replication.
-3. Assess an independently sourced neonatal model separately.
+3. Compare the neonatal plasma estimates with an independently enrolled cohort with documented sampling times and renal function. The [fixed-effect reconstruction](evidence-review.md#neonatal-plasma-models-from-the-same-two-trials) compares two analyses of the same trials.
 4. Review pediatric extracorporeal-clearance evidence before designing a dialysis extension.
 
 ## Cross-model evidence review
