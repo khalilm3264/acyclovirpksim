@@ -99,25 +99,61 @@ assert.ok(S(0.25, 'disrupted').gmr > 1.5 && S(0.025, 'disrupted').gmr < 0.5, 'di
 assert.ok(Math.abs(serum.cmmg.gmr - 1) < 0.15, 'serum CMMG unbiased within 15%');
 
 // Blood-brain barrier presets (engine CSF_BARRIER). The damaged preset was fitted to the CSF/serum ratios of the
-// disrupted-barrier samples, so its fit below is in-sample: CSF GMR should match that group's serum GMR.
+// disrupted-barrier cohort. Marginal GMRs may use different participants or visits.
 const presets = {};
 for (const [name, p] of Object.entries(engine.CSF_BARRIER)) {
   const group = name === 'intact' ? 'intact' : 'disrupted';
   const sel = samples.filter(x => x.barrier === group);
   const rowsById = Object.fromEntries(rows.map(r => [r.sample_id, r]));
   const logs = {csf: [], csfCmmg: [], plasma: [], cmmg: []};
+  const pairs = {acyclovir: [], cmmg: []};
+  const limitChecks = {acyclovir: [], cmmg: []};
   for (const x of sel) {
     const pred = simulate(rowsById[x.id], p.csfMetRatio, {csfRatio: p.csfRatio});
+    for (const [analyte, csf, serum, observedCsf, observedSerum, partition] of [
+      ['acyclovir', 'csf', 'plasma', 'csfAcv', 'serumAcv', p.csfRatio],
+      ['cmmg', 'csfCmmg', 'cmmg', 'csfCmmg', 'serumCmmg', p.csfMetRatio]
+    ]) {
+      const fluid = x.observed[observedCsf], blood = x.observed[observedSerum];
+      if (!fluid || !blood || !('value' in blood)) continue;
+      const expectedRatio = pred[csf] / pred[serum];
+      if ('below' in fluid) {
+        limitChecks[analyte].push(expectedRatio * blood.value < fluid.below);
+      } else {
+        const observedRatio = fluid.value / blood.value;
+        pairs[analyte].push({id: x.id, implied: partition * observedRatio / expectedRatio});
+      }
+    }
     for (const [k, o] of [['csf', 'csfAcv'], ['csfCmmg', 'csfCmmg'], ['plasma', 'serumAcv'], ['cmmg', 'serumCmmg']]) {
       const v = x.observed[o];
       if (v && 'value' in v) logs[k].push(Math.log(pred[k] / v.value));
     }
   }
   const g = a => +Math.exp(a.reduce((x, y) => x + y, 0) / a.length).toFixed(3);
-  presets[name] = {...p, group, gmr: Object.fromEntries(Object.entries(logs).map(([k, a]) => [k, {n: a.length, gmr: g(a)}]))};
+  const paired = {};
+  const geometricMean = values => Math.exp(values.reduce((sum, v) => sum + Math.log(v), 0) / values.length);
+  const round = v => +v.toFixed(5);
+  for (const [key, visits] of Object.entries(pairs)) {
+    const patients = new Map();
+    for (const {id, implied} of visits) {
+      const patient = id.match(/^\d+/)[0];
+      if (!patients.has(patient)) patients.set(patient, []);
+      patients.get(patient).push(implied);
+    }
+    const byPatient = [...patients.values()].map(geometricMean);
+    const leaveOneOut = byPatient.map((_, i) => geometricMean(byPatient.filter((v, j) => i !== j)));
+    const visitWeighted = geometricMean(visits.map(v => v.implied));
+    const partition = key === 'acyclovir' ? p.csfRatio : p.csfMetRatio;
+    paired[key] = {quantifiedPairs: visits.length, patients: patients.size,
+      ratioGmr: round(partition / visitWeighted), visitWeighted: round(visitWeighted),
+      patientWeighted: round(geometricMean(byPatient)),
+      leaveOnePatientOutRange: [round(Math.min(...leaveOneOut)), round(Math.max(...leaveOneOut))],
+      belowLimitPairs: limitChecks[key].length, belowLimitConsistent: limitChecks[key].filter(Boolean).length};
+  }
+  presets[name] = {...p, group, paired, gmr: Object.fromEntries(Object.entries(logs).map(([k, a]) => [k, {n: a.length, gmr: g(a)}]))};
 }
-const ratioErr = q => Math.abs(Math.log(q.csf.gmr / q.plasma.gmr)) + Math.abs(Math.log(q.csfCmmg.gmr / q.cmmg.gmr));
-assert.ok(ratioErr(presets.damaged.gmr) < 0.1, 'damaged preset reproduces the disrupted-barrier CSF/serum ratios');
+assert.equal(presets.damaged.paired.cmmg.quantifiedPairs, 16, 'quantified CSF and serum from the same visit');
+assert.equal(presets.intact.paired.cmmg.quantifiedPairs, 3);
 
 const results = {source: 'doi:10.1093/jac/dkz357, Table 1 (34 samples, 21 patients)', candidates: CANDIDATES, summary, serum, presets, samples};
 const out = process.argv[2] || __dirname;
