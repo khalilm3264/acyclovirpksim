@@ -208,6 +208,7 @@ async function main(){
    }
   }
   assert.deepEqual(errors,[]);
+  await require('./check-responsive-layout.cjs').checkResponsiveLayout('http://127.0.0.1:'+server.address().port);
   console.log('Results-first layout, summary hierarchy and dosing-weight checks passed.');
  }finally{await browser?.close();server.close();}
 }
