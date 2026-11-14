@@ -28,6 +28,7 @@ const server=http.createServer((req,res)=>{
   async function png(){const pending=page.waitForEvent('download');await page.click('#litePng');const f=await pending;const bytes=fs.readFileSync(await f.path());assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.equal(bytes.readUInt32BE(16),1920);assert.equal(bytes.readUInt32BE(20),1280);if(process.env.EXPORT_PREVIEW_PATH)fs.copyFileSync(await f.path(),process.env.EXPORT_PREVIEW_PATH);}
   await png();
   await page.setViewportSize({width:390,height:844});
+  await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth+1);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await png();
   await page.route('**/echarts-5.6.0.min.js',r=>r.abort());await page.reload();
