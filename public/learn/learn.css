@@ -17,7 +17,7 @@
   font: 12px/1.5 Arial, "Segoe UI", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 280px; }
+body { margin: 0; overflow-wrap: anywhere; }
 button, input, select { font: inherit; }
 a { color: #245b7f; }
 a:hover { color: #173f5d; }
