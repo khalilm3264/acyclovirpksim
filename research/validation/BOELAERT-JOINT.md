@@ -22,7 +22,7 @@ answers a different question. Table I plasma endpoints are treated as
 source-derived fitted endpoints, following the existing reconstruction.
 
 The inherited IV regimen and four daily dwells (4, 4, 4 and 12 h) are preserved.
-The two outcomes are day-5 predose trough and daily dialysate recovery.
+The two outcomes are end-of-day-five trough (120 h) and daily dialysate recovery.
 The engine SHA-256 and explicit grid are saved in the result JSON.
 
 ## Exploration
@@ -78,14 +78,11 @@ across patients.
 The JSON includes half-step repeats of both the shared and individual minima.
 These check numerical sensitivity within the same equations and event schedule.
 
-## Source review checklist for Gem
+## Source verification
 
-- Confirm Table I day-5 troughs of 6.3, 3.0 and 2.9 µmol/L for patients 1, 4 and 5.
-- Confirm Table II daily recovery fractions of 10.6%, 13.6% and 12.3%.
-- Confirm 24-hour steady-state AUC values of 265, 194 and 218 µmol·h/L.
-- Check the recovery collection window and the four dwell durations against Methods.
-- Assess whether blank urine-recovery cells justify the inherited anuric subset.
-- Check the status of the plasma endpoints as source-derived/fitted values.
+Table I gives fitted day-five minima of 6.3, 3.0 and 2.9 µmol/L for patients 1, 4 and 5. Table II gives daily dialysate recovery of 10.6%, 13.6% and 12.3% and steady-state 24-hour AUC of 265, 194 and 218 µmol·h/L, respectively.
+
+The investigators recorded each drained volume and assayed dialysate aliquots. Their analysis jointly fitted plasma concentrations and dialysate amounts over five days and used the fitted model to derive steady-state endpoints. The final simulated day approximates that steady-state interval. The methods identify three nonanuric patients, for whom urine was collected. Blank urine entries do not quantify residual creatinine clearance in the other three.
 
 ## Interpretation
 
