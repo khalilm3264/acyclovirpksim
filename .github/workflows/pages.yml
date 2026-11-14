@@ -60,6 +60,7 @@ jobs:
           npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
           npx playwright install --with-deps chromium firefox
           node scripts/check-script-markup.cjs
+          node scripts/check-scenario-summary.cjs
           node scripts/check-visualizations.cjs
 
           node scripts/check-pediatric.cjs
@@ -70,6 +71,7 @@ jobs:
           node scripts/check-regimens.cjs
           node scripts/check-literature.cjs
           node scripts/check-exchanges.cjs
+          node scripts/check-export-downloads.cjs
 
       - name: Compare surface startup when the ECharts renderer changes
         if: github.event_name == 'push'

@@ -101,3 +101,51 @@ The browser regression uses the [OSPSuite-R SimResults.csv fixture](https://gith
 - On open, missing settings are filled from the current defaults and the result passes the same validation as a schema 2 JSON import. A link that fails validation changes nothing.
 - The fragment is removed from the address bar as soon as the page reads it. Links are capped at 6,000 characters; larger scenarios should use the JSON file.
 - Because defaults are filled in at open time, a link made today can produce different results after a release that changes a default. Use the JSON export when a scenario must be reproducible.
+
+## Runnable nominal scenario scripts
+
+From the main simulator's Export results menu, select Nominal Python (.py) or
+Nominal R / mrgsolve (.R). The export describes the primary scenario, not all
+counterfactual overlays. Both write `ayflux_nominal_systemic.csv` with time in
+hours and plasma acyclovir/CMMG in mg/L. The parameter snapshot includes the
+resolved Cockcroft–Gault weight choice, probenecid and scaling modifiers.
+
+Python requires NumPy and SciPy. R requires mrgsolve plus a working C++ toolchain.
+All dosing and HD/CRRT start/stop events become explicit solver boundaries; the
+Python integration is split at those boundaries and the R event table includes
+EVID=2 solver-reset records. The scripts support constant or piecewise-linear
+CrCl, IV infusions, oral valacyclovir and mixed routes. They do not export measured
+levels. Applied fitting blocks nominal export rather than silently discarding the
+fit. Exchange-resolved PD is unsupported and raises a clear message.
+
+These are nominal **systemic** curves. They do not reproduce the uncertainty
+ensemble median, Bayesian reweighting, CSF lag proxies or PD mass accounting.
+Use configuration JSON with the actual AyFlux engine for those features.
+Agreement between implementations does not establish clinical validity.
+
+Re-run the four numerical export scenarios with
+`node scripts/check-scenario-scripts.cjs` (Python) or the same command with `--r`.
+The cases cover off-grid HD events, overlapping infusions, oral/IV transitions,
+changing CrCl, CRRT→HD, anuria and zero dosing. The comparison threshold is
+0.005% normalized maximum systemic concentration error against a fine-grid engine
+run; it is an implementation check, not a clinical acceptance limit.
+
+## Printable teaching handout
+
+Choose **Printable summary** from Export results. The renderer captures the current
+primary scenario before loading the preview, so later updates cannot relabel an
+older curve. The handout includes model version, capture time, patient/kidney
+inputs, regimen and dialysis summary, selected non-default modifiers, five output
+metrics and plasma acyclovir/CMMG curves. Parameter bands retain the configured
+coverage; fitting is disclosed as a count, never as individual measurements.
+
+The handout is a summary, not a complete model file. Custom dosing lists, CrCl knots
+and dialysis schedules are abbreviated explicitly. Keep the configuration JSON and
+CSV alongside it for reproducibility. End-window concentration is not labeled as a
+steady-state trough. Numerical outputs, prior assumptions and clinical limitations
+are unchanged. The local preview supports Print / save PDF; it transmits nothing.
+
+The summary renderer and stylesheet load only when requested. Print styling is
+scoped to an open preview, so closing it restores the application's normal print
+behavior. Browser regression checks require a single PDF page for the default,
+mobile, 200-dose/dynamic-kidney, PD and fitted-result summaries.

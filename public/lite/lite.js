@@ -106,11 +106,11 @@
   if(lo>0&&Math.abs(time[lo-1]-hour)<Math.abs(time[lo]-hour))return lo-1;
   return lo;
  }
- function draw(canvas,scenarios,key,horizon,highlight,shown,hoverHour=null){
+ function draw(canvas,scenarios,key,horizon,highlight,shown,hoverHour=null,layout=null){
   if(!canvas||typeof canvas.getContext!=="function")return;
   const ctx=canvas.getContext("2d");if(!ctx)return;
-  const rect=canvas.getBoundingClientRect(),width=Math.max(280,rect.width||700);
-  const height=Math.max(210,rect.height||290),scale=Math.min(2,window.devicePixelRatio||1);
+  const rect=layout||canvas.getBoundingClientRect(),width=Math.max(280,rect.width||700);
+  const height=Math.max(210,rect.height||290),scale=layout?.scale||Math.min(2,window.devicePixelRatio||1);
   if(canvas.width!==Math.round(width*scale)||canvas.height!==Math.round(height*scale)){
    canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);
   }
@@ -178,6 +178,31 @@
    }
   }
   return lines.join("\r\n")+"\r\n";
+ }
+ function imageCanvas(document,scenarios,config,active,visibility){
+  if(!scenarios.length||!config)throw Error("Calculate a scenario before exporting.");
+  const image=document.createElement("canvas");image.width=1920;image.height=1280;
+  const ctx=image.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,image.width,image.height);
+  ctx.fillStyle="#24485d";ctx.font="bold 38px system-ui,sans-serif";ctx.fillText("AyFlux Lite",100,65);
+  ctx.font="24px system-ui,sans-serif";
+  ctx.fillText(config.route+" · "+config.dose+" mg every "+config.every+" h · "+config.weight+" kg · CrCl "+config.crcl+" mL/min · "+config.horizon+" h",100,108,1720);
+  ctx.font="22px system-ui,sans-serif";
+  ctx.font="21px system-ui,sans-serif";
+  ctx.fillText("HD "+config.hdDuration+" h from "+config.hdStart+" h, every "+config.hdRepeat+" h, clearance "+config.hdCl+" mL/min · PD fill "+config.pdVolume+" L · CRRT effluent "+config.effluent+" mL/kg/h",100,140,1720);
+  let x=100;
+  for(const scenario of scenarios.filter(s=>visibility.has(s.id))){
+   ctx.fillStyle=scenario.color;ctx.fillRect(x,172,32,6);ctx.fillStyle="#24485d";
+   ctx.fillText(scenario.label,x+44,183);x+=340;
+  }
+  for(const [key,title,y] of [["plasma","Plasma acyclovir",236],["cmmg","Plasma CMMG (exploratory)",756]]){
+   ctx.font="bold 28px system-ui,sans-serif";ctx.fillText(title,100,y);
+   const chart=document.createElement("canvas");
+   draw(chart,scenarios,key,config.horizon,active,visibility,null,{width:860,height:220,scale:2});
+   ctx.drawImage(chart,100,y+15,1720,440);
+  }
+  ctx.font="21px system-ui,sans-serif";ctx.fillStyle="#526f7c";
+  ctx.fillText("Deterministic educational model · unvalidated · not for dosing or toxicity decisions · ayflux.org/lite/",100,1245,1720);
+  return image;
  }
  function mount(document,engine){
   const $=id=>document.getElementById(id);
@@ -329,8 +354,20 @@
    link.href=url;link.download="ayflux_lite_scenarios.csv";
    link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   });
+  $("litePng")?.addEventListener("click",()=>{
+   try{
+    if(pending){clearTimeout(pending);update();}
+    const image=imageCanvas(document,scenarios,config,active,visibility);
+    image.toBlob(blob=>{
+     if(!blob){status.textContent="Image export failed. Please try again.";return;}
+     const url=URL.createObjectURL(blob),link=document.createElement("a");
+     link.href=url;link.download="ayflux_lite_charts.png";link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+     status.textContent="Downloaded both charts with the visible scenarios and applied inputs.";
+    },"image/png");
+   }catch(error){status.textContent="Image export failed: "+error.message;}
+  });
   window.addEventListener("resize",requestPaint,{passive:true});
   update();
  }
- return {MODES,DEFAULT_INPUTS,INPUT_LIMITS,fixedConfiguration,compute,draw,ticks,closest,exportCSV,mount};
+ return {MODES,DEFAULT_INPUTS,INPUT_LIMITS,fixedConfiguration,compute,draw,ticks,closest,exportCSV,imageCanvas,mount};
 });

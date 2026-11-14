@@ -163,10 +163,13 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  await page.click('#openVisualExplorer');await page.waitForURL('**/explore/');assert.ok((await page.textContent('#source')).includes('copied'));
  await page.goto(url+'/lite/');
  await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#acvChart'))?.getOption().series.length===5);
- await page.route('**/echarts-6.1.0.min.js',r=>r.abort());
+ let blockedRendererRequests=0;
+ await page.route(/\/echarts-(?!gl-)[^/]+\.min\.js(?:\?.*)?$/,r=>{blockedRendererRequests++;return r.abort();});
  await page.reload();await page.waitForSelector('#acvChart > canvas');
  await page.waitForFunction(()=>document.querySelector('#liteResults').children.length===5);
  assert.ok(await page.evaluate(()=>document.querySelector('#acvChart > canvas').width>300));
+ assert.ok(blockedRendererRequests>0,'Offline chart check must block an actual renderer request');
+ assert.equal(await page.evaluate(()=>!!window.echarts),false,'Native Canvas fallback must run without ECharts');
  assert.ok(!requests.some(u=>/plotly/i.test(u)));
  assert.deepEqual(errors,[]);console.log('Desktop/mobile explorer, lazy 3D, cell selection, time slider, invalid inputs, snapshot transfer and XLSX download passed.');
  }finally{await browser.close();server.close();}})().catch(e=>{console.error(e);server.close();process.exitCode=1;});
