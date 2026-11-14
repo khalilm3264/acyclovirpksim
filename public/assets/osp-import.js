@@ -43,6 +43,7 @@
   if(rows.length<2)throw Error("CSV needs a header and at least one data row.");
   const headers=rows.shift().map(s=>s.trim());
   if(headers.length<2||headers.some(s=>!s))throw Error("CSV header is missing or incomplete.");
+  if(new Set(headers).size!==headers.length)throw Error("CSV column headings must be unique. Rename duplicate headings before importing.");
   if(rows.some(r=>r.length!==headers.length))throw Error("CSV rows have inconsistent column counts.");
   return {delimiter,headers,rows};
  }

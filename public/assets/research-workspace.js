@@ -61,7 +61,7 @@ $('itoStudy').addEventListener('toggle',async()=>{
   $('itoStatus').textContent='Chart unavailable. The measurements and intervals are listed below.';
  }
 });
-let externalTable=null, lastExternal=null;
+let externalTable=null, lastExternal=null, externalRevision=0;
 const getSnapshot=()=>{
  const snapshot=bridge.snapshot();
  if(!snapshot.updated||!snapshot.results?.[snapshot.primary])throw Error("Run a successful simulation first.");
@@ -75,19 +75,22 @@ function selection(select,headers,preferred){
  if(index>=0)select.selectedIndex=index;
 }
 $('ospFile').addEventListener("change",async event=>{
+ const revision=++externalRevision;
  try{
   const file=event.target.files?.[0];externalTable=null;lastExternal=null;
   $('ospPlot').classList.add("hidden");$('ospDifference').classList.add("hidden");updateText("ospMetrics","");
   if(!file)return;
   if(file.size>4*1024*1024)throw Error("Choose a CSV smaller than 4 MB.");
-  externalTable=importer.parseCSV(await file.text());
+  const text=await file.text();
+  if(revision!==externalRevision)return;
+  externalTable=importer.parseCSV(text);
   selection($('ospTimeColumn'),externalTable.headers,/(^time$|time|hour|minute)/i);
   selection($('ospValueColumn'),externalTable.headers,/(acyclovir|aciclovir|concentration|plasma|blood|cmmg)/i);
   if($('ospTimeColumn').value===$('ospValueColumn').value&&externalTable.headers.length>1)$('ospValueColumn').selectedIndex=1;
   updateText("ospStatus",externalTable.rows.length+" rows loaded locally. Confirm the two columns, their units, and target analyte.");
- }catch(error){externalTable=null;updateText("ospStatus","Import error: "+error.message);}
+ }catch(error){if(revision!==externalRevision)return;externalTable=null;updateText("ospStatus","Import error: "+error.message);}
 });
-async function renderExternal(){
+async function renderExternal(revision){
  if(!externalTable)throw Error("Select a CSV file first.");
  const snapshot=getSnapshot(),key=$('ospTarget').value;
  const raw=importer.selectSeries(externalTable,{
@@ -101,6 +104,7 @@ async function renderExternal(){
  const model={time:simulation.time,concentration:simulation[key].median};
  const difference=importer.compareCurves(model,raw);
  await window.AyFluxCharts.ensure();
+ if(revision!==externalRevision)return;
  const unitName=key==="plasma"?"Plasma acyclovir":key==="csf"?"CSF acyclovir":key==="cmmg"?"Plasma CMMG":"CSF CMMG";
  const charts=window.AyFluxCharts;
  $('ospPlot').classList.remove('hidden');$('ospDifference').classList.remove('hidden');
@@ -116,9 +120,11 @@ async function renderExternal(){
  lastExternal={time:raw.time,concentration:raw.concentration,unitName,metrics:difference};
 }
 $('ospCompare').addEventListener("click",async ()=>{
- try{await renderExternal();}catch(error){updateText("ospStatus","Comparison error: "+error.message);}
+ const revision=externalTable?++externalRevision:externalRevision;
+ try{await renderExternal(revision);}catch(error){if(revision===externalRevision)updateText("ospStatus","Comparison error: "+error.message);}
 });
 $('ospClear').addEventListener("click",()=>{
+ ++externalRevision;
  $('ospFile').value="";externalTable=null;lastExternal=null;
  for(const id of ["ospPlot","ospDifference"]){const el=$(id);window.AyFluxCharts.dispose(el);el.classList.add("hidden");}
  updateText("ospMetrics","");updateText("ospStatus","Import cleared; no file data were uploaded.");
