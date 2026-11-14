@@ -1,8 +1,9 @@
-# Secondary Kenzaka queue: Blohm, Feldman, Rajan and Ikuta
+# Secondary Kenzaka queue: five verified original sources
 
-Reviewed 2026-11-14 from four newly supplied original PDFs, with page rendering
+Reviewed 2026-11-14 from five newly supplied original PDFs, with page rendering
 and visual checks of Blohm p.1050/Table 1, Feldman p.386/Figure 1, Rajan
-p.306/Table 1 and Ikuta p.1. These complete four source checks in issue #75;
+p.306/Table 1, Ikuta p.1 and Chevret pp.632–633/Figure 1. These complete the
+five outstanding source checks in this secondary queue in issue #75;
 they do not create an independent cohort or validate a model. Existing numbered
 bibliography anchors remain unchanged. No source PDF or model edits enter the
 public repository. Original PDFs and the source catalogue remain private.
@@ -16,7 +17,9 @@ public repository. Original PDFs and the source catalogue remain private.
 | 31 | Rajan GRC, Cobb JP, Reiss CK. Acyclovir induced coma in the intensive care unit. Anaesth Intensive Care. 2000;28(3):305–307 | [10.1177/0310057X0002800309](https://doi.org/10.1177/0310057X0002800309); [10853214](https://pubmed.ncbi.nlm.nih.gov/10853214/) | `9bf4ee05c3258164a7424e9094a89b8ff57635a92ce6731c5ee44e93ff8d8153` |
 | 4 | Ikuta K, et al. Trillions and trillions: Herpes simplex virus–1 hepatitis in an immunocompetent adult. Open Forum Infect Dis. 2019;6(11):ofz465 | [10.1093/ofid/ofz465](https://doi.org/10.1093/ofid/ofz465); [31777756](https://pubmed.ncbi.nlm.nih.gov/31777756/) | `5215bdf1cd87ae8b23b5983d0ccb12f0c0e8a30dde8f25c048943d1de8c88863` |
 
-PDF page counts are 3, 4, 3 and 4, respectively. Feldman's first PDF page
+| 29 | Chevret L, Debray D, Poulain C, Durand Ph, Devictor D. Neurological toxicity of acyclovir: Report of a case in a six-month-old liver transplant recipient. Pediatr Transplant. 2006;10(5):632–634 | [10.1111/j.1399-3046.2006.00534.x](https://doi.org/10.1111/j.1399-3046.2006.00534.x); [16857003](https://pubmed.ncbi.nlm.nih.gov/16857003/) | `a1b39d89d07eaf282c2ef2104adcd06d30a33d682d48cba926d3d6bbd467cf13` |
+
+PDF page counts are 3, 4, 3, 4 and 3, respectively. Feldman's first PDF page
 includes the end of an unrelated preceding article before the target article
 begins on printed p.385. That extra content does not change document identity.
 
@@ -123,13 +126,50 @@ this does not prove that no assay was ever performed. Kenzaka's serum-ACV-positi
 flag must remain visible as a secondary-source conflict. No acute HD or timed
 ACV/CMMG post-HD pair is identified in the supplied clinical course.
 
+## Case 29 — Chevret: earlier CVVH and one residual plasma ACV value
+
+The six-month-old girl (pretransplant weight 5.5 kg) underwent liver
+transplantation. Persistent oligoanuria and water retention required **CVVH
+during the first three postoperative days (POD)**; CVVH was stopped on POD 3
+(p.632). Figure 1 on p.633 depicts the early filtration period, creatinine/urea
+course, ACV treatment and neurologic symptoms; it is not an ACV concentration
+curve. No CVVH prescription, exact end clock or ACV assay at its termination
+is reported.
+
+The case narrative on p.633 gives the following sequence:
+
+| Event | Day-level evidence |
+| --- | --- |
+| ACV started | POD 3, 250 mg/m² body surface once daily |
+| Dose increased | POD 5, 250 mg/m² three times daily, as printed |
+| Neurologic deterioration | POD 5; the clock order relative to same-day dose escalation is not specified |
+| ACV assay | **Plasma residual 4.5 mg/L on POD 7, prior to withdrawal** |
+| Withdrawal | ACV discontinued on POD 7; neurologic recovery over following days |
+
+The last-infusion-to-draw interval and the exact draw-to-withdrawal interval are
+omitted. “Prior to withdrawal” does **not** establish an immediate pre-stop draw
+or a precisely timed trough. CVVH stopped and ACV began on the same reported
+POD 3, without hour-level ordering; do not invent a clock gap or an overlap.
+There is no patient ACV sample at CVVH disconnect, later paired sample after
+withdrawal, or reported intermittent HD. No restarted filtration course is
+specified as treatment for these neurologic symptoms. The discussion's general
+statement that hemofiltration may expedite recovery is not documentation that
+it was used again in this patient.
+
+The cited **2.3 ± 1.4 mg/L** target residual concentration is a reference range,
+not a second patient draw. CMMG is discussed mechanistically on p.634 but is
+not measured in this patient. Thus neither a treatment concentration decline
+nor an end-treatment-to-delayed rebound pair can be calculated. Preserve the
+original 4.5 mg/L plasma observation and day-level chronology; this case adds
+zero qualifying rebound pairs. The correct DOI ends in **00534.x**, distinct
+from the excluded BK-virus Alexander paper ending in 00539.x.
+
 ## Queue disposition and intake boundaries
 
-These four originals add **zero qualifying immediate-end-HD to delayed
+These five originals add **zero qualifying immediate-end-HD to delayed
 pre-dose/pre-next-HD pairs**. They do not replace the verified flat Krieble pair
-or Davenport's two sequence-qualified between-session rises. The remaining
-secondary acute-HD source target is Chevret et al. 2006 (case 29; PMID 16857003);
-its full text is not supplied in this intake. Gómez Campderá (case 16) and
+or Davenport's two sequence-qualified between-session rises. Chevret case 29 is now resolved from the supplied original, so none of the five
+secondary-queue full texts remains outstanding. Gómez Campderá (case 16) and
 MacDiarmaid-Gordon (case 40) remain separate baseline-HD retrieval tasks. Existing
 Strong (19), Peyrière (30), Sagawa (18), Sadjadi (6) and Davenport (35/36)
 dispositions are not re-counted here. This is not a completed primary review of
@@ -141,3 +181,11 @@ new patients or unique PDFs. `toddalexander2006.pdf` is Alexander et al.'s BK
 viremia/urinary shedding paper, DOI 10.1111/j.1399-3046.2006.00539.x; it is not
 Chevret's acyclovir-neurotoxicity report and is excluded from this ACV source
 archive. All previous accepted originals and numbered citations are retained.
+
+
+The subsequently supplied `feldman1988(1).pdf` has the same SHA-256 as the
+accepted Feldman original and is another byte duplicate. The four supplied
+methodological/statistical materials (`Statistical-Methods-for-Dose-Finding-Experiments.pdf`,
+`katsahian2006.pdf`, `resche-rigon2005.pdf`, `resche-rigon2006.pdf`) are excluded
+from this ACV primary-case archive. They do not supply additional patients or
+ACV rebound endpoints for this screen.
