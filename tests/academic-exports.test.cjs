@@ -26,8 +26,8 @@ test('LaTeX escapes all control characters and distinguishes measurement reweigh
 test('complete bibliography is regenerated exactly from numbered sources, additional source and software',()=>{
  const bib=generate(read('public/index.html'),read('public/cite/index.html'),read('public/references/index.html'));
  assert.equal(bib,read('public/references/ayflux.bib'));
- assert.equal((bib.match(/^@misc/gm)||[]).length,52);
- for(let i=1;i<=51;i++)assert.match(bib,new RegExp('@misc\\{ayfluxRef'+i+','));
+ assert.equal((bib.match(/^@misc/gm)||[]).length,57);
+ for(let i=1;i<=56;i++)assert.match(bib,new RegExp('@misc\\{ayfluxRef'+i+','));
  assert.match(bib,/@software\{khalil2026ayflux/);
  const hara=bib.slice(bib.indexOf('@misc{ayfluxAdditional1'));
  assert.match(hara,/author = \{Hara, K and Suyama, K and Itoh, H and Nagashima, S\}/);
