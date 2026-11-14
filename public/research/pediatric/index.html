@@ -23,7 +23,7 @@
 <div class="shell"><nav class="guide-topics" aria-label="Research navigation"><a href="/learn/">User guide</a><a href="/learn/model-methods/">Model methods</a><a href="/references/">References</a><span aria-current="page">Pediatric research</span></nav>
 <main><div class="page-intro"><span class="eyebrow">Research model · Abdalla 2020</span><h1>Pediatric acyclovir: size and kidney function</h1><p>Explore predicted plasma exposure after repeated IV infusions.</p></div>
 <div class="notice"><strong>Research only—not for patient dosing.</strong> Ages 1–18; no dialysis.</div>
-<div class="layout"><section class="card"><h2>Simulation inputs</h2><form id="inputs" class="controls">
+<div class="layout"><section class="card"><h2>Simulation inputs</h2><form id="inputs" class="controls tool-controls">
 <label>Age (years)<input id="age" type="number" min="1" max="18" step="any" value="4" required></label>
 <label>Weight (kg)<input id="weight" type="number" min="3.1" max="66" step="any" value="15" required></label>
 <label class="wide">Study-defined eGFR (mL/min/1.73 m²)<input id="egfr" type="number" min="56" max="399" step="any" value="164" required></label>
@@ -37,7 +37,7 @@
 <div id="chart" class="chart" style="height:360px" role="img" aria-label="Predicted plasma acyclovir concentrations. Numerical results follow in the table."></div>
 <div id="metrics" class="metrics" aria-live="polite"></div><p id="status" class="status" aria-live="polite"></p>
 <p>Shading shows simulated between-person variability, excluding parameter uncertainty and measurement error.</p>
-<details><summary>Concentration table and CSV</summary><button id="export" class="btn" type="button">Export CSV</button><div class="table-scroll"><table><caption>Predictions in mg/L; time in hours</caption><thead><tr><th>Time</th><th>Typical</th><th>5th</th><th>Median</th><th>95th</th><th>Comparison</th></tr></thead><tbody id="rows"></tbody></table></div></details></section></div>
+<details><summary>Concentration table and CSV</summary><button id="export" class="btn secondary" type="button">Export CSV</button><div class="table-scroll"><table><caption>Predictions in mg/L; time in hours</caption><thead><tr><th>Time</th><th>Typical</th><th>5th</th><th>Median</th><th>95th</th><th>Comparison</th></tr></thead><tbody id="rows"></tbody></table></div></details></section></div>
 <details class="card" id="pediatricMapPanel"><summary>Weight–eGFR map</summary>
 <label>Outcome <select id="pediatricMetric"><option value="cl">Clearance (L/h)</option><option value="halfLife">Half-life (h)</option><option value="aucPerInterval">Steady-state interval AUC (mg·h/L)</option></select></label>
 <label>Dose convention <select id="pediatricConvention"><option value="relative">Hold mg/kg fixed</option><option value="absolute">Hold total mg fixed</option></select></label>

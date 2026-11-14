@@ -21,9 +21,9 @@
   <a class="ay-guide-link" href="/">← Simulator</a>
 </header>
 <div class="shell"><nav class="guide-topics" aria-label="Research navigation"><a href="/learn/">User guide</a><a href="/learn/model-methods/">Model methods</a><a href="/references/">References</a><span aria-current="page">Plasma sampling</span></nav><main>
-<h1>Plasma sampling and parameter recovery</h1>
-<p>Three sampling schedules use subsets of the same six simulated plasma concentrations. Select a synthetic adult to compare estimated peak concentration, exposure and total systemic clearance after one IV infusion.</p>
-<section class="card"><label>Synthetic adult <select id="patient"><option value="0">Lower clearance, larger central volume</option><option value="1">Higher clearance, smaller central volume</option><option value="2">Reference clearance and volume</option></select></label>
+<div class="page-intro"><h1>Plasma sampling and parameter recovery</h1>
+<p>Three sampling schedules use subsets of the same six simulated plasma concentrations. Select a synthetic adult to compare estimated peak concentration, exposure and total systemic clearance after one IV infusion.</p></div>
+<section class="card"><div class="tool-fields tool-controls"><label>Synthetic adult <select id="patient"><option value="0">Lower clearance, larger central volume</option><option value="1">Higher clearance, smaller central volume</option><option value="2">Reference clearance and volume</option></select></label></div>
 <fieldset><legend>Curves shown</legend><label><input type="checkbox" checked value="0"> Late sample (12 h)</label> <label><input type="checkbox" checked value="1"> Early and late (1, 12 h)</label> <label><input type="checkbox" checked value="2"> All six samples</label></fieldset>
 <p>Lines show pointwise posterior medians. Circles show the six simulated measurements. The 12-hour sample represents a pre-dose trough for an assumed 12-hour interval.</p>
 <div id="chart" style="height:320px" aria-label="Estimated plasma acyclovir and synthetic samples"></div><p id="status" role="status"></p>
