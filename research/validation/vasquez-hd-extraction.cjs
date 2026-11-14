@@ -24,6 +24,22 @@ const clearanceAtUnitBloodPlasmaRatio = bloodFlow * (1 - auc(outlet) / inletAuc)
 // ultrafiltration, and linear interpolation between sparse blood samples.
 const bloodMassAtUnitRatio = clearanceAtUnitBloodPlasmaRatio * inletAuc / 1000;
 const ratioNeeded = effluentMass / bloodMassAtUnitRatio;
+// Table II of de Miranda et al. (1981) gives total radioactivity clearance
+// by plasma and whole blood in the same participants. AUCblood/AUCplasma
+// equals CLplasma/CLblood for the same tracer input and body-surface factor.
+const clearancePairs = [
+  ['VMB',238,209], ['EJH',260,244], ['MAM',291,276], ['GSS',265,248]
+];
+const tracerComparison = clearancePairs.map(([id,plasma,blood]) => {
+  const tracerAucRatio = plasma / blood;
+  return {id,plasma,blood,tracerAucRatio,
+    conditionalBloodMassMg: bloodMassAtUnitRatio * tracerAucRatio};
+});
+// Table 1B's haematocrit row reads 26.7 g/dL. Treat 26.7 as percent
+// for this additional sensitivity, with the same Hct in inlet and outlet.
+const assumedHct = .267;
+const requiredCellToPlasma = (ratioNeeded - (1 - assumedHct)) / assumedHct;
+const minimumInletBloodToPlasma = effluentMass / (bloodFlow * inletAuc / 1000);
 const summaries = [81.8, clearanceAtUnitBloodPlasmaRatio, effluentClearance].map(hdCl => {
   // Existing case reconstruction with an assumed four-hour last-dose lag.
   // Use the same CL for both sessions as a sensitivity. HD1 CL is unmeasured.
@@ -33,7 +49,8 @@ const summaries = [81.8, clearanceAtUnitBloodPlasmaRatio, effluentClearance].map
   return {hdCl, endpoints};
 });
 console.log(JSON.stringify({extraction, inletAuc, effluentAuc, effluentMass,
-  bloodMassAtUnitRatio, clearanceAtUnitBloodPlasmaRatio, effluentClearance, ratioNeeded, summaries}, null, 2));
+  bloodMassAtUnitRatio, clearanceAtUnitBloodPlasmaRatio, effluentClearance, ratioNeeded, tracerComparison, assumedHct, requiredCellToPlasma,
+  minimumInletBloodToPlasma, summaries}, null, 2));
 // The implied ratio is a reconciliation calculation. Blood/plasma partition
 // was unknown (Table 1B). It cannot be inferred uniquely from these results.
 // Model comparisons using the effluent-derived clearance reuse observed data.
