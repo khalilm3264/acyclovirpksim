@@ -22,7 +22,27 @@ const server=http.createServer((req,res)=>{
  await page.waitForFunction(()=>document.querySelectorAll('#literatureRows tr').length===3);
  await page.waitForSelector('#literaturePlot canvas');
  assert.equal(await page.locator('#literatureRows tr').count(),3);
- await page.selectOption('#literatureCase','smith-ckd');await page.click('#runLiterature');
+ await page.check('#laskinCompare');
+ await page.click('#runLiterature');
+ await page.waitForFunction(()=>document.querySelector('#literatureAlternative').textContent.startsWith('Calibration'));
+ const pair=await page.locator('#literatureRows tr').first().locator('td').allTextContents();
+ assert.equal(pair[2],pair[3]);
+ await page.click('#fitPublished');
+ await page.waitForFunction(()=>window.AyFluxResearchBridge.snapshot().config.vcScale!==1);
+ await page.click('#runLiterature');
+ await page.waitForFunction(()=>{
+  const cells=document.querySelectorAll('#literatureRows tr:first-child td');
+  return cells.length===4&&cells[2].textContent!==cells[3].textContent;
+ });
+ await page.waitForFunction(()=>{
+  const chart=window.echarts.getInstanceByDom(document.querySelector('#literaturePlot'));
+  const series=chart?.getOption().series||[];
+  return series.some(s=>s.type==='custom'&&s.data.length===3)&&series.some(s=>s.name.startsWith('Calibration'));
+ });
+ await page.click('#resetPublished');
+ await page.selectOption('#literatureCase','smith-ckd');
+ assert.equal(await page.locator('#laskinCompare').isVisible(),false);
+ await page.click('#runLiterature');
  await page.waitForFunction(()=>document.querySelectorAll('#literatureRows tr').length===1);
  await page.waitForSelector('#literaturePlot canvas');
  assert.match(await page.locator('#literatureRows').innerText(),/0.909/);
