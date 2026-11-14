@@ -73,7 +73,7 @@ async function main(){
   assert.ok(troughWidth>phoneMetricsWidth*0.9,'Phone trough uses a full row');
   for(const id of ['concUnit','csv']) {
    const height=await page.locator('#'+id).evaluate(el=>el.getBoundingClientRect().height);
-   assert.ok(height>=39.9,'Phone picker target height');
+   assert.ok(height>=39.9,'Phone picker '+id+' target height '+height);
   }
   // Guide navigation follows all content at desktop and phone widths.
   for (const width of [1280,390]) {
