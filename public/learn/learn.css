@@ -238,3 +238,7 @@ html body .site-header.ay-header .ayflux-logo:focus-visible{outline:2px solid #f
 
 /* Long DOI identifiers remain readable on small screens. */
 ol.refs{padding-left:1.6rem;line-height:1.7;overflow-wrap:anywhere}ol.refs li{margin-bottom:1rem;scroll-margin-top:1rem}
+
+@media (max-width:319px) {
+  .card select {min-width:0;max-width:100%}
+}
