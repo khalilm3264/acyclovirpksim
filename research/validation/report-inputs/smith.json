@@ -1,0 +1,531 @@
+{
+  "schemaVersion": 1,
+  "id": "smith",
+  "provenance": {
+    "sourceCommit": "b0defab8b9af6a87e7fdd42d01390b30d21e4457",
+    "modelCommit": "304ce5308ea78907d18b07d8670c164295829eb3",
+    "engineBlob": "17971df66e0a97b4d382572a582d35c444a3c83f",
+    "files": {
+      "public/assets/pk-engine.js": "019c02b31fb273fa0d019d9c0766d4f8dccacd08b0d758e0cdd2f247cdf3755c",
+      "research/validation/smith2016-obesity.cjs": "086e2585d364a4e6135f9c81394e87ad92fd7bedc4051830599cd57750ce4807"
+    }
+  },
+  "source": {
+    "doi": "10.1016/j.ijantimicag.2016.01.006",
+    "patient": {
+      "age": 61,
+      "sex": "female",
+      "height": 162.6,
+      "weight": 106.7,
+      "scr": 1.8
+    },
+    "reportedIdealWeight": 54.7,
+    "reportedEstimatedCrCl": 55,
+    "measuredCrCl": 19.4,
+    "doseMg": 1000,
+    "intervalHours": 8,
+    "samplingDay": 19,
+    "endpoints": {
+      "peak": 43,
+      "trough": 16.1,
+      "auc8": 217,
+      "clearance": 4.62,
+      "apparentHalfLife": 5.13
+    },
+    "endpointStatus": {
+      "peak": "Observed post-infusion maximum",
+      "trough": "Author-extrapolated pre-next-dose concentration, not a measured trough",
+      "auc8": "Author-derived interval AUC using observed and extrapolated concentrations",
+      "clearance": "Author-derived dose / interval AUC; not an independent endpoint",
+      "apparentHalfLife": "Author-estimated from a one-compartment log-linear fit"
+    },
+    "limitations": [
+      "Infusion duration is not reported; 1 h is assumed and 0.5/2 h explored.",
+      "No individual concentration values are tabulated; no synthetic measured points are created.",
+      "Measured CrCl is absolute mL/min; it is not indexed to 1.73 m2.",
+      "The source samples span only 4 h after infusion; steady state was assumed on day 19.",
+      "This analysis was designed after inspecting the reported endpoints; no fitting is performed."
+    ]
+  },
+  "comparisons": [
+    {
+      "axis": "CrCl input",
+      "name": "reported-estimate",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 55,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 21.56932031877719,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 2.351313457167545,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 56.81637992759522,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 17.600558171329546,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 1.6964929707760357,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "CrCl input",
+      "name": "measured",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 19.4,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 31.003896691758623,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 9.626825177120818,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 129.27469576345604,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 7.735465893725851,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 3.2785277219769777,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "CrCl input",
+      "name": "cg-actual",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 55.284760802469144,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 21.53188528583803,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 2.3309069241219227,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 56.56278782316938,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 17.679468047548706,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 1.6908736082244002,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "CrCl input",
+      "name": "cg-ideal",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 28.36062657966365,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 27.060275158030013,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 6.223591489188707,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 97.86134641244183,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 10.218539154217714,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 2.5981335809470765,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "CrCl input",
+      "name": "cg-adjusted",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 39.13028026878584,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 24.19743551802721,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 4.018128361512459,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 75.74087425473411,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 13.202910711550125,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 2.1142645795589896,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "PK scaling weight",
+      "name": "actual",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 19.4,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 31.003896691758623,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 9.626825177120818,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 129.27469576345604,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 7.735465893725851,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 3.2785277219769777,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "PK scaling weight",
+      "name": "adjusted",
+      "inputs": {
+        "weight": 75.5,
+        "crcl": 19.4,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 41.6644230858263,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 12.073429513156961,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 167.5624204777225,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 5.96792524928315,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 3.110805821614329,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "PK scaling weight",
+      "name": "ideal",
+      "inputs": {
+        "weight": 54.7,
+        "crcl": 19.4,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 54.88195602496656,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 14.870574171512558,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 213.3763806301137,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 4.686554327367153,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 2.9703041767029394,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "Infusion assumption",
+      "name": "0.5",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 19.4,
+        "infusion": 0.5,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 34.266475669801665,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 9.408098667379434,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 129.27469576345644,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 7.735465893725828,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 3.027110263798547,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "Infusion assumption",
+      "name": "1",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 19.4,
+        "infusion": 1,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 31.003896691758623,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 9.626825177120818,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 129.27469576345604,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 7.735465893725851,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 3.2785277219769777,
+          "observed": 5.13
+        }
+      ]
+    },
+    {
+      "axis": "Infusion assumption",
+      "name": "2",
+      "inputs": {
+        "weight": 106.7,
+        "crcl": 19.4,
+        "infusion": 2,
+        "dose": 1000,
+        "every": 8,
+        "horizon": 336,
+        "comparisonWindow": [
+          328,
+          336
+        ]
+      },
+      "rows": [
+        {
+          "endpoint": "peak",
+          "predicted": 26.382415480695123,
+          "observed": 43
+        },
+        {
+          "endpoint": "trough",
+          "predicted": 10.091153049461147,
+          "observed": 16.1
+        },
+        {
+          "endpoint": "auc8",
+          "predicted": 129.27469576345544,
+          "observed": 217
+        },
+        {
+          "endpoint": "clearance",
+          "predicted": 7.7354658937258876,
+          "observed": 4.62
+        },
+        {
+          "endpoint": "apparentHalfLife",
+          "predicted": 3.7482960786615758,
+          "observed": 5.13
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "case": "Smith 2016 combined endpoint score",
+      "reason": "Peak, extrapolated trough, AUC, dose/AUC clearance and fitted half-life are dependent descriptors; report ratios separately"
+    }
+  ]
+}

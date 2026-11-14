@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "id": "turner",
+  "provenance": {
+    "sourceCommit": "341f1467562e004fd26b67e38744d061e9b8815d",
+    "modelCommit": "304ce5308ea78907d18b07d8670c164295829eb3",
+    "engineBlob": "17971df66e0a97b4d382572a582d35c444a3c83f",
+    "files": {
+      "public/assets/pk-engine.js": "019c02b31fb273fa0d019d9c0766d4f8dccacd08b0d758e0cdd2f247cdf3755c",
+      "research/validation/turner-2016.cjs": "f27bef8caab6c8139d0958644de1a6cce9c365010337bc70fe05fa68f497e595",
+      "research/validation/TURNER-2016-PROTOCOL.md": "34a73d3383771a24225282c64aa2826315c99b8334f6d9251cda1c0f1d785673"
+    }
+  },
+  "combinations": [
+    {
+      "kidney": "absolute-egfr",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 4.001254768855627
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 7.075289753546336
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 8.55076426339627
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 16.49287743607696
+        }
+      ]
+    },
+    {
+      "kidney": "absolute-egfr",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 4.406397191747719
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 9.236152664555725
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 9.310505572830513
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 21.387038800522273
+        }
+      ]
+    },
+    {
+      "kidney": "cg-actual",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 3.5992707693776733
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 5.579469700480299
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 8.783100307732216
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 17.828233873753764
+        }
+      ]
+    },
+    {
+      "kidney": "cg-actual",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 4.051619795353545
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 7.315572587228802
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 9.50686141998611
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 23.0657906598711
+        }
+      ]
+    },
+    {
+      "kidney": "cg-ideal",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 4.658198777660759
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 11.146660643902791
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 8.904748385973578
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 18.572450765579976
+        }
+      ]
+    },
+    {
+      "kidney": "cg-ideal",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 4.9599339160010425
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 14.37661071237377
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 9.609201633635248
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 23.998938316508493
+        }
+      ]
+    },
+    {
+      "kidney": "cg-adjusted",
+      "variant": "default",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 4.184782275716315
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 7.966896793992394
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 8.855789492372832
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 18.26743035707553
+        }
+      ]
+    },
+    {
+      "kidney": "cg-adjusted",
+      "variant": "renal-x0.75",
+      "rows": [
+        {
+          "case": "obese",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 5.8,
+          "predicted": 4.563810748369675
+        },
+        {
+          "case": "obese",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 15.2,
+          "predicted": 10.372089319537794
+        },
+        {
+          "case": "normal",
+          "endpoint": "peak",
+          "unit": "mg/L",
+          "observed": 8.2,
+          "predicted": 9.568072545346537
+        },
+        {
+          "case": "normal",
+          "endpoint": "aucInfinity",
+          "unit": "mg h/L",
+          "observed": 24,
+          "predicted": 23.61676286555223
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "case": "Turner clearance",
+      "reason": "Derived exposure descriptor, excluded from co-primary Cmax/AUC count; group means are not independent patient records"
+    }
+  ]
+}

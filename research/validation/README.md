@@ -59,3 +59,10 @@ Run `node research/validation/compare-benchmarks.cjs` to reproduce the [benchmar
 ## Continuous infusion and PD/HD reconstructability
 
 [Manders 2026 & Sadjadi 2018 protocol](MANDERS2026-SADJADI2018-PROTOCOL.md) and [results](MANDERS2026-SADJADI2018-RESULTS.md) test continuous IV acyclovir (`n = 6` steady-state plasma levels plus Case F CSF check) and audit Sadjadi 2018 reconstructability under the pinned `304ce53` engine without modifying parameters or the 37-point scorecard. Run `node research/validation/manders2026-sadjadi2018.cjs`.
+
+## Unified report and manuscript audit
+
+Run `npm run benchmark:report` for pinned, separately labeled manuscript and external
+evaluations. See the [report](BENCHMARK-REPORT.md), [reproduction guide](BENCHMARK-REPORT-GUIDE.md)
+and [artifact audit](REPRODUCIBILITY-AUDIT.md). The generator does not change model
+parameters or merge new observations into the 37-point frozen scorecard.

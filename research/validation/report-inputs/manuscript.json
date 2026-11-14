@@ -1,0 +1,4348 @@
+{
+  "schemaVersion": 1,
+  "id": "manuscript",
+  "provenance": {
+    "sourceCommit": "8fc1c9d97590c81d3fbcf65ecb1f0ead273ab4a0",
+    "modelCommit": "8fc1c9d97590c81d3fbcf65ecb1f0ead273ab4a0",
+    "engineBlob": "cb07505a2b9e619ee3351bb0bf66d5610a611a6f",
+    "files": {
+      "public/assets/pk-engine.js": "9c370f46ebb986e7192afe7b6822aa31ed6faff34f91856fa580acbbad4c139d",
+      "public/assets/study-library.js": "9c4add6b0aae4e27d7006d704d71f5086b62586e846a932c18c156835b31e51d",
+      "research/validation/ablation-study.cjs": "003728caf128262ac541faad6ba9e6f8044af382a772d26aee7d5d9b685cf744"
+    }
+  },
+  "scenarios": [
+    {
+      "id": "laskin-normal",
+      "label": "Laskin 1982 (normal kidney function)",
+      "mode": "No dialysis",
+      "evidence": "published means",
+      "config": {
+        "virus": "VZV",
+        "age": 55,
+        "sex": "male",
+        "scr": 1,
+        "crclSource": "manual",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "repeat",
+        "doseCount": 1,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 79.1,
+        "crcl": 98,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 395.5,
+        "every": 24,
+        "infusion": 1,
+        "horizon": 24,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": false,
+        "pdRxRows": [],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 2.5,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "sinceDose": 0.25,
+          "predicted": 3.314557543482283,
+          "lower": 2.4949615658673543,
+          "upper": 4.5360666613535825,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "sinceDose": 0.5,
+          "predicted": 5.698106923149747,
+          "lower": 4.453253797955246,
+          "upper": 7.4802335868116945,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "sinceDose": 0.75,
+          "predicted": 7.43679635810537,
+          "lower": 5.90068598280691,
+          "upper": 9.729226420407848,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "sinceDose": 1,
+          "predicted": 8.727277271614918,
+          "lower": 6.85483480696981,
+          "upper": 11.407618043056662,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "sinceDose": 1.5,
+          "predicted": 4.764294455516726,
+          "lower": 2.988087410674206,
+          "upper": 7.021680231102086,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "sinceDose": 2,
+          "predicted": 2.8274152249707667,
+          "lower": 1.4140010003364074,
+          "upper": 4.9309320610535465,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "sinceDose": 3,
+          "predicted": 1.3358785537373508,
+          "lower": 0.517682394858135,
+          "upper": 3.008237480526074,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "sinceDose": 4,
+          "predicted": 0.8589223988481667,
+          "lower": 0.3293830105007294,
+          "upper": 2.1929998186750113,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "sinceDose": 6,
+          "predicted": 0.49552791940706375,
+          "lower": 0.1839818642646401,
+          "upper": 1.3636729294303094,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "sinceDose": 8,
+          "predicted": 0.3097296285866745,
+          "lower": 0.10221596629723204,
+          "upper": 0.9302502497960764,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "sinceDose": 10,
+          "predicted": 0.19487322747816033,
+          "lower": 0.05288456792323611,
+          "upper": 0.6517129771100306,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "sinceDose": 12,
+          "predicted": 0.12267187572237898,
+          "lower": 0.023941469820092955,
+          "upper": 0.47609608661273034,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "laskin-anuric",
+      "label": "Laskin 1982 (anuric, before dialysis)",
+      "mode": "No dialysis",
+      "evidence": "published means",
+      "config": {
+        "virus": "VZV",
+        "age": 55,
+        "sex": "male",
+        "scr": 1,
+        "crclSource": "manual",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "repeat",
+        "doseCount": 1,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 70,
+        "crcl": 0,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 175,
+        "every": 24,
+        "infusion": 1,
+        "horizon": 24,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": false,
+        "pdRxRows": [],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 2.5,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "sinceDose": 1,
+          "predicted": 6.241889938639192,
+          "lower": 4.859147631406018,
+          "upper": 8.265724840477665,
+          "inside": false
+        },
+        {
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "sinceDose": 8,
+          "predicted": 2.543137214214401,
+          "lower": 1.6531258905031954,
+          "upper": 3.517770907841522,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "sinceDose": 24,
+          "predicted": 1.4754476660683467,
+          "lower": 0.558329950477274,
+          "upper": 2.461201181631442,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "label-5",
+      "label": "US label 5 mg/kg q8h (steady state)",
+      "mode": "No dialysis",
+      "evidence": "published means",
+      "config": {
+        "virus": "VZV",
+        "age": 55,
+        "sex": "male",
+        "scr": 1,
+        "crclSource": "manual",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "repeat",
+        "doseCount": 10,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 70,
+        "crcl": 95,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 350,
+        "every": 8,
+        "infusion": 1,
+        "horizon": 80,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": false,
+        "pdRxRows": [],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 2.5,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 8.977730755709116,
+          "lower": 7.008852603456676,
+          "upper": 12.164020631024016,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "sinceDose": 8,
+          "predicted": 0.3674230014508829,
+          "lower": 0.10760167364370585,
+          "upper": 1.2788104771933984,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "label-10",
+      "label": "US label 10 mg/kg q8h (steady state)",
+      "mode": "No dialysis",
+      "evidence": "published means",
+      "config": {
+        "virus": "VZV",
+        "age": 55,
+        "sex": "male",
+        "scr": 1,
+        "crclSource": "manual",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "repeat",
+        "doseCount": 10,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 70,
+        "crcl": 95,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 700,
+        "every": 8,
+        "infusion": 1,
+        "horizon": 80,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": false,
+        "pdRxRows": [],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 2.5,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 17.955461511418232,
+          "lower": 14.017705206913352,
+          "upper": 24.328041262048032,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "sinceDose": 8,
+          "predicted": 0.7348460029017658,
+          "lower": 0.2152033472874117,
+          "upper": 2.5576209543867967,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "kacirova",
+      "label": "Kacirova 2022, one patient (with CMMG)",
+      "mode": "No dialysis",
+      "evidence": "measured concentrations",
+      "config": {
+        "virus": "VZV",
+        "age": 36,
+        "sex": "male",
+        "scr": 0.9841628959276018,
+        "crclSource": "estimated",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "custom",
+        "doseCount": 12,
+        "customDoses": [
+          {
+            "time": 0,
+            "route": "Acyclovir IV",
+            "amount": 750,
+            "infusion": 1
+          },
+          {
+            "time": 8,
+            "route": "Acyclovir IV",
+            "amount": 750,
+            "infusion": 1
+          },
+          {
+            "time": 16,
+            "route": "Acyclovir IV",
+            "amount": 750,
+            "infusion": 1
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 750,
+            "infusion": 1
+          },
+          {
+            "time": 32,
+            "route": "Acyclovir IV",
+            "amount": 750,
+            "infusion": 1
+          },
+          {
+            "time": 40,
+            "route": "Acyclovir IV",
+            "amount": 750,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 850,
+            "infusion": 1
+          },
+          {
+            "time": 56,
+            "route": "Acyclovir IV",
+            "amount": 850,
+            "infusion": 1
+          },
+          {
+            "time": 64,
+            "route": "Acyclovir IV",
+            "amount": 850,
+            "infusion": 1
+          }
+        ],
+        "weight": 86,
+        "crcl": 126.2212005108557,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 700,
+        "every": 8,
+        "infusion": 1,
+        "horizon": 72,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": false,
+        "pdRxRows": [],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 2.5,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "sinceDose": 8,
+          "predicted": 0.44517610379660594,
+          "lower": 0.11964800441113667,
+          "upper": 1.6457379697133152,
+          "inside": false
+        },
+        {
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "sinceDose": 1.4166666666666714,
+          "predicted": 9.19668522480459,
+          "lower": 5.435299016014858,
+          "upper": 14.61195373649376,
+          "inside": true
+        },
+        {
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "sinceDose": 8,
+          "predicted": 0.10836914367707887,
+          "lower": 0.017043340914586345,
+          "upper": 0.8821072757793077,
+          "inside": true
+        },
+        {
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "sinceDose": 1.4166666666666714,
+          "predicted": 0.6965301758694279,
+          "lower": 0.25686624564467814,
+          "upper": 2.3311433258872007,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "vasquez",
+      "label": "Vasquez 2025, HD patient",
+      "mode": "Custom sequence",
+      "evidence": "measured concentrations",
+      "config": {
+        "virus": "VZV",
+        "age": 69,
+        "sex": "female",
+        "scr": 11.3,
+        "crclSource": "estimated",
+        "pdMethod": "manual",
+        "route": "Valacyclovir oral",
+        "dosingMode": "repeat",
+        "doseCount": 4,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 49.9,
+        "crcl": 3.70140732546706,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 1000,
+        "every": 8,
+        "infusion": 1,
+        "horizon": 62.5,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": false,
+        "pdRxRows": [],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 2.5,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "HD",
+            "start": 44,
+            "end": 46
+          },
+          {
+            "type": "HD",
+            "start": 60,
+            "end": 62.5
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "sinceDose": 20,
+          "predicted": 8.272226530172405,
+          "lower": 2.858779137461995,
+          "upper": 15.964877365773198,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "sinceDose": 22,
+          "predicted": 5.0327163569460724,
+          "lower": 1.6230223395671552,
+          "upper": 10.338666597348961,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "boelaert-1",
+      "label": "Boelaert 1987 CAPD, patient 1",
+      "mode": "Peritoneal dialysis",
+      "evidence": "author-fitted peaks and troughs",
+      "config": {
+        "virus": "VZV",
+        "age": 22,
+        "sex": "male",
+        "scr": 1,
+        "crclSource": "manual",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "repeat",
+        "doseCount": 5,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 46.5,
+        "crcl": 0,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 110,
+        "every": 24,
+        "infusion": 1,
+        "horizon": 120,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": true,
+        "pdRxRows": [
+          {
+            "sessionStart": null,
+            "start": 0,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 4,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 8,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 12,
+            "dwell": 12,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          }
+        ],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 1.36,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 5.726096439676357,
+          "lower": 4.4846120054362295,
+          "upper": 7.540309937777751,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "sinceDose": 24,
+          "predicted": 1.1248229816822612,
+          "lower": 0.3963451507288294,
+          "upper": 1.9172321935437273,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 7.3571014676464985,
+          "lower": 5.747746769693754,
+          "upper": 10.290799136676238,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "sinceDose": 24,
+          "predicted": 1.744400717314351,
+          "lower": 0.49240327687197033,
+          "upper": 4.246154473506671,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "boelaert-4",
+      "label": "Boelaert 1987 CAPD, patient 4",
+      "mode": "Peritoneal dialysis",
+      "evidence": "author-fitted peaks and troughs",
+      "config": {
+        "virus": "VZV",
+        "age": 49,
+        "sex": "male",
+        "scr": 1,
+        "crclSource": "manual",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "repeat",
+        "doseCount": 5,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 59,
+        "crcl": 0,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 142,
+        "every": 24,
+        "infusion": 1,
+        "horizon": 120,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": true,
+        "pdRxRows": [
+          {
+            "sessionStart": null,
+            "start": 0,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 4,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 8,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 12,
+            "dwell": 12,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          }
+        ],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 1.36,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 5.908703812259109,
+          "lower": 4.617515072382505,
+          "upper": 7.799661876337821,
+          "inside": false
+        },
+        {
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "sinceDose": 24,
+          "predicted": 1.2361506302449332,
+          "lower": 0.45702069896885344,
+          "upper": 2.056112247861233,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 7.785748959388584,
+          "lower": 6.015156661171492,
+          "upper": 10.87415582792063,
+          "inside": false
+        },
+        {
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "sinceDose": 24,
+          "predicted": 2.0019855915606106,
+          "lower": 0.5738216392025518,
+          "upper": 4.75588146495155,
+          "inside": true
+        }
+      ]
+    },
+    {
+      "id": "boelaert-5",
+      "label": "Boelaert 1987 CAPD, patient 5",
+      "mode": "Peritoneal dialysis",
+      "evidence": "author-fitted peaks and troughs",
+      "config": {
+        "virus": "VZV",
+        "age": 39,
+        "sex": "female",
+        "scr": 1,
+        "crclSource": "manual",
+        "pdMethod": "manual",
+        "route": "Acyclovir IV",
+        "dosingMode": "repeat",
+        "doseCount": 5,
+        "customDoses": [
+          {
+            "time": 12,
+            "route": "Valacyclovir oral",
+            "amount": 1000
+          },
+          {
+            "time": 24,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          },
+          {
+            "time": 48,
+            "route": "Acyclovir IV",
+            "amount": 250,
+            "infusion": 1
+          }
+        ],
+        "weight": 48,
+        "crcl": 0,
+        "renalMode": "constant",
+        "renalProfile": [
+          {
+            "time": 0,
+            "crcl": 95
+          },
+          {
+            "time": 96,
+            "crcl": 95
+          }
+        ],
+        "dose": 122,
+        "every": 24,
+        "infusion": 1,
+        "horizon": 120,
+        "valF": 0.545,
+        "valKa": 1.8,
+        "hdStart": 24,
+        "hdDuration": 4,
+        "hdRepeat": 48,
+        "hdCl": 81.8,
+        "pdRxEnabled": true,
+        "pdRxRows": [
+          {
+            "sessionStart": null,
+            "start": 0,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 4,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 8,
+            "dwell": 4,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          },
+          {
+            "sessionStart": null,
+            "start": 12,
+            "dwell": 12,
+            "fill": 2,
+            "glucose": 1.36,
+            "uf": null
+          }
+        ],
+        "vcScale": 1,
+        "clearanceScale": 1,
+        "pdCl": 6,
+        "pdVolume": 2,
+        "capdDwell": 6,
+        "capdExchanges": 4,
+        "pdGlucose": 1.36,
+        "pdTransport": 1,
+        "pdUfBase": 120,
+        "pdAbsorb": 20,
+        "pdSmallPore": 0.5,
+        "pdSigma": 0.12,
+        "apdStart": 20,
+        "apdHours": 10,
+        "apdCycles": 5,
+        "apdDwell": 1.5,
+        "apdTurnover": 0.25,
+        "apdFactor": 1,
+        "effluent": 25,
+        "sieving": 0.95,
+        "delivered": 0.85,
+        "csfRatio": 0.3,
+        "csfLag": 4,
+        "csfMetRatio": 0.25,
+        "csfMetLag": 6,
+        "formFactor": 1,
+        "metRenal": 1,
+        "metDial": 1,
+        "variability": 1,
+        "draws": 120,
+        "coverage": 0.9,
+        "assayCV": 0.15,
+        "observations": [],
+        "fitMode": "No dialysis",
+        "showBands": true,
+        "showShades": true,
+        "showStudy": true,
+        "showIC50": false,
+        "probenecid": false,
+        "labelBsa": 0,
+        "schedule": [
+          {
+            "type": "PD",
+            "start": 0,
+            "end": 24
+          },
+          {
+            "type": "PD",
+            "start": 24,
+            "end": 48
+          },
+          {
+            "type": "HD",
+            "start": 54,
+            "end": 58
+          }
+        ]
+      },
+      "rows": [
+        {
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 6.164256594349799,
+          "lower": 4.826299790135875,
+          "upper": 8.119763765273728,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "sinceDose": 24,
+          "predicted": 1.2216722120709875,
+          "lower": 0.4332661796969827,
+          "upper": 2.0806280501762204,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "sinceDose": 1,
+          "predicted": 7.946812089728578,
+          "lower": 6.209359693554071,
+          "upper": 11.106512916942192,
+          "inside": true
+        },
+        {
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "sinceDose": 24,
+          "predicted": 1.9056152198032168,
+          "lower": 0.538950882862796,
+          "upper": 4.621362955849699,
+          "inside": true
+        }
+      ]
+    }
+  ],
+  "ablations": [
+    {
+      "variant": "full",
+      "label": "Full model (reference)",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.314557543482283
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 5.698106923149747
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 7.43679635810537
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 8.727277271614918
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 4.764294455516726
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 2.8274152249707667
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 1.3358785537373508
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 0.8589223988481667
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 0.49552791940706375
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 0.3097296285866745
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 0.19487322747816033
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 0.12267187572237898
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 6.241889938639192
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 2.543137214214401
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 1.4754476660683467
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 8.977730755709116
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 0.3674230014508829
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 17.955461511418232
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 0.7348460029017658
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 0.44517610379660594
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 9.19668522480459
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0.10836914367707887
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 0.6965301758694279
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 8.272226530172405
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 5.0327163569460724
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 5.726096439676357
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 1.1248229816822612
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 7.3571014676464985
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 1.744400717314351
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 5.908703812259109
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 1.2361506302449332
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 7.785748959388584
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 2.0019855915606106
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 6.164256594349799
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 1.2216722120709875
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 7.946812089728578
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 1.9056152198032168
+        }
+      ]
+    },
+    {
+      "variant": "no-peripheral",
+      "label": "No peripheral compartment (Q = 0)",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.4846121254494333
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 6.24523391783151
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 8.43228728452204
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 10.164941298176357
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 6.379840363300377
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 4.00419066546886
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 1.5773374793914896
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 0.6213474161829835
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 0.09641713990461631
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 0.014961460569828222
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 0.00232163391907259
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 0.00036025787917110013
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 7.520087799235349
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 4.393287526638663
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 1.2859611131924458
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 10.162781801871374
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 0.01476572729981401
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 20.325563603742747
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 0.02953145459962802
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 0.005685966632321559
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 11.437780638634534
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0.05421773647175678
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 0.7482949771519791
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 3.6618514872420045
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 1.5580827104316042
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 7.00329553017775
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 0.7784709691559258
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 7.779573750718098
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 0.8652872067310399
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 7.160393977782662
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 0.9339374612323074
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 8.120482441231642
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 1.0597542683073635
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 7.52983066482089
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 0.8558565842487276
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 8.386736364414887
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 0.9538288946692746
+        }
+      ]
+    },
+    {
+      "variant": "no-other",
+      "label": "No other nonrenal acyclovir clearance",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.316596518097666
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 5.704691028037413
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 7.448896719080309
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 8.745036844309151
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 4.785800118229541
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 2.8461602758483013
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 1.3480155323943819
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 0.8673471640694023
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 0.5007812427519734
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 0.31335090870694793
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 0.19737997663150733
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 0.1243950682028061
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 6.257207517865416
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 2.605541810246986
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 1.567102207588971
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 8.999860809344463
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 0.3721954503148787
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 17.999721618688927
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 0.7443909006297574
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 0.44968656404163104
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 9.234192828531082
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0.10920157334328626
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 0.6983800607032578
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 8.889835492352423
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 5.427343055696616
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 5.741444203251538
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 1.1994083204077544
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 7.537599211967107
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 1.9207488337593421
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 5.9237247621323785
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 1.3141985519853212
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 7.986713410079653
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 2.201449109260378
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 6.180663129147002
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 1.3021553310995848
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 8.143216745694557
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 2.0979172520867233
+        }
+      ]
+    },
+    {
+      "variant": "no-cmmg",
+      "label": "No CMMG formation",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.341879139286411
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 5.786776380682079
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 7.600504932419977
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 8.968568853208058
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 5.06010363497684
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 3.088825903021235
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 1.5089819167402914
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 0.9806165284636689
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 0.5722738696612424
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 0.36312559902063335
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 0.23218645809206565
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 0.14856159540598793
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 6.45048302622741
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 3.540249484794409
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 3.3948207102796935
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 9.284190797086953
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 0.4387433114343012
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 18.568381594173907
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 0.8774866228686024
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 0.5109827063833954
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 9.714028174903259
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 0
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 23.27917614069266
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 14.88151466253323
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 5.935539793017035
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 2.735549866741305
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 13.945235177923841
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 9.34729831467377
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 6.113428254007492
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 2.883594048299164
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 14.966054506503498
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 10.418536445343577
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 6.388109903481343
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 2.9543937634354136
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 15.097820483354838
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 10.176198935376467
+        }
+      ]
+    },
+    {
+      "variant": "gfr-only",
+      "label": "Renal clearance = CrCl (no net secretion)",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.5624655770456948
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 6.538085269724057
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 9.05206659825087
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 11.201742580888892
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 8.15610618394077
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 6.239526687133314
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 4.192159508384005
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 3.2295115516985757
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 2.3147319751725606
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 1.7870615168332231
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 1.3980730849921774
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 1.096209425218561
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 6.241889938639192
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 2.543137214214401
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 1.4754476660683467
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 13.663828840063307
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 2.855120547157957
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 27.327657680126613
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 5.710241094315914
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 4.0863496359901585
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 19.546857560453294
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0.6250122361624619
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 1.366420391015891
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 11.412026684271206
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 7.0516194216797095
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 5.726096439676357
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 1.1248229816822612
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 7.3571014676464985
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 1.744400717314351
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 5.908703812259109
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 1.2361506302449332
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 7.785748959388584
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 2.0019855915606106
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 6.164256594349799
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 1.2216722120709875
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 7.946812089728578
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 1.9056152198032168
+        }
+      ]
+    },
+    {
+      "variant": "no-dialysis",
+      "label": "No dialytic clearance",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.314557543482283
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 5.698106923149747
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 7.43679635810537
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 8.727277271614918
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 4.764294455516726
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 2.8274152249707667
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 1.3358785537373508
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 0.8589223988481667
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 0.49552791940706375
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 0.3097296285866745
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 0.19487322747816033
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 0.12267187572237898
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 6.241889938639192
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 2.543137214214401
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 1.4754476660683467
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 8.977730755709116
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 0.3674230014508829
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 17.955461511418232
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 0.7348460029017658
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 0.44517610379660594
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 9.19668522480459
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0.10836914367707887
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 0.6965301758694279
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 8.272226530172405
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 7.459452323113223
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 5.784687623252185
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 1.273026355023421
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 7.784441287238278
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 2.112661991150598
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 5.956617140928034
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 1.364738666924702
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 8.173995168849231
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 2.344395494133354
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 6.225405747634869
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 1.3776225806970943
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 8.399243505912942
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 2.2967439730925103
+        }
+      ]
+    },
+    {
+      "variant": "no-allometry",
+      "label": "No allometric weight scaling",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.3609830167116836
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 5.846202134973898
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 7.7052261824182615
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 9.11527660045645
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 5.209505728905583
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 3.183171376096432
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 1.516568151041011
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 0.9598379094616893
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 0.5572568516642106
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 0.3607206831124561
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 0.23618222926994797
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 0.1548140607914448
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 6.241889938639192
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 2.543137214214401
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 1.4754476660683467
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 8.977730755709116
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 0.3674230014508829
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 17.955461511418232
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 0.7348460029017658
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 0.6128006335465197
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 10.809861832203865
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0.15601993941657186
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 0.7145921744303277
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 5.528119147553729
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 3.352367974884891
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 5.348642740963645
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 0.8256925064894611
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 6.386158306379348
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 1.115759260187459
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 5.756643673030565
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 1.1060373331807862
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 7.334005525172572
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 1.6823668588635396
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 5.792564500134673
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 0.92379071564854
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 6.972437779343327
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 1.2669086870310922
+        }
+      ]
+    },
+    {
+      "variant": "renal-75",
+      "label": "Renal coefficient ×0.75 (post hoc, from [16])",
+      "rows": [
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.25,
+          "observed": 4.5,
+          "kind": "serial",
+          "predicted": 3.4000299485730343
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.5,
+          "observed": 6.35,
+          "kind": "serial",
+          "predicted": 5.978704058398919
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 0.75,
+          "observed": 7.41,
+          "kind": "serial",
+          "predicted": 7.960392389108764
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 11.4,
+          "kind": "serial",
+          "predicted": 9.506676265522227
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1.5,
+          "observed": 4.8,
+          "kind": "serial",
+          "predicted": 5.747629361539342
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 2,
+          "observed": 3.08,
+          "kind": "serial",
+          "predicted": 3.725162452507913
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 3,
+          "observed": 2.16,
+          "kind": "serial",
+          "predicted": 1.9641152631370644
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 4,
+          "observed": 1.39,
+          "kind": "serial",
+          "predicted": 1.3158333993667404
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 6,
+          "observed": 0.79,
+          "kind": "serial",
+          "predicted": 0.7933760860735513
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 0.47,
+          "kind": "serial",
+          "predicted": 0.5224490075877676
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 10,
+          "observed": 0.27,
+          "kind": "serial",
+          "predicted": 0.3475050775789074
+        },
+        {
+          "study": "laskin-normal",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 12,
+          "observed": 0.14,
+          "kind": "serial",
+          "predicted": 0.2313911430032946
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 8.445375,
+          "kind": "serial",
+          "predicted": 6.241889938639192
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 8,
+          "observed": 2.3196630000000003,
+          "kind": "serial",
+          "predicted": 2.543137214214401
+        },
+        {
+          "study": "laskin-anuric",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 1.441344,
+          "kind": "serial",
+          "predicted": 1.4754476660683467
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 9.8,
+          "kind": "peak",
+          "predicted": 9.989307498496542
+        },
+        {
+          "study": "label-5",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 0.7,
+          "kind": "trough",
+          "predicted": 0.6502248587239087
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 73,
+          "observed": 22.9,
+          "kind": "peak",
+          "predicted": 19.978614996993084
+        },
+        {
+          "study": "label-10",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 80,
+          "observed": 1.9,
+          "kind": "trough",
+          "predicted": 1.3004497174478173
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 64,
+          "observed": 1.7,
+          "kind": "trough",
+          "predicted": 0.8110693316649055
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "plasma",
+          "time": 65.41666666666667,
+          "observed": 8.9,
+          "kind": "post-infusion",
+          "predicted": 11.520133951788035
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 64,
+          "observed": 0.27,
+          "kind": "trough",
+          "predicted": 0.17172115392777576
+        },
+        {
+          "study": "kacirova",
+          "mode": "No dialysis",
+          "analyte": "cmmg",
+          "time": 65.41666666666667,
+          "observed": 0.64,
+          "kind": "post-infusion",
+          "predicted": 0.8158942994301006
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 44,
+          "observed": 8.8,
+          "kind": "hd-start",
+          "predicted": 9.257484594940756
+        },
+        {
+          "study": "vasquez",
+          "mode": "Custom sequence",
+          "analyte": "plasma",
+          "time": 46,
+          "observed": 3.2,
+          "kind": "hd-end",
+          "predicted": 5.662880759505905
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 5.726096439676357
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.923361,
+          "kind": "trough",
+          "predicted": 1.1248229816822612
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.215796,
+          "kind": "peak",
+          "predicted": 7.3571014676464985
+        },
+        {
+          "study": "boelaert-1",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 1.4188230000000002,
+          "kind": "trough",
+          "predicted": 1.744400717314351
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 4.346553,
+          "kind": "peak",
+          "predicted": 5.908703812259109
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.517983,
+          "kind": "trough",
+          "predicted": 1.2361506302449332
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 4.95462,
+          "kind": "peak",
+          "predicted": 7.785748959388584
+        },
+        {
+          "study": "boelaert-4",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.67563,
+          "kind": "trough",
+          "predicted": 2.0019855915606106
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 1,
+          "observed": 5.900502,
+          "kind": "peak",
+          "predicted": 6.164256594349799
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 24,
+          "observed": 0.563025,
+          "kind": "trough",
+          "predicted": 1.2216722120709875
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 97,
+          "observed": 6.486048,
+          "kind": "peak",
+          "predicted": 7.946812089728578
+        },
+        {
+          "study": "boelaert-5",
+          "mode": "Peritoneal dialysis",
+          "analyte": "plasma",
+          "time": 120,
+          "observed": 0.653109,
+          "kind": "trough",
+          "predicted": 1.9056152198032168
+        }
+      ]
+    }
+  ]
+}
