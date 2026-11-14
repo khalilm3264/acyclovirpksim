@@ -71,6 +71,13 @@ async function main(){
     assert.equal(await page.locator('main > :last-child.actions a[href="/"]').count(),1);
     await page.locator('main > .actions').scrollIntoViewIfNeeded();
     assert.ok(await page.locator('main > .actions a').isVisible());
+    for (const control of await page.locator('.tool-controls select, .tool-controls input[type="number"], main .btn').all()) {
+     const bounds=await control.boundingBox();
+     if (bounds && await control.isVisible()) {
+      const id=await control.getAttribute('id');
+      assert.ok(bounds.height >= (width < 640 ? 39.9 : 34.9),guide+' control '+id+' '+JSON.stringify(bounds));
+     }
+    }
     const dimensions=await page.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth}));
     assert.ok(dimensions.page<=dimensions.viewport+2,guide+' '+JSON.stringify(dimensions));
    }
