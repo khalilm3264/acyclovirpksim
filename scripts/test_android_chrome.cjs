@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
+const https = require('node:https');
 const { chromium } = require('C:/Users/hasan/acyclovirpksim/node_modules/playwright');
 
 const CHROME_PATH = 'C:\\Users\\hasan\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
@@ -196,6 +197,17 @@ async function runTestSuite(baseUrl, label) {
       assert.equal(await page.locator('#doseRows .dose-row').count(), afterAddRows);
       console.log('     ✓ Applied timeline schedule survived post-application rotation!');
 
+      // Step H2: Assert applied model configuration in the engine
+      console.log('     Asserting applied model configuration in engine (window.AyFluxResearchBridge)...');
+      const appliedConfig = await page.evaluate(() => window.AyFluxResearchBridge.snapshot().config);
+      assert.equal(appliedConfig.dosingMode, 'custom', 'Applied model dosingMode must be custom');
+      assert.ok(Array.isArray(appliedConfig.customDoses), 'customDoses must be an array');
+      const appliedDose = appliedConfig.customDoses.find(d => d.time === 36);
+      assert.ok(appliedDose, 'Applied model configuration must contain custom dose at hour 36');
+      assert.equal(appliedDose.amount, 500, 'Applied dose amount must be 500 mg');
+      assert.equal(appliedDose.route, 'Valacyclovir oral', 'Applied dose route must be Valacyclovir oral');
+      console.log(`     ✓ Applied model configuration verified: hour=${appliedDose.time}, amount=${appliedDose.amount} mg, route="${appliedDose.route}".`);
+
       // Step I: Check Touch Target Sizes on Mobile/Tablet
       console.log('  9. Checking touch target heights on timeline controls...');
       const timelineControls = await page.locator('#scheduleRows input, #scheduleRows select, #scheduleRows button, #doseRows input, #doseRows select, #doseRows button, #addRow, #addDose, #applyFullTimelineBottom').all();
@@ -307,23 +319,59 @@ async function runTestSuite(baseUrl, label) {
 
       // Step F: Test Larger Android Text Scaling (125%, 150%, 200%)
       console.log('  7. Testing Android accessibility text scaling (125%, 150%, 200%)...');
+      console.log('     Testing representative label: label[for="lite_weight"] ("Body weight (kg)") and inheriting button #liteReset ("Reset").');
+
+      // Baseline font size check at 1.0x (100%)
+      const baseLabelSize = await litePage.evaluate(() => parseFloat(window.getComputedStyle(document.querySelector('label[for="lite_weight"]')).fontSize));
+      const baseBtnSize = await litePage.evaluate(() => parseFloat(window.getComputedStyle(document.querySelector('#liteReset')).fontSize));
+      assert.equal(baseLabelSize, 11.5, 'Default label size in Lite CSS is 11.5px');
+      assert.equal(baseBtnSize, 13.0, 'Default inheriting button font size in Lite CSS is 13px');
+
       for (const textScale of [1.25, 1.50, 2.00]) {
+        // In Lite CSS, labels use fixed px (11.5px on .control label) while buttons/inputs inherit from :root (13px).
+        // System-level Android accessibility text scaling scales both root font and explicit label fonts.
         await litePage.evaluate(scale => {
-          document.documentElement.style.fontSize = `${13 * scale}px`;
+          const styleId = 'ayflux-test-accessibility-scale';
+          let styleEl = document.getElementById(styleId);
+          if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = styleId;
+            document.head.appendChild(styleEl);
+          }
+          styleEl.textContent = `
+            html { font-size: ${13 * scale}px !important; }
+            .control label, .topline label, .legend-option { font-size: ${11.5 * scale}px !important; }
+            .side h2 { font-size: ${12 * scale}px !important; }
+          `;
         }, textScale);
         await litePage.waitForTimeout(200);
 
-        // Check horizontal containment
-        const fits = await litePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2);
-        assert.ok(fits, `Lite page fits horizontally at ${(textScale * 100).toFixed(0)}% text scaling`);
+        // Verify representative label actually grew in computed px
+        const scaledLabelSize = await litePage.evaluate(() => parseFloat(window.getComputedStyle(document.querySelector('label[for="lite_weight"]')).fontSize));
+        const scaledBtnSize = await litePage.evaluate(() => parseFloat(window.getComputedStyle(document.querySelector('#liteReset')).fontSize));
+        const expectedLabelPx = 11.5 * textScale;
+        const expectedBtnPx = 13.0 * textScale;
+
+        assert.ok(Math.abs(scaledLabelSize - expectedLabelPx) < 0.25, `Representative label 'Body weight (kg)' grew to ${scaledLabelSize}px (expected ${expectedLabelPx}px) at ${(textScale * 100).toFixed(0)}%`);
+        assert.ok(Math.abs(scaledBtnSize - expectedBtnPx) < 0.25, `Inheriting control '#liteReset' grew to ${scaledBtnSize}px (expected ${expectedBtnPx}px) at ${(textScale * 100).toFixed(0)}%`);
+
+        // Check horizontal containment (no horizontal scroll blowout)
+        const scrollW = await litePage.evaluate(() => document.documentElement.scrollWidth);
+        const clientW = await litePage.evaluate(() => document.documentElement.clientWidth);
+        assert.ok(scrollW <= clientW + 2, `Lite page fits horizontally (${scrollW}px <= ${clientW}px) at ${(textScale * 100).toFixed(0)}% text scaling`);
 
         // Check controls still visible and interactive
         assert.ok(await litePage.locator('#lite_dose').isVisible(), `Dose input visible at ${(textScale * 100).toFixed(0)}%`);
         assert.ok(await litePage.locator('#acvChart').isVisible(), `Chart visible at ${(textScale * 100).toFixed(0)}%`);
+        console.log(`     ✓ Text scale ${(textScale * 100).toFixed(0)}%: label=${scaledLabelSize.toFixed(1)}px (+${((textScale-1)*100).toFixed(0)}%), btn=${scaledBtnSize.toFixed(1)}px, scrollWidth=${scrollW}px (fits horizontally)`);
       }
 
-      // Reset text scaling
-      await litePage.evaluate(() => { document.documentElement.style.fontSize = ''; });
+      // Reset text scaling style
+      await litePage.evaluate(() => {
+        const styleEl = document.getElementById('ayflux-test-accessibility-scale');
+        if (styleEl) styleEl.remove();
+        document.documentElement.style.fontSize = '';
+      });
       console.log('     ✓ Lite zoom, rotation, reachability & text scaling tests PASSED!');
 
       results.push({
@@ -344,7 +392,22 @@ async function runTestSuite(baseUrl, label) {
   }
 }
 
+function checkUrlReachable(targetUrl) {
+  const urlObj = new URL(targetUrl);
+  const client = urlObj.protocol === 'https:' ? https : http;
+  return new Promise((resolve, reject) => {
+    const req = client.request(urlObj, { method: 'HEAD', timeout: 8000 }, res => {
+      resolve(res.statusCode >= 200 && res.statusCode < 500);
+    });
+    req.on('timeout', () => { req.destroy(); reject(new Error('Connection timed out')); });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
 async function main() {
+  const localOnly = process.argv.includes('--local') || process.argv.includes('--local-only') || process.env.LOCAL_ONLY === 'true';
+
   const localServer = await createServer();
   const localBase = 'http://127.0.0.1:' + localServer.address().port;
 
@@ -354,10 +417,29 @@ async function main() {
 
     // 2. Run on Production Deployed Site
     let prodResults = [];
-    try {
-      prodResults = await runTestSuite('https://ayflux.org', 'PRODUCTION DEPLOYED (ayflux.org)');
-    } catch (err) {
-      console.warn('Production test encountered network warning:', err.message);
+    if (localOnly) {
+      console.log('\n[INFO] Skipping production test suite (--local-only specified).');
+    } else {
+      let isReachable = false;
+      try {
+        await checkUrlReachable('https://ayflux.org');
+        isReachable = true;
+      } catch (netErr) {
+        console.warn(`\n[NETWORK NOTICE] Production site https://ayflux.org unreachable (${netErr.message}). Skipping production assertions.`);
+      }
+
+      if (isReachable) {
+        try {
+          prodResults = await runTestSuite('https://ayflux.org', 'PRODUCTION DEPLOYED (ayflux.org)');
+        } catch (err) {
+          if (err instanceof assert.AssertionError || err.name === 'AssertionError') {
+            console.error('\n❌ PRODUCTION FUNCTIONAL ASSERTION FAILURE:', err.message);
+            throw err; // Real functional assertion failure: must fail the suite!
+          } else {
+            console.warn(`\n[NETWORK WARNING] Production test interrupted by network/navigation error: ${err.message}`);
+          }
+        }
+      }
     }
 
     console.log('\n========================================================================');
