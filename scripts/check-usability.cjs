@@ -23,6 +23,7 @@ async function main(){
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('http://127.0.0.1:'+server.address().port);
   await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});
+  await require('./check-configuration-import-race.cjs')(page);
   assert.equal(await page.locator('#jumpToWorkspace').isVisible(),false,'Mobile shortcut stays hidden on desktop');
   assert.equal(await page.locator('#jumpToInputs').isVisible(),false,'Mobile return stays hidden on desktop');
   // Tabs expose selection, support manual keyboard activation and return to results.

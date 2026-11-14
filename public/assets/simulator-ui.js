@@ -1308,13 +1308,17 @@ function downloadJSON(obj,name){
 }
 // Session-only version history for imports. Nothing is written to storage or sent anywhere.
 const importHistory=[],IMPORT_HISTORY_LIMIT=10;
+let pendingConfigurationImport=null;
 function currentVersion(){return {config:structuredClone(c),primary,visible:[...visible],palette:paletteMode,unit:concUnit};}
 function rememberVersion(label){
  importHistory.unshift({label:String(label).slice(0,120),savedAt:new Date(),state:currentVersion()});
  importHistory.length=Math.min(importHistory.length,IMPORT_HISTORY_LIMIT);
  renderImportHistory();
 }
-function applyVersion(state){
+function applyVersion(state,importRequest=null){
+ // Replacing settings cancels older file reads; the committing import keeps its own token.
+ pendingConfigurationImport=importRequest;
+ if(!importRequest)$('loadConfig').value='';
  Object.assign(c,structuredClone(state.config));setPalette(state.palette);setConcUnit(state.unit||concUnit);metricsSignature='';tableRevision=-1;primary=state.primary;
  visible=new Set(state.visible);
  draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
@@ -1675,26 +1679,32 @@ $('saveConfig').addEventListener('click',()=>{
  downloadJSON(data,'ayflux_simulation_v'+((typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown')+'.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
 });
 $('loadConfig').addEventListener('change',async e=>{
+ const request={};pendingConfigurationImport=request;
  const file=e.target.files?.[0];if(!file)return;
  migratedPayload=null;$('downloadMigrated').classList.add('hidden');
  try{
   if(file.size>1000000)throw Error('File is too large (maximum 1 MB). No settings were changed.');
   let input;
-  try{input=JSON.parse(await file.text());}
+  try{
+   const text=await file.text();
+   if(pendingConfigurationImport!==request)return;
+   input=JSON.parse(text);
+  }
   catch(_){throw Error('This is not valid JSON. Export a configuration using Save configuration (JSON).');}
   const {next,palette:importedPalette,migrating,converted}=parseConfiguration(input);
   rememberVersion('Before importing '+file.name);
-  applyVersion({config:next,primary:input.primary,visible:input.visibleScenarios,palette:importedPalette,unit:concUnit});
+  applyVersion({config:next,primary:input.primary,visible:input.visibleScenarios,palette:importedPalette,unit:concUnit},request);
   migratedPayload=migrating?converted:null;
   $('downloadMigrated').classList.toggle('hidden',!migratedPayload);
   const note=migrating?`Migrated schema 1 (Version ${String(input.appVersion??'unknown')}) to schema 2. ${input.appearance?'PK settings preserved.':'PK settings preserved; standard graph palette applied (not saved in this old file).'} Download the converted JSON to keep a reusable copy.`:'AyFlux configuration loaded. All parameters validated.';
   researchStatus(note+' Recalculating…');alertMessage('');defer();
  }catch(error){
-  const message='Configuration not loaded: '+error.message;
+  if(pendingConfigurationImport!==request)return;
+  const message='Configuration not loaded, '+error.message;
   researchStatus(message,true);alertMessage(message);
   $('status').textContent=message;
  }
- finally{e.target.value='';}
+ finally{if(pendingConfigurationImport===request)e.target.value='';}
 });
 
 openSharedLink(true);
