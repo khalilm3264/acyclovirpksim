@@ -58,5 +58,9 @@ not alter the separately documented Davenport case-2 post-treatment→next-pre-H
 rises, whose precise postdisconnect sampling delays remain unknown. This is a
 three-patient source audit, not a completed primary review of all 43 Kenzaka rows
 or evidence that rebound is absent from the literature. Remaining previously
-listed full-text gaps (Krieble 34, Adair 12, Gómez Campderá 16 and
-MacDiarmaid-Gordon 40) are unaffected by these uploads.
+listed full-text gaps were unaffected by these two uploads. The subsequent
+[Adair primary audit](ADAIR-REBOUND.md) resolves cases 12/13 using recovered
+scanned originals and corrects the secondary serum-assay assignment; it adds
+no rebound pair. The [Krieble primary audit](KRIEBLE-REBOUND.md) resolves case
+34 and verifies a flat immediate-post-HD to ten-hour pair. Gómez Campderá 16
+and MacDiarmaid-Gordon 40 remain separate retrieval tasks.
