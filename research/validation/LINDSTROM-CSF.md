@@ -2,7 +2,7 @@
 
 Lindström J, Helldén A, Lycke J, Grahn A, Studahl M. *J Antimicrob Chemother.* 2019;74:3565–3572. [doi:10.1093/jac/dkz357](https://doi.org/10.1093/jac/dkz357), reference [4]. Table 1 gives paired serum and CSF acyclovir and CMMG for 34 samples from 21 patients treated for herpesvirus CNS infection, with each sample's CSF:serum albumin ratio, a marker of blood–brain barrier damage.
 
-**Since the #47 model change, AyFlux's default is 0.025** (see `MODEL-CHANGE-47.md`); this benchmark was written before it and compares candidate values explicitly. Reproduce with `node research/validation/lindstrom-csf.cjs`; the table is in `data/lindstrom2019-table1.csv` and the results in `lindstrom-csf-results.json`. The study was not used to set any AyFlux parameter, so it is an independent check of the CSF CMMG partition (`csfMetRatio`, default 0.25) and of the alternative 0.025 that Smith 2010 informed.
+**Since the #47 model change, AyFlux's default is 0.025** (see `MODEL-CHANGE-47.md`); this benchmark was written before it and compares candidate values explicitly. Reproduce with `node research/validation/lindstrom-csf.cjs`; the table is in `data/lindstrom2019-table1.csv` and the results in `lindstrom-csf-results.json`. Lindström is an independent check of the intact-barrier value derived from Smith 2010. The disrupted-barrier subset was subsequently used to select the exploratory preset.
 
 ## Reconstruction
 
@@ -37,7 +37,20 @@ The simulator's *Blood–brain barrier* setting (engine `CSF_BARRIER`) sets both
 | Intact (default) | 0.30 | 0.025 | Unchanged default; Smith 2010 for CMMG | acyclovir 0.80 vs 0.70; CMMG 0.58 (3 values) vs 0.86 |
 | Damaged (exploratory) | 0.37 | 0.11 | **Fitted** to the disrupted-barrier samples here | acyclovir 0.61 vs 0.61; CMMG 0.97 vs 0.97 |
 
-The damaged values are chosen so that the predicted CSF/serum ratio matches the observed one. That divides out the systemic error, such as AyFlux's low serum acyclovir, instead of folding it into the partition. Fitted on the intact samples, the same method gives 0.26 and 0.037, close to the defaults. The damaged fit is in-sample: no independent study tests it, and the interface says so. Barrier damage varies widely (albumin ratio 10–162 × 10⁻³ here), so one preset describes the typical damaged-barrier sample, not the most severe.
+The damaged preset was chosen by bringing the separate CSF and serum GMRs close together. The disrupted group contributes 23 CSF and 21 serum values for acyclovir, and 17 CSF and 21 serum values for CMMG. Different visits contribute to those summaries.
+
+### Same-visit ratio check
+
+For each visit with both measurements quantified, divide observed CSF/serum by predicted CSF/plasma and multiply by the preset partition. This gives the partition implied by that visit under the original dose, CrCl, sampling and lag assumptions. The collection-time concentrations are distinct from dosing-interval AUC ratios. For equal patient weighting, take the geometric mean within each patient and then across patients. The final column repeats this calculation omitting each patient in turn. Its range describes sensitivity to individual patients.
+
+| Barrier and analyte | Quantified visits / patients | Preset | Visit-weighted partition | Patient-weighted partition | Omit-one-patient range |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Intact acyclovir | 10 / 8 | 0.30 | 0.261 | 0.287 | 0.238–0.353 |
+| Intact CMMG | 3 / 3 | 0.025 | 0.030 | 0.030 | 0.022–0.039 |
+| Disrupted acyclovir | 21 / 12 | 0.37 | 0.377 | 0.418 | 0.349–0.456 |
+| Disrupted CMMG | 16 / 8 | 0.11 | 0.087 | 0.102 | 0.075–0.123 |
+
+At the damaged preset of 0.11 the visit-weighted predicted/observed CMMG concentration-ratio GMR is **1.26**. The corresponding acyclovir GMR is **0.98**. For CSF CMMG below the assay limit, scale the predicted CSF/plasma ratio by the same visit's measured serum CMMG and compare with 0.15 µmol/L. Seven of seven intact and three of five disrupted pairs remain below the limit. This check uses no imputed concentrations. One additional disrupted below-limit CSF sample lacks serum. Patient weighting, censoring and barrier variability all affect interpretation. All of these estimates reuse the original cohort.
 
 ## Other sources
 
@@ -51,4 +64,4 @@ Serum CMMG does not depend on the partition. With the 0.5 L/h non-kidney CMMG cl
 
 ## Implication for #47
 
-The data support 0.025 for patients with an intact blood–brain barrier. They also show that CNS infection with barrier damage raises CSF CMMG several-fold, an effect AyFlux does not represent. The #47 change adopts 0.025 and adds that warning to the CSF CMMG chart.
+The data support 0.025 for patients with an intact blood–brain barrier. They also show that CNS infection with barrier damage raises CSF CMMG several-fold, an effect now represented by the exploratory damaged preset. The independent intact-barrier comparison and the in-sample damaged-preset comparison answer different questions.
