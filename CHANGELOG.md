@@ -15,6 +15,16 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 ### Clarified
 - Cockcroft–Gault weight selection can change estimated CrCl and predicted concentrations, while the entered dose and actual-weight model scaling stay unchanged. The concentration guide distinguishes label reference observations from therapeutic targets and identifies the displayed trough as pre-dose within the simulated window, without assuming steady state.
 
+### Nominal scenario scripts and Lite chart export
+
+- Add local Python/SciPy and R/mrgsolve exports for the primary nominal systemic
+  scenario: IV/oral schedules, HD/CRRT transitions and changing CrCl. Applied
+  fitting and exchange-resolved PD are rejected explicitly. CSF proxies and
+  ensemble bands are omitted and labeled; no equations or defaults change.
+- Add a 1920 × 1280 PNG of Lite's two concentration charts, applied inputs and
+  visible scenario legend. The image renderer works with ECharts or the offline
+  Canvas fallback; export does not add a charting dependency.
+
 ### Added
 - **Usability pass from inpatient pharmacist feedback.**
   - *Results first:* on the Concentration tab the plasma acyclovir graph now follows the summary. Baseline, regimen and hemodialysis-timing tools move below the graphs under "Comparison tools".

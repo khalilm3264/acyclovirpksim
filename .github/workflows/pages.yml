@@ -70,6 +70,7 @@ jobs:
           node scripts/check-regimens.cjs
           node scripts/check-literature.cjs
           node scripts/check-exchanges.cjs
+          node scripts/check-export-downloads.cjs
 
       - name: Compare surface startup when the ECharts renderer changes
         if: github.event_name == 'push'

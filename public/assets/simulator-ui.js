@@ -817,6 +817,16 @@ function downloadTidyCSV(){
  }catch(error){alertMessage('Unable to export R / OSP CSV: '+error.message);}
 }
 
+function downloadScenarioScript(language){
+ try{
+  const content=window.AyFluxScenarioScript.generate(E,c,primary,language,window.AyFluxVersion?.version||'unknown');
+  const url=URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download='ayflux_scenario.'+(language==='python'?'py':'R');a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  $('status').textContent='Exported nominal systemic '+primary+' scenario. Ensemble bands and CSF proxies are not included.';
+ }catch(error){alertMessage('Unable to export scenario script: '+error.message);}
+}
+
 async function downloadOSPWorkbook(){
  if(!results||!dataIsCurrent)return;
  const snapshot=results;
@@ -1052,7 +1062,7 @@ $('applyFullTimeline').addEventListener('click',()=>{
  pdStatusText('Applied dialysis sessions, exchange prescriptions and medication administrations together.');
 });
 $('applyFullTimelineBottom').addEventListener('click',()=>$('applyFullTimeline').click());
-$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent||!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
+$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent)return;if(['python','r'].includes(format)){downloadScenarioScript(format);return;}if(!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;
