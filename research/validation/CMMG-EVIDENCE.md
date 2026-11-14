@@ -35,3 +35,20 @@ Run `node research/validation/kably-auc-comparison.cjs` to compare both analytes
 With no kidney function, CMMG leaves only through the non-kidney term (0.25 L/h before the change, volume 0.4 L/kg): a nominal half-life of 77.6 h at 70 kg, 38.8 h at the current 0.5 L/h. Single-dose data fit: the Hara CMMG peak is predicted at 8.57 vs 7.47 mg/L observed. Without repeated-dose data with known dosing and no dialysis in between, the half-life cannot be tested. The guided "no kidney function" scenario (700 mg IV every 8 h, about 162 mg/L CMMG by 96 h) uses a regimen many times the labeled anuric dose, far outside any observed data. Its interface note now says the CMMG height is an untested extrapolation and gives the highest measured symptomatic level (about 38 mg/L).
 
 **Resolved by the next source (2026-11-13):** Helldén's case 1 ([45]) is reconstructed in `HELLDEN-COTARD.md`. With almost no kidney function, measured CMMG fell from 21.1 to 8.9 µmol/L between sessions, an apparent half-life of about 35 h, and the former 0.25 L/h left day-6 CMMG 2.6–3 times too high. Hara, as the independent check, also fits better at 0.5 L/h. The #46 model change raised the non-kidney CMMG clearance to 0.5 L/h (`MODEL-CHANGE-46.md`).
+
+## Urinary recovery after a single radiolabeled IV dose
+
+De Miranda and colleagues measured dose recovery in five adults with advanced malignancy. They gave 0.5 or 2.5 mg/kg acyclovir IV over one hour and collected urine through 120 hours. HPLC distinguished urinary parent drug from CMMG. Table IV spans printed pages 670–671. A 1982 report with the same doses, population and recovery figures is counted once. [1981 primary paper](https://doi.org/10.1038/clpt.1981.218) · [1982 report](https://pubmed.ncbi.nlm.nih.gov/7102704/)
+
+| Source row | Estimated CrCl, mL/min/1.73 m² | Urinary acyclovir, observed / modeled % dose | Urinary CMMG, observed / modeled % dose |
+| --- | ---: | ---: | ---: |
+| VMB | 84 | 68.1 / 90.8 | 9.3 / 8.2 |
+| EJH | 52 | 62.1 / 85.9 | 9.4 / 12.1 |
+| MAM | 71 | 85.4 / 89.3 | 9.3 / 9.4 |
+| RFR | 66 | 75.5 / 88.6 | 14.1 / 10.0 |
+| GSS | 125 | 91.0 / 93.6 | 8.5 / 5.7 |
+| Mean | | 76.4 / 89.6 | 10.1 / 9.1 |
+
+Run `node research/validation/de-miranda-iv-recovery.cjs`. The comparison assumes 70 kg and BSA 1.73 m² because individual sizes are unavailable. Absolute CrCl equals indexed CrCl multiplied by BSA / 1.73. Varying assumed BSA from 1.50 to 2.10 m² gives mean CMMG recovery of 10.2% to 7.7%. The paper reports weights of 57–102 kg. In this linear model, common allometric clearance scaling cancels in the eventual recovery fractions at fixed absolute CrCl. At 120 hours the nominal fractions agree with their infinite-time limits within 0.005 percentage points. The script converts metabolite mass to parent molar equivalents and checks recovery against integrated urinary CMMG flux.
+
+The authors suspected incomplete collections in the first two participants. VMB also had an uncertain administered dose and lower parent recovery by radioimmunoassay after sample storage. Substituting their measured indexed CrCl values of 66 and 28 gives predicted urinary CMMG of 10.0% and 18.9%. Total urinary radioactivity and analyte-specific measurements have separate assay error. Among the other three participants, the mean measured and modeled parent recoveries were 84.0% and 90.5%, and CMMG recoveries were 10.6% and 8.4%. These urine measurements constrain the product of parent conversion and metabolite renal recovery at the studied renal function. Formation in anuric patients remains undetermined.
