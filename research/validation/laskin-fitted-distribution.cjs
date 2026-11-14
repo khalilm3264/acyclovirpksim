@@ -47,14 +47,17 @@ function profile(subject, fitted, dt) {
   });
 }
 const mean = values => values.reduce((sum, value) => sum + value, 0) / values.length;
-const output = {hours, measured, units: 'µmol/L'};
-for (const [name, fitted] of [['default', false], ['sourceFit', true]]) {
-  const profiles = subjects.map(subject => {
-    const curve = profile(subject, fitted, 1 / 32);
-    const fine = profile(subject, fitted, 1 / 64);
-    curve.forEach((value, i) => assert.ok(Math.abs(value - fine[i]) < .0001));
-    return curve;
-  });
-  output[name] = {profiles, mean: hours.map((_, i) => mean(profiles.map(curve => curve[i])))};
+if (require.main === module) {
+  const output = {hours, measured, units: 'µmol/L'};
+  for (const [name, fitted] of [['default', false], ['sourceFit', true]]) {
+    const profiles = subjects.map(subject => {
+      const curve = profile(subject, fitted, 1 / 32);
+      const fine = profile(subject, fitted, 1 / 64);
+      curve.forEach((value, i) => assert.ok(Math.abs(value - fine[i]) < .0001));
+      return curve;
+    });
+    output[name] = {profiles, mean: hours.map((_, i) => mean(profiles.map(curve => curve[i])))};
+  }
+  console.log(JSON.stringify(output, null, 2));
 }
-console.log(JSON.stringify(output, null, 2));
+module.exports = {subjects,hours,profile};

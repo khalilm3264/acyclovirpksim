@@ -53,3 +53,18 @@ At nominal 70 kg, BSA 1.73 m², constant renal function and no RRT, the predicte
 | 92.8 | 0.38 / 0.39 | 0.77 / 0.77 |
 
 Table 1 supplies the baseline estimated GFR median and quartiles. It labels the values mL/min and specifies CKD-EPI in Methods. The additional scenarios treat them as indexed values and vary assumed BSA from 1.50 to 2.10 m² and weight from 55 to 90 kg. CrCl and estimated GFR are different quantities. At the nominal median kidney input the two regimens bracket the cohort median. This cannot establish predictive accuracy or reproduce the trough distribution in a population receiving dose adjustments. The ratio of the marginal median cumulative dose (5,500 mg) to median treatment duration (5.5 days) does not identify an individual’s dose. The nephrotoxicity analysis compares outcomes in matched groups and supplies no concentration-specific validation of a toxicity boundary. [Study](https://doi.org/10.3390/jcm14051409) · [Reproduction script](boosman-icu-trough.cjs)
+
+## Dispersion among the six anuric subjects
+
+In the original scan, Table I row 2 at 1 h is **36.1** µmol/L. Re-summing the six rows reproduces every printed mean and sample SD, including the post-HD column at its nominal time. The 1 h group mean is 37.53, median 28.75, and range 22.8–83.9 µmol/L. Omitting only the highest observation changes that mean to 28.26, close to the 27.44 predicted by averaging unmodified deterministic runs at the six reported weights. At 2 h, omitting that same participant gives 17.58 against the full mean of 17.57. This sharpens the interpretation of mean peak error without excluding that observation from the analysis. [Laskin et al., Am J Med, Table I, p. 198](https://doi.org/10.1016/0002-9343(82)90090-0)
+
+| Hours from IV start | Measured sample SD | SD with observed weights alone | SD with six source-fitted PK parameter sets |
+|---:|---:|---:|---:|
+| 1 | 23.29 | 0.22 | 21.18 |
+| 2 | 3.34 | 0.31 | 3.52 |
+| 8 | 2.94 | 0.13 | 2.29 |
+| 12 | 2.66 | 0.16 | 2.32 |
+| 24 | 2.38 | 0.21 | 2.09 |
+| 48 | 1.38 | 0.18 | 1.41 |
+
+All SDs are in µmol/L. Weight-only results use 2.5 mg/kg IV over one hour, CrCl zero, and default PK coefficients with random variability disabled. The other column uses all six parameter sets fitted by the source authors to these data. It describes in-sample dispersion. The calculation pairs no patient identifiers across papers and supplies no coverage estimate for the model’s Monte Carlo band. The paper’s post-HD draws varied from 15 to 90 minutes, so modeled SDs stop at 48 h. [CPT parameter source](https://doi.org/10.1038/clpt.1982.83) · [Digitized rows and reproduction script](laskin-individual-spread.cjs)
