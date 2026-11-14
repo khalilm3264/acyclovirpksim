@@ -18,6 +18,7 @@ const expectedSources = [
   './assets/scenario-script.js',
   './assets/simulator-ui.js',
   './assets/simulator-navigation.js',
+  './assets/timeline-labels.js',
   './assets/analysis-views.js',
   './assets/research-workspace.js',
   './assets/literature-cases.js',

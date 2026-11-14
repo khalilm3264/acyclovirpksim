@@ -41,7 +41,8 @@ async function check(browser, legacy) {
              ? fetch(event.request) : caches.match(event.request).then(hit => hit || fetch(event.request))));`);
        } else res.end(worker.replace(/^const CACHE = .+?;$/m, 'const CACHE = "ayflux-static-prior";')
          .replace(' "'+controlCssPath+'",\n', '')
-         .replace(' "/assets/simulator-navigation.js",\n', ''));
+         .replace(' "/assets/simulator-navigation.js",\n', '')
+         .replace(' "/assets/timeline-labels.js",\n', ''));
        return;
      }
      if (pathname === '/' || pathname === '/index.html') {
