@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-timeline-editors-20261114";
+const CACHE = "ayflux-static-v0.27.0-timeline-labels-20261114";
 const CORE = [
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
@@ -10,6 +10,7 @@ const CORE = [
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
  "/assets/simulator-navigation.js",
+ "/assets/timeline-labels.js",
  "/assets/pk-engine.js", "/assets/simulator-ui.js", "/assets/study-library.js", "/assets/regimen-tools.js",
  "/assets/scenario-summary.js", "/assets/scenario-summary.css",
  "/assets/scenario-script.js", "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",

@@ -133,6 +133,28 @@ async function main(){
   await page.locator('#pdRxEnable').check();
   await page.locator('#generatePdRx').click();
   assert.ok(await page.locator('#pdRxRows tr').count()>0,'Generated exchange rows');
+  async function checkTimelineLabels() {
+   const fields=await page.locator('#scheduleRows input, #scheduleRows select, #doseRows input, #doseRows select').evaluateAll(fields=>fields.map(field=>({id:field.id,name:field.getAttribute('aria-label'),label:field.labels?.[0]?.textContent.trim()})));
+   assert.ok(fields.length>0);
+   assert.equal(new Set(fields.map(field=>field.id)).size,fields.length,'Timeline IDs are unique');
+   for(const field of fields) {
+    assert.ok(field.id&&field.label,'Each timeline field has an associated visible label');
+    assert.ok(field.name.includes(field.label),'Accessible name includes the visible label');
+    assert.match(field.name,/^(Session|Medication dose) [1-9][0-9]*: /);
+   }
+  }
+  await checkTimelineLabels();
+  await page.locator('label[for="timeline-session-2-start"]').click();
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'timeline-session-2-start');
+  await page.locator('#scheduleRows button[data-delete="0"]').click();
+  await page.locator('#doseRows button[data-delete-dose="0"]').click();
+  await checkTimelineLabels();
+  await page.getByLabel('Medication dose 1: Medication / route',{exact:true}).selectOption('Valacyclovir oral');
+  assert.equal(await page.getByLabel('Medication dose 1: IV infusion (hours)',{exact:true}).count(),0);
+  await page.getByLabel('Medication dose 1: Medication / route',{exact:true}).selectOption('Acyclovir IV');
+  await page.getByLabel('Medication dose 1: IV infusion (hours)',{exact:true}).waitFor();
+  await checkTimelineLabels();
+
   for(const control of await page.locator('#scheduleRows input, #scheduleRows select, #scheduleRows button, #doseRows input, #doseRows select, #doseRows button, #pdRxRows input, #pdRxRows select, #pdRxRows button, #addRow, #addDose, #generatePdRx, #applyFullTimelineBottom').all()) {
    const bounds=await control.boundingBox();
    assert.ok(bounds.height>=39.9,'Timeline phone target '+await control.evaluate(el=>el.outerHTML)+' '+JSON.stringify(bounds));
