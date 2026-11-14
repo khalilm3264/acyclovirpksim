@@ -50,6 +50,21 @@ async function main(){
   assert.ok(zeroChanges.every(value=>value==='0'||value==='Unavailable'));
   await page.selectOption('#differenceTo','1');
   assert.deepEqual(await page.$$eval('#differenceOutcomes tr',rows=>rows.map(row=>row.textContent)),differences);
+  // Supply an absent parent curve and a real zero metabolite curve to the production renderer.
+  const edgeCells=await page.evaluate(()=>{
+   const regimens=window.AyFluxRegimens,metrics=regimens.metrics;
+   const select=document.querySelector('#differenceTo');
+   try{
+    regimens.metrics=(data,doses,T)=>metrics({...data,plasma:{median:[]},cmmg:{median:data.time.map(()=>0)}},doses,T);
+    select.dispatchEvent(new Event('change'));
+    return Array.from(document.querySelectorAll('#differenceOutcomes tr'),row=>Array.from(row.cells,cell=>cell.textContent));
+   }finally{
+    regimens.metrics=metrics;
+    select.dispatchEvent(new Event('change'));
+   }
+  });
+  assert.deepEqual(edgeCells[0].slice(1),['Unavailable','Unavailable','Unavailable','Unavailable']);
+  assert.deepEqual(edgeCells[3].slice(1),['0','0','0','Undefined (zero baseline)']);
   await page.check('#predictMode');
   assert.equal(await page.locator('#differenceOutcomes tr').count(),0);
 

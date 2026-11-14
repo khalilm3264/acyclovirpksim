@@ -51,12 +51,17 @@
      for(let j=1;j<points.length;j++){
        if(t<=points[j].time){
          const a=points[j-1],b=points[j];
-         return b.time===a.time?a.crcl:a.crcl+(b.crcl-a.crcl)*(t-a.time)/(b.time-a.time);
+         return a.crcl+(b.crcl-a.crcl)*(t-a.time)/(b.time-a.time);
        }
      }
      return points.at(-1).crcl;
    };
-   if(sim.kidneyClear?.median?.some((v,i)=>Math.abs(getCrCl(sim.time[i]))<1e-8&&Math.abs(v)>1e-8))
+   if(config?.renalMode!=='profile' && config?.crcl!==undefined && (!finite(config.crcl)||config.crcl<0))
+     issues.push("Creatinine clearance must be finite and non-negative");
+   const clearance=sim.kidneyClear?.median;
+   if(clearance && (clearance.length!==sim.time.length || sim.time.some((t,i)=>!finite(clearance[i])||clearance[i]<-1e-8||!finite(getCrCl(t)))))
+     issues.push("Missing or nonfinite renal clearance");
+   else if(sim.kidneyClear?.median?.some((v,i)=>Math.abs(getCrCl(sim.time[i]))<1e-8&&Math.abs(v)>1e-8))
      issues.push("Renal acyclovir clearance is nonzero at CrCl = 0");
    notes.push("Checks only numerical consistency, not clinical accuracy or external validation.");
    return {passed:!issues.length,issues,notes};
