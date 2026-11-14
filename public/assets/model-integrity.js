@@ -40,11 +40,36 @@
      for(let j=1;j<points.length;j++){
        if(t<=points[j].time){
          const a=points[j-1],b=points[j];
+         if(b.time<=a.time)return NaN;
          return a.crcl+(b.crcl-a.crcl)*(t-a.time)/(b.time-a.time);
        }
      }
      return points.at(-1).crcl;
    };
+   if(config?.renalMode==='profile'){
+     const points=config.renalProfile;
+     if(!Array.isArray(points)||points.length<2){
+       issues.push("Renal profile requires at least two time points");
+     }else{
+       for(let i=0;i<points.length;i++){
+         const p=points[i];
+         if(!p||!finite(p.time)||p.time<0||(i>0&&p.time<=points[i-1].time)){
+           issues.push("Renal profile timestamps must be strictly increasing");break;
+         }
+         if(!p||!finite(p.crcl)||p.crcl<0){
+           issues.push("Renal profile clearance must be finite and non-negative");break;
+         }
+       }
+     }
+   }else if(config?.crcl!==undefined&&(!finite(config.crcl)||config.crcl<0)){
+     issues.push("Creatinine clearance must be finite and non-negative");
+   }
+   if(sim.kidneyClear?.median){
+     for(let i=0;i<sim.kidneyClear.median.length;i++){
+       const v=sim.kidneyClear.median[i];
+       if(!finite(v)||v<-1e-8){issues.push("Renal clearance is nonfinite or negative");break;}
+     }
+   }
    if(sim.kidneyClear?.median?.some((v,i)=>Math.abs(getCrCl(sim.time[i]))<1e-8&&Math.abs(v)>1e-8))
      issues.push("Renal acyclovir clearance is nonzero at CrCl = 0");
    notes.push("Checks only numerical consistency, not clinical accuracy or external validation.");

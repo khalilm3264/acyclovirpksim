@@ -1,7 +1,9 @@
 // Optional research figures; expensive calculations run only on request.
 (function(){
 'use strict';
-const $=id=>document.getElementById(id),charts=window.AyFluxCharts,pk=window.RenalPKV7;
+const $=id=>typeof document!=='undefined'&&document.getElementById?document.getElementById(id):null;
+const charts=typeof window!=='undefined'&&window.AyFluxCharts?window.AyFluxCharts:{options:(series,x,y)=>({series,tooltip:{},xAxis:{data:[]}})};
+const pk=typeof window!=='undefined'?window.RenalPKV7:null;
 const snapshot=()=>window.AyFluxResearchBridge.snapshot();
 const jobs=new Map();
 function cancel(key){jobs.get(key)?.terminate();jobs.delete(key);}
@@ -90,8 +92,8 @@ function selectFactor(label){
  $('sweepFactor').value=key;if($('sweepPanel').open)sweep();else $('sweepPanel').open=true;
 }
 const dimensions=['Central volume (L)','Systemic clearance (L/h)','Plasma AUC (mg·h/L)','Plasma at sample (mg/L)'];
-for(const id of ['ensembleX','ensembleY'])$(id).replaceChildren(...dimensions.map((v,i)=>new Option(v,i)));
-$('ensembleY').value='2';
+for(const id of ['ensembleX','ensembleY'])$(id)?.replaceChildren?.(...dimensions.map((v,i)=>new Option(v,i)));
+if($('ensembleY'))$('ensembleY').value='2';
 function quantile(sorted,p){if(!sorted||!sorted.length)return null;const pos=(sorted.length-1)*p,i=Math.floor(pos);return sorted[i]+(pos-i)*((sorted[i+1]??sorted[i])-sorted[i]);}
 function density(values){
  if(!values||!values.length)return [];
@@ -101,7 +103,7 @@ function density(values){
  const max=Math.max(...points.map(p=>p[1]));return points.map(([v,d])=>[v,d/max]);
 }
 function ensembleOption(result,kind){
- const x=+$('ensembleX').value,y=+$('ensembleY').value;
+ const x=+$('ensembleX')?.value||0,y=+$('ensembleY')?.value||2;
  if(kind==='scatter'){
   const o=charts.options([{type:'scatter',name:'Prior draws',symbolSize:6,data:result.points.map(p=>[p[x],p[y]])}],dimensions[x],dimensions[y]);
   o.tooltip.trigger='item';return o;
@@ -137,17 +139,27 @@ async function renderEnsemble(){
  charts.draw($('ensembleChart'),ensembleOption(ensemble,kind));
  $('ensembleStatus').textContent=ensemble.mode+' · '+ensemble.points.length+' prior draws · '+ensemble.hour+' h. '+({matrix:'V: central volume; CL: systemic clearance; AUC: plasma exposure; C: sampled plasma concentration.',box:'Box: quartiles and median; whiskers: minimum and maximum.',violin:'Width shows relative density within each scenario.','scatter':''}[kind]);
 }
-$('ensembleRun').onclick=()=>{
+if($('ensembleRun'))$('ensembleRun').onclick=()=>{
  const s=snapshot();if(!s.updated)return;
  const hour=$('ensembleHour').valueAsNumber;
  if(!Number.isFinite(hour)||hour<0||hour>s.config.horizon){$('ensembleStatus').textContent='Enter a time within the simulated window.';return;}
  $('ensembleStatus').textContent='Generating prior draws…';
  run('ensemble','ensemble',{config:s.config,mode:s.primary,hour,modes:pk.MODES.filter(m=>s.results[m])},r=>{if(current(s)){ensemble=r;renderEnsemble();}},msg=>{$('ensembleStatus').textContent=msg;});
 };
-for(const id of ['ensembleView','ensembleX','ensembleY'])$(id).onchange=renderEnsemble;
-$('eventsPanel').ontoggle=timeline;$('comparisonPanel').ontoggle=multiples;$('removalPanel').ontoggle=drawRemoval;
-$('sweepPanel').ontoggle=sweep;$('sweepFactor').onchange=sweep;$('tornadoMetric').addEventListener('change',sweep);
-window.addEventListener('ayflux:results-updated',()=>{cancel('ensemble');ensemble=null;charts.dispose($('ensembleChart'));$('ensembleStatus').textContent='';timeline();multiples();drawRemoval();});
-document.addEventListener('change',e=>{if(e.target.matches('input[data-mode]'))requestAnimationFrame(multiples);});
-window.AyFluxViews={setFactors,selectFactor,timeline};
+for(const id of ['ensembleView','ensembleX','ensembleY']){const el=$(id);if(el)el.onchange=renderEnsemble;}
+if($('eventsPanel'))$('eventsPanel').ontoggle=timeline;
+if($('comparisonPanel'))$('comparisonPanel').ontoggle=multiples;
+if($('removalPanel'))$('removalPanel').ontoggle=drawRemoval;
+if($('sweepPanel'))$('sweepPanel').ontoggle=sweep;
+if($('sweepFactor'))$('sweepFactor').onchange=sweep;
+if($('tornadoMetric'))$('tornadoMetric')?.addEventListener?.('change',sweep);
+if(typeof window!=='undefined'&&window.addEventListener){
+ window.addEventListener('ayflux:results-updated',()=>{cancel('ensemble');ensemble=null;charts.dispose?.($('ensembleChart'));if($('ensembleStatus'))$('ensembleStatus').textContent='';timeline();multiples();drawRemoval();});
+}
+if(typeof document!=='undefined'&&document.addEventListener){
+ document.addEventListener('change',e=>{if(e.target?.matches?.('input[data-mode]'))requestAnimationFrame(multiples);});
+}
+const api={setFactors,selectFactor,timeline,ensembleOption,quantile,density};
+if(typeof window!=='undefined')window.AyFluxViews=api;
+if(typeof module==='object'&&module.exports)module.exports=api;
 })();

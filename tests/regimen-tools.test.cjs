@@ -175,3 +175,51 @@ test('comparison metrics distinguish empty series from genuine zero series and h
  assert.deepEqual(readoutRow(plasmaOnly.peak,zeroSeries.peak),{x:'5',y:'0',delta:'-5',pct:'-100'});
  assert.deepEqual(readoutRow(cmmgOnly.cmmgPeak,cmmgOnly.cmmgPeak),{x:'3',y:'3',delta:'0',pct:'0'});
 });
+
+test('visible results display Unavailable for empty trajectories, 0 for simulated zero, and empty scenarios have no boxplot',()=>{
+ const views=require('../public/assets/analysis-views.js');
+ const format=x=>x===null?'Unavailable':String(Number(x.toPrecision(4)));
+
+ // 1. Empty trajectory displays "Unavailable"
+ const emptyTrajectory=R.metrics({time:[],plasma:{median:[]},cmmg:{median:[]}},[{time:12}],24);
+ assert.equal(format(emptyTrajectory.auc),'Unavailable');
+ assert.equal(format(emptyTrajectory.peak),'Unavailable');
+ assert.equal(format(emptyTrajectory.trough),'Unavailable');
+ assert.equal(format(emptyTrajectory.cmmgAuc),'Unavailable');
+ assert.equal(format(emptyTrajectory.cmmgPeak),'Unavailable');
+
+ // 2. Simulated zero displays 0
+ const zeroTrajectory=R.metrics({time:[0,12,24],plasma:{median:[0,0,0]},cmmg:{median:[0,0,0]}},[{time:12}],24);
+ assert.equal(format(zeroTrajectory.auc),'0');
+ assert.equal(format(zeroTrajectory.peak),'0');
+ assert.equal(format(zeroTrajectory.trough),'0');
+ assert.equal(format(zeroTrajectory.cmmgAuc),'0');
+ assert.equal(format(zeroTrajectory.cmmgPeak),'0');
+
+ // 3. Plasma and CMMG tested separately so missing series does not hide valid results for the other
+ const missingPlasma=R.metrics({time:[0,12,24],plasma:null,cmmg:{median:[2,4,2]}},[{time:12}],24);
+ assert.equal(format(missingPlasma.auc),'Unavailable');
+ assert.equal(format(missingPlasma.peak),'Unavailable');
+ assert.equal(format(missingPlasma.trough),'Unavailable');
+ assert.equal(format(missingPlasma.cmmgPeak),'4');
+ assert.ok(typeof missingPlasma.cmmgAuc==='number'&&missingPlasma.cmmgAuc>0);
+ assert.notEqual(format(missingPlasma.cmmgAuc),'Unavailable');
+
+ const missingCmmg=R.metrics({time:[0,12,24],plasma:{median:[10,5,2]},cmmg:null},[{time:12}],24);
+ assert.equal(format(missingCmmg.peak),'10');
+ assert.equal(format(missingCmmg.trough),'5');
+ assert.ok(typeof missingCmmg.auc==='number'&&missingCmmg.auc>0);
+ assert.notEqual(format(missingCmmg.auc),'Unavailable');
+ assert.equal(format(missingCmmg.cmmgAuc),'Unavailable');
+ assert.equal(format(missingCmmg.cmmgPeak),'Unavailable');
+
+ // 4. Empty scenario has no boxplot
+ const emptyOnly=views.ensembleOption({groups:[{name:'Empty scenario',values:[]}]},'box');
+ assert.deepEqual(emptyOnly.xAxis.data,[]);
+ assert.deepEqual(emptyOnly.series[0].data,[]);
+
+ const mixedGroups=views.ensembleOption({groups:[{name:'Normal',values:[1,2,3,4,5]},{name:'Empty scenario',values:[]}]},'box');
+ assert.deepEqual(mixedGroups.xAxis.data,['Normal']);
+ assert.equal(mixedGroups.series[0].data.length,1);
+ assert.ok(!mixedGroups.xAxis.data.includes('Empty scenario'));
+});

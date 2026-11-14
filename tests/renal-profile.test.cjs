@@ -94,10 +94,45 @@ test('kidney profile editor, CSV format selector and layout share consistent UI 
  assert.ok(html.includes('--ui-space-3:14px'));
 });
 
-test('profile validation rejects duplicate timestamps at hour zero and later in trajectory',()=>{
+test('profile validation and integrity checks reject duplicate timestamps and nonfinite clearance',()=>{
  const base=config({renalMode:'profile',horizon:96,renalProfile:[{time:0,crcl:50},{time:24,crcl:30}]});
+ // 1. Existing validator rejects duplicate timestamps and nonfinite clearance
  const atZero=model.validateRenalProfile({...base,renalProfile:[{time:0,crcl:50},{time:0,crcl:30},{time:24,crcl:30}]});
- assert.ok(atZero.some(e=>/increase/i.test(e)),'rejects duplicate timestamp at hour zero');
+ assert.ok(atZero.some(e=>/increase/i.test(e)),'validator rejects duplicate timestamp at hour zero');
  const afterZero=model.validateRenalProfile({...base,renalProfile:[{time:0,crcl:50},{time:12,crcl:40},{time:12,crcl:30},{time:24,crcl:20}]});
- assert.ok(afterZero.some(e=>/increase/i.test(e)),'rejects duplicate timestamp after hour zero');
+ assert.ok(afterZero.some(e=>/increase/i.test(e)),'validator rejects duplicate timestamp after hour zero');
+ const nonfiniteVal=model.validateRenalProfile({...base,renalProfile:[{time:0,crcl:NaN},{time:24,crcl:30}]});
+ assert.ok(nonfiniteVal.some(e=>/within 0–140/i.test(e)),'validator rejects nonfinite clearance in profile');
+
+ // 2. Model integrity check rejects duplicate timestamps and nonfinite clearance
+ const validSim={
+  time:[0,12,24],
+  plasma:{median:[0,1,0],lower:[0,0.5,0],upper:[0,1.5,0]},
+  csf:{median:[0,0.1,0],lower:[0,0.05,0],upper:[0,0.2,0]},
+  cmmg:{median:[0,0.2,0],lower:[0,0.1,0],upper:[0,0.3,0]},
+  csfCmmg:{median:[0,0.02,0],lower:[0,0.01,0],upper:[0,0.03,0]},
+  kidneyClear:{median:[10,15,10]}
+ };
+ const validReport=quality.checkSimulation(validSim,base);
+ assert.equal(validReport.passed,true);
+
+ const startDupReport=quality.checkSimulation(validSim,{...base,renalProfile:[{time:0,crcl:50},{time:0,crcl:30},{time:24,crcl:30}]});
+ assert.equal(startDupReport.passed,false,'integrity check fails on duplicate timestamp at start');
+ assert.ok(startDupReport.issues.some(i=>/strictly increasing/i.test(i)));
+
+ const laterDupReport=quality.checkSimulation(validSim,{...base,renalProfile:[{time:0,crcl:50},{time:12,crcl:40},{time:12,crcl:30},{time:24,crcl:20}]});
+ assert.equal(laterDupReport.passed,false,'integrity check fails on duplicate timestamp later in profile');
+ assert.ok(laterDupReport.issues.some(i=>/strictly increasing/i.test(i)));
+
+ const nonfiniteProfileReport=quality.checkSimulation(validSim,{...base,renalProfile:[{time:0,crcl:NaN},{time:24,crcl:30}]});
+ assert.equal(nonfiniteProfileReport.passed,false,'integrity check fails on nonfinite profile clearance');
+ assert.ok(nonfiniteProfileReport.issues.some(i=>/finite/i.test(i)));
+
+ const nonfiniteScalarReport=quality.checkSimulation(validSim,{...base,renalMode:'constant',crcl:NaN});
+ assert.equal(nonfiniteScalarReport.passed,false,'integrity check fails on nonfinite scalar clearance');
+ assert.ok(nonfiniteScalarReport.issues.some(i=>/finite/i.test(i)));
+
+ const nonfiniteSimClearReport=quality.checkSimulation({...validSim,kidneyClear:{median:[10,NaN,10]}},base);
+ assert.equal(nonfiniteSimClearReport.passed,false,'integrity check fails on nonfinite simulated clearance');
+ assert.ok(nonfiniteSimClearReport.issues.some(i=>/finite/i.test(i)));
 });
