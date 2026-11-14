@@ -117,3 +117,82 @@ test('held-out predictions interpolate each PK draw before weighting and exclude
  assert.equal(engine.evaluateHoldouts(raw,config,[.2,.8]).lines[0].predicted,7);
  assert.equal(engine.evaluateHoldouts(raw,{...config,observations:[]},[.2,.8]).n,0);
 });
+
+test('CSV duplicate headings, including whitespace-normalized names, are rejected',()=>{
+ for(const text of ['time,conc,conc\n0,1,9\n1,2,8','time; time ;conc\n0;1;9\n1;2;8']){
+  assert.throws(()=>csv.parseCSV(text),/headings must be unique/);
+ }
+});
+
+function importWorkspace(){
+ const fs=require('node:fs'),vm=require('node:vm');
+ const source=fs.readFileSync(require('node:path').resolve(__dirname,'../public/assets/research-workspace.js'),'utf8');
+ const elements=new Map(),listeners={},draws=[];
+ const el=id=>{
+  if(!elements.has(id))elements.set(id,{value:'',textContent:'',files:[],selectedIndex:0,
+   classList:{hidden:true,add(){this.hidden=true;},remove(){this.hidden=false;}},
+   addEventListener(type,fn){this[type]=fn;},replaceChildren(){},append(){}});
+  return elements.get(id);
+ };
+ let finish,fail;
+ const charts={ensure:()=>new Promise((resolve,reject)=>{finish=resolve;fail=reject;}),
+  dispose(){},line(){return {};},options(){return {};},draw(target){draws.push(target);}};
+ const snapshot={updated:true,primary:'No dialysis',results:{'No dialysis':{time:[0,1],plasma:{median:[0,2]}}}};
+ const context={$:el,importer:csv,bridge:{snapshot:()=>snapshot},
+  document:{createElement:()=>({})},window:{AyFluxCharts:charts,addEventListener:(name,fn)=>{listeners[name]=fn;}}};
+ vm.runInNewContext(source.slice(source.indexOf('let externalTable='),source.indexOf('// One worker per research operation')),context);
+ async function load(text='time,conc\n0,0\n1,1'){
+  await el('ospFile').change({target:{files:[{size:text.length,text:async()=>text}]}});
+  for(const [id,value] of Object.entries({ospTimeColumn:'time',ospValueColumn:'conc',ospTimeUnit:'h',ospConcUnit:'mg/L',ospTarget:'plasma'}))el(id).value=value;
+ }
+ return {el,draws,load,listeners,resolve:()=>finish(),reject:()=>fail(Error('chart failure'))};
+}
+
+for(const reject of [false,true])test('Clear cancels pending CSV comparison '+(reject?'failure':'success'),async()=>{
+ const w=importWorkspace();await w.load();
+ const pending=w.el('ospCompare').click();w.el('ospClear').click();
+ reject?w.reject():w.resolve();await pending;
+ assert.equal(w.draws.length,0);
+ assert.equal(w.el('ospPlot').classList.hidden,true);
+ assert.equal(w.el('ospDifference').classList.hidden,true);
+ assert.equal(w.el('ospMetrics').textContent,'');
+ assert.match(w.el('ospStatus').textContent,/Import cleared/);
+ w.listeners['ayflux:results-updated']();
+ assert.match(w.el('ospStatus').textContent,/Import cleared/);
+});
+
+test('Clear cancels a pending CSV file read and allows a fresh comparison',async()=>{
+ const w=importWorkspace();let finish;
+ const pending=w.el('ospFile').change({target:{files:[{size:30,text:()=>new Promise(resolve=>{finish=resolve;})}]}});
+ w.el('ospClear').click();finish('time,conc\n0,0\n1,1');await pending;
+ assert.match(w.el('ospStatus').textContent,/Import cleared/);
+ await w.el('ospCompare').click();
+ assert.match(w.el('ospStatus').textContent,/Select a CSV/);
+ await w.load();const compare=w.el('ospCompare').click();w.resolve();await compare;
+ assert.equal(w.draws.length,2);
+ assert.match(w.el('ospStatus').textContent,/Compared with AyFlux/);
+});
+
+test('new CSV selection invalidates an older pending comparison',async()=>{
+ const w=importWorkspace();await w.load();
+ const pending=w.el('ospCompare').click(),resolveOld=w.resolve;
+ // Capture the pending chart loader before loading the replacement file.
+ await w.load('time,conc\n0,0\n1,9');
+ resolveOld();await pending;
+ assert.equal(w.draws.length,0);
+ assert.match(w.el('ospStatus').textContent,/rows loaded locally/);
+ const fresh=w.el('ospCompare').click();w.resolve();await fresh;
+ assert.equal(w.draws.length,2);
+});
+
+test('Compare during file loading does not cancel the pending import',async()=>{
+ const w=importWorkspace();let finish;
+ const loading=w.el('ospFile').change({target:{files:[{size:30,text:()=>new Promise(resolve=>{finish=resolve;})}]}});
+ await w.el('ospCompare').click();
+ assert.match(w.el('ospStatus').textContent,/Select a CSV/);
+ finish('time,conc\n0,0\n1,1');await loading;
+ assert.match(w.el('ospStatus').textContent,/rows loaded locally/);
+ for(const [id,value] of Object.entries({ospTimeColumn:'time',ospValueColumn:'conc',ospTimeUnit:'h',ospConcUnit:'mg/L',ospTarget:'plasma'}))w.el(id).value=value;
+ const compare=w.el('ospCompare').click();w.resolve();await compare;
+ assert.equal(w.draws.length,2);
+});
