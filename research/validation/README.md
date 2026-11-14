@@ -37,8 +37,8 @@ Outputs are exploratory and should not be interpreted as independently validated
 
 - The source's group-average 12.1% ± 2.1% daily recovery was calculated from actual collected dialysate, but AyFlux uses illustrative membrane and ultrafiltration assumptions. Agreement may be coincidental.
 - The PD model approximates membrane transport; it is not parameterized from this study's patient-specific exchange measurements.
-- The low CMMG CSF partition discrepancy highlighted by Smith et al. (2010) remains unresolved and is **not silently modified**.
-- No UI or simulation defaults are changed in this release. The saved JSON configuration schema stays version 2.
+- The original v0.26 experiment predates the #47 revision of the intact-barrier CMMG partition from 0.25 to 0.025. Smith supplied the revised value. Lindström supplied an independent intact-barrier comparison and the development data for the exploratory damaged-barrier preset. [Calibration and sample counts](LINDSTROM-CSF.md)
+- The original v0.26 CAPD experiment used saved configuration schema version 2.
 
 ## Cross-study comparison
 
