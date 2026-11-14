@@ -59,3 +59,26 @@ Case 1 had blood acyclovir of 17 µmol/L approximately 42 hours after the last d
 The conditional comparison scales the model's terminal curve to the first measurement. A one-hour IV input initializes the linear model, and the reported blood concentration is compared with modeled plasma assuming their ratio stays constant. The analysis assumes uninterrupted two-hour dwells with 1.5% dextrose, nominal membrane transport, modeled ultrafiltration, and stable renal function. At assumed weights of 50–90 kg and CrCl zero, modeled concentrations after another 96 hours are 0.25–0.55 µmol/L during PD, or 0.49–0.80 with dialysis disabled. The discrepancy persists without PD and therefore cannot identify peritoneal clearance from these blood samples. Sample clocks, matrix comparability, prior distribution, residual renal function and actual exchanges limit the comparison. [Reproduction script](davenport-dialysis-washout.cjs)
 
 Case 2 had three successive daily HD concentration pairs of 13→5, 8→3 and 5→2 µmol/L. These are falls of 61.5%, 62.5% and 60.0%. The next predialysis values exceeded the preceding postdialysis values by 60.0% and 66.7%. The paper gives neither exact postdisconnect sampling times nor effluent mass. The rises describe the intervals between sessions and cannot measure early rebound kinetics. The first blood value was paired with CSF of 6 µmol/L.
+
+
+### Davenport 1992 continuous case 2 HD course
+
+The [original report](https://doi.org/10.1016/S0272-6386(12)70234-2), p.648, gives oral acyclovir 800 mg twice daily for five days, a first blood measurement 48 hours after the last dose, and three successive daily HD pairs: 13→5, 8→3 and 5→2 µmol/L. The next pretreatment values exceed the preceding post-treatment values by 60.0% and 66.7%. These are sequence-qualified interdialytic rises. Exact postdisconnect sampling delays, HD clocks and session durations are absent; they do not identify immediate rebound kinetics. Blood is the reported matrix; comparison with model plasma assumes a constant matrix ratio.
+
+[Reproduction script](davenport-case2-course.cjs) follows a **single continuous trajectory** through all three sessions. Oral ACV is unsupported by the engine and is not substituted with valacyclovir. Following the earlier Davenport terminal-shape comparison, a unit IV input initializes the distribution state and one fixed concentration scale anchors the first predialysis value to 13 µmol/L at model hour 48. This conditions on an assumed terminal distribution state; it does not reconstruct five days of oral exposure or estimate bioavailability. No subsequent observation resets a state, no new dose is given, and no coefficient is fitted. The unit-input scale is a normalization, not evidence of absolute exposure accuracy. First-sample error is therefore zero by construction.
+
+The 48 scenarios reuse established source-comparison ranges: weights 50/70/90 kg, residual CrCl 0/5 mL/min, HD clearance 81.8/159 mL/min and sessions 4/5 hours, beginning at hours 48/72/96. The source's rounded 1600 mg/day and 27 mg/kg/day suggest approximately 59 kg but do not give measured weight. Timing every 24 hours is an assumption from “daily.” A preceding-PD sensitivity adds hour 24–48 rapid cycles of 1 L/hour, with assumed 1.5% dextrose, default membrane/UF settings and no PD after the first HD. Neither its exact start nor full prescription is known. The other branch omits preceding PD to bound this initialization uncertainty; neither claims to reconstruct his prior chronic CAPD. Post-treatment samples are compared at disconnect and at a one-hour delay, with next predialysis sampling at the following assumed session start.
+
+| Endpoint | Observed | Model range across scenarios |
+| --- | --- | --- |
+| Session 1 concentration fall | 61.5% | 37.3–78.3% |
+| Session 2 concentration fall | 62.5% | 37.7–78.3% |
+| Session 3 concentration fall | 60.0% | 37.7–78.3% |
+| Post-treatment 1 → pre-HD 2 change | +60.0% | −63.3 to −27.3% |
+| Post-treatment 2 → pre-HD 3 change | +66.7% | −63.3 to −27.3% |
+| Predialysis 2 blood ACV | 8 µmol/L | 1.41–4.70 µmol/L |
+| Predialysis 3 blood ACV | 5 µmol/L | 0.153–1.687 µmol/L |
+
+The model produces a transient postdisconnect peak of 2.29–29.26% above the disconnect value, yet all scenarios predict lower next-predialysis concentrations. A peak within the interval is a different endpoint from the later pre-HD sample. The observed individual treatment falls lie within the modeled ranges; this does not mean any one scenario matches the full course. The uninterrupted model misses the direction of both observed interdialytic changes throughout this grid. Sampling and prescription uncertainties, residual clearance and an unverified terminal distribution state limit attribution; this descriptive discrepancy does not identify a new parameter or establish a mechanism.
+
+The runner verifies step halving (0.125→0.0625 hours; all six paired concentrations differ by <0.001 µmol/L) and final mass-accounting residual <1e-8 for each scenario. It is included in the source-comparison CI artifact. Frozen adult engine blob remains `17971df66e0a97b4d382572a582d35c444a3c83f`.
