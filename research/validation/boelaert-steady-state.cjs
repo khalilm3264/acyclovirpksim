@@ -30,7 +30,9 @@ function report(){
  return {protocol:{days:20,stepHours:0.125,interpretation:'Numerical approach to a repeating regimen under fixed assumptions; measured source steady state is a separate observation'},records};
 }
 if(require.main===module){
- const r=report();fs.writeFileSync(path.join(__dirname,'boelaert-steady-state-results.json'),JSON.stringify(r,null,2)+'\n');
+ const out=process.argv[2] || __dirname;
+ fs.mkdirSync(out,{recursive:true});
+ const r=report();fs.writeFileSync(path.join(out,'boelaert-steady-state-results.json'),JSON.stringify(r,null,2)+'\n');
  console.log(JSON.stringify(r.records.map(x=>({subject:x.subject,candidate:x.candidate,troughPct:x.day5vsDay20TroughPercent,recoveryPct:x.day5vsDay20RecoveryPercent})),null,2));
 }
 module.exports={report};
