@@ -1,0 +1,1252 @@
+{
+  "source": {
+    "doi": "10.2131/fts.8.229",
+    "url": "https://www.jstage.jst.go.jp/article/fts/8/7/8_229/_pdf",
+    "numerical": "Results p231: three pre-HD pairs; day7 both <0.1 µg/mL",
+    "graphical": "Fig3C p232 also has an early point between day1 and day2, following the first HD arrow. No exact concentration or draw/session-end timestamp supplied; excluded from numerical comparison."
+  },
+  "engineBlob": "17971df66e0a97b4d382572a582d35c444a3c83f",
+  "unit": "µg/mL (= mg/L)",
+  "observed": [
+    {
+      "day": 1,
+      "acv": 11.2,
+      "cmmg": 36.4
+    },
+    {
+      "day": 2,
+      "acv": 5.39,
+      "cmmg": 16.37
+    },
+    {
+      "day": 3,
+      "acv": 2.26,
+      "cmmg": 7.22
+    }
+  ],
+  "observedChanges": [
+    {
+      "fromDay": 1,
+      "toDay": 2,
+      "acvRatio": 0.48125,
+      "cmmgRatio": 0.4497252747252748
+    },
+    {
+      "fromDay": 2,
+      "toDay": 3,
+      "acvRatio": 0.41929499072356213,
+      "cmmgRatio": 0.4410507025045815
+    }
+  ],
+  "day7Observed": {
+    "acv": {
+      "lessThan": 0.1
+    },
+    "cmmg": {
+      "lessThan": 0.1
+    }
+  },
+  "assumptions": "500 mg valacyclovir q8h ×21 doses at hours 0..160; final dose 8 or 24h before day1; pre-HD samples exactly 24h apart; HD starts at those samples for three days; 2/4h duration; HD clearance 81.8/159 mL/min; weight70kg. CrCl profiles are hypothetical, not inferred from creatinine. Recovery begins day1. No subsequent doses. All other model parameters frozen.",
+  "scenarios": [
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 2,
+        "hdCl": 81.8,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 11.549121927546286,
+          "predictedCmmg": 42.18824300704434
+        },
+        {
+          "day": 2,
+          "predictedAcv": 4.3217290551948695,
+          "predictedCmmg": 26.85920635275659
+        },
+        {
+          "day": 3,
+          "predictedAcv": 1.6185311786261756,
+          "predictedCmmg": 15.132917608270416
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.37420412411500614,
+          "cmmgRatio": 0.6366514563849411
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.3745100995354266,
+          "cmmgRatio": 0.5634164096109753
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.05292454249051072,
+        "predictedCmmg": 2.6449993282645905,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 2,
+        "hdCl": 81.8,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.6106427353365191,
+          "predictedCmmg": 6.291297881624339
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.3931393906392081,
+          "predictedCmmg": 2.3816761318129394
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.24378785796953426,
+          "cmmgRatio": 0.4788216657011959
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.2440885132462772,
+          "cmmgRatio": 0.3785667403810831
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0022453209260742363,
+        "predictedCmmg": 0.06422802654880094,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 2,
+        "hdCl": 81.8,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.4281001383030159,
+          "predictedCmmg": 5.53334593327836
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.25264655125243285,
+          "predictedCmmg": 1.4391074163271103
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.21615810014512407,
+          "cmmgRatio": 0.4211350291347541
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.17691094936287025,
+          "cmmgRatio": 0.26007906132745207
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.00005722610099771704,
+        "predictedCmmg": 0.0007442961674848824,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 2,
+        "hdCl": 159,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 11.549121927546286,
+          "predictedCmmg": 42.18824300704434
+        },
+        {
+          "day": 2,
+          "predictedAcv": 3.773912275953762,
+          "predictedCmmg": 20.324455878833522
+        },
+        {
+          "day": 3,
+          "predictedAcv": 1.2342805976384028,
+          "predictedCmmg": 8.79803680993898
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.32677049386347273,
+          "cmmgRatio": 0.4817563953881622
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.3270559852445084,
+          "cmmgRatio": 0.43287932835149157
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.03524589251073253,
+        "predictedCmmg": 1.280908679148809,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 2,
+        "hdCl": 159,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.4195838391308304,
+          "predictedCmmg": 4.910345672198628
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.30542450172113567,
+          "predictedCmmg": 1.4669880515401719
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.2148690679547662,
+          "cmmgRatio": 0.37371937208666367
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.21515073171595003,
+          "cmmgRatio": 0.2987545377601333
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0015375569952362134,
+        "predictedCmmg": 0.03449672665317854,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 2,
+        "hdCl": 159,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.2589993328378086,
+          "predictedCmmg": 4.3193335021132615
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.19723891043910596,
+          "predictedCmmg": 0.8902341981479979
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.19056290001734869,
+          "cmmgRatio": 0.3287382828019692
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.15666323666314078,
+          "cmmgRatio": 0.2061045292549059
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.00003973423781529056,
+        "predictedCmmg": 0.0004200940640932015,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 11.549121927546286,
+          "predictedCmmg": 42.18824300704434
+        },
+        {
+          "day": 2,
+          "predictedAcv": 3.6856956627406747,
+          "predictedCmmg": 19.79848995290684
+        },
+        {
+          "day": 3,
+          "predictedAcv": 1.177198293008633,
+          "predictedCmmg": 8.366849632690107
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.31913211115641354,
+          "cmmgRatio": 0.4692892744929199
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.3193964995290119,
+          "cmmgRatio": 0.42260039288812906
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.03282859429875712,
+        "predictedCmmg": 1.1909226692874157,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.3879248215651148,
+          "predictedCmmg": 4.769115993290563
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.2919351158981886,
+          "predictedCmmg": 1.390571018655957
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.210077139919805,
+          "cmmgRatio": 0.3629705836214535
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.2103392859340778,
+          "cmmgRatio": 0.2915783597237483
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0014367832521968579,
+        "predictedCmmg": 0.03204766740068551,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.2314279230919154,
+          "predictedCmmg": 4.195788415621638
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.1887921041890975,
+          "predictedCmmg": 0.8441997236039388
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.18638967477274018,
+          "cmmgRatio": 0.31933544332175623
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.1533115342350458,
+          "cmmgRatio": 0.20120169083379869
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.00003723889991174389,
+        "predictedCmmg": 0.0003912829014663359,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 159,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 11.549121927546286,
+          "predictedCmmg": 42.18824300704434
+        },
+        {
+          "day": 2,
+          "predictedAcv": 2.881309775829849,
+          "predictedCmmg": 11.622619307956047
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.7194781259093962,
+          "predictedCmmg": 3.083589675544277
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.24948301644971974,
+          "cmmgRatio": 0.2754942723264245
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.24970523195555344,
+          "cmmgRatio": 0.2653093587461359
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.015686200082946498,
+        "predictedCmmg": 0.35005540092127685,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 159,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.1036272239624905,
+          "predictedCmmg": 2.999889653436913
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.18460197594116484,
+          "predictedCmmg": 0.5817384162409934
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.16704568370369544,
+          "cmmgRatio": 0.2283173023763391
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.16726841449086888,
+          "cmmgRatio": 0.19391993821322975
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0007224949427918417,
+        "predictedCmmg": 0.01142032219510376,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 159,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.60673894406094,
+          "predictedCmmg": 13.13912534097896
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.9799168973260999,
+          "predictedCmmg": 2.6406267107202175
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.12052451311100182,
+          "predictedCmmg": 0.3573657585056576
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.14832081388761184,
+          "cmmgRatio": 0.20097431466647928
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.12299462682996606,
+          "cmmgRatio": 0.13533369069352022
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.000019222302313950644,
+        "predictedCmmg": 0.0001535307053134591,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 2,
+        "hdCl": 81.8,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.712818054401028,
+          "predictedCmmg": 39.133221297449055
+        },
+        {
+          "day": 2,
+          "predictedAcv": 2.514018151835956,
+          "predictedCmmg": 22.318882833392937
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.9415251882791322,
+          "predictedCmmg": 11.874468682549416
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.3745100986593442,
+          "cmmgRatio": 0.5703308363946983
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.37451009953589565,
+          "cmmgRatio": 0.5320368752858518
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.03078704351884099,
+        "predictedCmmg": 1.9282047066584134,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 2,
+        "hdCl": 81.8,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.6992544380989332,
+          "predictedCmmg": 3.9363060874901286
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.17067997617668706,
+          "predictedCmmg": 1.364551483485236
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.2440885126291406,
+          "cmmgRatio": 0.3898506813669987
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.24408851324664543,
+          "cmmgRatio": 0.3466578698800587
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0009747975687408705,
+        "predictedCmmg": 0.03324334433910838,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 2,
+        "hdCl": 81.8,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.6200045849703261,
+          "predictedCmmg": 3.4618667399483694
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.10968559973659205,
+          "predictedCmmg": 0.8224316398314079
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.21642479292672423,
+          "cmmgRatio": 0.34286233777901215
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.1769109493631272,
+          "cmmgRatio": 0.23756883254370262
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.000024844507781346313,
+        "predictedCmmg": 0.00037548388115360177,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 2,
+        "hdCl": 159,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.712818054401028,
+          "predictedCmmg": 39.133221297449055
+        },
+        {
+          "day": 2,
+          "predictedAcv": 2.195467314669404,
+          "predictedCmmg": 16.631938885013977
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.7180407256721512,
+          "predictedCmmg": 6.702835536848463
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.3270559840706574,
+          "cmmgRatio": 0.4250081729432826
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.32705598524488827,
+          "cmmgRatio": 0.4030098705381835
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.020504240513698233,
+        "predictedCmmg": 0.8895348770093753,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 2,
+        "hdCl": 159,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.6163547061322675,
+          "predictedCmmg": 2.99741742322261
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.13260916602110753,
+          "predictedCmmg": 0.8074745120377306
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.2151507309425338,
+          "cmmgRatio": 0.2968634041184884
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.2151507317162434,
+          "cmmgRatio": 0.269390077532008
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0006675762740029205,
+        "predictedCmmg": 0.016963739311151714,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 2,
+        "hdCl": 159,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.5466323943125314,
+          "predictedCmmg": 2.6363970211388628
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.08563720015803551,
+          "predictedCmmg": 0.48849114439843594
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.19081278689542472,
+          "cmmgRatio": 0.2611080419562237
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.1566632366633459,
+          "cmmgRatio": 0.18528739809735448
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0000172518133939173,
+        "predictedCmmg": 0.00020179666298901969,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.712818054401028,
+          "predictedCmmg": 39.133221297449055
+        },
+        {
+          "day": 2,
+          "predictedAcv": 2.1440505699479693,
+          "predictedCmmg": 16.23193836486566
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.6848022468553355,
+          "predictedCmmg": 6.3906276234643
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.3193964967577657,
+          "cmmgRatio": 0.4147866653114947
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.3193964995293716,
+          "cmmgRatio": 0.3937069917229932
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.019097118361796853,
+        "predictedCmmg": 0.8288740348176581,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.6025710773447707,
+          "predictedCmmg": 2.9191441029953458
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.12674437013339498,
+          "predictedCmmg": 0.7676781888543677
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.21033928425580387,
+          "cmmgRatio": 0.2891112358304493
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.21033928593435652,
+          "cmmgRatio": 0.2629805729928337
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0006237830887785698,
+        "predictedCmmg": 0.01578563789770752,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.5346278105656188,
+          "predictedCmmg": 2.5678474675868803
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.08196460988264288,
+          "predictedCmmg": 0.4645467183149671
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.18662235086546952,
+          "cmmgRatio": 0.25431891286776814
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.15331153423524113,
+          "cmmgRatio": 0.18090900031204818
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.000016167370541448385,
+        "predictedCmmg": 0.00018816415248121298,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 4,
+        "hdCl": 159,
+        "renal": "anuric",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 6.712818054401028,
+          "predictedCmmg": 39.133221297449055
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.6762257625775296,
+          "predictedCmmg": 9.193929836529142
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.4185623428546589,
+          "predictedCmmg": 2.1994337935225174
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.24970522796734673,
+          "cmmgRatio": 0.2349392544673663
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.24970523195576963,
+          "cmmgRatio": 0.23922673248862203
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.009125576471009847,
+        "predictedCmmg": 0.22233880780925164,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": false
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 4,
+        "hdCl": 159,
+        "renal": "constant5",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.47918346618816676,
+          "predictedCmmg": 1.740329695688261
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.08015225863961202,
+          "predictedCmmg": 0.29622887003040044
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.16726841213383523,
+          "cmmgRatio": 0.17236177842559391
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.1672684144910327,
+          "cmmgRatio": 0.17021422478988882
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.00031369979235173595,
+        "predictedCmmg": 0.005215703820578181,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 24,
+        "duration": 4,
+        "hdCl": 159,
+        "renal": "recovery",
+        "weight": 70
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 2.864757667483334,
+          "predictedCmmg": 10.09695833719618
+        },
+        {
+          "day": 2,
+          "predictedAcv": 0.4254698875134885,
+          "predictedCmmg": 1.5315203940924054
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.05233051004215812,
+          "predictedCmmg": 0.18126054991890328
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.14851863120668782,
+          "cmmgRatio": 0.1516813621435317
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.12299462683008114,
+          "cmmgRatio": 0.1183533373881842
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.000008346126927284568,
+        "predictedCmmg": 0.00006917317591932764,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    }
+  ],
+  "weightSensitivity": [
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "constant5",
+        "weight": 50
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 8.357095109324126,
+          "predictedCmmg": 16.904640184402588
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.4135338034414442,
+          "predictedCmmg": 4.729887562515268
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.2392838760046823,
+          "predictedCmmg": 1.0516945547074192
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.16914176336994718,
+          "cmmgRatio": 0.27979818031734244
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.16928061813740322,
+          "cmmgRatio": 0.22235085735275856
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.0006816936055943291,
+        "predictedCmmg": 0.015356499221433492,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    },
+    {
+      "inputs": {
+        "gap": 8,
+        "duration": 4,
+        "hdCl": 81.8,
+        "renal": "constant5",
+        "weight": 90
+      },
+      "rows": [
+        {
+          "day": 1,
+          "predictedAcv": 5.53806721092339,
+          "predictedCmmg": 10.875517152640615
+        },
+        {
+          "day": 2,
+          "predictedAcv": 1.3367080879993725,
+          "predictedCmmg": 4.621571943827218
+        },
+        {
+          "day": 3,
+          "predictedAcv": 0.3231767800411355,
+          "predictedCmmg": 1.593701996019737
+        }
+      ],
+      "changes": [
+        {
+          "fromDay": 1,
+          "toDay": 2,
+          "acvRatio": 0.2413672563169374,
+          "cmmgRatio": 0.4249519244889502
+        },
+        {
+          "fromDay": 2,
+          "toDay": 3,
+          "acvRatio": 0.24177064756511535,
+          "cmmgRatio": 0.34483981108383654
+        }
+      ],
+      "day7": {
+        "predictedAcv": 0.00229793485161987,
+        "predictedCmmg": 0.05008112752507802,
+        "acvBelowLimit": true,
+        "cmmgBelowLimit": true
+      }
+    }
+  ],
+  "maxRelativeStepDifference": 1.1104771324710327e-8,
+  "limits": "One patient, six dependent numerical observations and two censored day7 observations. No scoring, fitting, independent cohort addition, clearance estimate, body-mass removal or rebound estimate."
+}
