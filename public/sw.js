@@ -38,7 +38,7 @@ self.addEventListener("fetch", event => {
    return;
  }
  event.respondWith(caches.match(request,{ignoreSearch:true}).then(cached => cached || fetch(request).then(response => {
-   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || ["/assets/vendor/echarts-5.6.0.min.js","/assets/vendor/echarts-gl-2.0.9.min.js"].includes(url.pathname))) {
+   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || ["/assets/vendor/echarts-6.1.0.min.js","/assets/vendor/echarts-gl-2.1.0.min.js"].includes(url.pathname))) {
      const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(request,copy)).catch(()=>{});
    }
    return response;

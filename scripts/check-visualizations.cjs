@@ -163,7 +163,7 @@ const server=http.createServer((req,res)=>{let file=path.resolve(root,'.'+decode
  await page.click('#openVisualExplorer');await page.waitForURL('**/explore/');assert.ok((await page.textContent('#source')).includes('copied'));
  await page.goto(url+'/lite/');
  await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#acvChart'))?.getOption().series.length===5);
- await page.route('**/echarts-5.6.0.min.js',r=>r.abort());
+ await page.route('**/echarts-6.1.0.min.js',r=>r.abort());
  await page.reload();await page.waitForSelector('#acvChart > canvas');
  await page.waitForFunction(()=>document.querySelector('#liteResults').children.length===5);
  assert.ok(await page.evaluate(()=>document.querySelector('#acvChart > canvas').width>300));

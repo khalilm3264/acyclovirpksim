@@ -49,7 +49,7 @@ test('simulator script assets exist and use the expected loader', () => {
     const filename = path.join(root, 'public', relative);
     assert.ok(fs.statSync(filename).size > 0, relative + ' must exist');
   }
-  assert.ok(!html.includes('<script src="./assets/vendor/echarts-5.6.0.min.js"'));
+  assert.ok(!html.includes('<script src="./assets/vendor/echarts-6.1.0.min.js"'));
   assert.ok(read('public/assets/charts.js').includes('script.async=true'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxCharts.ensure()'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.RenalPKV7'));
@@ -191,7 +191,9 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(read('CITATION.cff').includes('version: "'+version+'"'),'citation version matches the app');
  assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
  assert.ok(read('CHANGELOG.md').includes('## ['+version+']'),'the changelog has a section for the current version');
- assert.match(index,new RegExp('class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/releases/tag/v'+version.replace(/\./g,'\\.')+'"[^>]*>v'+version.replace(/\./g,'\\.')+'</a>'),'footer shows and links the current release');
+ const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ const vEsc=escRe(version);
+ assert.match(index,new RegExp('class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/releases/tag/v'+vEsc+'"[^>]*>v'+vEsc+'</a>'),'footer shows and links the current release');
 });
 
 test('blood-brain barrier presets: intact matches DEFAULTS, damaged raises only the CSF curves',()=>{
