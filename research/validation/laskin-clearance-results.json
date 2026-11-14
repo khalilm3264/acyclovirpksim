@@ -25,6 +25,10 @@
     "sadjadiIntercept": 28.7
   },
   "probenecidEmulation": {
+    "engineAucControlUmolHL": 74.24558376714675,
+    "engineAucProbenecidUmolHL": 105.23773192821358,
+    "engineHalfLifeControlH": 2.991402425105891,
+    "engineHalfLifeProbenecidH": 3.573416531004993,
     "engineAucIncreasePct": 41.74274965399445,
     "laskinAucIncreasePct": 39.75903614457832,
     "engineTotalClFallPct": 29.449654219275335,

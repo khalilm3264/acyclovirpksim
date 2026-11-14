@@ -13,11 +13,13 @@ The engine takes absolute CrCl, so the input is 90 × 1.89 / 1.73 = 98.324 mL/mi
 | Total clearance, same units | 300 ± 69 | 360.8 |
 | Renal fraction | 83% | 92% |
 | Renal clearance / CrCl | 2.76 | 3.69 |
+| AUC without / with probenecid, µmol·h/L | 91.3 / 127.6 | 74.25 / 105.24 |
 | AUC increase with approximately 32% renal inhibition | 39.8% | 41.7% |
+| Terminal half-life without / with probenecid, h | 2.3 / 2.7 | 2.99 / 3.57 |
 
 Renal clearance is approximately 34% high and slightly exceeds the published mean plus one SD. Total clearance is approximately 20% high. A reported SD describes the small cohort's spread and does not establish model agreement. The earlier 70-kg comparison mixed absolute and indexed clearance and understated the difference.
 
-The probenecid illustration multiplies the model's renal term by 0.68 through the CrCl input. It is a sensitivity experiment, with no separate secretion pathway. Total clearance from simulated AUC, with a terminal half-life tail correction, is checked against the parameter sum.
+The reconstruction activates the simulator’s probenecid switch while holding CrCl fixed. This applies the study-informed factor of 0.68 to parent renal clearance. Metabolite renal clearance stays fixed. The simulated relative AUC increase is close to the observed ratio, while both absolute AUCs are low and both terminal half-lives are long. The calculated 26.7% decrease in total clearance assumes the source’s baseline nonrenal clearance also applies during probenecid treatment. Total clearance from simulated AUC, with a terminal half-life tail correction, is checked against the parameter sum.
 
 At a separate nominal 70-kg, CrCl-zero setting, nonrenal clearance is 28.7 mL/min. Its similarity to the cited Sadjadi intercept is a construction anchor. A BSA of 1.73 m² would make this numerically identical in indexed units, but no matched patient is represented. About 93% of that nonrenal clearance is assigned to CMMG formation. Parent-drug clearance alone does not identify this formation fraction or metabolite elimination, so #46 remains unresolved.
 

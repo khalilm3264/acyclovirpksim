@@ -36,7 +36,7 @@ function totalClearance(cfg) {
   let auc = 0;
   for (let i = 1; i < run.t.length; i++) auc += 0.5 * (c[i] + c[i - 1]) * (run.t[i] - run.t[i - 1]);
   const tail = c[c.length - 1] / (Math.log(2) / run.summary.modelHalfLife); // negligible by 168 h; kept for completeness
-  return { auc: auc + tail, cl: (cfg.dose / (auc + tail)) * ML_MIN_PER_L_H };
+  return { auc: auc + tail, halfLife:run.summary.modelHalfLife, cl: (cfg.dose / (auc + tail)) * ML_MIN_PER_L_H };
 }
 
 function terms(cfg) {
@@ -53,8 +53,11 @@ function report() {
   const nominal = config(LASKIN.crcl / TO_INDEXED, {weight:COHORT_WEIGHT_KG, dose:5*COHORT_WEIGHT_KG});
   const t = terms(nominal);
   const total = totalClearance(nominal);
-  const probenecid = {...nominal, crcl:nominal.crcl * 0.68};
+  const probenecid = {...nominal, probenecid:true};
   const totalProb = totalClearance(probenecid);
+  const baseline = engine.drawParams(nominal)[0], inhibited = engine.drawParams(probenecid)[0];
+  assert.ok(Math.abs(inhibited.renal / baseline.renal - engine.PROBENECID_RENAL) < 1e-12);
+  assert.equal(inhibited.mr, baseline.mr); // drug switch preserves renal clearance of CMMG
   const anuric = terms(config(0));
   const anuricTotal = totalClearance(config(0));
   return {
@@ -70,7 +73,11 @@ function report() {
     },
     anuric: { nonrenal: anuric.nonrenal, totalFromSimulatedAUC: anuricTotal.cl,
       sadjadiIntercept: SADJADI_ANURIC_INTERCEPT },
-    probenecidEmulation: {
+    probenecidEmulation: { // retain the existing report key for downstream readers
+      engineAucControlUmolHL: total.auc / .22521,
+      engineAucProbenecidUmolHL: totalProb.auc / .22521,
+      engineHalfLifeControlH: total.halfLife,
+      engineHalfLifeProbenecidH: totalProb.halfLife,
       engineAucIncreasePct: 100 * (total.cl / totalProb.cl - 1),
       laskinAucIncreasePct: 100 * (LASKIN.aucProbenecid / LASKIN.auc - 1),
       engineTotalClFallPct: 100 * (1 - totalProb.cl / total.cl),
@@ -90,7 +97,7 @@ if (require.main === module) {
   console.log('| Renal fraction of total | 83% | ' + f(100 * r.engineAtLaskinCrCl.renalFraction, 0) + '% |');
   console.log('| Renal clearance / CrCl | ' + f(r.laskinDerived.renalToCrClRatio, 2) + ' | ' + f(r.engineAtLaskinCrCl.renalToCrClRatio, 2) + ' |');
   console.log('| Anuric total clearance (mL/min) | 28.7 (Sadjadi [23]) | ' + f(r.anuric.totalFromSimulatedAUC) + ' |');
-  console.log('| Total clearance fall, renal −32% | ' + f(r.probenecidEmulation.laskinTotalClFallPct) + '% | ' + f(r.probenecidEmulation.engineTotalClFallPct) + '% |');
+  console.log('| Total clearance fall, assuming unchanged nonrenal CL in the source | ' + f(r.probenecidEmulation.laskinTotalClFallPct) + '% | ' + f(r.probenecidEmulation.engineTotalClFallPct) + '% |');
   console.log('| AUC increase, renal −32% | ' + f(r.probenecidEmulation.laskinAucIncreasePct) + '% | ' + f(r.probenecidEmulation.engineAucIncreasePct) + '% |');
   assert.ok(Math.abs(r.engineAtLaskinCrCl.totalFromSimulatedAUC - r.engineAtLaskinCrCl.totalFromParameters) < 1,
     'AUC-derived clearance must match the parameter sum');
