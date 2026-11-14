@@ -62,5 +62,5 @@ listed full-text gaps were unaffected by these two uploads. The subsequent
 [Adair primary audit](ADAIR-REBOUND.md) resolves cases 12/13 using recovered
 scanned originals and corrects the secondary serum-assay assignment; it adds
 no rebound pair. The [Krieble primary audit](KRIEBLE-REBOUND.md) resolves case
-34 and verifies a flat immediate-post-HD to ten-hour pair. Gómez Campderá 16
-and MacDiarmaid-Gordon 40 remain separate retrieval tasks.
+34 and verifies a flat immediate-post-HD to ten-hour pair. The [final baseline-HD audit](FINAL-HD-SOURCE-AUDIT.md) subsequently resolves
+Gómez Campderá 16 and MacDiarmaid-Gordon 40.

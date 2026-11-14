@@ -169,8 +169,8 @@ from the excluded BK-virus Alexander paper ending in 00539.x.
 These five originals add **zero qualifying immediate-end-HD to delayed
 pre-dose/pre-next-HD pairs**. They do not replace the verified flat Krieble pair
 or Davenport's two sequence-qualified between-session rises. Chevret case 29 is now resolved from the supplied original, so none of the five
-secondary-queue full texts remains outstanding. Gómez Campderá (case 16) and
-MacDiarmaid-Gordon (case 40) remain separate baseline-HD retrieval tasks. Existing
+secondary-queue full texts remains outstanding. The subsequent [final baseline-HD audit](FINAL-HD-SOURCE-AUDIT.md) resolves
+Gómez Campderá (case 16) and MacDiarmaid-Gordon (case 40) separately. Existing
 Strong (19), Peyrière (30), Sagawa (18), Sadjadi (6) and Davenport (35/36)
 dispositions are not re-counted here. This is not a completed primary review of
 all 43 Kenzaka rows and does not establish absence of rebound in the literature.
