@@ -4,9 +4,33 @@ const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
 const https = require('node:https');
-const { chromium } = require('C:/Users/hasan/acyclovirpksim/node_modules/playwright');
+const { chromium } = require('playwright');
 
-const CHROME_PATH = 'C:\\Users\\hasan\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
+function getBrowserLaunchOptions() {
+  const args = ['--no-sandbox', '--disable-gpu'];
+  const options = { headless: true, args };
+  if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE) {
+    options.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
+  } else if (process.env.CHROME_EXECUTABLE) {
+    options.executablePath = process.env.CHROME_EXECUTABLE;
+  } else if (process.env.CHROME_BIN) {
+    options.executablePath = process.env.CHROME_BIN;
+  } else if (process.platform === 'win32') {
+    // Windows local user fallback when running outside standard CI
+    const candidatePaths = [
+      path.join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+    ];
+    for (const p of candidatePaths) {
+      if (p && fs.existsSync(p)) {
+        options.executablePath = p;
+        break;
+      }
+    }
+  }
+  return options;
+}
 
 const PROFILES = {
   phone: {
@@ -54,11 +78,7 @@ async function runTestSuite(baseUrl, label) {
   console.log(`RUNNING ANDROID CHROME USABILITY TEST ON: ${label} (${baseUrl})`);
   console.log(`========================================================================\n`);
 
-  const browser = await chromium.launch({
-    executablePath: CHROME_PATH,
-    headless: true,
-    args: ['--no-sandbox', '--disable-gpu']
-  });
+  const browser = await chromium.launch(getBrowserLaunchOptions());
 
   const results = [];
 
@@ -395,12 +415,13 @@ async function runTestSuite(baseUrl, label) {
 function checkUrlReachable(targetUrl) {
   const urlObj = new URL(targetUrl);
   const client = urlObj.protocol === 'https:' ? https : http;
-  return new Promise((resolve, reject) => {
-    const req = client.request(urlObj, { method: 'HEAD', timeout: 8000 }, res => {
-      resolve(res.statusCode >= 200 && res.statusCode < 500);
+  return new Promise((resolve) => {
+    const req = client.request(urlObj, { method: 'HEAD', timeout: 5000 }, res => {
+      const ok = res.statusCode >= 200 && res.statusCode < 400;
+      resolve({ ok, statusCode: res.statusCode });
     });
-    req.on('timeout', () => { req.destroy(); reject(new Error('Connection timed out')); });
-    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); resolve({ ok: false, error: 'Connection timed out' }); });
+    req.on('error', err => resolve({ ok: false, error: err.message }));
     req.end();
   });
 }
@@ -420,25 +441,15 @@ async function main() {
     if (localOnly) {
       console.log('\n[INFO] Skipping production test suite (--local-only specified).');
     } else {
-      let isReachable = false;
-      try {
-        await checkUrlReachable('https://ayflux.org');
-        isReachable = true;
-      } catch (netErr) {
-        console.warn(`\n[NETWORK NOTICE] Production site https://ayflux.org unreachable (${netErr.message}). Skipping production assertions.`);
-      }
-
-      if (isReachable) {
-        try {
-          prodResults = await runTestSuite('https://ayflux.org', 'PRODUCTION DEPLOYED (ayflux.org)');
-        } catch (err) {
-          if (err instanceof assert.AssertionError || err.name === 'AssertionError') {
-            console.error('\n❌ PRODUCTION FUNCTIONAL ASSERTION FAILURE:', err.message);
-            throw err; // Real functional assertion failure: must fail the suite!
-          } else {
-            console.warn(`\n[NETWORK WARNING] Production test interrupted by network/navigation error: ${err.message}`);
-          }
-        }
+      const targetProd = process.env.AYFLUX_PROD_URL || 'https://ayflux.org';
+      const reachability = await checkUrlReachable(targetProd);
+      if (!reachability.ok) {
+        console.warn(`\n[OFFLINE SKIP] Production site ${targetProd} is unreachable (${reachability.error || 'HTTP ' + reachability.statusCode}). Skipping production tests.`);
+      } else {
+        console.log(`\n[PREFLIGHT PASSED] Production site ${targetProd} is reachable (HTTP ${reachability.statusCode}). Running full production test suite...`);
+        // Once preflight passes, any failure (AssertionError, TypeError from missing bridge, TimeoutError from missing control)
+        // must fail the run and exit nonzero!
+        prodResults = await runTestSuite(targetProd, `PRODUCTION DEPLOYED (${targetProd})`);
       }
     }
 

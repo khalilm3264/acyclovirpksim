@@ -16,7 +16,7 @@ The usability evaluation was executed via Playwright Chromium launching the inst
 | Pixel 7 (Phone) | Android 14 | 412 × 915 | 915 × 412 | 2.625 | Chrome 157 Mobile Safari |
 | Pixel Tablet (Tablet) | Android 14 | 800 × 1280 | 1280 × 800 | 2.000 | Chrome 157 Safari |
 
-The test suite supports standalone local runs via the `--local-only` flag (`node scripts/test_android_chrome.cjs --local-only`), and partitions network availability checks from functional assertion failures. When running against production, an unreachable domain triggers a network notice, whereas any functional assertion failure throws an `AssertionError` that immediately fails the test run.
+The test suite supports standalone local runs via the `--local-only` flag (`node scripts/test_android_chrome.cjs --local-only`), and strictly partitions preflight network availability checks from runtime assertion failures. When running against production, an unreachable domain logs `[OFFLINE SKIP]` and skips production gracefully (exiting with code 0). Once preflight succeeds (HTTP 200–399), any subsequent failure—including an `AssertionError`, a missing simulator bridge (`TypeError`), or a missing control (`TimeoutError`)—immediately terminates the process with exit code 1.
 
 ---
 
