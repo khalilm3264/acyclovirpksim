@@ -7,8 +7,18 @@
 <meta property="og:description" content="Inspect simulated CAPD drain accounting and explore hypothetical sample timing using the Boelaert 1987 reconstruction.">
 <link rel="canonical" href="https://ayflux.org/research/exchanges/">
 <link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="style.css">
-<script defer src="/assets/pk-engine.js"></script><script defer src="/assets/study-library.js"></script><script defer src="/assets/ayflux-version.js"></script><script defer src="/assets/charts.js"></script><script defer src="view.js"></script></head>
-<body><div class="shell"><main><p><a href="/learn/">← AyFlux user guide</a></p>
+<script defer src="/assets/pk-engine.js"></script><script defer src="/assets/study-library.js"></script><script defer src="/assets/ayflux-version.js"></script><script defer src="/assets/charts.js"></script><script defer src="view.js"></script><link rel="icon" href="/favicon.ico"></head>
+<body><header class="site-header ay-header">
+  <div class="ay-header-brand">
+    <img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" alt="" width="42" height="42">
+    <div class="ay-title-stack">
+      <a class="brand ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a>
+      <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function and dialysis</p>
+    </div>
+  </div>
+  <a class="ay-guide-link" href="/">← Simulator</a>
+</header>
+<div class="shell"><nav class="guide-topics" aria-label="Research navigation"><a href="/learn/">User guide</a><a href="/learn/model-methods/">Model methods</a><a href="/references/">References</a><span aria-current="page">PD exchanges</span></nav><main>
 <h1>PD exchanges and sample timing</h1><p>Educational research tool. Do not use for patient dosing or dialysis prescriptions.</p>
 <section class="card"><h2>Replay the Boelaert CAPD reconstruction</h2>
 <label>Patient <select id="patient"><option value="boelaert-1">Boelaert patient 1</option><option value="boelaert-4">Boelaert patient 4</option><option value="boelaert-5">Boelaert patient 5</option></select></label>
@@ -23,4 +33,9 @@
 <label>Hypothetical time shift (h) <input id="shift" type="range" min="-2" max="2" step="0.25" value="0"></label>
 <p id="timing" role="status"></p><p>The observed concentration stays fixed while its assumed collection time moves. Boelaert's endpoint times are inferred from fitted peaks and troughs. This exercise does not revise the source or fit the model.</p>
 <div class="scroll"><table><caption>Published endpoint comparisons at the reconstructed times</caption><thead><tr><th>Time (h)</th><th>Observed (mg/L)</th><th>Predicted (mg/L)</th><th>Predicted ÷ observed</th></tr></thead><tbody id="endpoints"></tbody></table></div></section>
-</main></div></body></html>
+<div class="actions"><a class="btn" href="/">Open simulator</a></div>
+</main>
+<footer class="site-footer">
+    <span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a></span>
+    <span><a href="/learn/">User guide</a> · <a href="/disclaimer/">Disclaimer</a> · <a href="/cite/">Cite</a> · <a class="github-icon-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" title="AyFlux on GitHub" aria-label="AyFlux source code on GitHub"><img src="/github-mark.svg" width="19" height="19" alt=""></a></span>
+  </footer></div></body></html>
