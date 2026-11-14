@@ -30,7 +30,7 @@ async function checkResponsiveLayout(base) {
       await page.locator('#num_dose').press('Tab');
       const tabs = await page.locator('#tabs [role=tab]').evaluateAll(nodes => nodes.map(node => node.id));
       for (const [width, height] of sizes) {
-        for (const zoom of [1, 1.25, 1.5, 2, 3, 4]) {
+        for (const zoom of [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5]) {
           // At narrower effective widths mobile browsers magnify and pan.
           const effectiveWidth = Math.max(160, Math.round(width / zoom));
           await page.setViewportSize({ width: effectiveWidth, height: Math.ceil(height / zoom) });
@@ -60,6 +60,12 @@ async function checkResponsiveLayout(base) {
           await page.waitForFunction(expected => Math.abs(visualViewport.scale - expected) < 0.05, scale);
           assert.equal(await page.locator('#num_dose').inputValue(), '725');
         }
+        await session.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1 });
+        await page.goto(base + '/lite/index.html');
+        const touchAction = await page.locator('.chart').first().evaluate(chart => getComputedStyle(chart).touchAction);
+        assert.ok(touchAction.includes('pinch-zoom'), 'Lite chart allows pinch zoom');
+        await session.send('Emulation.setPageScaleFactor', { pageScaleFactor: 3 });
+        await page.waitForFunction(() => Math.abs(visualViewport.scale - 3) < 0.05);
         await session.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1 });
       }
       for (const route of ['/lite/index.html', '/learn/index.html', '/research/pediatric/index.html', '/experimental/neonatal/index.html']) {
