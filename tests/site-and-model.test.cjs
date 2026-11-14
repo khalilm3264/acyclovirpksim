@@ -13,7 +13,6 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const html = read('public/index.html');
 const engineSource = read('public/assets/pk-engine.js');
 const scriptPaths = [
-  '/assets/measurement-pixel.js',
   './assets/charts.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
@@ -50,7 +49,7 @@ test('simulator script assets exist and use the expected loader', () => {
     const filename = path.join(root, 'public', relative);
     assert.ok(fs.statSync(filename).size > 0, relative + ' must exist');
   }
-  assert.ok(!html.includes('<script src="./assets/vendor/echarts-5.6.0.min.js"'));
+  assert.ok(!html.includes('<script src="./assets/vendor/echarts-6.1.0.min.js"'));
   assert.ok(read('public/assets/charts.js').includes('script.async=true'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxCharts.ensure()'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.RenalPKV7'));
@@ -59,7 +58,7 @@ test('simulator script assets exist and use the expected loader', () => {
 test('worker Content Security Policy allows local scripts but not inline scripts', () => {
   const worker = read('src/index.js');
   const directive = /script-src ([^;]+);/.exec(worker)?.[1];
-  assert.equal(directive?.trim(), "'self' https://bzrcdn.openai.com");
+  assert.equal(directive?.trim(), "'self'");
   assert.doesNotMatch(directive, /unsafe-inline|unsafe-eval/);
   const markup = html;
   assert.doesNotMatch(markup, /\s(?:onclick|onchange|oninput|onload|onerror)\s*=/i);
@@ -186,9 +185,44 @@ test('v0.20 research workspace remains optional and has public sources', () => {
  assert.ok(index.includes('id="printResearchReport"'));
  assert.ok(ui.includes('window.AyFluxResearchBridge'));
  assert.ok(index.includes('/manifest.webmanifest'));
- assert.ok(read('public/sw.js').includes('ayflux-static-v0.26.0'));
+ const version=read('public/assets/ayflux-version.js').match(/version:"([^"]+)"/)[1];
+ assert.ok(read('public/sw.js').includes('ayflux-static-v'+version),'offline cache name carries the app version');
  assert.ok(read('public/manifest.webmanifest').includes('AyFlux'));
- assert.ok(read('CITATION.cff').includes('version: "0.26.0"'));
+ assert.ok(read('CITATION.cff').includes('version: "'+version+'"'),'citation version matches the app');
  assert.equal(read('CITATION.cff'),read('public/CITATION.cff'));
- assert.ok(read('CHANGELOG.md').includes('[0.26.0]'));
+ assert.ok(read('CHANGELOG.md').includes('## ['+version+']'),'the changelog has a section for the current version');
+ const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ const vEsc=escRe(version);
+ assert.match(index,new RegExp('class="release-link" href="https://github.com/khalilm3264/acyclovirpksim/releases/tag/v'+vEsc+'"[^>]*>v'+vEsc+'</a>'),'footer shows and links the current release');
+});
+
+test('blood-brain barrier presets: intact matches DEFAULTS, damaged raises only the CSF curves',()=>{
+ const pk=require('../public/assets/pk-engine.js');
+ assert.deepEqual(pk.CSF_BARRIER.intact,{csfRatio:pk.DEFAULTS.csfRatio,csfMetRatio:pk.DEFAULTS.csfMetRatio});
+ assert.equal(pk.csfBarrierOf(pk.DEFAULTS),'intact');
+ const damaged={...structuredClone(pk.DEFAULTS),...pk.CSF_BARRIER.damaged,draws:1,variability:0};
+ assert.equal(pk.csfBarrierOf(damaged),'damaged');
+ assert.equal(pk.csfBarrierOf({...damaged,csfMetRatio:.2}),'custom');
+ const base={...structuredClone(pk.DEFAULTS),draws:1,variability:0};
+ const run=c=>pk.single(c,pk.drawParams(c)[0],[],.25);
+ const a=run(base),b=run(damaged);
+ assert.deepEqual(a.cols.plasma,b.cols.plasma);assert.deepEqual(a.cols.cmmg,b.cols.cmmg);
+ const peak=(r,k)=>Math.max(...r.cols[k]);
+ assert.ok(peak(b,'csf')/peak(a,'csf')>1.2&&peak(b,'csfCmmg')/peak(a,'csfCmmg')>4);
+});
+
+test('body size and Cockcroft-Gault weight choice: Devine ideal weight, adjusted weight, fallbacks',()=>{
+ const pk=require('../public/assets/pk-engine.js');
+ const man={age:60,sex:'male',scr:1.2,weight:120,height:177.8}; // 70 in
+ const s=pk.bodySize(man);
+ assert.ok(Math.abs(s.ideal-73)<1e-9&&Math.abs(s.adjusted-(73+.4*47))<1e-9&&Math.abs(s.bmi-120/1.778**2)<1e-9);
+ assert.ok(Math.abs(pk.bodySize({sex:'female',weight:60,height:152.4}).ideal-45.5)<1e-9);
+ assert.equal(pk.bodySize({sex:'male',weight:80,height:0}),null);
+ const cg=w=>(140-60)*w/(72*1.2);
+ assert.ok(Math.abs(pk.cockcroftGault(man)-cg(120))<1e-9,'default is actual weight');
+ assert.ok(Math.abs(pk.cockcroftGault({...man,cgWeight:'ideal'})-cg(73))<1e-9);
+ assert.ok(Math.abs(pk.cockcroftGault({...man,cgWeight:'adjusted'})-cg(91.8))<1e-9);
+ assert.ok(Math.abs(pk.cockcroftGault({...man,cgWeight:'ideal',height:0})-cg(120))<1e-9,'no height: actual weight');
+ assert.ok(Math.abs(pk.cockcroftGault({...man,weight:60,cgWeight:'ideal'})-cg(60))<1e-9,'below ideal weight: actual weight');
+ assert.equal(pk.DEFAULTS.height,0);assert.equal(pk.DEFAULTS.cgWeight,'actual');
 });

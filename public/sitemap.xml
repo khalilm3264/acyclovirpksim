@@ -10,6 +10,12 @@
     <loc>https://ayflux.org/disclaimer/</loc>
   </url>
   <url>
+    <loc>https://ayflux.org/experimental/</loc>
+  </url>
+  <url>
+    <loc>https://ayflux.org/experimental/neonatal/</loc>
+  </url>
+  <url>
     <loc>https://ayflux.org/explore/</loc>
   </url>
   <url>
@@ -29,6 +35,15 @@
   </url>
   <url>
     <loc>https://ayflux.org/lite/</loc>
+  </url>
+  <url>
+    <loc>https://ayflux.org/references/</loc>
+  </url>
+  <url>
+    <loc>https://ayflux.org/research/exchanges/</loc>
+  </url>
+  <url>
+    <loc>https://ayflux.org/research/mass-recovery/</loc>
   </url>
   <url>
     <loc>https://ayflux.org/research/pediatric/</loc>

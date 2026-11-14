@@ -1,0 +1,442 @@
+{
+  "source": "doi:10.1136/bmj.39408.393137.BE (BMJ 2007;335:1305), case 1",
+  "assumptions": "Doses at 0, 24, 48 h; HD 78-82 and 126-130 h; 60 kg; CrCl 0. Only the 30 h dose-to-sample gap is reported.",
+  "scenarios": [
+    {
+      "hdCl": 81.8,
+      "cmmgNonrenalLh": 0.25,
+      "rmsLogError": 1.32,
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "key": "plasma",
+          "hour": 78,
+          "umolL": 19.4,
+          "predictedUmolL": 21,
+          "ratio": 1.08
+        },
+        {
+          "label": "CMMG before session 1",
+          "key": "cmmg",
+          "hour": 78,
+          "umolL": 90.2,
+          "predictedUmolL": 114.1,
+          "ratio": 1.26
+        },
+        {
+          "label": "CMMG after session 1",
+          "key": "cmmg",
+          "hour": 82,
+          "umolL": 21.1,
+          "predictedUmolL": 50.7,
+          "ratio": 2.4
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "key": "plasma",
+          "hour": 126,
+          "umolL": 1.8,
+          "predictedUmolL": 2.7,
+          "ratio": 1.48
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 126,
+          "umolL": 8.9,
+          "predictedUmolL": 46.6,
+          "ratio": 5.23
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 130,
+          "umolL": 1.5,
+          "predictedUmolL": 20.1,
+          "ratio": 13.39
+        }
+      ]
+    },
+    {
+      "hdCl": 81.8,
+      "cmmgNonrenalLh": 0.5,
+      "rmsLogError": 0.971,
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "key": "plasma",
+          "hour": 78,
+          "umolL": 19.4,
+          "predictedUmolL": 21,
+          "ratio": 1.08
+        },
+        {
+          "label": "CMMG before session 1",
+          "key": "cmmg",
+          "hour": 78,
+          "umolL": 90.2,
+          "predictedUmolL": 84.4,
+          "ratio": 0.94
+        },
+        {
+          "label": "CMMG after session 1",
+          "key": "cmmg",
+          "hour": 82,
+          "umolL": 21.1,
+          "predictedUmolL": 36.7,
+          "ratio": 1.74
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "key": "plasma",
+          "hour": 126,
+          "umolL": 1.8,
+          "predictedUmolL": 2.7,
+          "ratio": 1.48
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 126,
+          "umolL": 8.9,
+          "predictedUmolL": 26.4,
+          "ratio": 2.97
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 130,
+          "umolL": 1.5,
+          "predictedUmolL": 11.1,
+          "ratio": 7.4
+        }
+      ]
+    },
+    {
+      "hdCl": 81.8,
+      "cmmgNonrenalLh": 0.75,
+      "rmsLogError": 0.7,
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "key": "plasma",
+          "hour": 78,
+          "umolL": 19.4,
+          "predictedUmolL": 21,
+          "ratio": 1.08
+        },
+        {
+          "label": "CMMG before session 1",
+          "key": "cmmg",
+          "hour": 78,
+          "umolL": 90.2,
+          "predictedUmolL": 64.6,
+          "ratio": 0.72
+        },
+        {
+          "label": "CMMG after session 1",
+          "key": "cmmg",
+          "hour": 82,
+          "umolL": 21.1,
+          "predictedUmolL": 27.6,
+          "ratio": 1.31
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "key": "plasma",
+          "hour": 126,
+          "umolL": 1.8,
+          "predictedUmolL": 2.7,
+          "ratio": 1.48
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 126,
+          "umolL": 8.9,
+          "predictedUmolL": 16.3,
+          "ratio": 1.83
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 130,
+          "umolL": 1.5,
+          "predictedUmolL": 6.7,
+          "ratio": 4.46
+        }
+      ]
+    },
+    {
+      "hdCl": 159,
+      "cmmgNonrenalLh": 0.25,
+      "rmsLogError": 0.668,
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "key": "plasma",
+          "hour": 78,
+          "umolL": 19.4,
+          "predictedUmolL": 21,
+          "ratio": 1.08
+        },
+        {
+          "label": "CMMG before session 1",
+          "key": "cmmg",
+          "hour": 78,
+          "umolL": 90.2,
+          "predictedUmolL": 114.1,
+          "ratio": 1.26
+        },
+        {
+          "label": "CMMG after session 1",
+          "key": "cmmg",
+          "hour": 82,
+          "umolL": 21.1,
+          "predictedUmolL": 23.6,
+          "ratio": 1.12
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "key": "plasma",
+          "hour": 126,
+          "umolL": 1.8,
+          "predictedUmolL": 2,
+          "ratio": 1.12
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 126,
+          "umolL": 8.9,
+          "predictedUmolL": 25.4,
+          "ratio": 2.85
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 130,
+          "umolL": 1.5,
+          "predictedUmolL": 5.1,
+          "ratio": 3.4
+        }
+      ]
+    },
+    {
+      "hdCl": 159,
+      "cmmgNonrenalLh": 0.5,
+      "rmsLogError": 0.375,
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "key": "plasma",
+          "hour": 78,
+          "umolL": 19.4,
+          "predictedUmolL": 21,
+          "ratio": 1.08
+        },
+        {
+          "label": "CMMG before session 1",
+          "key": "cmmg",
+          "hour": 78,
+          "umolL": 90.2,
+          "predictedUmolL": 84.4,
+          "ratio": 0.94
+        },
+        {
+          "label": "CMMG after session 1",
+          "key": "cmmg",
+          "hour": 82,
+          "umolL": 21.1,
+          "predictedUmolL": 17.1,
+          "ratio": 0.81
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "key": "plasma",
+          "hour": 126,
+          "umolL": 1.8,
+          "predictedUmolL": 2,
+          "ratio": 1.12
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 126,
+          "umolL": 8.9,
+          "predictedUmolL": 15.3,
+          "ratio": 1.72
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 130,
+          "umolL": 1.5,
+          "predictedUmolL": 3,
+          "ratio": 2
+        }
+      ]
+    },
+    {
+      "hdCl": 159,
+      "cmmgNonrenalLh": 0.75,
+      "rmsLogError": 0.273,
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "key": "plasma",
+          "hour": 78,
+          "umolL": 19.4,
+          "predictedUmolL": 21,
+          "ratio": 1.08
+        },
+        {
+          "label": "CMMG before session 1",
+          "key": "cmmg",
+          "hour": 78,
+          "umolL": 90.2,
+          "predictedUmolL": 64.6,
+          "ratio": 0.72
+        },
+        {
+          "label": "CMMG after session 1",
+          "key": "cmmg",
+          "hour": 82,
+          "umolL": 21.1,
+          "predictedUmolL": 12.9,
+          "ratio": 0.61
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "key": "plasma",
+          "hour": 126,
+          "umolL": 1.8,
+          "predictedUmolL": 2,
+          "ratio": 1.12
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 126,
+          "umolL": 8.9,
+          "predictedUmolL": 10,
+          "ratio": 1.12
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "key": "cmmg",
+          "hour": 130,
+          "umolL": 1.5,
+          "predictedUmolL": 1.9,
+          "ratio": 1.29
+        }
+      ]
+    }
+  ],
+  "sensitivity": [
+    {
+      "label": "weight 50 kg",
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "predictedUmolL": 23.5
+        },
+        {
+          "label": "CMMG before session 1",
+          "predictedUmolL": 99.6
+        },
+        {
+          "label": "CMMG after session 1",
+          "predictedUmolL": 14.7
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "predictedUmolL": 1.9
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "predictedUmolL": 14
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "predictedUmolL": 2
+        }
+      ]
+    },
+    {
+      "label": "weight 80 kg",
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "predictedUmolL": 17.4
+        },
+        {
+          "label": "CMMG before session 1",
+          "predictedUmolL": 64.7
+        },
+        {
+          "label": "CMMG after session 1",
+          "predictedUmolL": 19.5
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "predictedUmolL": 2.2
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "predictedUmolL": 16.6
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "predictedUmolL": 4.9
+        }
+      ]
+    },
+    {
+      "label": "residual CrCl 2 mL/min",
+      "rows": [
+        {
+          "label": "Acyclovir before session 1",
+          "predictedUmolL": 15
+        },
+        {
+          "label": "CMMG before session 1",
+          "predictedUmolL": 54.3
+        },
+        {
+          "label": "CMMG after session 1",
+          "predictedUmolL": 10.7
+        },
+        {
+          "label": "Acyclovir before session 2 (day 6)",
+          "predictedUmolL": 1
+        },
+        {
+          "label": "CMMG before session 2 (day 6)",
+          "predictedUmolL": 6.9
+        },
+        {
+          "label": "CMMG after session 2 (day 6)",
+          "predictedUmolL": 1.3
+        }
+      ]
+    }
+  ],
+  "haraCheck": [
+    {
+      "cmmgNonrenalLh": 0.25,
+      "cmmgPeakMgL": 8.57,
+      "observedCmmgPeakMgL": 7.47
+    },
+    {
+      "cmmgNonrenalLh": 0.5,
+      "cmmgPeakMgL": 7.06,
+      "observedCmmgPeakMgL": 7.47
+    },
+    {
+      "cmmgNonrenalLh": 0.75,
+      "cmmgPeakMgL": 6.08,
+      "observedCmmgPeakMgL": 7.47
+    }
+  ]
+}

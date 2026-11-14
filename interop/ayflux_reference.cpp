@@ -39,7 +39,7 @@ local_double flux = Q*(cc-cp);
 dxdt_CENT = -(other+renal+form+hd)*cc - flux;
 dxdt_PERI = flux;
 dxdt_MET = form*cc*(239.19/225.21)
-           -(0.25*scale+metRenal+hd*METDIAL)*MET/Vm;
+           -(0.5*scale+metRenal+hd*METDIAL)*MET/Vm;
 
 $TABLE
 capture plasma_acyclovir_mg_L = CENT/(0.32*WT*VCSCALE);

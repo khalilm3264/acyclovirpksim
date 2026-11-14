@@ -72,7 +72,7 @@ function createEChartsView(container, status, selectCell) {
       if (current !== revision) return;
       const surface = kind === 'surface';
       if (surface) {
-        await load('echarts-gl-2.0.9.min.js');
+        await load('echarts-gl-2.1.0.min.js');
         if (current !== revision) return;
         if (!supportsSurface()) throw new Error('WebGL is unavailable. Select the 2D heatmap.');
       }

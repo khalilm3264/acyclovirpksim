@@ -54,7 +54,7 @@ test('shared links go through full validation, never carry measurements, and lea
  assert.doesNotMatch(share,/fetch\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage|innerHTML/);
  const html=read('public/index.html');
  for(const id of ['copyShareLink','shareLinkField','concUnit'])assert.ok(html.includes('id="'+id+'"'),id);
- // The third-party measurement script is deferred, so it runs after the UI script has removed the fragment.
- assert.match(html,/<script defer src="\/assets\/measurement-pixel\.js">/);
+ // No third-party script is loaded on the page that reads share links.
+ assert.doesNotMatch(html,/<script[^>]+src="https?:/);
  assert.match(html,/<script src="\.\/assets\/simulator-ui\.js">/);
 });

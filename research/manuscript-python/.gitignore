@@ -3,3 +3,7 @@
 /figures/
 /data/
 __pycache__/
+
+/reconciled/results/
+/reconciled/figures/
+/reconciled/data/

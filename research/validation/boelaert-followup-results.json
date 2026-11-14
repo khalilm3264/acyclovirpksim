@@ -1,0 +1,697 @@
+{
+  "protocol": {
+    "candidateSelection": "Fixed from prior Boelaert analysis before external run",
+    "sourceCentralVolumeL": 28.2,
+    "defaultCentralVolumeL": 18.88,
+    "sourceRecoveryPct": {
+      "anuricSubset": [
+        8.6,
+        4.8,
+        7.8,
+        6.7
+      ],
+      "eightPersonSubset": [
+        8.6,
+        4.8,
+        7.8,
+        6.7,
+        5.7,
+        3.4,
+        8.4,
+        6.7
+      ]
+    },
+    "caveat": "Unknown individual weights, CrCl and exchange prescription; denominator ambiguity. At positive CrCl, clearanceScale also multiplies renal clearance."
+  },
+  "patient4": [
+    {
+      "name": "baseline",
+      "overrides": {},
+      "peakRatio": 1.571411926522838,
+      "troughRatio": 2.9631389837050017,
+      "recoveryRatio": 0.8986229655867168,
+      "aucRatio": 1.8674687218445962
+    },
+    {
+      "name": "baseline with source central volume",
+      "overrides": {
+        "vcScale": 1.4936440677966103
+      },
+      "peakRatio": 1.2782402553523664,
+      "troughRatio": 3.252310118168016,
+      "recoveryRatio": 0.8821142455433711,
+      "aucRatio": 1.8492841641258417
+    },
+    {
+      "name": "Boelaert shared grid minimum",
+      "overrides": {
+        "clearanceScale": 1.625,
+        "formFactor": 1.625,
+        "pdTransport": 2
+      },
+      "peakRatio": 1.3295774574690309,
+      "troughRatio": 1.3734054212664526,
+      "recoveryRatio": 0.7971154766680171,
+      "aucRatio": 1.1777424701866073
+    },
+    {
+      "name": "Boelaert shared grid minimum with source central volume",
+      "overrides": {
+        "clearanceScale": 1.625,
+        "formFactor": 1.625,
+        "pdTransport": 2,
+        "vcScale": 1.4936440677966103
+      },
+      "peakRatio": 1.048857360936269,
+      "troughRatio": 1.6084496160559578,
+      "recoveryRatio": 0.7879954022099863,
+      "aucRatio": 1.1773490167621952
+    },
+    {
+      "name": "Boelaert patient 4 grid minimum",
+      "overrides": {
+        "clearanceScale": 1.875,
+        "formFactor": 1.875,
+        "pdTransport": 6
+      },
+      "peakRatio": 1.252501420439937,
+      "troughRatio": 1.060672709998752,
+      "recoveryRatio": 0.8193465507590613,
+      "aucRatio": 1.0178000716959998
+    },
+    {
+      "name": "Boelaert patient 4 grid minimum with source central volume",
+      "overrides": {
+        "clearanceScale": 1.875,
+        "formFactor": 1.875,
+        "pdTransport": 6,
+        "vcScale": 1.4936440677966103
+      },
+      "peakRatio": 0.9839073152449617,
+      "troughRatio": 1.2639269552045245,
+      "recoveryRatio": 0.8219231285933571,
+      "aucRatio": 1.0165668188452608
+    }
+  ],
+  "external": [
+    {
+      "candidate": "baseline",
+      "weight": 50,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 17.803019052217188,
+      "capdPctTablet": 3.560603810443437,
+      "capdPctEquivalent": 5.127863948666686,
+      "stepDifferenceMg": 0.00009204048602029502
+    },
+    {
+      "candidate": "baseline",
+      "weight": 50,
+      "crcl": 0.5,
+      "urine": 6.064140444945425,
+      "dialysate": 17.373173265782324,
+      "capdPctTablet": 3.4746346531564645,
+      "capdPctEquivalent": 5.004054009168188,
+      "stepDifferenceMg": 0.00009003563910070511
+    },
+    {
+      "candidate": "baseline",
+      "weight": 50,
+      "crcl": 1,
+      "urine": 11.853268492428057,
+      "dialysate": 16.95890355434232,
+      "capdPctTablet": 3.3917807108684643,
+      "capdPctEquivalent": 4.884730499369822,
+      "stepDifferenceMg": 0.00008809171373513891
+    },
+    {
+      "candidate": "baseline",
+      "weight": 50,
+      "crcl": 2,
+      "urine": 22.663952994934395,
+      "dialysate": 16.174343399757518,
+      "capdPctTablet": 3.2348686799515036,
+      "capdPctEquivalent": 4.658750977556372,
+      "stepDifferenceMg": 0.00008437796822846622
+    },
+    {
+      "candidate": "baseline",
+      "weight": 50,
+      "crcl": 5,
+      "urine": 49.849243735601156,
+      "dialysate": 14.128937293866514,
+      "capdPctTablet": 2.8257874587733025,
+      "capdPctEquivalent": 4.069605720787411,
+      "stepDifferenceMg": 0.00007448830718637112
+    },
+    {
+      "candidate": "baseline",
+      "weight": 50,
+      "crcl": 10,
+      "urine": 82.23188343193458,
+      "dialysate": 11.517417068546093,
+      "capdPctTablet": 2.3034834137092184,
+      "capdPctEquivalent": 3.317400694473815,
+      "stepDifferenceMg": 0.00006139312354669357
+    },
+    {
+      "candidate": "baseline",
+      "weight": 70,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 13.437537997224716,
+      "capdPctTablet": 2.687507599444943,
+      "capdPctEquivalent": 3.870459636801087,
+      "stepDifferenceMg": 0.00007046956473999444
+    },
+    {
+      "candidate": "baseline",
+      "weight": 70,
+      "crcl": 0.5,
+      "urine": 5.887173547124708,
+      "dialysate": 13.128043126770693,
+      "capdPctTablet": 2.625608625354139,
+      "capdPctEquivalent": 3.7813147797493953,
+      "stepDifferenceMg": 0.00006898870647553679
+    },
+    {
+      "candidate": "baseline",
+      "weight": 70,
+      "crcl": 1,
+      "urine": 11.519282980704897,
+      "dialysate": 12.829200452954836,
+      "capdPctTablet": 2.5658400905909677,
+      "capdPctEquivalent": 3.695238111017603,
+      "stepDifferenceMg": 0.00006755129610169774
+    },
+    {
+      "candidate": "baseline",
+      "weight": 70,
+      "crcl": 2,
+      "urine": 22.069003600168415,
+      "dialysate": 12.261687744724012,
+      "capdPctTablet": 2.4523375489448025,
+      "capdPctEquivalent": 3.531775501197803,
+      "stepDifferenceMg": 0.00006480083080084853
+    },
+    {
+      "candidate": "baseline",
+      "weight": 70,
+      "crcl": 5,
+      "urine": 48.79659760009705,
+      "dialysate": 10.772073352659028,
+      "capdPctTablet": 2.1544146705318057,
+      "capdPctEquivalent": 3.1027168164836634,
+      "stepDifferenceMg": 0.00005744636474602771
+    },
+    {
+      "candidate": "baseline",
+      "weight": 70,
+      "crcl": 10,
+      "urine": 81.04658591030888,
+      "dialysate": 8.847042839540755,
+      "capdPctTablet": 1.769408567908151,
+      "capdPctEquivalent": 2.548243749901557,
+      "stepDifferenceMg": 0.000047632580049139506
+    },
+    {
+      "candidate": "baseline",
+      "weight": 90,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 10.842688457259332,
+      "capdPctTablet": 2.1685376914518666,
+      "capdPctEquivalent": 3.12305632452155,
+      "stepDifferenceMg": 0.0000572959218629876
+    },
+    {
+      "candidate": "baseline",
+      "weight": 90,
+      "crcl": 0.5,
+      "urine": 5.733873649300594,
+      "dialysate": 10.6021817108876,
+      "capdPctTablet": 2.12043634217752,
+      "capdPctEquivalent": 3.0537823507919573,
+      "stepDifferenceMg": 0.00005612906684504537
+    },
+    {
+      "candidate": "baseline",
+      "weight": 90,
+      "crcl": 1,
+      "urine": 11.228257172226138,
+      "dialysate": 10.369627735644736,
+      "capdPctTablet": 2.073925547128947,
+      "capdPctEquivalent": 2.986799040698915,
+      "stepDifferenceMg": 0.00005499539671127707
+    },
+    {
+      "candidate": "baseline",
+      "weight": 90,
+      "crcl": 2,
+      "urine": 21.544331082041793,
+      "dialysate": 9.927098906981842,
+      "capdPctTablet": 1.9854197813963683,
+      "capdPctEquivalent": 2.859335961538555,
+      "stepDifferenceMg": 0.00005282316839938517
+    },
+    {
+      "candidate": "baseline",
+      "weight": 90,
+      "crcl": 5,
+      "urine": 47.832336091998826,
+      "dialysate": 8.759640346326169,
+      "capdPctTablet": 1.7519280692652337,
+      "capdPctEquivalent": 2.523068913394103,
+      "stepDifferenceMg": 0.00004699455898204974
+    },
+    {
+      "candidate": "baseline",
+      "weight": 90,
+      "crcl": 10,
+      "urine": 79.87915391496261,
+      "dialysate": 7.237106262907037,
+      "capdPctTablet": 1.4474212525814076,
+      "capdPctEquivalent": 2.0845282583466704,
+      "stepDifferenceMg": 0.0000391657658012079
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 50,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 17.549016915526774,
+      "capdPctTablet": 3.509803383105355,
+      "capdPctEquivalent": 5.054702851899963,
+      "stepDifferenceMg": 0.00015099183214672962
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 50,
+      "crcl": 0.5,
+      "urine": 7.602776387381928,
+      "dialysate": 16.92758102652801,
+      "capdPctTablet": 3.385516205305602,
+      "capdPctEquivalent": 4.875708565466981,
+      "stepDifferenceMg": 0.0001467549636124943
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 50,
+      "crcl": 1,
+      "urine": 14.734545010320328,
+      "dialysate": 16.33893732189824,
+      "capdPctTablet": 3.267787464379648,
+      "capdPctEquivalent": 4.706159523097974,
+      "stepDifferenceMg": 0.00014271292515743994
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 50,
+      "crcl": 2,
+      "urine": 27.724286545493737,
+      "dialysate": 15.251529181877864,
+      "capdPctTablet": 3.0503058363755726,
+      "capdPctEquivalent": 4.392949669064665,
+      "stepDifferenceMg": 0.00013516871950258746
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 50,
+      "crcl": 5,
+      "urine": 58.52967245696021,
+      "dialysate": 12.5818982910199,
+      "capdPctTablet": 2.51637965820398,
+      "capdPctEquivalent": 3.624006830699697,
+      "stepDifferenceMg": 0.00011617556985932254
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 50,
+      "crcl": 10,
+      "urine": 91.90422785896511,
+      "dialysate": 9.507832293686292,
+      "capdPctTablet": 1.9015664587372585,
+      "capdPctEquivalent": 2.7385731771539557,
+      "stepDifferenceMg": 0.00009330084085767965
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 70,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 13.476194047827448,
+      "capdPctTablet": 2.6952388095654896,
+      "capdPctEquivalent": 3.881593870141072,
+      "stepDifferenceMg": 0.00011770148906542488
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 70,
+      "crcl": 0.5,
+      "urine": 7.486509054633643,
+      "dialysate": 13.015623053700159,
+      "capdPctTablet": 2.6031246107400317,
+      "capdPctEquivalent": 3.7489340448799866,
+      "stepDifferenceMg": 0.00011444750401956583
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 70,
+      "crcl": 1,
+      "urine": 14.523888111780952,
+      "dialysate": 12.578379503221749,
+      "capdPctTablet": 2.51567590064435,
+      "capdPctEquivalent": 3.622993302317785,
+      "stepDifferenceMg": 0.00011133997537449147
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 70,
+      "crcl": 2,
+      "urine": 27.378954051143587,
+      "dialysate": 11.768084275361518,
+      "capdPctTablet": 2.353616855072304,
+      "capdPctEquivalent": 3.3896012200797077,
+      "stepDifferenceMg": 0.00010553152554493295
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 70,
+      "crcl": 5,
+      "urine": 58.062045081871176,
+      "dialysate": 9.763842488916271,
+      "capdPctTablet": 1.9527684977832545,
+      "capdPctEquivalent": 2.8123126618312715,
+      "stepDifferenceMg": 0.00009085814366827094
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 70,
+      "crcl": 10,
+      "urine": 91.61020290292504,
+      "dialysate": 7.427436142675148,
+      "capdPctTablet": 1.4854872285350298,
+      "capdPctEquivalent": 2.1393496190357957,
+      "stepDifferenceMg": 0.00007308857515564426
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 90,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 11.00922612739994,
+      "capdPctTablet": 2.2018452254799876,
+      "capdPctEquivalent": 3.17102473439092,
+      "stepDifferenceMg": 0.00009692884525946965
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 90,
+      "crcl": 0.5,
+      "urine": 7.367130379206409,
+      "dialysate": 10.644035237727751,
+      "capdPctTablet": 2.1288070475455503,
+      "capdPctEquivalent": 3.0658375640554314,
+      "stepDifferenceMg": 0.00009429779562353247
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 90,
+      "crcl": 1,
+      "urine": 14.304302847368042,
+      "dialysate": 10.296736563501359,
+      "capdPctTablet": 2.0593473127002717,
+      "capdPctEquivalent": 2.9658039492083215,
+      "stepDifferenceMg": 0.00009178250775931929
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 90,
+      "crcl": 2,
+      "urine": 27.007214018333805,
+      "dialysate": 9.651523817663204,
+      "capdPctTablet": 1.9303047635326407,
+      "capdPctEquivalent": 2.7799611340712076,
+      "stepDifferenceMg": 0.00008707393952711584
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 90,
+      "crcl": 5,
+      "urine": 57.4959182756724,
+      "dialysate": 8.046145280078392,
+      "capdPctTablet": 1.6092290560156786,
+      "capdPctEquivalent": 2.317558509960149,
+      "stepDifferenceMg": 0.00007513627123856281
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "weight": 90,
+      "crcl": 10,
+      "urine": 91.11310920563312,
+      "dialysate": 6.156104204630677,
+      "capdPctTablet": 1.2312208409261354,
+      "capdPctEquivalent": 1.7731635697614792,
+      "stepDifferenceMg": 0.00006059355288634549
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 50,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 16.567676424482293,
+      "capdPctTablet": 3.3135352848964583,
+      "capdPctEquivalent": 4.772044022482649,
+      "stepDifferenceMg": 0.00019778994719743537
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 50,
+      "crcl": 0.5,
+      "urine": 8.00652608336217,
+      "dialysate": 15.850053076848807,
+      "capdPctTablet": 3.1700106153697614,
+      "capdPctEquivalent": 4.5653445361619305,
+      "stepDifferenceMg": 0.00019084380981304605
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 50,
+      "crcl": 1,
+      "urine": 15.48326977321733,
+      "dialysate": 15.175183613863162,
+      "capdPctTablet": 3.0350367227726323,
+      "capdPctEquivalent": 4.370959596217199,
+      "stepDifferenceMg": 0.00018425614126904577
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 50,
+      "crcl": 2,
+      "urine": 29.016203003574198,
+      "dialysate": 13.941366072762433,
+      "capdPctTablet": 2.7882732145524867,
+      "capdPctEquivalent": 4.015578945908056,
+      "stepDifferenceMg": 0.00017206464013597156
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 50,
+      "crcl": 5,
+      "urine": 60.66267680469251,
+      "dialysate": 10.987705137121695,
+      "capdPctTablet": 2.197541027424339,
+      "capdPctEquivalent": 3.164825970582168,
+      "stepDifferenceMg": 0.00014199467622688644
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 50,
+      "crcl": 10,
+      "urine": 94.245107212089,
+      "dialysate": 7.736182286691729,
+      "capdPctTablet": 1.547236457338346,
+      "capdPctEquivalent": 2.2282788178727366,
+      "stepDifferenceMg": 0.00010705183729786683
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 70,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 12.790993271352084,
+      "capdPctTablet": 2.5581986542704165,
+      "capdPctEquivalent": 3.684233166937822,
+      "stepDifferenceMg": 0.00015530550714615288
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 70,
+      "crcl": 0.5,
+      "urine": 7.914572746742796,
+      "dialysate": 12.253199907028218,
+      "capdPctTablet": 2.4506399814056437,
+      "capdPctEquivalent": 3.52933072052354,
+      "stepDifferenceMg": 0.00014987540147082257
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 70,
+      "crcl": 1,
+      "urine": 15.318297579122383,
+      "dialysate": 11.746386672422146,
+      "capdPctTablet": 2.349277334484429,
+      "capdPctEquivalent": 3.3833515859272665,
+      "stepDifferenceMg": 0.0001447237332907747
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 70,
+      "crcl": 2,
+      "urine": 28.750945418844122,
+      "dialysate": 10.81706945707252,
+      "capdPctTablet": 2.1634138914145042,
+      "capdPctEquivalent": 3.1156771970222468,
+      "stepDifferenceMg": 0.0001351850402731003
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 70,
+      "crcl": 5,
+      "urine": 60.32287712831773,
+      "dialysate": 8.577001322481872,
+      "capdPctTablet": 1.7154002644963744,
+      "capdPctEquivalent": 2.4704627760168467,
+      "stepDifferenceMg": 0.00011163079047449287
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 70,
+      "crcl": 10,
+      "urine": 94.04878563328333,
+      "dialysate": 6.083346387907609,
+      "capdPctTablet": 1.2166692775815218,
+      "capdPctEquivalent": 1.752206889084813,
+      "stepDifferenceMg": 0.00008420943423459448
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 90,
+      "crcl": 0,
+      "urine": 0,
+      "dialysate": 10.496475207148018,
+      "capdPctTablet": 2.099295041429604,
+      "capdPctEquivalent": 3.023335348063042,
+      "stepDifferenceMg": 0.00012868986183178777
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 90,
+      "crcl": 0.5,
+      "urine": 7.811485074704605,
+      "dialysate": 10.066571942644309,
+      "capdPctTablet": 2.013314388528862,
+      "capdPctEquivalent": 2.8995088529614628,
+      "stepDifferenceMg": 0.00012424496004292962
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 90,
+      "crcl": 1,
+      "urine": 15.130126590410244,
+      "dialysate": 9.660733252534595,
+      "capdPctTablet": 1.932146650506919,
+      "capdPctEquivalent": 2.782613758826935,
+      "stepDifferenceMg": 0.00012002479433803614
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 90,
+      "crcl": 2,
+      "urine": 28.437031003707524,
+      "dialysate": 8.914739984370252,
+      "capdPctTablet": 1.7829479968740505,
+      "capdPctEquivalent": 2.5677427880916897,
+      "stepDifferenceMg": 0.0001122024619277795
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 90,
+      "crcl": 5,
+      "urine": 59.86286867506173,
+      "dialysate": 7.106162395766548,
+      "capdPctTablet": 1.4212324791533097,
+      "capdPctEquivalent": 2.0468120522560476,
+      "stepDifferenceMg": 0.00009283774003687739
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "weight": 90,
+      "crcl": 10,
+      "urine": 93.66147894357697,
+      "dialysate": 5.073524497620658,
+      "capdPctTablet": 1.0147048995241317,
+      "capdPctEquivalent": 1.461344465661635,
+      "stepDifferenceMg": 0.00007020086380915558
+    }
+  ],
+  "ranges": [
+    {
+      "candidate": "baseline",
+      "capdPctTablet": [
+        1.4474212525814076,
+        3.560603810443437
+      ],
+      "capdPctEquivalent": [
+        2.0845282583466704,
+        5.127863948666686
+      ],
+      "anuricPctTablet": [
+        2.1685376914518666,
+        3.560603810443437
+      ],
+      "anuricPctEquivalent": [
+        3.12305632452155,
+        5.127863948666686
+      ]
+    },
+    {
+      "candidate": "Boelaert shared grid minimum",
+      "capdPctTablet": [
+        1.2312208409261354,
+        3.509803383105355
+      ],
+      "capdPctEquivalent": [
+        1.7731635697614792,
+        5.054702851899963
+      ],
+      "anuricPctTablet": [
+        2.2018452254799876,
+        3.509803383105355
+      ],
+      "anuricPctEquivalent": [
+        3.17102473439092,
+        5.054702851899963
+      ]
+    },
+    {
+      "candidate": "Boelaert patient 4 grid minimum",
+      "capdPctTablet": [
+        1.0147048995241317,
+        3.3135352848964583
+      ],
+      "capdPctEquivalent": [
+        1.461344465661635,
+        4.772044022482649
+      ],
+      "anuricPctTablet": [
+        2.099295041429604,
+        3.3135352848964583
+      ],
+      "anuricPctEquivalent": [
+        3.023335348063042,
+        4.772044022482649
+      ]
+    }
+  ]
+}

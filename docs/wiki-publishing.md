@@ -14,11 +14,11 @@ The source-controlled Wiki drafts are in [`wiki/`](../wiki/). They can be review
    git clone https://github.com/khalilm3264/acyclovirpksim.wiki.git
    ```
 
-4. Copy `wiki/Home.md`, `wiki/Roadmap.md`, `wiki/Release-Plan.md` and `wiki/_Sidebar.md` from the main repository into the root of the cloned wiki.
+4. Copy all reviewed `wiki/*.md` files, including `Home.md`, `Roadmap.md`, `Release-Plan.md`, `Research-Modules.md`, `References.md` and `_Sidebar.md` from the main repository into the root of the cloned wiki.
 5. In the cloned wiki, commit and push:
 
    ```bash
-   git add Home.md Roadmap.md Release-Plan.md _Sidebar.md
+   git add Home.md Roadmap.md Release-Plan.md Research-Modules.md References.md _Sidebar.md
    git commit -m "Publish AyFlux roadmap and wiki navigation"
    git push
    ```
