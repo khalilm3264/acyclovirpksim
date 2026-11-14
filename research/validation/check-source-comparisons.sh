@@ -21,7 +21,7 @@ studies=(
   kably-auc-comparison kably-renal-slope kacirova-iv-cohort kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
   laskin-anuric-course laskin-clearance laskin-fitted-distribution lindstrom-course-6-20
   lindstrom-patient19 lindstrom-patient4-course lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
-  stathoulopoulou-1996-recovery sun-cns-comparison unita-hd-sampling vasquez-hd-extraction vasquez-urine-intervals weller-single-dose yang-three-hd
+  stathoulopoulou-1996-recovery sun-cns-comparison unita-hd-sampling vasquez-hd-extraction vasquez-urine-intervals weller-single-dose whitley-iv-course yang-three-hd
 )
 for study in "${studies[@]}"; do
   echo "Checking $study"
