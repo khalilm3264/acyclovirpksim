@@ -13,6 +13,8 @@ Each sample is simulated at its weight, dose, estimated CrCl and time since the 
 
 Patient 7’s supplementary case history records a switch to 12-hour dosing. A separate analysis reconstructs this change and the serial CrCl estimates. The cohort results below use the original Table 1 assumptions. [Patient 7 follow-up](LINDSTROM-PATIENT7-COURSE.md)
 
+Patient 4’s supplementary case history records acute renal failure after 3 days followed by dose adjustments (10 mg/kg q12h on day 4, 12 mg/kg q8h on day 6). A separate analysis reconstructs these changes and the timing discrepancies. [Patient 4 follow-up](LINDSTROM-PATIENT4-COURSE.md)
+
 **Barrier intact** means an albumin ratio at or below the paper's upper reference: 6.8 × 10⁻³ at 45 years or younger, 10.2 × 10⁻³ above 45. Values reported as below 0.15 µmol/L count as consistent when the prediction is at or below that limit.
 
 ## CSF CMMG
