@@ -6,7 +6,7 @@
 
 - **Hara 2008** ([doi 10.2133/dmpk.23.306](https://doi.org/10.2133/dmpk.23.306)): 18 HD patients (CrCl 0.93 mL/min), one 1,000 mg valacyclovir dose, HD at 48–52 h. Over the session, plasma acyclovir fell 69.4% and serum CMMG 77.6%. This is already the `hara-hd.cjs` benchmark.
 - **Helldén 2010 thesis** (Karolinska Institutet; [open copy](https://core.ac.uk/download/70338802.pdf)):
-  - Paper V (preliminary, single dose; 6 healthy, 6 CKD and 4 HD patients): one HD session lowered serum acyclovir by 56% and CMMG by 73%. The dose was 50 mg IV; session timing and dialyzer are not given. The linear fit of CMMG kidney clearance against measured CrCl has slope 3.7474 (R² 0.854); the acyclovir fit has slope 1.5392.
+  - Paper V (preliminary, single dose; 6 healthy, 6 CKD and 4 HD patients): one HD session lowered serum acyclovir by 56% and CMMG by 73%. The IV dose was 100 mg in healthy participants and 50 mg in the CKD and HD groups. Session timing and dialyzer are not given. The linear fit of CMMG kidney clearance against measured CrCl has slope 3.7474 (R² 0.854); the acyclovir fit has slope 1.5392.
   - Paper I: 7 of 49 patients with neuropsychiatric symptoms had serum CMMG above 40 µmol/L, at most 158 µmol/L (about 38 mg/L).
   - The thesis reports **no** CMMG non-kidney clearance and no CMMG half-life between or during dialysis.
 
@@ -26,7 +26,7 @@ Once the dialyzer matches each study's acyclovir data, the unchanged CMMG dialys
 
 ## 2. Kidney clearance of CMMG: sources conflict
 
-AyFlux uses CMMG kidney clearance ≈ 2.0 × CrCl and acyclovir ≈ 3.37 × CrCl (mL/min). Helldén's Paper V fits 3.75 × CrCl and 1.54 × CrCl. Raising the CMMG coefficient would lower the CMMG/acyclovir exposure ratio. The Kably population model predicts higher median CMMG/acyclovir AUC ratios than the illustrative AyFlux scenarios. Kably reports simulated exposure by indexed eGFR category. AyFlux uses absolute CrCl. Paper V is small, preliminary and uses a 50 mg dose, and Kably's population is liver-transplant recipients on oral valacyclovir. Neither is strong enough to override the other, so no change.
+AyFlux uses CMMG kidney clearance ≈ 2.0 × CrCl and acyclovir ≈ 3.37 × CrCl (mL/min). Helldén's Paper V fits 3.75 × CrCl and 1.54 × CrCl. Raising the CMMG coefficient would lower the CMMG/acyclovir exposure ratio. The Kably population model predicts higher median CMMG/acyclovir AUC ratios than the illustrative AyFlux scenarios. Kably reports simulated exposure by indexed eGFR category. AyFlux uses absolute CrCl. Paper V is small and preliminary, with 50 mg IV in CKD/HD and 100 mg IV in healthy volunteers. Kably studied liver-transplant recipients on oral valacyclovir. Neither is strong enough to override the other, so no change.
 
 Run `node research/validation/kably-auc-comparison.cjs` to compare both analytes at day 11 (2000 mg valacyclovir every eight hours). At absolute CrCl 104 mL/min, AyFlux predicts acyclovir and CMMG AUCs of 99.84 and 13.08 mg·h/L. Kably’s simulated medians for indexed eGFR above 90 are 44.8 and 13.3 mg·h/L. At CrCl 25, AyFlux gives 335.33 and 162.84 mg·h/L, compared with 88.7 and 103.1 for Kably’s below-30 stratum. A lower metabolite/parent ratio can coexist with similar or higher absolute metabolite exposure. These model comparisons do not isolate formation or elimination.
 
@@ -132,3 +132,19 @@ The reconstruction infers 64.9 kg from the reported 500 mg/day and 7.7 mg/kg/day
 | 0 | 159 | 5.78 / 13.00 | 0.092 / 0.229 |
 
 At assumed CrCl 0, moving the first draw between 36 and 48 h gives parent concentrations from 7.10 to 4.70 mg/L and CMMG from 11.99 to 13.49 mg/L. Both exceed the observed pair throughout the tested range. Assuming residual CrCl narrows the parent gap but at 10 mL/min CMMG falls below the observation. The 159 mL/min alternative comes from the separate Hara sensitivity, not a measurement in Yang. Across all six CrCl/HD combinations and draws 0, 6 or 12 h after the third session, parent stays below the reported limit. This bound cannot distinguish those clearances. A numerical error for final CMMG cannot be calculated. [Scenario runner](yang-three-hd.cjs)
+
+## Paper V low-dose IV profiles
+
+Figure 7 of the preliminary study plots six group concentration profiles after IV acyclovir. Six healthy participants received 100 mg, six with CKD received 50 mg and four on maintenance HD received 50 mg. The authors report concentrations near or below quantification in the two groups with kidney function. The plot provides group markers without individual uncertainty and does not identify the timing of an HD session. [Helldén thesis, printed p. 20](https://files01.core.ac.uk/download/pdf/70338802.pdf)
+
+We extracted the centres of the filled and open vector markers for parent and metabolite. The vertical scale is logarithmic. Using linear trapezoids at 1, 2, 3, 4, 6 and 8 h gives comparable partial areas for all six curves. Ratios below are ratios of group-curve **molar** AUCs over 1–8 h. Kably uses mass AUCs over 24 h, and Smith samples a multiple-dose interval. Their numerical ratios describe different quantities.
+
+| Group | Figure ACV / CMMG partial AUC, µmol·h/L | Figure CMMG/ACV | AyFlux ratio, default | AyFlux ratio, Paper V renal slope |
+|---|---:|---:|---:|---:|
+| Healthy | 7.77 / 0.98 | 0.127 | 0.217–0.267 | 0.107–0.138 |
+| CKD | 15.93 / 2.47 | 0.155 | 0.267–0.336 | 0.164–0.258 |
+| Maintenance HD | 21.42 / 15.99 | 0.746 | 0.324–0.356 | 0.316–0.356 |
+
+All scenarios assume 70 kg, a single nominal IV dose, and no active dialysis during the modeled interval. The first plotted parent marker is already high. We treat plotted zero as the end of a 15- or 60-minute infusion. The source does not specify that clock alignment or duration. Absolute CrCl scenarios are 90 and 120, 25/45/60 and 0/2 mL/min respectively. The calculation uses the same trapezoids for the modeled curves and checks both integration step sizes.
+
+The higher slope brackets the plotted healthy ratio and moves the CKD ratio closer, but has little effect on the HD group. In the HD scenarios AyFlux gives parent partial AUC 25.07–27.54 and CMMG 8.26–9.46 across either slope, versus the plotted 21.42 and 15.99. Even the default predicts only 1.74–1.95 µmol/L CMMG at 8 h, versus approximately 3.14. The first HD-group marker already shows about 0.08 µmol/L CMMG, while the simulation starts with zero drug. Group weights, individual administration and dialysis times, background concentrations and treatment of low assays limit attribution to formation or elimination. Figure 7 and the Figure 8 clearance slope come from the same participants. [Vector calibration, extracted profiles and scenario runner](hellden-iv-profiles.cjs)
