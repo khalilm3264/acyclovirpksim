@@ -18,6 +18,12 @@ AyFlux is a browser-based acyclovir and valacyclovir pharmacokinetics simulator 
 | [Release plan](Release-Plan) | Verification and release checks |
 | [Reference maintenance](References) | How sources and evidence versions are tracked |
 
+## Release candidate integration
+
+The `release/combined-review` branch combines benchmark/usability work from #101, academic exports from #107, corrected missing-data handling from #108/#110 and the event CSV/teaching note from #104. The current main already contains ECharts 6.1, nominal Python/R exports, Lite PNG and the printable summary through #109. Candidate features remain pending until merged and deployed.
+
+The combined menu retains detailed CSV, tidy CSV, pharmacometric events, XLSX, LaTeX, full BibTeX, printable summary and nominal Python/R scripts. Printing uses one shared preview renderer. The teaching note can be copied locally; clipboard denial offers manual copying. See [Data exchange](https://ayflux.org/learn/interoperability/).
+
 ## Available on main
 
 - Adult central/peripheral acyclovir, CMMG formation/elimination, oral absorption and exploratory CSF estimates.

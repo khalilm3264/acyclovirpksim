@@ -109,43 +109,28 @@ test('prediction exercise hides results until revealed',()=>{
  assert.match(ui,/\$\('predictMode'\)\.checked=false;renderRegimens\(\);/,'reveal ends the exercise');
 });
 
-test('regimen-tools interpolation and AUC handle empty, singleton and zero inputs safely',()=>{
+test('regimen-tools interpolation and AUC handle empty or singleton inputs safely',()=>{
  assert.equal(R.interp([],[],5),null);
  assert.equal(R.interp(null,null,5),null);
  assert.equal(R.interp([0],[10],5),10);
- assert.equal(R.interp([0,10],[0,0],5),0);
  assert.equal(R.aucTo([],[],10),null);
  assert.equal(R.aucTo(null,null,10),null);
  assert.equal(R.aucTo([0],[10],10),0);
- assert.equal(R.aucTo([0,10],[0,0],10),0);
 });
 
-test('comparison metrics distinguish empty series from genuine zero series and handle curves independently',()=>{
- const empty=R.metrics({time:[],plasma:{median:[]},cmmg:{median:[]}},[{time:12}],24);
- assert.equal(empty.auc,null);
- assert.equal(empty.peak,null);
- assert.equal(empty.trough,null);
- assert.equal(empty.cmmgAuc,null);
- assert.equal(empty.cmmgPeak,null);
-
- const zeroSeries=R.metrics({time:[0,12,24],plasma:{median:[0,0,0]},cmmg:{median:[0,0,0]}},[{time:12}],24);
- assert.equal(zeroSeries.auc,0);
- assert.equal(zeroSeries.peak,0);
- assert.equal(zeroSeries.trough,0);
- assert.equal(zeroSeries.cmmgAuc,0);
- assert.equal(zeroSeries.cmmgPeak,0);
-
- const cmmgOnly=R.metrics({time:[0,12,24],plasma:{median:[]},cmmg:{median:[1,3,2]}},[{time:12}],24);
- assert.equal(cmmgOnly.auc,null);
- assert.equal(cmmgOnly.peak,null);
- assert.equal(cmmgOnly.trough,null);
- assert.equal(cmmgOnly.cmmgPeak,3);
- assert.ok(typeof cmmgOnly.cmmgAuc==='number'&&cmmgOnly.cmmgAuc>0);
-
- const plasmaOnly=R.metrics({time:[0,12,24],plasma:{median:[5,2,1]},cmmg:{median:[]}},[{time:12}],24);
- assert.ok(typeof plasmaOnly.auc==='number'&&plasmaOnly.auc>0);
- assert.equal(plasmaOnly.peak,5);
- assert.equal(plasmaOnly.trough,2);
- assert.equal(plasmaOnly.cmmgAuc,null);
- assert.equal(plasmaOnly.cmmgPeak,null);
+test('missing or malformed curves stay unavailable while valid zero-dose curves remain zero',()=>{
+ const doses=[{time:0},{time:8}],empty={time:[],plasma:{median:[]},cmmg:{median:[]}};
+ for(const data of [undefined,empty,{...empty,time:[0,8,24],plasma:{median:[0,1]}}]){
+  const metrics=R.metrics(data,doses,24);
+  for(const key of ['auc','peak','trough','cmmgAuc','cmmgPeak','troughTime'])assert.equal(metrics[key],null,key);
+ }
+ const data={time:[0,8,24],plasma:{median:[0,0,0]},cmmg:{median:[0,0,0]}};
+ const zero=R.metrics(data,doses,24);
+ for(const key of ['auc','peak','trough','cmmgAuc','cmmgPeak'])assert.equal(zero[key],0,key);
+ const partial=R.metrics({...data,cmmg:{median:[]}},doses,24);
+ assert.equal(partial.auc,0);assert.equal(partial.cmmgAuc,null);assert.equal(partial.cmmgPeak,null);
+ for(const values of [[0,NaN,1],[0,Infinity,1],[0,undefined,1]]){
+  assert.equal(R.interp(data.time,values,8),null);assert.equal(R.aucTo(data.time,values,24),null);
+ }
+ assert.equal(R.interp([0,0],[1,2],0),null);
 });

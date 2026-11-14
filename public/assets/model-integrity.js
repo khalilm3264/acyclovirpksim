@@ -34,14 +34,14 @@
    }
    if(config?.renalMode==='profile'){
      const points=config.renalProfile;
-     if(!Array.isArray(points)||points.length<2||points.length>24||points.some((p,i)=>
+     if(!Array.isArray(points)||points.length<2||points.some((p,i)=>
        !p||!finite(p.time)||p.time<0||(i===0?p.time!==0:p.time<=points[i-1]?.time)||
        !finite(p.crcl)||p.crcl<0||p.crcl>140||
-       (finite(config.horizon)&&p.time>config.horizon))){
+       (finite(config.horizon)&&p.time>config.horizon)))
        issues.push("Invalid renal profile: use finite, strictly increasing times from hour 0 and CrCl within 0–140 mL/min");
      // Do not interpolate an invalid trajectory or let NaN silently pass the zero-clearance check.
+     if(issues.some(issue=>issue.startsWith('Invalid renal profile')))
        return {passed:false,issues,notes:["Checks only numerical consistency, not clinical accuracy or external validation."]};
-     }
    }
    const getCrCl=t=>{
      if(config?.renalMode!=='profile')return config?.crcl;
