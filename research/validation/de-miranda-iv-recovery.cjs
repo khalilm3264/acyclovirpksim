@@ -53,20 +53,23 @@ function recover(row, indexedCrCl, bsa, weight, step) {
     100 * cmmgPercent / (parentPercent + cmmgPercent)};
 }
 
-const results = table.map(row => {
-  const base = recover(row, row[2], 1.73, 70, 0.125);
-  const finer = recover(row, row[2], 1.73, 70, 0.0625);
-  assert.ok(Math.abs(base.cmmgPercent - finer.cmmgPercent) < .001);
-  return {...base, observedParentPercent: row[4], observedCmmgPercent: row[6],
-    observedCmmgShareOfTwo: 100 * row[6] / (row[4] + row[6])};
-});
-const sensitivity = [1.5, 1.73, 2.1].map(bsa => {
-  const rows = table.map(row => recover(row, row[2], bsa, 70, .125));
-  return {assumedBsa: bsa, meanParentPercent: mean(rows.map(r => r.parentPercent)),
-    meanCmmgPercent: mean(rows.map(r => r.cmmgPercent))};
-});
-const alternativeCrCl = table.filter(row => measuredCrCl[row[0]]).map(row =>
-  recover(row, measuredCrCl[row[0]], 1.73, 70, .125));
-console.log(JSON.stringify({results, sensitivity, alternativeCrCl,
-  observedMeanParentPercent: mean(results.map(r => r.observedParentPercent)),
-  observedMeanCmmgPercent: mean(results.map(r => r.observedCmmgPercent))}, null, 2));
+if (require.main === module) {
+  const results = table.map(row => {
+    const base = recover(row, row[2], 1.73, 70, 0.125);
+    const finer = recover(row, row[2], 1.73, 70, 0.0625);
+    assert.ok(Math.abs(base.cmmgPercent - finer.cmmgPercent) < .001);
+    return {...base, observedParentPercent: row[4], observedCmmgPercent: row[6],
+      observedCmmgShareOfTwo: 100 * row[6] / (row[4] + row[6])};
+  });
+  const sensitivity = [1.5, 1.73, 2.1].map(bsa => {
+    const rows = table.map(row => recover(row, row[2], bsa, 70, .125));
+    return {assumedBsa: bsa, meanParentPercent: mean(rows.map(r => r.parentPercent)),
+      meanCmmgPercent: mean(rows.map(r => r.cmmgPercent))};
+  });
+  const alternativeCrCl = table.filter(row => measuredCrCl[row[0]]).map(row =>
+    recover(row, measuredCrCl[row[0]], 1.73, 70, .125));
+  console.log(JSON.stringify({results, sensitivity, alternativeCrCl,
+    observedMeanParentPercent: mean(results.map(r => r.observedParentPercent)),
+    observedMeanCmmgPercent: mean(results.map(r => r.observedCmmgPercent))}, null, 2));
+}
+module.exports = {table};
