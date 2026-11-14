@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const engine = require('../../public/assets/pk-engine.js');
 
-function simulate(admissionDelay, step, overrides = {}) {
+function simulateCourse(admissionDelay, step, overrides = {}) {
   const admission = 24 + admissionDelay;
   const hd1 = { type: 'HD', start: admission + 16, end: admission + 18 };
   const hd2 = { type: 'HD', start: hd1.end + 14, end: hd1.end + 16.5 };
@@ -23,6 +23,11 @@ function simulate(admissionDelay, step, overrides = {}) {
     assert.ok(index >= 0, 'Missing endpoint at hour ' + hour);
     return { plasma: run.cols.plasma[index], ...run.accounting[index].parts };
   }
+  return {admission, hd1, hd2, at, run};
+}
+
+function simulate(admissionDelay, step, overrides = {}) {
+  const {admission, hd1, hd2, at} = simulateCourse(admissionDelay, step, overrides);
   const start1 = at(hd1.start), end1 = at(hd1.end);
   const start2 = at(hd2.start), end2 = at(hd2.end);
   return [
@@ -50,4 +55,4 @@ for (const delay of [0, 4, 8]) {
 }
 
 }
-module.exports = {simulate};
+module.exports = {simulate, simulateCourse};
