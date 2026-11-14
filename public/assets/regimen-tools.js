@@ -8,17 +8,18 @@
  'use strict';
  const MAX_SAVED=4;
  function interp(time,values,t){
-  if(!time||!time.length||!values||!values.length)return 0;
+  if(!time||!time.length||!values||!values.length)return null;
   if(t<=time[0])return values[0];
   for(let i=1;i<time.length;i++)if(time[i]>=t){const f=(time[i]-time[i-1])?(t-time[i-1])/(time[i]-time[i-1]):1;return values[i-1]+f*(values[i]-values[i-1]);}
   return values[values.length-1];
  }
  // Trapezoidal AUC from 0 to T (mg·h/L when values are mg/L).
  function aucTo(time,values,T){
-  if(!time||!time.length||!values||!values.length)return 0;
+  if(!time||!time.length||!values||!values.length)return null;
   let sum=0;
   for(let i=1;i<time.length&&time[i-1]<T;i++){
    const t1=Math.min(time[i],T),v1=time[i]<=T?values[i]:interp(time,values,T);
+   if(v1===null)return null;
    sum+=(t1-time[i-1])*(values[i-1]+v1)/2;
   }
   return sum;
@@ -27,12 +28,22 @@
  // Trough: plasma acyclovir at the start time of the last dose that starts after hour 0 and before T,
  // that is, the concentration immediately before that dose. Null when no such dose exists.
  function metrics(data,doses,T){
-  const plasma=data.plasma.median,cmmg=data.cmmg.median,time=data.time;
-  const last=doses.map(d=>d.time).filter(t=>t>0&&t<T).sort((a,b)=>a-b).pop();
+  const time=data?.time||[];
+  const hasPlasma=Array.isArray(data?.plasma?.median)&&data.plasma.median.length>0&&time.length>0;
+  const hasCmmg=Array.isArray(data?.cmmg?.median)&&data.cmmg.median.length>0&&time.length>0;
+  const plasma=hasPlasma?data.plasma.median:[];
+  const cmmg=hasCmmg?data.cmmg.median:[];
+  const last=doses?.map(d=>d.time).filter(t=>t>0&&t<T).sort((a,b)=>a-b).pop();
   let peak=0,peakCmmg=0;
-  for(let i=0;i<time.length&&time[i]<=T;i++){peak=Math.max(peak,plasma[i]);peakCmmg=Math.max(peakCmmg,cmmg[i]);}
-  return {window:T,auc:aucTo(time,plasma,T),peak,trough:last===undefined?null:interp(time,plasma,last),troughTime:last??null,
-   cmmgAuc:aucTo(time,cmmg,T),cmmgPeak:peakCmmg};
+  if(hasPlasma)for(let i=0;i<time.length&&time[i]<=T;i++)peak=Math.max(peak,plasma[i]);
+  if(hasCmmg)for(let i=0;i<time.length&&time[i]<=T;i++)peakCmmg=Math.max(peakCmmg,cmmg[i]);
+  return {window:T,
+   auc:hasPlasma?aucTo(time,plasma,T):null,
+   peak:hasPlasma?peak:null,
+   trough:(hasPlasma&&last!==undefined)?interp(time,plasma,last):null,
+   troughTime:hasPlasma?(last??null):null,
+   cmmgAuc:hasCmmg?aucTo(time,cmmg,T):null,
+   cmmgPeak:hasCmmg?peakCmmg:null};
  }
  // CROWDING_H is an AyFlux interface rule, not a label rule: neither label sets a minimum spacing
  // between doses. One hour is the standard AyFlux IV infusion length, so two dose starts closer than

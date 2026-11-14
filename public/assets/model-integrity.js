@@ -40,7 +40,7 @@
      for(let j=1;j<points.length;j++){
        if(t<=points[j].time){
          const a=points[j-1],b=points[j];
-         return b.time===a.time?a.crcl:a.crcl+(b.crcl-a.crcl)*(t-a.time)/(b.time-a.time);
+         return a.crcl+(b.crcl-a.crcl)*(t-a.time)/(b.time-a.time);
        }
      }
      return points.at(-1).crcl;

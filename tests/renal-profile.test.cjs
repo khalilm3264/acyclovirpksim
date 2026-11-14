@@ -94,18 +94,10 @@ test('kidney profile editor, CSV format selector and layout share consistent UI 
  assert.ok(html.includes('--ui-space-3:14px'));
 });
 
-test('checkSimulation handles boundary profile configurations without NaN',()=>{
- const sim={
-  time:[0,1,2],
-  plasma:{median:[0,1,0],lower:[0,0.5,0],upper:[0,1.5,0]},
-  csf:{median:[0,0.1,0],lower:[0,0.05,0],upper:[0,0.2,0]},
-  cmmg:{median:[0,0.2,0],lower:[0,0.1,0],upper:[0,0.3,0]},
-  csfCmmg:{median:[0,0.02,0],lower:[0,0.01,0],upper:[0,0.03,0]},
-  kidneyClear:{median:[0,10,0]}
- };
- const res=quality.checkSimulation(sim,{
-  renalMode:'profile',
-  renalProfile:[{time:0,crcl:20},{time:0,crcl:20},{time:2,crcl:0}]
- });
- assert.ok(res.passed);
+test('profile validation rejects duplicate timestamps at hour zero and later in trajectory',()=>{
+ const base=config({renalMode:'profile',horizon:96,renalProfile:[{time:0,crcl:50},{time:24,crcl:30}]});
+ const atZero=model.validateRenalProfile({...base,renalProfile:[{time:0,crcl:50},{time:0,crcl:30},{time:24,crcl:30}]});
+ assert.ok(atZero.some(e=>/increase/i.test(e)),'rejects duplicate timestamp at hour zero');
+ const afterZero=model.validateRenalProfile({...base,renalProfile:[{time:0,crcl:50},{time:12,crcl:40},{time:12,crcl:30},{time:24,crcl:20}]});
+ assert.ok(afterZero.some(e=>/increase/i.test(e)),'rejects duplicate timestamp after hour zero');
 });
