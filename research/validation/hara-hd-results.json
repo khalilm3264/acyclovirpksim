@@ -1,0 +1,163 @@
+{
+  "source": "10.2133/dmpk.23.306",
+  "engineConfig": {
+    "virus": "VZV",
+    "age": 55,
+    "sex": "male",
+    "scr": 1,
+    "crclSource": "manual",
+    "pdMethod": "manual",
+    "route": "Valacyclovir oral",
+    "dosingMode": "repeat",
+    "doseCount": 1,
+    "customDoses": [
+      {
+        "time": 12,
+        "route": "Valacyclovir oral",
+        "amount": 1000
+      },
+      {
+        "time": 24,
+        "route": "Acyclovir IV",
+        "amount": 250,
+        "infusion": 1
+      },
+      {
+        "time": 48,
+        "route": "Acyclovir IV",
+        "amount": 250,
+        "infusion": 1
+      }
+    ],
+    "weight": 56.2,
+    "crcl": 0.93,
+    "renalMode": "constant",
+    "renalProfile": [
+      {
+        "time": 0,
+        "crcl": 95
+      },
+      {
+        "time": 96,
+        "crcl": 95
+      }
+    ],
+    "dose": 1000,
+    "every": 8,
+    "infusion": 1,
+    "horizon": 52,
+    "valF": 0.545,
+    "valKa": 1.8,
+    "hdStart": 24,
+    "hdDuration": 4,
+    "hdRepeat": 48,
+    "hdCl": 81.8,
+    "pdRxEnabled": false,
+    "pdRxRows": [],
+    "vcScale": 1,
+    "clearanceScale": 1,
+    "pdCl": 6,
+    "pdVolume": 2,
+    "capdDwell": 6,
+    "capdExchanges": 4,
+    "pdGlucose": 2.5,
+    "pdTransport": 1,
+    "pdUfBase": 120,
+    "pdAbsorb": 20,
+    "pdSmallPore": 0.5,
+    "pdSigma": 0.12,
+    "apdStart": 20,
+    "apdHours": 10,
+    "apdCycles": 5,
+    "apdDwell": 1.5,
+    "apdTurnover": 0.25,
+    "apdFactor": 1,
+    "effluent": 25,
+    "sieving": 0.95,
+    "delivered": 0.85,
+    "csfRatio": 0.3,
+    "csfLag": 4,
+    "csfMetRatio": 0.025,
+    "csfMetLag": 6,
+    "formFactor": 1,
+    "metRenal": 1,
+    "metDial": 1,
+    "variability": 0,
+    "draws": 1,
+    "coverage": 0.9,
+    "assayCV": 0.15,
+    "observations": [],
+    "fitMode": "No dialysis",
+    "showBands": true,
+    "showShades": true,
+    "showStudy": true,
+    "showIC50": false,
+    "probenecid": false,
+    "labelBsa": 0,
+    "schedule": [
+      {
+        "type": "HD",
+        "start": 48,
+        "end": 52
+      }
+    ]
+  },
+  "endpoints": [
+    {
+      "endpoint": "plasmaPeak",
+      "observed": 10.6,
+      "predicted": 12.952202882961538,
+      "predictedObservedRatio": 1.2219059323548622
+    },
+    {
+      "endpoint": "plasmaAuc12",
+      "observed": 77.97,
+      "predicted": 93.38485544771726,
+      "predictedObservedRatio": 1.1977023912750706
+    },
+    {
+      "endpoint": "cmmgPeak",
+      "observed": 7.47,
+      "predicted": 7.059741718754452,
+      "predictedObservedRatio": 0.9450792126846657
+    },
+    {
+      "endpoint": "plasmaDeclinePct",
+      "observed": 69.4,
+      "predicted": 51.90501341245444,
+      "predictedObservedRatio": 0.7479108560872396
+    },
+    {
+      "endpoint": "cmmgDeclinePct",
+      "observed": 77.6,
+      "predicted": 59.75129727151427,
+      "predictedObservedRatio": 0.7699909442205447
+    }
+  ],
+  "residualCrClSensitivity": [
+    {
+      "crcl": 0,
+      "plasmaPeak": 13.025929732303165,
+      "plasmaAuc12": 95.89231706637112,
+      "cmmgPeak": 8.158823954131309,
+      "plasmaDeclinePct": 51.3882896941803,
+      "cmmgDeclinePct": 59.10415852338715
+    },
+    {
+      "crcl": 0.93,
+      "plasmaPeak": 12.952202882961538,
+      "plasmaAuc12": 93.38485544771726,
+      "cmmgPeak": 7.059741718754452,
+      "plasmaDeclinePct": 51.90501341245444,
+      "cmmgDeclinePct": 59.75129727151427
+    },
+    {
+      "crcl": 2.94,
+      "plasmaPeak": 12.794573151759971,
+      "plasmaAuc12": 88.29993392977181,
+      "cmmgPeak": 5.468258784546932,
+      "plasmaDeclinePct": 52.97737572427069,
+      "cmmgDeclinePct": 61.104232974874925
+    }
+  ]
+}

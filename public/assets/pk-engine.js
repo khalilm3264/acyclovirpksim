@@ -27,8 +27,8 @@ const DEFAULTS={virus:'VZV',age:55,sex:'male',scr:1,crclSource:'manual',pdMethod
  hdStart:24,hdDuration:4,hdRepeat:48,hdCl:81.8,
  pdRxEnabled:false,pdRxRows:[],vcScale:1,clearanceScale:1,pdCl:6,pdVolume:2,capdDwell:6,capdExchanges:4,pdGlucose:2.5,pdTransport:1,pdUfBase:120,pdAbsorb:20,pdSmallPore:0.5,pdSigma:0.12,apdStart:20,apdHours:10,apdCycles:5,apdDwell:1.5,apdTurnover:0.25,apdFactor:1,
  effluent:25,sieving:0.95,delivered:0.85,
- csfRatio:0.3,csfLag:4,csfMetRatio:0.25,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
- variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,
+ csfRatio:0.3,csfLag:4,csfMetRatio:0.025,csfMetLag:6,formFactor:1,metRenal:1,metDial:1,
+ variability:1,draws:120,coverage:0.9,assayCV:0.15,observations:[],fitMode:"No dialysis",showBands:true,showShades:true,showStudy:true,showIC50:false,probenecid:false,labelBsa:0,height:0,cgWeight:'actual',
  schedule:[{type:'PD',start:0,end:24},{type:'PD',start:24,end:48},{type:'HD',start:54,end:58}]};
 // Time-varying residual CrCl is a user-defined illustration, not a measured GFR estimate.
 // Piecewise-linear interpolation, holding the first and last endpoints outside the knots.
@@ -62,9 +62,24 @@ function validateRenalProfile(c){
  if(pts[0]?.time!==0)err.push('Kidney function profile must begin at hour 0');
  return [...new Set(err)];
 }
-function cockcroftGault({age,sex,scr,weight}){
+// Body-size descriptors from height: BMI, ideal body weight (Devine: 50 kg men, 45.5 kg women, plus 2.3 kg per
+// inch over 5 ft) and adjusted body weight (ideal + 0.4 x (actual - ideal)). Null when no valid height is entered.
+function bodySize({sex,weight,height}){
+ if(!Number.isFinite(height)||height<120||height>230||!Number.isFinite(weight)||weight<=0||!['male','female'].includes(sex))return null;
+ const ideal=Math.max((sex==='female'?45.5:50)+2.3*(height/2.54-60),30);
+ return {bmi:weight/Math.pow(height/100,2),ideal,adjusted:ideal+.4*(weight-ideal)};
+}
+// Weight entered into Cockcroft-Gault. 'ideal' and 'adjusted' need a height and never exceed actual weight, so
+// a patient below ideal weight is estimated from actual weight. Affects only the CrCl estimate, not the PK model.
+function cgWeightOf(c){
+ const size=bodySize(c),choice=c.cgWeight??'actual';
+ if(!size||choice==='actual'||c.weight<=size.ideal)return c.weight;
+ return choice==='ideal'?size.ideal:choice==='adjusted'?size.adjusted:c.weight;
+}
+function cockcroftGault(c){
+ const {age,sex,scr,weight}=c;
  if(!Number.isFinite(age)||age<18||age>120||!Number.isFinite(weight)||weight<=0||!Number.isFinite(scr)||scr<=0||!['male','female'].includes(sex))return NaN;
- return (140-age)*weight*(sex==='female'?.85:1)/(72*scr);
+ return (140-age)*cgWeightOf(c)*(sex==='female'?.85:1)/(72*scr);
 }
 function rng(seed=2026){let s=seed|0;return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return(s>>>0)/4294967296;};}
 function quantile(a,q){let b=Array.from(a).sort((x,y)=>x-y),p=(b.length-1)*q,j=Math.floor(p);return b[j]+((b[j+1]??b[j])-b[j])*(p-j);}
@@ -146,7 +161,35 @@ function validatePdRx(c){
  if(c.pdMethod==='cycler'&&rows.filter(x=>x.sessionStart==null).some(r=>r.start+r.dwell>c.apdHours+1e-8))errors.push('Cycler template exchanges must fit within configured cycler session duration');
  return [...new Set(errors)];
 }
+// Laskin et al. 1982 (Antimicrob Agents Chemother 21:804): oral probenecid lowered acyclovir renal
+// clearance by 32% in three adults. Applied to the renal acyclovir term only; CMMG is not adjusted.
+// Non-kidney CMMG clearance (L/h at 70 kg). 0.5 since #46 (was 0.25): Helldén 2007 [45] case 1 shows CMMG
+// falling between HD sessions with an apparent half-life of about 35 h, and Hara 2008 single-dose CMMG peaks
+// fit better (research/validation/HELLDEN-COTARD.md). Calibrated on the Helldén case; Hara is the check.
+// CSF CMMG partition (DEFAULTS.csfMetRatio) is 0.025 since #47 (was 0.25): Smith 2010 CSF/plasma AUC ratio,
+// checked against Lindström 2019 with an intact blood-brain barrier (research/validation/LINDSTROM-CSF.md).
+// Blood-brain barrier presets for the CSF proxies (#47). Intact = DEFAULTS (acyclovir 0.30; CMMG 0.025 from
+// Smith 2010, checked against Lindström 2019 intact-barrier samples). Damaged = exploratory, fitted to the
+// CSF/serum ratios of Lindström 2019's disrupted-barrier samples (research/validation/LINDSTROM-CSF.md);
+// no independent data test it.
+const CSF_BARRIER={intact:{csfRatio:0.3,csfMetRatio:0.025},damaged:{csfRatio:0.37,csfMetRatio:0.11}};
+function csfBarrierOf(c){
+ for(const [name,p] of Object.entries(CSF_BARRIER))if(Math.abs(c.csfRatio-p.csfRatio)<1e-9&&Math.abs(c.csfMetRatio-p.csfMetRatio)<1e-9)return name;
+ return 'custom';
+}
+const CMMG_NONRENAL_CL=0.5;
+const PROBENECID_RENAL=0.68;
+// US acyclovir sodium injection label, renal impairment: percent of the recommended dose and interval.
+function labelRenalAdjustment(crcl){
+ if(!Number.isFinite(crcl)||crcl<0)return null;
+ if(crcl>50)return {fraction:1,every:8,band:'above 50'};
+ if(crcl>25)return {fraction:1,every:12,band:'>25–50'};
+ if(crcl>10)return {fraction:1,every:24,band:'>10–25'};
+ return {fraction:0.5,every:24,band:'≤10'};
+}
 function validate(c,mode,allowWindowBeyondHorizon=false){let err=[];
+ if(c.labelBsa!==undefined&&c.labelBsa!==0&&(!Number.isFinite(c.labelBsa)||c.labelBsa<0))err.push('Label body surface area must be 0 (not provided) or a positive value in m²');
+ if(c.probenecid!==undefined&&typeof c.probenecid!=='boolean')err.push('Probenecid must be on or off');
  if(!Number.isFinite(c.weight)||c.weight<=0)err.push('weight must be positive');
  if(!Number.isFinite(c.horizon)||c.horizon>336||c.horizon<1)err.push('Simulation duration must be 1–336 hours');
  if(!ROUTES.includes(c.route))err.push('Unsupported medication route');
@@ -200,8 +243,8 @@ function drawParams(c){let random=rng(), norm=()=>Math.sqrt(-2*Math.log(Math.max
  const sampledCrCl=c.renalMode==='profile'?1:c.crcl;
  for(let i=0;i<c.draws;i++)params.push({
  vc:0.32*c.weight*(c.vcScale||1)*logn(0.20*v),vp:0.37*c.weight*logn(0.25*v),q:10*scale*logn(0.35*v),
- other:0.12*scale*(c.clearanceScale||1)*logn(0.35*v),renal:0.202*sampledCrCl*scale*(c.clearanceScale||1)*logn(0.35*v),form:1.6*c.formFactor*scale*logn(0.5*v),
- vm:0.4*c.weight*logn(0.35*v),mr:0.12*sampledCrCl*c.metRenal*scale*logn(0.65*v),mn:0.25*scale*logn(0.6*v),
+ other:0.12*scale*(c.clearanceScale||1)*logn(0.35*v),renal:0.202*sampledCrCl*scale*(c.clearanceScale||1)*(c.probenecid?PROBENECID_RENAL:1)*logn(0.35*v),form:1.6*c.formFactor*scale*logn(0.5*v),
+ vm:0.4*c.weight*logn(0.35*v),mr:0.12*sampledCrCl*c.metRenal*scale*logn(0.65*v),mn:CMMG_NONRENAL_CL*scale*logn(0.6*v),
  hd:c.hdCl*0.06*logn(0.2*v), pd:c.pdCl*0.06*logn(0.35*v),
  crrt:c.effluent*c.weight/1000*c.sieving*c.delivered*logn(0.25*v),
  kp:Math.min(1.3,c.csfRatio*logn(0.4*v)),km:Math.min(1.3,c.csfMetRatio*logn(0.55*v)),
@@ -324,7 +367,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
     mass+=pdAmount;
     if(accounting){
      removed.pdDrained+=pdAmount;
-     drains.push({start:timeline.pdAt[i-1].start,end:t,mass:pdAmount,complete:t>=pdScheduledEnd-1e-8});
+     drains.push({start:timeline.pdAt[i-1].start,end:t,mass:pdAmount,volume:pdVol,concentration:pdAmount/pdVol,complete:t>=pdScheduledEnd-1e-8});
     }
    }
    pdAmount=0;
@@ -346,7 +389,7 @@ function single(c,p,rows,dt,doses=buildDoses(c),events=null){
   if(accounting){
    const parts={central:a,peripheral:b,depot:oralDepot,pdFluid:pdAmount,...removed};
    const accounted=Object.values(parts).reduce((sum,v)=>sum+v,0);
-   accounting.push({time:t,input:administeredAcyclovirEqMg,parts,residual:administeredAcyclovirEqMg-accounted});
+   accounting.push({time:t,pdVolume:pdVol,input:administeredAcyclovirEqMg,parts,residual:administeredAcyclovirEqMg-accounted});
   }
   if(i===tarr.length-1)break;
   const step=tarr[i+1]-t,mid=t+step/2,midPD=timeline.midPD[i],midActive=timeline.midActive[i],ivRate=timeline.ivRate[i],midDial=midActive.active?(midActive.type==='HD'?p.hd:midActive.type==='CRRT'?p.crrt:0):0;
@@ -589,10 +632,11 @@ function createSimulator(){
  };
 }
 const simulateMany=createSimulator();
-const api={renalCrClAt,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
+const api={bodySize,cgWeightOf,renalCrClAt,labelRenalAdjustment,PROBENECID_RENAL,CMMG_NONRENAL_CL,CSF_BARRIER,csfBarrierOf,validateRenalProfile,prepareEvents,MODES,TYPES,ROUTES,MAX_DOSE_MG,MARKER,DEFAULTS,cockcroftGault,effectiveConfig,buildDoses,validateDoses,validate,scheduleFor,activeWindow,dialClear,drawParams,pdStatus,pdTransfer,validatePdRx,exchangesForSession,timeGrid,single,benchmark,anuricBenchmark,fitBenchmark,sensitivity,simulate,simulateMany,createSimulator,posterior,evaluateHoldouts,weightedStat};
 if(typeof module==='object'&&module.exports)module.exports=api;
 root.RenalPKV7=api;
 })(typeof window!=='undefined'?window:globalThis);
+
 
 
 

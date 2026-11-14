@@ -91,3 +91,13 @@ The separate pediatric IV page exports `ayflux-pediatric-abdalla-iv.csv`. Each r
 ## OSP aciclovir import test
 
 The browser regression uses the [OSPSuite-R SimResults.csv fixture](https://github.com/Open-Systems-Pharmacology/OSPSuite-R/blob/0618a72b8b26d8d1d3015488ff4311153f5093f1/inst/extdata/SimResults.csv), reproduced in `interop/fixtures/ospsuite_aciclovir.csv`. Select the peripheral venous plasma aciclovir output, minutes and µmol/L. The 491 samples span 0–24 h. At 1 minute, 3.254674 µmol/L corresponds to 0.732985 mg/L. This test checks file parsing, unit conversion and curve display.
+
+## Shareable scenario links
+
+*Copy shareable link* (Research tools → Save / load) encodes a scenario in the URL fragment: `https://ayflux.org/#s=<base64url JSON>`.
+
+- Payload: `{"v":1,"c":{…settings that differ from defaults…},"p":"<selected scenario>","s":[…visible scenarios…],"a":"standard|accessible","u":"mg|umol"}`.
+- Measured concentrations (`observations`) are never written to a link, and a link that contains them is rejected.
+- On open, missing settings are filled from the current defaults and the result passes the same validation as a schema 2 JSON import. A link that fails validation changes nothing.
+- The fragment is removed from the address bar as soon as the page reads it. Links are capped at 6,000 characters; larger scenarios should use the JSON file.
+- Because defaults are filled in at open time, a link made today can produce different results after a release that changes a default. Use the JSON export when a scenario must be reproducible.

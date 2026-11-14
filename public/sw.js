@@ -1,10 +1,12 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.26.0-visualization-suite-20261111-pd-drains-ito";
+const CACHE = "ayflux-static-v0.27.0-ito-source-review-20261113";
 const CORE = [
+ "/research/exchanges/", "/research/exchanges/view.js", "/research/exchanges/style.css",
+ "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js",
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
- "/assets/pk-engine.js", "/assets/simulator-ui.js",
+ "/assets/pk-engine.js", "/assets/simulator-ui.js", "/assets/study-library.js", "/assets/regimen-tools.js",
  "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
  "/assets/model-integrity.js", "/assets/research-workspace.js",
  "/assets/charts.js", "/assets/analysis-views.js",
@@ -12,7 +14,7 @@ const CORE = [
  "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",
  "/learn/model-methods/", "/learn/dialysis/",
- "/license/", "/cite/", "/disclaimer/"
+ "/license/", "/cite/", "/references/", "/disclaimer/"
 ];
 self.addEventListener("install", event => {
  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
@@ -42,4 +44,5 @@ self.addEventListener("fetch", event => {
    return response;
  })));
 });
+
 

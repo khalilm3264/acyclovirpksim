@@ -10,7 +10,11 @@
  */
 
 (function(){'use strict';
-const E=window.RenalPKV7,$=id=>document.getElementById(id),modes=E.MODES;
+const E=window.RenalPKV7,$=id=>document.getElementById(id),modes=E.MODES,STUDIES=window.AyFluxStudies;
+// Published study whose measured points are overlaid on the plasma and CMMG charts. Display state only: it is not
+// part of the configuration, saved files or share links.
+let studyOverlay=null;
+function overlayStudy(){const study=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;return study&&STUDIES.matches(study,c,primary)?study:null;}
 // Dedicated visualization palettes; chart calculations are independent of these colors.
 const PALETTES={
  standard:{'No dialysis':'#88949F','Intermittent HD':'#E23D25','Peritoneal dialysis':'#009A69','CRRT':'#9B5E00','Custom sequence':'#0054E9'},
@@ -19,7 +23,12 @@ const PALETTES={
 const LINE_DASH={'No dialysis':'solid','Intermittent HD':'dash','Peritoneal dialysis':'dot','CRRT':'dashdot','Custom sequence':'longdash'};
 const LEGEND_DASH={'No dialysis':'solid','Intermittent HD':'dashed','Peritoneal dialysis':'dotted','CRRT':'dashed','Custom sequence':'solid'};
 let paletteMode='standard',COLORS=PALETTES.standard;
-function setPalette(value){paletteMode=Object.prototype.hasOwnProperty.call(PALETTES,value)?value:'standard';COLORS=PALETTES[paletteMode];}
+function setPalette(value){paletteMode=Object.prototype.hasOwnProperty.call(PALETTES,value)?value:'standard';COLORS=PALETTES[paletteMode];
+ const accessible=paletteMode==='accessible';
+ window.AyFluxCharts?.setAccessible?.(accessible);
+ if(typeof Event==='function')window.dispatchEvent?.(new Event('ayflux:palette'));}
+// Start from the colorblind-safe preference saved by the header toggle, if any.
+if(window.AyFluxCharts?.accessible?.())setPalette('accessible');
 
 const DEFS={
 weight:['Body weight','kg',30,150,1],crcl:['Residual creatinine clearance','mL/min',0,140,1],dose:['Acyclovir IV dose','mg',0,2000,25],doseCount:['Total planned doses','doses',1,200,1],every:['Dose interval','hours',.25,48,.25],infusion:['Infusion duration','hours',.25,4,.25],horizon:['Simulation duration','hours',24,336,12],valF:['Oral acyclovir bioavailability [8]','fraction',.2,.8,.005],valKa:['Oral conversion/absorption rate (assumed)','1/hour',.3,5,.1],
@@ -37,6 +46,8 @@ let pendingCsvExport=false, migratedPayload=null;
 // Small, bounded cache of completed summaries; the engine retains its own raw ensemble cache.
 const completedResults=new Map();
 let baseline=null,baselineRevision=0;
+// Up to four frozen regimens (inputs, dose list and median curves) for side-by-side comparison.
+let savedRegimens=[],savedRevision=0;
 const presentationKeys=new Set(['virus','showBands','showShades','showStudy','showIC50','requestedModes']);
 function resultKey(config){return JSON.stringify(Object.keys(config).sort().filter(k=>!presentationKeys.has(k)).map(k=>[k,config[k]]));}
 function rememberResult(key,data){
@@ -49,12 +60,134 @@ function rememberResult(key,data){
 let renalDraft=structuredClone(c.renalProfile),renalDirty=false,renalProfileEdited=false;
 // Narrow read-only integration point for optional research workspace.
 window.AyFluxResearchBridge=Object.freeze({snapshot:()=>({results,config:structuredClone(c),primary,updated:dataIsCurrent,revision:resultsRevision})});
-function requestedModes(all=false){return all||tab==='table'?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
+// Display units for concentrations. Simulation, exports and saved files always stay in mg/L.
+// A message that must survive the next successful calculation (for example a rejected shared link).
+let pendingNotice='';
+const MOLAR_MASS={acyclovir:225.21,cmmg:239.19};
+let concUnit='mg';
+function unitFactor(analyte){return concUnit==='umol'?1000/MOLAR_MASS[analyte]:1;}
+function unitLabel(){return concUnit==='umol'?'µmol/L':'mg/L';}
+function unitText(text){return concUnit==='umol'?text.replaceAll('mg·h/L','µmol·h/L').replaceAll('mg/L','µmol/L'):text;}
+function shown(value,analyte){return analyte?value*unitFactor(analyte):value;}
+const CONCENTRATION_KEYS={plasma:'acyclovir',csf:'acyclovir',cmmg:'cmmg',csfCmmg:'cmmg'};
+function setConcUnit(value){concUnit=value==='umol'?'umol':'mg';const control=document.getElementById('concUnit');if(control)control.value=concUnit;}
+// Hours the curve spends above a level, with linear interpolation at each crossing. Descriptive only.
+function timeAbove(time,values,level){
+ let hours=0;
+ for(let i=1;i<time.length;i++){
+  const a=values[i-1],b=values[i],dt=time[i]-time[i-1];
+  if(!(dt>0)||!Number.isFinite(a)||!Number.isFinite(b))continue;
+  if(a>level&&b>level)hours+=dt;
+  else if(a>level!==b>level)hours+=dt*(Math.max(a,b)-level)/Math.abs(b-a);
+ }
+ return hours;
+}
+// Peak after the last dose divided by peak after the first, on one curve. Null when there are fewer than two dose times.
+function accumulationRatio(time,values,doseTimes){
+ const starts=[...new Set(doseTimes.filter(Number.isFinite))].sort((a,b)=>a-b);
+ if(starts.length<2)return null;
+ const peak=(from,to)=>{let best=-Infinity;for(let i=0;i<time.length;i++)if(time[i]>=from&&time[i]<to&&values[i]>best)best=values[i];return best;};
+ const first=peak(starts[0],starts[1]),last=peak(starts[starts.length-1],Infinity);
+ return first>0&&Number.isFinite(last)?last/first:null;
+}
+// One-line plain-language description of the selected scenario, including mg/kg for repeat dosing.
+function describeScenario(config,mode){
+ const n=value=>String(Number(Number(value).toPrecision(4))),parts=[n(config.weight)+' kg'];
+ if(config.renalMode==='profile'&&config.renalProfile?.length){const p=config.renalProfile;parts.push('CrCl '+n(p[0].crcl)+' → '+n(p[p.length-1].crcl)+' mL/min (custom trajectory)');}
+ else{const of=(typeof window!=='undefined'&&window.RenalPKV7?.cgWeightOf)||null,alt=config.crclSource==='estimated'&&config.cgWeight&&config.cgWeight!=='actual'&&of&&of(config)!==config.weight;parts.push('CrCl '+n(config.crcl)+' mL/min'+(alt?' (Cockcroft–Gault, '+config.cgWeight+' body weight)':''));}
+ if(config.dosingMode==='custom')parts.push('custom schedule of '+config.customDoses.length+' dose'+(config.customDoses.length===1?'':'s'));
+ else{
+  const oral=config.route==='Valacyclovir oral';
+  parts.push((oral?'valacyclovir oral ':'acyclovir IV ')+n(config.dose)+' mg ('+n(config.dose/config.weight)+' mg/kg) every '+n(config.every)+' h, up to '+config.doseCount+' dose'+(config.doseCount===1?'':'s')+(oral?'':', '+n(config.infusion)+'-h infusion'));
+ }
+ if(config.probenecid)parts.push('with probenecid');
+ {const of=(typeof window!=='undefined'&&window.RenalPKV7?.csfBarrierOf)||null,b=of?of(config):'intact';if(b==='damaged')parts.push('damaged blood–brain barrier (exploratory CSF)');else if(b==='custom')parts.push('custom CSF partitions');}
+ parts.push(n(config.horizon)+' h simulated');
+ parts.push(mode==='Intermittent HD'?'intermittent HD: '+n(config.hdDuration)+' h every '+n(config.hdRepeat)+' h from hour '+n(config.hdStart):mode==='CRRT'?'CRRT at '+n(config.effluent)+' mL/kg/h effluent':mode==='Custom sequence'?'custom dialysis sequence ('+config.schedule.length+' session'+(config.schedule.length===1?'':'s')+')':mode.toLowerCase());
+ return parts.join(' · ');
+}
+// Ratio of CMMG to acyclovir AUC (mg·h/L each) over the last 24 simulated hours, or the whole
+// horizon when it is shorter. Null when acyclovir exposure in that window is zero.
+function cmmgAucRatio(time,plasma,cmmg){
+ if(!time?.length)return null;
+ const to=time[time.length-1],from=Math.max(time[0],to-24);
+ let parent=0,metabolite=0;
+ for(let i=1;i<time.length;i++){
+  if(time[i]<=from)continue;
+  const t0=Math.max(time[i-1],from),dt=time[i]-t0,f=(t0-time[i-1])/(time[i]-time[i-1]);
+  const p0=plasma[i-1]+f*(plasma[i]-plasma[i-1]),m0=cmmg[i-1]+f*(cmmg[i]-cmmg[i-1]);
+  parent+=dt*(p0+plasma[i])/2;metabolite+=dt*(m0+cmmg[i])/2;
+ }
+ return parent>1e-12?{from,to,ratio:metabolite/parent}:null;
+}
+const PROVENANCE_LABEL={reported:'Reported',calculated:'Calculated',assumed:'Assumed',unknown:'Unknown'};
+function provenanceSummary(study){
+ const n=STUDIES.provenanceCounts(study);
+ if(!n)return '<span class="tip">Not yet recorded</span>';
+ return STUDIES.STATUSES.map(k=>`<span class="prov prov-${k}" title="${PROVENANCE_LABEL[k]}">${PROVENANCE_LABEL[k][0]} ${n[k]}</span>`).join(' ');
+}
+function renderStudyProvenance(study){
+ const box=$('studyProvenance');if(!box)return;
+ if(!study){box.classList.add('hidden');return;}
+ box.classList.remove('hidden');
+ const n=STUDIES.provenanceCounts(study),esc=t=>String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+ if(!n){$('studyProvenanceCounts').textContent='Input provenance has not yet been recorded for this study. The study note above lists its assumptions.';$('studyProvenanceRows').innerHTML='';return;}
+ $('studyProvenanceCounts').textContent=`Of ${study.provenance.length} inputs needed to reproduce this case: ${n.reported} reported by the source, ${n.calculated} calculated from reported values, ${n.assumed} assumed by AyFlux, ${n.unknown} unknown.`;
+ // The study's main source is named once; a row shows its own location only when it differs.
+ const tally=new Map();for(const r of study.provenance)tally.set(r.source,(tally.get(r.source)||0)+1);
+ const main=[...tally].sort((x,y)=>y[1]-x[1])[0][0];
+ $('studyMainSource').textContent='Source for rows without their own location: '+main+'.';
+ $('studyProvenanceRows').innerHTML=study.provenance.map(r=>`<tr><td>${esc(r.input)}<br><span class="prov prov-${r.status}">${PROVENANCE_LABEL[r.status]}</span></td><td>${esc(r.reported)}${r.source!==main?`<br><span class="tip">${esc(r.source)}</span>`:''}</td><td>${esc(r.used)}</td></tr>`).join('');
+ $('studySourceCheck').textContent=study.sourceCheck||'';$('studySourceCheck').classList.toggle('hidden',!study.sourceCheck);
+ const spec=study.explore;$('studyExplore').classList.toggle('hidden',!spec);
+ if(spec&&$('studyExplore').dataset.study!==study.id){
+  $('studyExplore').dataset.study=study.id;
+  $('studyExploreLabel').textContent=spec.label+' ('+spec.min+'–'+spec.max+' '+spec.unit+')';
+  $('studyExploreValue').min=spec.min;$('studyExploreValue').max=spec.max;$('studyExploreValue').value=spec.value;$('studyExploreUnit').textContent=spec.unit;
+  $('studyExploreStatus').textContent='Changes only “'+spec.input+'”. The reconstruction uses '+spec.value+' '+spec.unit+'. Exploring saves the original reconstruction as a regimen when there is room, and Undo restores your settings.';
+ }
+}
+function renderStudyStatus(){
+ const select=$('studySelect'),status=$('studyStatus');if(!select||!status)return;
+ const chosen=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;
+ renderStudyProvenance(chosen);
+ if(!chosen){status.textContent='';if(select.value)select.value='';return;}
+ if(select.value!==chosen.id)select.value=chosen.id;
+ status.textContent=overlayStudy()&&chosen.teaching?'Teaching case: no concentrations were measured, so there are no dots to compare '+chosen.cite+'.':overlayStudy()?'Dots: '+chosen.pointsLabel+(chosen.n>1?', n='+chosen.n:', one patient')+(chosen.cmmgPoints?' (CMMG graph too)':'')+' '+chosen.cite+'.':'Settings no longer match this study, so its measured points are hidden. Choose it again to reload the regimen.';
+}
+let aboveLevelMg=null;
+// Summary-card readouts tied to results. They show only for current results and are cleared
+// while a calculation is pending or after one fails, so a stale value is never displayed.
+function renderTimeAbove(rewrite=false){
+ const output=$('timeAboveResult'),input=$('timeAboveLevel');if(!output||!input)return;
+ $('timeAboveUnit').textContent=unitLabel();
+ if(rewrite||document.activeElement!==input)input.value=aboveLevelMg===null?'':String(Number(shown(aboveLevelMg,'acyclovir').toPrecision(6)));
+ const run=dataIsCurrent&&results?results[primary]:null,words=$('scenarioWords'),accumulation=$('accumulationResult');
+ if(words)words.textContent=run?describeScenario(c,primary):'';
+ if(accumulation){
+  const ratio=run?accumulationRatio(run.time,run.plasma.median,run.doses.filter(d=>d.amount>0).map(d=>d.time)):null;
+  accumulation.textContent=ratio===null?'':'Accumulation: the plasma peak after the last dose is '+ratio.toFixed(2)+'× the peak after the first dose (median curve).';
+ }
+ const cmmgRatio=$('cmmgRatioResult');
+ if(cmmgRatio){
+  const window24=run?cmmgAucRatio(run.time,run.plasma.median,run.cmmg.median):null;
+  cmmgRatio.textContent=window24===null?'':'CMMG/acyclovir AUC ratio over hours '+window24.from.toFixed(0)+'–'+window24.to.toFixed(0)+': '+Math.round(100*window24.ratio)+'% (median curves, mass basis). For comparison, Kably 2025 estimated about 30% with eGFR above 90 and about 130% below 30 mL/min/1.73 m², at steady state on valacyclovir in liver transplant recipients [29].';
+ }
+ renderStudyStatus();
+ if(aboveLevelMg===null||!run){output.textContent='';return;}
+ const span=run.time[run.time.length-1]-run.time[0],hours=timeAbove(run.time,run.plasma.median,aboveLevelMg);
+ output.textContent=`${hours.toFixed(1)} of ${span.toFixed(0)} hours (${span>0?Math.round(100*hours/span):0}%) for the median ${primary} curve.`;
+}
+function tableOpen(){return tab==='concentration'&&!!$('tablePanel')?.open;}
+function requestedModes(all=false){return all||tableOpen()?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
 function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
+ if(typeof renderTimeAbove==='function')renderTimeAbove();
  document.querySelector('main').setAttribute('aria-busy',String(busy));
  $('csv').disabled=busy||!dataIsCurrent;
  $('saveBaseline').disabled=busy||!dataIsCurrent;
+ if(typeof refreshLabelAdjust==='function')refreshLabelAdjust();
+ if(typeof renderRegimens==='function'){renderRegimens();renderPostHd();}
  if(busy)$('status').textContent='Updating simulation';
 }
 function calculationError(error){
@@ -63,7 +196,7 @@ function calculationError(error){
  $('status').textContent='Simulation not updated: invalid settings';
 }
 function acceptResults(data){
- results=data;resultsRevision++;dataIsCurrent=true;alertMessage('');setBusy(false);render();
+ results=data;resultsRevision++;dataIsCurrent=true;alertMessage(pendingNotice);pendingNotice='';setBusy(false);render();
  window.dispatchEvent(new Event('ayflux:results-updated'));
  if(pendingCsvExport){const format=pendingCsvExport;pendingCsvExport=false;if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();}
 }
@@ -128,6 +261,36 @@ function modalControls(){if(primary==='No dialysis')return '';
  (types.has('HD')?group('HD parameters',['hdCl']):'')+
  (types.has('PD')?pdGroup():'')+(types.has('CRRT')?CRRT():'');
 }
+// Height is optional. With it, AyFlux shows BMI, ideal and adjusted body weight, and Cockcroft–Gault can use them.
+let heightUnit='cm';
+const n3=v=>String(Number(Number(v).toPrecision(3)));
+function bodySizeText(){
+ const s=E.bodySize(c);
+ if(!s)return 'Optional. Enter height to see BMI, ideal and adjusted body weight.';
+ return 'BMI '+s.bmi.toFixed(1)+' kg/m² · ideal body weight '+n3(s.ideal)+' kg · adjusted '+n3(s.adjusted)+' kg.'+
+  (s.bmi>=30?' The model itself scales from actual weight and has no obesity-specific adjustment; that is untested in obesity.':'');
+}
+function heightControl(){
+ const shown=c.height?(heightUnit==='in'?c.height/2.54:c.height):'';
+ return `<div class="inputrow"><label for="heightValue">Height (optional)</label><div class="threshold-entry"><input id="heightValue" type="number" min="0" step="any" inputmode="decimal" value="${shown===''?'':Number(shown.toFixed(1))}" placeholder="—"> <select id="heightUnit" aria-label="Height unit"><option value="cm" ${heightUnit==='cm'?'selected':''}>cm</option><option value="in" ${heightUnit==='in'?'selected':''}>in</option></select></div><p class="tip" id="bodySizeTip">${bodySizeText()}</p></div>`+
+  (c.height&&(c.crclSource!=='estimated'||c.renalMode==='profile')?`<div class="inputrow"><label for="sizeSex">Sex (for ideal body weight)</label><select id="sizeSex"><option value="male" ${c.sex==='male'?'selected':''}>Male</option><option value="female" ${c.sex==='female'?'selected':''}>Female</option></select></div>`:'');
+}
+function cgWeightControl(){
+ const s=E.bodySize(c),used=E.cgWeightOf(c),opt=(v,t)=>`<option value="${v}" ${c.cgWeight===v?'selected':''}>${t}</option>`;
+ const note=!s?'Enter height above to use ideal or adjusted weight.':c.weight<=s.ideal&&c.cgWeight!=='actual'?'Actual weight is at or below ideal weight, so actual weight is used.':'Using '+n3(used)+' kg.'+(s.bmi>=30&&c.cgWeight==='actual'?' BMI is 30 or above: many hospital protocols use ideal or adjusted weight here.':'');
+ return `<div class="inputrow"><label for="cgWeight">Weight used for the estimate</label><select id="cgWeight" ${s?'':'disabled'}>${opt('actual','Actual body weight')}${opt('ideal','Ideal body weight')}${opt('adjusted','Adjusted body weight')}</select><p class="tip" id="cgWeightTip">${note}</p></div>`;
+}
+// Dose per kg by each body weight, shown under the medication inputs for weight-based IV dosing.
+function doseWeightText(){
+ if(c.dosingMode!=='repeat')return '';
+ const s=E.bodySize(c),base=n3(c.dose)+' mg = '+n3(c.dose/c.weight)+' mg/kg of actual weight';
+ return s?base+' · '+n3(c.dose/s.ideal)+' mg/kg ideal · '+n3(c.dose/s.adjusted)+' mg/kg adjusted.':base+'.';
+}
+function refreshBodySize(){
+ const a=$('bodySizeTip'),b=$('doseWeightTip'),g=$('cgWeight');
+ if(a)a.textContent=bodySizeText();if(b)b.textContent=doseWeightText();
+ if(g)g.closest('.inputrow').outerHTML=cgWeightControl();
+}
 function renalInputs(){
  const method=`<div class="inputrow"><label for="crclSource">Creatinine clearance input</label><select id="crclSource"><option value="manual" ${c.crclSource==='manual'?'selected':''}>Enter CrCl</option><option value="estimated" ${c.crclSource==='estimated'?'selected':''}>Estimate (Cockcroft–Gault)</option></select></div>`;
  if(c.renalMode==='profile')return '';
@@ -136,8 +299,9 @@ function renalInputs(){
  return method+`<div class="inputrow"><label for="cgAge">Age (years)</label><input id="cgAge" type="number" min="18" max="120" step="1" value="${c.age}" class="cg-field"></div>`+
  `<div class="inputrow"><label for="cgSex">Sex coefficient for Cockcroft–Gault</label><select id="cgSex"><option value="male" ${c.sex==='male'?'selected':''}>Male</option><option value="female" ${c.sex==='female'?'selected':''}>Female (×0.85)</option></select></div>`+
  `<div class="inputrow"><label for="cgScr">Serum creatinine (mg/dL)</label><input id="cgScr" type="number" min="0.1" max="25" step="0.01" value="${c.scr}" class="cg-field"></div>`+
+ cgWeightControl()+
  `<div class="calculated">Estimated CrCl: <strong id="cgOutput">${Number.isFinite(estimated)?estimated.toFixed(1):'—'} mL/min</strong></div>`+
- `<p class="tip">Uses actual weight. Estimates may be unreliable in acute kidney injury, dialysis, and altered muscle mass. Use measured clearance when available. <a class="source-id" href="#ref13">[13]</a></p>`;
+ `<p class="tip">Estimates may be unreliable in acute kidney injury, dialysis, and altered muscle mass. Use measured clearance when available. <a class="source-id" href="#ref13">[13]</a></p>`;
 }
 function renalProfileControls(){
  const dynamic=c.renalMode==='profile';
@@ -151,6 +315,7 @@ function renalProfileControls(){
  <div class="renal-profile-grid"><span class="renal-heading">Time (h)</span><span class="renal-heading">CrCl (mL/min)</span><span></span></div>
  ${rows}
  <div class="renal-profile-actions"><button type="button" class="btn secondary small" id="renalAdd">+ Time point</button><button type="button" class="btn small" id="renalApply">Apply profile</button></div>
+ <p class="example-row"><span class="example-label">Load an example:</span><button class="example-chip" type="button" id="renalExample" title="Starting CrCl held to the halfway point, then falling to one fifth over the next quarter of the simulation and staying there">Kidney injury mid-course</button></p>
  <p class="tip">Linear change between points, with fixed endpoints. Hypothetical CrCl inputs, not a kidney recovery forecast.</p>
  <p id="renalProfileStatus" class="tip" role="status" aria-live="polite">${renalDirty?'Unapplied edits — click Apply profile.':'Current profile applied.'}</p>
  </div>`;
@@ -192,15 +357,16 @@ function renderRenalProfileChart(){
  pendingPlots.set('kidneyClearChart',{key:'kidneyClear',option,signature});requestPlotFrame();
 }
 function renderInputs(){let keepAdvanced=$('advanced').open;
- $('patientControls').innerHTML=numericField('weight')+renalProfileControls()+renalInputs()+
+ $('patientControls').innerHTML=numericField('weight')+heightControl()+renalProfileControls()+renalInputs()+
  `<h2>Medication</h2><div class="inputrow"><label for="dosingMode">Dosing schedule</label><select id="dosingMode"><option value="repeat" ${c.dosingMode==='repeat'?'selected':''}>Repeat dose</option><option value="custom" ${c.dosingMode==='custom'?'selected':''}>Custom oral / IV schedule</option></select></div>`+
  (c.dosingMode==='repeat'?`<div class="inputrow"><label for="route">Drug and route</label><select id="route"><option value="Acyclovir IV" ${c.route==='Acyclovir IV'?'selected':''}>Acyclovir — IV</option><option value="Valacyclovir oral" ${c.route==='Valacyclovir oral'?'selected':''}>Valacyclovir — oral</option></select></div>`:'')+
  (c.dosingMode==='repeat'?['dose','every','doseCount'].concat(c.route==='Valacyclovir oral'?[]:['infusion']).map(numericField).join(''):
  `<button class="btn secondary" id="openDoses">Edit medication schedule</button><div class="advisory" id="customDoseSummary"></div>`)+
+ `<p class="tip" id="doseWeightTip">${doseWeightText()}</p>`+medicationTools()+
  group('Simulation window',['horizon']);
  $('modeControls').innerHTML=modalControls();
  $('modeHint').textContent=primary==='Custom sequence'?'Define sequential treatments in Treatment timeline.':'';
- $('advancedControls').innerHTML=`<div class="inputrow"><label for="colorPalette">Graph accessibility</label><select id="colorPalette"><option value="standard" ${paletteMode==='standard'?'selected':''}>High-contrast colors</option><option value="accessible" ${paletteMode==='accessible'?'selected':''}>Colorblind-friendly (Okabe–Ito)</option></select></div><div class="inputrow"><label for="virus">Virus susceptibility reference</label><select id="virus"><option value="VZV" ${c.virus==='VZV'?'selected':''}>Varicella-zoster virus (VZV)</option><option value="HSV-1" ${c.virus==='HSV-1'?'selected':''}>HSV-1</option><option value="HSV-2" ${c.virus==='HSV-2'?'selected':''}>HSV-2</option></select><p class="tip virus-note">Only the optional cell-culture IC₅₀ range changes with virus selection; PK predictions remain unchanged. This is not a therapeutic target. <a href="#ref11">[11]</a></p></div>`+group('CNS distribution',['csfRatio','csfLag','csfMetRatio','csfMetLag'])+
+ $('advancedControls').innerHTML=`<div class="inputrow"><label for="colorPalette">Graph colors</label><select id="colorPalette"><option value="standard" ${paletteMode==='standard'?'selected':''}>Standard</option><option value="accessible" ${paletteMode==='accessible'?'selected':''}>Colorblind-friendly</option></select><p class="tip">Colorblind-friendly uses Okabe–Ito curves and viridis heatmaps here and in the visual explorer.</p></div><div class="inputrow"><label for="virus">Virus susceptibility reference</label><select id="virus"><option value="VZV" ${c.virus==='VZV'?'selected':''}>Varicella-zoster virus (VZV)</option><option value="HSV-1" ${c.virus==='HSV-1'?'selected':''}>HSV-1</option><option value="HSV-2" ${c.virus==='HSV-2'?'selected':''}>HSV-2</option></select><p class="tip virus-note">Only the optional cell-culture IC₅₀ range changes with virus selection; PK predictions remain unchanged. This is not a therapeutic target. <a href="#ref11">[11]</a></p></div>`+group('CNS distribution',['csfRatio','csfLag','csfMetRatio','csfMetLag'])+
  group('CMMG model',['formFactor','metRenal','metDial'])+
  group('Uncertainty',c.dosingMode==='custom'||c.route==='Valacyclovir oral'?['valF','valKa','variability']:['variability'])+
  group('Peritoneal membrane',['pdSmallPore','pdSigma'])+group('Assay error',['assayCV'])+
@@ -209,6 +375,163 @@ function renderInputs(){let keepAdvanced=$('advanced').open;
  $('draws').value=c.draws;$('coverage').value=c.coverage;$('advanced').open=keepAdvanced;
  $('drugCaution').classList.toggle('hidden',c.dosingMode!=='custom'&&c.route!=='Valacyclovir oral');
  updateDrugCaution();if(c.dosingMode==='custom')updateCustomDoseSummary();
+}
+// Label kidney-function adjustment for repeat IV acyclovir, and the probenecid option.
+function labelAdjustmentState(){
+ if(c.dosingMode!=='repeat')return {ok:false,text:'Label adjustment applies to a repeating regimen. Switch Dosing schedule to Repeat dose.'};
+ if(c.route!=='Acyclovir IV')return {ok:false,text:'Label adjustments for oral valacyclovir depend on the indication, so AyFlux does not apply them automatically.'};
+ if(c.renalMode==='profile')return {ok:false,text:'Label adjustment uses one CrCl. Switch kidney function to constant to apply it.'};
+ if(!(Number.isFinite(c.labelBsa)&&c.labelBsa>0))return {ok:false,text:'Enter body surface area to compare absolute CrCl with the label’s indexed kidney-function bands.'};
+ const indexedCrcl=c.crcl*1.73/c.labelBsa;
+ const tier=E.labelRenalAdjustment(indexedCrcl),n=v=>String(Number(Number(v).toPrecision(4)));
+ if(!tier)return {ok:false,text:''};
+ const dose=c.dose*tier.fraction,target=n(dose)+' mg every '+tier.every+' h';
+ if(c.every!==8)return {ok:false,text:'The label adjusts a standard every-8-hour regimen. Set the interval to 8 h first; this regimen is already every '+n(c.every)+' h.'};
+ if(tier.every===8)return {ok:false,text:'At indexed CrCl '+n(indexedCrcl)+' mL/min/1.73 m² the US label needs no adjustment (above 50 mL/min) [10].'};
+ return {ok:true,dose,every:tier.every,text:'At indexed CrCl '+n(indexedCrcl)+' mL/min/1.73 m² ('+tier.band+' band), the US label gives '+(tier.fraction<1?'50% of the dose':'the same dose')+' every '+tier.every+' h: '+target+' [10].'};
+}
+function medicationTools(){
+ const state=labelAdjustmentState();
+ return `<div class="label-adjust"><label for="labelBsa">Body surface area for label comparison (m²)</label><input id="labelBsa" type="number" min="0" step="any" inputmode="decimal" value="${c.labelBsa||''}" placeholder="Enter BSA"><p class="tip">Label CrCl = absolute CrCl × 1.73 ÷ body surface area. Used for this label comparison.</p><button type="button" class="btn secondary" id="labelAdjust" ${state.ok?'':'disabled'}>Apply label kidney adjustment</button><p class="tip" id="labelAdjustTip">${state.text}${state.ok?' The current curve is kept as a baseline for comparison.':''}</p></div>`+
+  `<label class="check"><input type="checkbox" id="probenecid" ${c.probenecid?'checked':''}> Probenecid co-administration</label><p class="tip">Lowers acyclovir renal clearance by 32%, as measured in three adults by Laskin et al. [41]. CMMG clearance is unchanged. A single small study; illustrative only.</p>`+csfBarrierControl();
+}
+// Blood-brain barrier choice: sets the two CSF partitions (#47). Values that match neither preset show as Custom.
+function csfBarrierControl(){
+ const state=E.csfBarrierOf(c),B=E.CSF_BARRIER,opt=(v,t)=>`<option value="${v}" ${state===v?'selected':''}>${t}</option>`;
+ return `<div class="inputrow"><label for="csfBarrier">Blood–brain barrier (CSF curves)</label><select id="csfBarrier">${opt('intact','Intact (default)')}${opt('damaged','Damaged (CNS infection; exploratory)')}${state==='custom'?opt('custom','Custom values (Advanced settings)'):''}</select><p class="tip">Sets how much acyclovir and CMMG reach the CSF. Choose Damaged for encephalitis or meningitis with barrier disruption. Intact: ${B.intact.csfRatio} and ${B.intact.csfMetRatio} of plasma [4][15]. Damaged: ${B.damaged.csfRatio} and ${B.damaged.csfMetRatio}, fitted to patients with herpesvirus CNS infection and a raised CSF:serum albumin ratio [4]; no independent study tests it. Plasma curves are unchanged.</p></div>`;
+}
+function refreshLabelAdjust(){
+ const button=$('labelAdjust'),tip=$('labelAdjustTip');if(!button||!tip)return;
+ const state=labelAdjustmentState();button.disabled=!state.ok||!dataIsCurrent;
+ tip.textContent=state.text+(state.ok?' The current curve is kept as a baseline for comparison.':'');
+}
+// ---------- Regimen comparison ----------
+const REG=window.AyFluxRegimens,REGIMEN_COLORS=['#7a3e9d','#a8740b','#2e7d4f','#c2185b'];
+const regimenEscape=text=>String(text).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);
+// Dose and dialysis timeline in words, for the prediction exercise.
+function regimenTimeline(config,mode){
+ const eff=E.effectiveConfig(config),hours=v=>String(Number(v.toFixed(2)));
+ const doses=E.buildDoses(eff),shown=doses.slice(0,10).map(d=>hours(d.time)).join(', ')+(doses.length>10?', …':'');
+ const sessions=E.scheduleFor(mode,eff).filter(r=>r.type!=='No dialysis').map(r=>r.type+' '+hours(r.start)+'–'+hours(r.end)+' h');
+ return 'Doses at hour '+shown+(sessions.length?' · '+sessions.slice(0,6).join(', ')+(sessions.length>6?', …':''):' · no dialysis');
+}
+function regimenRow(name,config,mode,data,T,color,index,hidden=false){
+ const m=REG.metrics(data,E.buildDoses(E.effectiveConfig(config)),T),f=v=>hidden?'?':v===null?'—':Number(v.toPrecision(3)).toString();
+ return `<tr><td>${color?`<span class="swatch" style="border-color:${color}"></span>`:''}${regimenEscape(name)}</td><td>${regimenEscape(describeScenario(config,mode))}${hidden?'<br><span class="tip">'+regimenEscape(regimenTimeline(config,mode))+'</span>':''}</td><td>${f(m.auc)}</td><td>${f(m.peak)}</td><td>${f(m.trough)}${hidden||m.troughTime===null?'':' <span class="tip">(h '+Number(m.troughTime.toFixed(2))+')</span>'}</td><td>${f(m.cmmgAuc)}</td><td>${f(m.cmmgPeak)}</td><td>${index===null?'':`<button type="button" class="btn secondary" data-remove-regimen="${index}">Remove</button>`}</td></tr>`;
+}
+function renderRegimens(){
+ const body=$('regimenRows');if(!body||!REG)return;
+ const current=dataIsCurrent&&results?.[primary]?results[primary]:null;
+ renderScenarioDifference();
+ $('saveRegimen').disabled=!current||savedRegimens.length>=REG.MAX_SAVED;
+ $('regimenStatus').textContent=savedRegimens.length>=REG.MAX_SAVED?'Four regimens saved. Remove one to save another.':'Save the selected scenario under a name, change the dose, interval, timing or kidney function, and save again. Saved regimens are frozen: later edits do not change them. Up to four; they last until removed or the page is closed.';
+ if(!savedRegimens.length&&!current){body.innerHTML='';$('regimenCaption').textContent='';return;}
+ const T=regimenWindow(),hidden=predicting();
+ body.innerHTML=savedRegimens.map((r,i)=>regimenRow(r.name,r.config,r.primary,r.data,T,REGIMEN_COLORS[i],i,hidden)).join('')+(current&&!hidden?regimenRow('Current settings (not saved)',c,primary,current,T,null,null):'');
+ renderPredictControls();
+ $('regimenCaption').textContent=`All values are from median curves of the selected scenario, in mg/L, over the common window 0–${Number(T.toFixed(2))} h (the shortest simulation among the rows). AUC is the plasma area under the curve from 0 to ${Number(T.toFixed(2))} h (mg·h/L). Trough is plasma acyclovir at the start of the last dose that begins after hour 0 and before hour ${Number(T.toFixed(2))}, immediately before that dose; its hour is shown. CMMG values are plasma 9-carboxymethoxymethylguanine: AUC over the same window (mg·h/L) and the highest concentration in it (mg/L). Saved curves appear as dashed lines on the plasma acyclovir and plasma CMMG graphs.`;
+}
+// Saved curves retain their original inputs. Compare over the shorter of these two runs.
+function renderScenarioDifference(){
+ const from=$('differenceFrom'),to=$('differenceTo');
+ const previousFrom=from.value,previousTo=to.value,hadPair=!to.disabled;
+ from.replaceChildren(...savedRegimens.map((r,i)=>new Option(r.name,i)));
+ to.replaceChildren(...savedRegimens.map((r,i)=>new Option(r.name,i)));
+ from.value=previousFrom&&+previousFrom<savedRegimens.length?previousFrom:'0';
+ to.value=hadPair&&previousTo&&+previousTo<savedRegimens.length?previousTo:String(Math.min(1,savedRegimens.length-1));
+ from.disabled=to.disabled=savedRegimens.length<2;
+ const inputs=$('differenceInputs'),outcomes=$('differenceOutcomes');
+ inputs.replaceChildren();outcomes.replaceChildren();
+ if(savedRegimens.length<2){$('differenceStatus').textContent='Save two regimens to compare their inputs and outcomes.';return;}
+ const a=savedRegimens[+from.value],b=savedRegimens[+to.value];
+ const T=Math.min(a.config.horizon,b.config.horizon);
+ const cellRow=values=>{const tr=document.createElement('tr');for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}return tr;};
+ const value=x=>x===undefined?'Default / unspecified':typeof x==='object'?JSON.stringify(x):String(x);
+ const labels={primary:'Dialysis scenario',dose:'Dose (mg)',every:'Dose interval (h)',infusion:'IV infusion (h)',crcl:'Creatinine clearance (mL/min)',weight:'Weight (kg)',horizon:'Simulation end (h)',customDoses:'Custom doses',pdRxRows:'PD exchanges',csfMetRatio:'CSF CMMG partition',csfRatio:'CSF acyclovir partition'};
+ const settingsA={...a.config,primary:a.primary},settingsB={...b.config,primary:b.primary};
+ const keys=[...new Set([...Object.keys(settingsA),...Object.keys(settingsB)])];
+ for(const key of keys){
+  if(key.startsWith('show')||JSON.stringify(settingsA[key])===JSON.stringify(settingsB[key]))continue;
+  inputs.append(cellRow([labels[key]||key.replace(/([A-Z])/g,' $1').replace(/^./,ch=>ch.toUpperCase()),value(settingsA[key]),value(settingsB[key])]));
+ }
+ if(!inputs.children.length)inputs.append(cellRow(['No changed inputs','—','—']));
+ $('differenceStatus').textContent=predicting()?'Reveal the prediction exercise to see outcome differences.':`Comparison minus baseline over hours 0–${T}. Exposure and concentration outcomes use saved median curves. Dialysis removal uses a nominal run with the saved inputs. Each trough uses its own last pre-dose time in this window.`;
+ if(predicting())return;
+ const metrics=r=>{
+  const config=E.effectiveConfig({...r.config,variability:0,draws:1}),doses=E.buildDoses(config);
+  const measured=REG.metrics(r.data,doses,T);
+  const nominal=E.single({...config,horizon:T},E.drawParams(config)[0],E.scheduleFor(r.primary,config),.125,doses);
+  return {...measured,mass:nominal.summary.mass};
+ };
+ const left=metrics(a),right=metrics(b),format=x=>x===null?'Unavailable':String(Number(x.toPrecision(4)));
+ for(const [key,label] of [['auc','Acyclovir AUC (mg·h/L)'],['peak','Peak acyclovir (mg/L)'],['trough','Trough acyclovir (mg/L)'],['cmmgAuc','CMMG AUC (mg·h/L)'],['cmmgPeak','Peak CMMG (mg/L)'],['mass','Nominal dialysis removal (mg)']]){
+  const x=left[key],y=right[key],delta=x===null||y===null?null:y-x;
+  outcomes.append(cellRow([label,format(x),format(y),format(delta),delta===null?'Unavailable':x===0?'Undefined (zero baseline)':format(delta/Math.abs(x)*100)]));
+ }
+}
+$('differenceFrom').addEventListener('change',renderScenarioDifference);
+$('differenceTo').addEventListener('change',renderScenarioDifference);
+// ---------- Prediction exercise: hide results, predict, then reveal ----------
+const PREDICT_METRICS={trough:'trough acyclovir',peak:'peak acyclovir',auc:'plasma acyclovir AUC',cmmgAuc:'plasma CMMG AUC'};
+function regimenWindow(){return Math.min(c.horizon,...savedRegimens.map(r=>r.config.horizon));}
+function predicting(){return !!$('predictMode')?.checked;}
+function renderPredictControls(){
+ const enough=savedRegimens.length>=2,choice=$('predictChoice'),keep=choice.value;
+ $('predictMode').disabled=!enough&&!predicting();
+ choice.innerHTML=savedRegimens.map((r,i)=>`<option value="${i}">${regimenEscape(r.name)}</option>`).join('');
+ if(keep&&+keep<savedRegimens.length)choice.value=keep;
+ for(const id of ['predictMetric','predictChoice','revealPrediction'])$(id).disabled=!predicting()||!enough;
+ $('predictQuestion').textContent=predicting()?`Which saved regimen will have the highest ${PREDICT_METRICS[$('predictMetric').value]} over hours 0–${Number(regimenWindow().toFixed(2))}? Concentration graphs and summaries are hidden until you reveal.`:enough?'':'Save at least two regimens to run a prediction exercise.';
+ document.querySelector('main').classList.toggle('predicting',predicting());
+}
+$('predictMode').addEventListener('change',()=>{$('predictResult').textContent='';renderRegimens();});
+$('predictMetric').addEventListener('change',renderPredictControls);
+$('revealPrediction').addEventListener('click',()=>{
+ const key=$('predictMetric').value,T=regimenWindow();
+ const values=savedRegimens.map(r=>REG.metrics(r.data,E.buildDoses(E.effectiveConfig(r.config)),T)[key]);
+ const valid=values.map((v,i)=>[v,i]).filter(([v])=>v!==null);
+ if(!valid.length){$('predictResult').textContent='No saved regimen has a value for this question (a single dose has no trough).';return;}
+ const best=valid.reduce((a,b)=>b[0]>a[0]?b:a),picked=+$('predictChoice').value,ties=valid.filter(([v])=>Math.abs(v-best[0])<=1e-9*Math.max(1,best[0])).map(([,i])=>i);
+ const unit=key==='trough'||key==='peak'?'mg/L':'mg·h/L',name=i=>savedRegimens[i].name;
+ $('predictResult').textContent=(ties.includes(picked)?'Correct. ':'Not this time. ')+`Highest ${PREDICT_METRICS[key]}: ${ties.map(name).join(' and ')} (${Number(best[0].toPrecision(3))} ${unit}). `+valid.map(([v,i])=>`${name(i)}: ${Number(v.toPrecision(3))}`).join(' · ')+(valid.length<values.length?' · regimens without a value were skipped':'')+'.';
+ $('predictMode').checked=false;renderRegimens();
+});
+$('saveRegimen').addEventListener('click',()=>{
+ if(!dataIsCurrent||!results?.[primary]||savedRegimens.length>=REG.MAX_SAVED)return;
+ const d=results[primary],name=($('regimenName').value.trim()||'Regimen '+(savedRegimens.length+1)).slice(0,40);
+ savedRegimens.push({name,primary,config:structuredClone(c),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
+ savedRevision++;$('regimenName').value='';renderRegimens();render();
+});
+$('regimenRows').addEventListener('click',e=>{const b=e.target.closest('[data-remove-regimen]');if(!b)return;savedRegimens.splice(+b.dataset.removeRegimen,1);savedRevision++;renderRegimens();render();});
+// ---------- Dose timing around intermittent hemodialysis ----------
+function currentPostHdPlan(){return REG.postHdPlan(E.effectiveConfig(c),E.scheduleFor(primary,E.effectiveConfig(c)),E.buildDoses(E.effectiveConfig(c)));}
+function renderPostHd(){
+ const panel=$('postHdRows');if(!panel||!REG)return;
+ const plan=currentPostHdPlan(),n=v=>v===null?'—':String(Number(Number(v).toFixed(2)));
+ $('applyPostHd').disabled=!plan.ok||!plan.apply;
+ if(!plan.ok){$('postHdRule').textContent=plan.reason;panel.innerHTML='';$('postHdFlags').replaceChildren();return;}
+ $('postHdRule').textContent=plan.ruleText+' '+plan.cite+(plan.apply?'':' No change is proposed for the current settings.');
+ panel.innerHTML=plan.rows.map(r=>`<tr class="${r.change==='unchanged'?'':'changed'}"><td>${r.dose??'new'}</td><td>${n(r.original)}</td><td>${n(r.proposed)}</td><td>${regimenEscape(String(Number(r.amount.toPrecision(6))))} mg</td><td>${r.change==='added'?'Added after HD ('+n(r.session.start)+'–'+n(r.session.end)+' h)':r.change==='moved'?'Moved to end of HD ('+n(r.session.start)+'–'+n(r.session.end)+' h)':'Unchanged'}</td></tr>`).join('');
+ $('postHdFlags').replaceChildren(...plan.flags.map(f=>{const li=document.createElement('li');li.className='flag-'+f.kind;li.textContent=({duplicate:'Check: ',drop:'Left out: ',gap:'Note: ',info:'Note: '})[f.kind]+f.text;return li;}));
+}
+$('applyPostHd').addEventListener('click',()=>{
+ const plan=currentPostHdPlan();if(!plan.ok||!plan.apply)return;
+ rememberVersion('Before post-dialysis dose timing');studyOverlay=null;
+ c.dosingMode='custom';c.customDoses=structuredClone(plan.customDoses);
+ renderInputs();
+ showScenarioNote('Dose timing after hemodialysis',plan.ruleText+' '+plan.cite+' The regimen is now a custom schedule; open Medication schedule to see every dose. Teaching comparison only, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ defer();
+});
+function applyLabelAdjustment(){
+ const state=labelAdjustmentState();if(!state.ok)return;
+ if(!dataIsCurrent||!results?.[primary])return;
+ baseline={primary,config:structuredClone(c),data:structuredClone(results[primary])};baselineRevision++;$('saveBaseline').textContent='Replace baseline with selected curve';
+ rememberVersion('Before label kidney adjustment');studyOverlay=null;
+ const before=c.dose+' mg every '+c.every+' h';
+ c.dose=Number(state.dose.toPrecision(6));c.every=state.every;
+ renderInputs();
+ showScenarioNote('Label kidney adjustment','Changed '+before+' to '+c.dose+' mg every '+c.every+' h, following the US acyclovir injection label using body surface area '+c.labelBsa+' m² [10]. The previous curve is shown as the baseline. The label specifies an additional dose after each hemodialysis session. Preview and apply those supplemental doses in Dose timing around hemodialysis on the Concentration tab. This is a teaching comparison, not a dosing recommendation. Use Undo last import in Research tools to return to the previous settings.');
+ defer();
 }
 function updateDrugCaution(){
  const oralDoses=c.dosingMode==='custom'?c.customDoses.filter(d=>d.route==='Valacyclovir oral').map(d=>d.amount):(c.route==='Valacyclovir oral'?[c.dose]:[]);
@@ -253,7 +576,7 @@ if(typeof IntersectionObserver!=='undefined'){
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
-function chartSignature(key){return JSON.stringify([resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
+function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,key==='plasma'||key==='cmmg'?savedRevision:0,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
 let chartWait=null;
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
@@ -336,23 +659,30 @@ function curve(key,unit,where,ref=null){if(!results)return;
   pendingPlots.delete(where);return;
  }
  const charts=window.AyFluxCharts,series=[];
+ const analyte=CONCENTRATION_KEYS[key],factor=analyte?unitFactor(analyte):1,scale=values=>factor===1?values:values.map(v=>v*factor);
  const dash={solid:'solid',dash:'dashed',dot:'dotted',dashdot:[6,3,2,3],longdash:[10,4]};
  for(const m of modes){
   if(!visible.has(m)||!results[m])continue;
   const d=results[m],z=d[key],color=COLORS[m];
-  if(m===primary&&c.showBands)series.push(charts.band(Math.round(c.coverage*100)+'% '+(results._validation.fitted?'updated':'unfitted')+' model interval',d.time,z.lower,z.upper,rgba(color,.17)));
-  series.push(charts.line(m+(m===primary?' (selected)':''),d.time,z.median,color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
+  if(m===primary&&c.showBands)series.push(charts.band(Math.round(c.coverage*100)+'% '+(results._validation.fitted?'updated':'unfitted')+' model interval',d.time,scale(z.lower),scale(z.upper),rgba(color,.17)));
+  series.push(charts.line(m+(m===primary?' (selected)':''),d.time,scale(z.median),color,m===primary?4.2:3.2,dash[LINE_DASH[m]]));
  }
  const comparison=baseline&&['plasma','csf','cmmg','csfCmmg'].includes(key);
- const horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
- if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,baseline.data[key].median,'#303846',2.5,[10,4,2,4]));
- const marker=key==='cmmg'?{value:E.MARKER,label:'Neurotoxicity-associated CMMG level: 2.58 mg/L [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
+ let horizon=comparison?Math.max(c.horizon,baseline.config.horizon):c.horizon;
+ if(comparison)series.push(charts.line('Baseline: '+baseline.primary,baseline.data.time,scale(baseline.data[key].median),'#303846',2.5,[10,4,2,4]));
+ if(key==='plasma'||key==='cmmg')savedRegimens.forEach((r,i)=>{series.push(charts.line(r.name,r.data.time,scale(r.data[key].median),REGIMEN_COLORS[i],2.6,'dashed'));horizon=Math.max(horizon,r.config.horizon);});
+ const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
+ const study=key==='plasma'||key==='cmmg'?overlayStudy():null,studyPoints=study?(key==='plasma'?study.points:study.cmmgPoints):null;
+ if(studyPoints?.length)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
+  itemStyle:{color:'#1d2733',borderColor:'#ffffff',borderWidth:1.5},data:studyPoints.map(([t,v])=>[t,v*factor])});
  if(key==='csf'&&c.showIC50){
   const r=VIRUSES[c.virus];
-  series.push(charts.band(c.virus+' in-vitro IC₅₀ range '+r.min+'–'+r.max+' mg/L [11]',[0,c.horizon],[r.min,r.min],[r.max,r.max],'rgba(177,145,56,.2)'));
+  const low=r.min*factor,high=r.max*factor,text=v=>concUnit==='umol'?Number(v.toPrecision(3)):v;
+  series.push(charts.band(c.virus+' in-vitro IC₅₀ range '+text(low)+'–'+text(high)+' '+unitLabel()+' [11]',[0,c.horizon],[low,low],[high,high],'rgba(177,145,56,.2)'));
  }
  const option=layout(unit,horizon,series);
+ if(analyte&&option.yAxis?.name)option.yAxis.name=unitText(option.yAxis.name);
  option.toolbox.feature.saveAsImage.name='acyclovir_'+key;
  pendingPlots.set(where,{key,option,signature});requestPlotFrame();
 }
@@ -376,8 +706,13 @@ function renderBaseline(){
  $('baselineStatus').textContent='Frozen baseline: '+baseline.primary+'. Dark dash-dot lines show saved medians on the four concentration charts; shading, dose markers and uncertainty bands describe the current settings only.';
  const changes=baselineChanges(baseline,c,primary);
  for(const text of changes.length?changes:['No input settings changed.']){const li=document.createElement('li');li.textContent=text;$('baselineChanges').append(li);}
- const before=baseline.data.summary.peak.median,after=results[primary].summary.peak.median,delta=after-before;
- $('baselineDelta').textContent=`Peak plasma acyclovir: baseline ${before.toFixed(2)} → current ${after.toFixed(2)} mg/L (${delta>=0?'+':''}${delta.toFixed(2)} mg/L).`+(baseline.config.horizon!==c.horizon?' Simulation durations differ; peaks cover each run’s own duration.':'');
+ const rows=[['Peak plasma acyclovir','peak','mg/L',2,'acyclovir'],['Plasma acyclovir AUC','auc','mg·h/L',0,'acyclovir'],['Peak CSF acyclovir','csfPeak','mg/L',2,'acyclovir'],['Peak plasma CMMG','mPeak','mg/L',2,'cmmg'],['Removed by dialysis','mass','mg',0]];
+ const parts=rows.map(([label,key,unit,digits,analyte])=>{
+  const before=shown(baseline.data.summary[key].median,analyte),after=shown(results[primary].summary[key].median,analyte);
+  const change=before>0?` (${after>=before?'+':''}${Math.round(100*(after-before)/before)}%)`:'';
+  return `${label}: ${before.toFixed(digits)} → ${after.toFixed(digits)} ${analyte?unitText(unit):unit}${change}`;
+ });
+ $('baselineDelta').textContent='Baseline → current, median values. '+parts.join(' · ')+'.'+(baseline.config.horizon!==c.horizon?' Simulation durations differ; each value covers its own run.':'');
 }
 $('saveBaseline').addEventListener('click',()=>{
  if(!dataIsCurrent||!results?.[primary])return;
@@ -388,19 +723,27 @@ $('clearBaseline').addEventListener('click',()=>{
  baseline=null;baselineRevision++;$('saveBaseline').textContent='Save selected curve as baseline';render();
 });
 function showStats(){let d=results[primary].summary;
- let arr=[['Peak plasma acyclovir',d.peak,'mg/L',1,'#ed766b'],['Plasma acyclovir AUC',d.auc,'mg·h/L',0,'#8660c1'],['Peak CSF acyclovir',d.csfPeak,'mg/L',1,'#179b89'],['CSF acyclovir AUC',d.csfAuc,'mg·h/L',0,'#d59c37'],['Peak plasma CMMG',d.mPeak,'mg/L',2,'#cb5891'],['Acyclovir removed by dialysis',d.mass,'mg',0,'#3976bd'],['Plasma at simulation end',d.endPlasma,'mg/L',2,'#315d74']];
- if(d.endPdFluidMg.upper>0)arr.push(['Acyclovir remaining in PD fluid',d.endPdFluidMg,'mg',1,'#3976bd']);
- $('metrics').innerHTML=arr.map(([label,v,unit,dig,color])=>`<div class="metric" style="--tone:${color}"><div class="key">${label}</div><div class="val">${v.median.toFixed(dig)} <span style="font-size:11px">${unit}</span></div><div class="sub">${results._validation.fitted?"Updated":"Unfitted"} ${Math.round(c.coverage*100)}% model interval: ${v.lower.toFixed(dig)}–${v.upper.toFixed(dig)} ${unit}</div></div>`).join('');}
-function table(){const cols=[['peak','Peak plasma acyclovir (mg/L)',1],['auc','Plasma acyclovir AUC (mg·h/L)',0],['csfPeak','Peak CSF acyclovir (mg/L)',1],['csfAuc','CSF acyclovir AUC (mg·h/L)',0],['mPeak','Peak plasma CMMG (mg/L)',2],['mass','Acyclovir removed by dialysis (mg)',0],['endPdFluidMg','Acyclovir remaining in PD fluid (mg)',1],['endPlasma','Plasma acyclovir at end (mg/L)',2]];
- let rows=`<table><thead><tr><th>Modality</th>${cols.map(x=>`<th>${x[1]}</th>`).join('')}</tr></thead><tbody>`;
- for(let m of modes){let d=results[m].summary;rows+=`<tr><td style="font-weight:800;color:${COLORS[m]}">${m}</td>${cols.map(([id,_,n])=>`<td>${d[id].median.toFixed(n)} <span style="color:#8b8593">[${d[id].lower.toFixed(n)}–${d[id].upper.toFixed(n)}]</span></td>`).join('')}</tr>`;} $('resultTable').innerHTML=rows+'</tbody></table>';}
+ // Plasma acyclovir first: it is the level with published reference values. The trough comes from the median curve.
+ const reg=window.AyFluxRegimens,m=reg?reg.metrics(results[primary],E.buildDoses(E.effectiveConfig(c)),c.horizon):null;
+ const main=[['Peak plasma acyclovir',d.peak,'mg/L',1,'#ed766b','acyclovir'],['Plasma acyclovir AUC',d.auc,'mg·h/L',0,'#8660c1','acyclovir']];
+ const other=[['Peak CSF acyclovir',d.csfPeak,'mg/L',1,'#179b89','acyclovir'],['CSF acyclovir AUC',d.csfAuc,'mg·h/L',0,'#d59c37','acyclovir'],['Peak plasma CMMG',d.mPeak,'mg/L',2,'#cb5891','cmmg'],['Acyclovir removed by dialysis',d.mass,'mg',0,'#3976bd'],['Plasma at simulation end',d.endPlasma,'mg/L',2,'#315d74','acyclovir']];
+ if(d.endPdFluidMg.upper>0)other.push(['Acyclovir remaining in PD fluid',d.endPdFluidMg,'mg',1,'#3976bd']);
+ const kind=results._validation.fitted?"Updated":"Unfitted",pct=Math.round(c.coverage*100);
+ const card=cls=>([label,v,unit,dig,color,analyte])=>{const u=analyte?unitText(unit):unit,f=x=>shown(x,analyte).toFixed(dig);return `<div class="metric ${cls}" style="--tone:${color}"><div class="key">${label}</div><div class="val">${f(v.median)} <span style="font-size:11px">${u}</span></div><div class="sub">${kind} ${pct}% model interval: ${f(v.lower)}–${f(v.upper)} ${u}</div></div>`;};
+ const trough=m&&m.trough!==null?`<div class="metric primary" id="troughMetric" style="--tone:#315d74"><div class="key">Plasma acyclovir trough</div><div class="val">${shown(m.trough,'acyclovir').toFixed(2)} <span style="font-size:11px">${unitText('mg/L')}</span></div><div class="sub">Median curve at hour ${Number(m.troughTime.toFixed(1))}, just before the last dose</div></div>`:'';
+ $('metrics').innerHTML='<div class="metric-group">Plasma acyclovir · start here</div>'+main.map(card('primary')).join('')+trough+
+  '<div class="metric-group">Other outputs</div>'+other.map(card('minor')).join('');}
+function table(){const cols=[['peak','Peak plasma acyclovir (mg/L)',1,'acyclovir'],['auc','Plasma acyclovir AUC (mg·h/L)',0,'acyclovir'],['csfPeak','Peak CSF acyclovir (mg/L)',1,'acyclovir'],['csfAuc','CSF acyclovir AUC (mg·h/L)',0,'acyclovir'],['mPeak','Peak plasma CMMG (mg/L)',2,'cmmg'],['mass','Acyclovir removed by dialysis (mg)',0],['endPdFluidMg','Acyclovir remaining in PD fluid (mg)',1],['endPlasma','Plasma acyclovir at end (mg/L)',2,'acyclovir']];
+ let rows=`<table><thead><tr><th>Modality</th>${cols.map(x=>`<th>${x[3]?unitText(x[1]):x[1]}</th>`).join('')}</tr></thead><tbody>`;
+ for(let m of modes){let d=results[m].summary;rows+=`<tr><td style="font-weight:800;color:${COLORS[m]}">${m}</td>${cols.map(([id,_,n,analyte])=>`<td>${shown(d[id].median,analyte).toFixed(n)} <span style="color:#8b8593">[${shown(d[id].lower,analyte).toFixed(n)}–${shown(d[id].upper,analyte).toFixed(n)}]</span></td>`).join('')}</tr>`;} $('resultTable').innerHTML=rows+'</tbody></table>';}
 let metricsSignature='',tableRevision=-1,validationSignature='';
 function render(){if(!renderFrame)renderFrame=requestAnimationFrame(()=>{renderFrame=0;renderNow();});}
 function renderNow(){if(!results||!dataIsCurrent)return;
  if(tab==='concentration'){renderChecks();renderBaseline();}
  const summarySignature=resultsRevision+':'+primary;
  if(tab==='concentration'&&metricsSignature!==summarySignature){showStats();metricsSignature=summarySignature;}
- if(tab==='table'&&tableRevision!==resultsRevision&&modes.every(m=>results[m])){table();tableRevision=resultsRevision;}
+ if(tab==='concentration')renderTimeAbove();
+ if(tableOpen()&&tableRevision!==resultsRevision&&modes.every(m=>results[m])){table();tableRevision=resultsRevision;}
  if(tab==='validation'&&validationSignature!==summarySignature){renderValidation();validationSignature=summarySignature;}
  if(tab==='research'){renderResearch();}
  if(tab==='concentration'){
@@ -433,10 +776,12 @@ function calculate(forceAll=false){
   queuedJob={id,key,config:jobConfig};setBusy(true);startNextJob();
  }catch(error){calculationError(error);}
 }
-function defer(){pendingCsvExport=false;++calculationVersion;queuedJob=null;dataIsCurrent=false;setBusy(true);clearTimeout(timer);timer=setTimeout(calculate,180);}
+function defer(){refreshLabelAdjust();pendingCsvExport=false;++calculationVersion;queuedJob=null;dataIsCurrent=false;setBusy(true);clearTimeout(timer);timer=setTimeout(calculate,180);}
 function updateParam(target){let id=target.dataset.k;if(!id)return;let value=Number(target.value);if(target.value.trim()===''||!Number.isFinite(value))return;
  const def=fieldDef(id);if(value<def[2]||value>def[3]){if(target.dataset.role==='number')target.setCustomValidity(`Use ${def[2]}–${def[3]}`);return;}target.setCustomValidity?.('');if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
  const same=document.querySelectorAll(`[data-k="${id}"]`);for(const el of same)if(el!==target)el.value=value;
+ if((id==='weight'||id==='dose')&&typeof refreshBodySize==='function')refreshBodySize();
+ if((id==='csfRatio'||id==='csfMetRatio')&&$('csfBarrier'))$('csfBarrier').closest('.inputrow').outerHTML=csfBarrierControl();
  defer();}
 function renderSchedule(){const rows=draft;
  $('scheduleRows').innerHTML=rows.map((r,i)=>`<div class="intervals" data-row="${i}"><div><label>Mode</label><select data-index="${i}" data-field="type">${E.TYPES.map(m=>`<option ${m===r.type?'selected':''}>${m}</option>`).join('')}</select></div><div><label>Start (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="start" value="${r.start}"></div><div><label>End (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="end" value="${r.end}"></div><button class="btn secondary small" data-delete="${i}" aria-label="Delete session ${i+1}">✕</button></div>`).join('');
@@ -448,11 +793,16 @@ function checkDraft(){return E.validate({...c,schedule:draft},'Custom sequence')
 function applyTimeline(){const errs=checkDraft();timelineErrors(errs);if(errs.length)return;
  c.schedule=structuredClone(draft);dirtyTimeline=false;$('timelinePending').classList.add('hidden');primary='Custom sequence';$('primary').value=primary;visible.add(primary);renderInputs();calculate();}
 function switchTab(next){if(next==='doses')next='timeline';tab=next;for(const btn of document.querySelectorAll('[data-tab]'))btn.classList.toggle('active',btn.dataset.tab===tab);
- for(const name of ['concentration','clearance','timeline','validation','reference','table','method','research'])$(name).classList.toggle('hidden',name!==tab);
- if(tab==='table'&&(!dataIsCurrent||!results||modes.some(m=>!results[m])))calculate(true);
+ // Drug reference and methods share one tab; legacy 'reference' and 'table' targets still resolve.
+ if(tab==='reference')tab='method';
+ if(tab==='table'){tab='concentration';$('tablePanel').open=true;}
+ for(const btn of document.querySelectorAll('[data-tab]'))btn.classList.toggle('active',btn.dataset.tab===tab);
+ for(const name of ['concentration','clearance','timeline','validation','reference','method','research','experimental'])$(name).classList.toggle('hidden',name!==tab&&!(name==='reference'&&tab==='method'));
+ if(tableOpen()&&(!dataIsCurrent||!results||modes.some(m=>!results[m])))calculate(true);
  else if(results)render();
  if(tab==='timeline'){renderSchedule();renderPdRxEditor();renderDoseRows();}
- if(tab==='research')renderResearch();resizeVisibleCharts();}
+ if(tab==='research')renderResearch();
+ if(tab==='method')renderScorecard();resizeVisibleCharts();}
 function download(){if(!results)return;const heads=['time_hours','day_hour','mode','plasma_mg_L_median','plasma_mg_L_lower','plasma_mg_L_upper','csf_mg_L_median','csf_mg_L_lower','csf_mg_L_upper','cmmg_mg_L_median','cmmg_mg_L_lower','cmmg_mg_L_upper','residual_kidney_clearance_mL_min_median','cmmg_residual_kidney_clearance_mL_min_median','total_clearance_mL_min_median','dialysis_only_clearance_mL_min_median','dialysis_removal_mg_hour_median','medication_events_at_time','entered_residual_crcl_mL_min'];let lines=[heads.join(',')];
  for(const mode of modes){let d=results[mode];for(let i=0;i<d.time.length;i++){lines.push([d.time[i],JSON.stringify(timeLabel(d.time[i])),JSON.stringify(mode),d.plasma.median[i],d.plasma.lower[i],d.plasma.upper[i],d.csf.median[i],d.csf.lower[i],d.csf.upper[i],d.cmmg.median[i],d.cmmg.lower[i],d.cmmg.upper[i],d.kidneyClear.median[i],d.cmmgKidneyClear.median[i],d.clearance.median[i],d.dialClear.median[i],d.dialRate.median[i],JSON.stringify(d.doses.filter(x=>Math.abs(x.time-d.time[i])<1e-7).map(x=>`${x.route}: ${x.amount} mg${x.route==='Acyclovir IV'?` / ${x.infusion} h infusion`:''}`).join('; ')),E.renalCrClAt(c,d.time[i])].join(','));}}
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='ayflux_simulation_data.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
@@ -627,6 +977,11 @@ function handleRenalRowChange(element){
  renalDirty=true;
  const status=$('renalProfileStatus');if(status)status.textContent='Edits not yet applied. Click Apply profile to update the graph.';
 }
+// Illustrative only: steady kidney function, then a fall to one fifth of the starting value that persists.
+function kidneyInjuryExample(start,horizon){
+ const round=value=>Number(value.toFixed(2)),low=round(Math.max(0,start*.2));
+ return [{time:0,crcl:round(start)},{time:round(horizon*.5),crcl:round(start)},{time:round(horizon*.75),crcl:low},{time:round(horizon),crcl:low}];
+}
 function addRenalPoint(){
  if(renalDraft.length>=24)return;
  let index=-1,width=0;
@@ -648,6 +1003,7 @@ $('patientControls').addEventListener('change',e=>{
 });
 $('patientControls').addEventListener('click',e=>{
  if(e.target.id==='renalAdd')addRenalPoint();
+ else if(e.target.id==='renalExample'){renalDraft=kidneyInjuryExample(renalDraft[0]?.crcl??c.crcl,c.horizon);renalDirty=true;renderInputs();}
  else if(e.target.id==='renalApply')applyRenalDraft();
  else if(e.target.hasAttribute('data-renal-remove')){
   const index=Number(e.target.dataset.renalRemove);
@@ -660,14 +1016,21 @@ $('enableRenalProfile').addEventListener('click',()=>{
 });
 $('patientControls').addEventListener('change',e=>{if(e.target.id==='crclSource'){c.crclSource=e.target.value;if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='cgSex'){c.sex=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();}else if(e.target.id==='route'){c.route=e.target.value;c.dose=c.route==='Valacyclovir oral'?1000:700;renderInputs();defer();}else if(e.target.id==='dosingMode'){c.dosingMode=e.target.value;renderInputs();defer();if(c.dosingMode==='custom')switchTab('doses');}});
 $('patientControls').addEventListener('input',e=>{if(e.target.id==='cgAge'||e.target.id==='cgScr'){const v=Number(e.target.value);if(!Number.isFinite(v)||e.target.value==='')return;if(e.target.id==='cgAge')c.age=v;else c.scr=v;c.crcl=calculatedCrCl();const target=$('cgOutput');if(target)target.textContent=Number.isFinite(c.crcl)?c.crcl.toFixed(1)+' mL/min':'—';defer();}});
-$('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');});
+$('patientControls').addEventListener('click',e=>{if(e.target.id==='openDoses')switchTab('doses');else if(e.target.id==='labelAdjust')applyLabelAdjustment();});
+$('patientControls').addEventListener('change',e=>{if(e.target.id==='heightUnit'){heightUnit=e.target.value;renderInputs();return;}if(e.target.id==='heightValue'){const raw=e.target.valueAsNumber,cm=e.target.value===''?0:(heightUnit==='in'?raw*2.54:raw);if(cm!==0&&(!Number.isFinite(cm)||cm<120||cm>230)){e.target.setCustomValidity('Enter a height from 120 to 230 cm (47 to 90 in), or leave it empty');e.target.reportValidity();return;}e.target.setCustomValidity('');c.height=cm;if(!cm)c.cgWeight='actual';if(c.crclSource==='estimated')c.crcl=calculatedCrCl();renderInputs();defer();return;}if(e.target.id==='sizeSex'){c.sex=e.target.value;renderInputs();return;}if(e.target.id==='cgWeight'){c.cgWeight=e.target.value;c.crcl=calculatedCrCl();renderInputs();defer();return;}if(e.target.id==='csfBarrier'){const p=E.CSF_BARRIER[e.target.value];if(p){c.csfRatio=p.csfRatio;c.csfMetRatio=p.csfMetRatio;renderInputs();defer();}return;}if(e.target.id==='probenecid'){c.probenecid=e.target.checked;defer();}else if(e.target.id==='labelBsa'){const value=e.target.valueAsNumber;if(e.target.value!==''&&(!Number.isFinite(value)||value<=0)){e.target.setCustomValidity('Enter a positive body surface area in m²');c.labelBsa=0;refreshLabelAdjust();return;}e.target.setCustomValidity('');c.labelBsa=e.target.value===''?0:value;refreshLabelAdjust();}});
 $('modeControls').addEventListener('click',e=>{if(e.target.id==='showPdRx'){switchTab('timeline');$('pdRxPanel').scrollIntoView({block:'start',behavior:'smooth'});}});
 $('primary').addEventListener('change',e=>{primary=e.target.value;renderInputs();defer();});
+// Start-here strip: dismissal is remembered per browser when storage is available.
+{const strip=$('startHere');if(strip){let seen=false;try{seen=localStorage.getItem('ayflux-start-here')==='dismissed';}catch{}if(seen)strip.classList.add('hidden');$('startHereClose').addEventListener('click',()=>{strip.classList.add('hidden');try{localStorage.setItem('ayflux-start-here','dismissed');}catch{}});}}
 document.querySelector('aside').addEventListener('input',e=>{if(e.target.dataset.k)updateParam(e.target);});
 document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='colorPalette'){setPalette(e.target.value);renderInputs();if(results)render();}else if(e.target.id==='virus'){c.virus=e.target.value;renderInputs();if(results)render();}else if(e.target.id==='pdMethod'){c.pdMethod=e.target.value;renderInputs();researchRenderedPrimary='';defer();}else if(e.target.id==='draws'){c.draws=+e.target.value;defer();}else if(e.target.id==='coverage'){c.coverage=+e.target.value;defer();}else if(e.target.dataset.toggle){c[e.target.dataset.toggle]=e.target.checked;if(results)render();}else if(e.target.dataset.k)updateParam(e.target);});
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
+$('timeAboveLevel').addEventListener('input',e=>{const value=e.target.valueAsNumber;aboveLevelMg=Number.isFinite(value)&&value>=0?value/unitFactor('acyclovir'):null;renderTimeAbove();});
+$('concUnit').addEventListener('change',e=>{setConcUnit(e.target.value);renderTimeAbove(true);metricsSignature='';tableRevision=-1;if(results)render();});
+$('tablePanel').addEventListener('toggle',()=>{if(!tableOpen())return;if(!dataIsCurrent||!results||modes.some(m=>!results[m]))calculate(true);else render();});
+document.querySelector('.ref-nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(!link)return;const target=document.querySelector(link.getAttribute('href'));if(!target)return;e.preventDefault();target.scrollIntoView({block:'start',behavior:'smooth'});});
 $('scheduleRows').addEventListener('input',e=>{let i=Number(e.target.dataset.index),key=e.target.dataset.field;if(!(key&&draft[i]))return;
  draft[i][key]=key==='type'?e.target.value:(e.target.value===''?NaN:Number(e.target.value));dirtyTimeline=true;timelineErrors(checkDraft());paintSchedule(draft);$('timelinePending').classList.remove('hidden');});
 $('scheduleRows').addEventListener('click',e=>{const b=e.target.closest('[data-delete]');if(!b)return;draft.splice(Number(b.dataset.delete),1);dirtyTimeline=true;renderSchedule();});
@@ -870,19 +1233,47 @@ function downloadJSON(obj,name){
  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}));
  a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
-$('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
-$('saveConfig').addEventListener('click',()=>{
- const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
- downloadJSON(data,'ayflux_simulation_v0.25.0.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
-});
-$('loadConfig').addEventListener('change',async e=>{
- const file=e.target.files?.[0];if(!file)return;
+// Session-only version history for imports. Nothing is written to storage or sent anywhere.
+const importHistory=[],IMPORT_HISTORY_LIMIT=10;
+function currentVersion(){return {config:structuredClone(c),primary,visible:[...visible],palette:paletteMode,unit:concUnit};}
+function rememberVersion(label){
+ importHistory.unshift({label:String(label).slice(0,120),savedAt:new Date(),state:currentVersion()});
+ importHistory.length=Math.min(importHistory.length,IMPORT_HISTORY_LIMIT);
+ renderImportHistory();
+}
+function applyVersion(state){
+ Object.assign(c,structuredClone(state.config));setPalette(state.palette);setConcUnit(state.unit||concUnit);metricsSignature='';tableRevision=-1;primary=state.primary;
+ visible=new Set(state.visible);
+ draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
+ renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
+ measureDraft=structuredClone(c.observations);rxDraft=structuredClone(c.pdRxRows);
+ $('primary').value=primary;researchRenderedPrimary='';renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxRows();
+}
+function restoreVersion(index){
+ const entry=importHistory[index];if(!entry)return;
+ showScenarioNote('','');
+ const restored=entry.state,label=entry.label,time=entry.savedAt.toLocaleTimeString();
+ importHistory.splice(index,1);
+ rememberVersion('Before restoring the '+time+' version');
+ studyOverlay=null;
+ applyVersion(restored);
  migratedPayload=null;$('downloadMigrated').classList.add('hidden');
- try{
-  if(file.size>1000000)throw Error('File is too large (maximum 1 MB). No settings were changed.');
-  let input;
-  try{input=JSON.parse(await file.text());}
-  catch(_){throw Error('This is not valid JSON. Export a configuration using Save configuration (JSON).');}
+ researchStatus('Restored the settings saved at '+time+' ('+label+'). Recalculating…');alertMessage('');defer();
+}
+function renderImportHistory(){
+ const list=$('importHistoryList');list.replaceChildren();
+ importHistory.forEach((entry,index)=>{
+  const item=document.createElement('li'),button=document.createElement('button');
+  item.textContent=entry.savedAt.toLocaleTimeString()+' — '+entry.label+' ('+entry.state.primary+')';
+  button.type='button';button.className='btn secondary';button.textContent='Restore';button.dataset.restore=String(index);
+  button.setAttribute('aria-label','Restore settings: '+entry.label);
+  item.append(button);list.append(item);
+ });
+ $('undoImport').disabled=!importHistory.length;
+ $('importHistoryCount').textContent=importHistory.length?'('+importHistory.length+' saved)':'(empty)';
+}
+// Validates a configuration object completely before anything is applied. Used by file imports and shared links.
+function parseConfiguration(input){
   if(!input||typeof input!=='object'||Array.isArray(input)||input.format!=='acyclovir-pk-simulator')
     throw Error('This file is not an AyFlux simulation configuration. No settings were changed.');
   if(input.schemaVersion!==1&&input.schemaVersion!==2)
@@ -892,10 +1283,12 @@ $('loadConfig').addEventListener('change',async e=>{
   if(!src||typeof src!=='object'||Array.isArray(src))throw Error('Configuration data is missing. No settings were changed.');
   const next=structuredClone(E.DEFAULTS);
   const required=Object.keys(next),number=x=>typeof x==='number'&&Number.isFinite(x);
-  const missing=required.filter(key=>!['renalMode','renalProfile'].includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
+  // Settings added after schema 2 shipped; older files without them load with the defaults.
+  const OPTIONAL_KEYS=['renalMode','renalProfile','probenecid','labelBsa','height','cgWeight'];
+  const missing=required.filter(key=>!OPTIONAL_KEYS.includes(key)&&!Object.prototype.hasOwnProperty.call(src,key));
   if(missing.length)throw Error('Configuration is incomplete (missing '+missing.slice(0,4).join(', ')+'). No settings were changed.');
   for(const key of required){
-   if(!Object.prototype.hasOwnProperty.call(src,key)&&['renalMode','renalProfile'].includes(key))continue;
+   if(!Object.prototype.hasOwnProperty.call(src,key)&&OPTIONAL_KEYS.includes(key))continue;
    const v=src[key];
    if(['schedule','customDoses','observations','pdRxRows','renalProfile'].includes(key)){
     if(!Array.isArray(v)||v.length>(key==='renalProfile'?24:key==='observations'?200:300))throw Error('Invalid or oversized '+key+' array');
@@ -912,6 +1305,8 @@ $('loadConfig').addEventListener('change',async e=>{
    }else{
     if(typeof v!==typeof next[key]||!['number','string','boolean'].includes(typeof v))throw Error('Invalid parameter type: '+key);
     if(typeof v==='number'&&!Number.isFinite(v))throw Error('Non-finite parameter: '+key);
+    if(key==='height'&&v!==0&&(v<120||v>230))throw Error('height is outside the supported range (120–230 cm, or 0 for not entered).');
+    if(key==='cgWeight'&&!['actual','ideal','adjusted'].includes(v))throw Error('Invalid Cockcroft–Gault weight choice.');
     if(typeof v==='number'&&DEFS[key]){
       const [, , min,max]=fieldDef(key);
       if(v<min||v>max)throw Error(`${key} is outside the supported range (${min}–${max}).`);
@@ -936,15 +1331,287 @@ $('loadConfig').addEventListener('change',async e=>{
   const errors=[...new Set(E.MODES.flatMap(mode=>E.validate(next,mode)))];
   if(errors.length)throw Error('Configuration fails model validation: '+errors.slice(0,3).join('; '));
   // Only now, after all shape and numerical checks, apply the loaded configuration.
-  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:'0.25.0',savedAt:new Date().toISOString(),
+  const converted={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:(typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown',savedAt:new Date().toISOString(),
     config:structuredClone(next),primary:input.primary,visibleScenarios:[...input.visibleScenarios],appearance:{palette:importedPalette}};
   if(migrating)converted.migratedFrom={schemaVersion:1,appVersion:String(input.appVersion??'unknown'),savedAt:input.savedAt??null};
-  Object.assign(c,next);setPalette(importedPalette);primary=input.primary;
-  visible=new Set(input.visibleScenarios);
-  draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
-  renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
-  measureDraft=structuredClone(c.observations);rxDraft=structuredClone(c.pdRxRows);
-  $('primary').value=primary;researchRenderedPrimary='';renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxRows();
+  return {next,primary:input.primary,visible:[...input.visibleScenarios],palette:importedPalette,migrating,converted};
+}
+// ---------- Shareable links ----------
+// The whole scenario travels in the URL fragment (#s=…), which browsers never send to a server.
+// Only settings that differ from the defaults are included; measured concentrations are never included.
+const SHARE_PREFIX='#s=',SHARE_LIMIT=6000;
+function encodeShare(text){
+ const bytes=new TextEncoder().encode(text);let binary='';for(const b of bytes)binary+=String.fromCharCode(b);
+ return btoa(binary).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
+}
+function decodeShare(code){
+ if(!/^[A-Za-z0-9_-]+$/.test(code))throw Error('The link is damaged or incomplete.');
+ const binary=atob(code.replaceAll('-','+').replaceAll('_','/'));
+ return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(binary,ch=>ch.charCodeAt(0)));
+}
+function shareLink(){
+ const changed={};
+ for(const key of Object.keys(E.DEFAULTS)){
+  if(key==='observations')continue;
+  if(JSON.stringify(c[key])!==JSON.stringify(E.DEFAULTS[key]))changed[key]=c[key];
+ }
+ const code=encodeShare(JSON.stringify({v:1,c:changed,p:primary,s:[...visible],a:paletteMode,u:concUnit}));
+ if(code.length>SHARE_LIMIT)throw Error('This scenario is too large for a link. Use Save configuration (JSON) instead.');
+ return location.origin+location.pathname+SHARE_PREFIX+code;
+}
+function readShare(hash){
+ let data;
+ try{data=JSON.parse(decodeShare(hash.slice(SHARE_PREFIX.length)));}catch(_){throw Error('The link is damaged or incomplete.');}
+ if(!data||typeof data!=='object'||Array.isArray(data)||data.v!==1||!data.c||typeof data.c!=='object'||Array.isArray(data.c))throw Error('The link is not an AyFlux scenario link.');
+ if(Object.prototype.hasOwnProperty.call(data.c,'observations'))throw Error('Links cannot carry measurements.');
+ const parsed=parseConfiguration({format:'acyclovir-pk-simulator',schemaVersion:2,config:{...structuredClone(E.DEFAULTS),...data.c},primary:data.p,visibleScenarios:data.s,appearance:{palette:data.a}});
+ if(data.u!==undefined&&data.u!=='mg'&&data.u!=='umol')throw Error('Unrecognized concentration unit.');
+ return {config:parsed.next,primary:parsed.primary,visible:parsed.visible,palette:parsed.palette,unit:data.u||'mg'};
+}
+function openSharedLink(initial){
+ if(!location.hash.startsWith(SHARE_PREFIX))return false;
+ const hash=location.hash;
+ // Remove the scenario from the address bar straight away so it is not bookmarked, re-applied, or read by later scripts.
+ try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}
+ try{
+  const state=readShare(hash);
+  if(!initial)rememberVersion('Before opening a shared link');
+  applyVersion(state);
+  migratedPayload=null;$('downloadMigrated').classList.add('hidden');
+  sharedNotice='Scenario loaded from a shared link. All settings were validated; measurements are never included in links.';
+  researchStatus(sharedNotice);
+  if(!initial){alertMessage('');defer();}
+  return true;
+ }catch(error){
+  sharedNotice='';
+  const message='Shared link not loaded: '+error.message+' Default settings are shown.';
+  researchStatus(message,true);alertMessage(message);if(initial)pendingNotice=message;
+  return false;
+ }
+}
+let sharedNotice='';
+window.addEventListener('hashchange',()=>openSharedLink(false));
+$('copyShareLink').addEventListener('click',async()=>{
+ const field=$('shareLinkField');
+ try{
+  const link=shareLink();
+  field.value=link;field.classList.remove('hidden');
+  let copied=false;
+  try{await navigator.clipboard.writeText(link);copied=true;}catch(_){field.focus();field.select();}
+  researchStatus((copied?'Link copied. ':'Select and copy the link below. ')+'It contains this scenario’s settings (not measurements) inside the link itself; nothing is uploaded. Anyone with the link can open the same scenario.');
+ }catch(error){field.classList.add('hidden');researchStatus(error.message,true);}
+});
+// ---------- Guided scenarios ----------
+// Teaching presets built on the defaults. Each is validated by the engine before it is applied.
+function guidedScenarios(){
+ const base=()=>({...structuredClone(E.DEFAULTS),observations:[]});
+ return [
+  {id:'noKidney',label:'Unadjusted IV dosing with no kidney function',primary:'No dialysis',visible:['No dialysis','Intermittent HD'],
+   config:{...base(),crcl:0,renalMode:'constant',crclSource:'manual'},
+   note:'The default 700 mg IV every 8 hours, but with creatinine clearance set to 0 and no dose change. Plasma acyclovir no longer returns to baseline between doses, and CMMG climbs past the dotted reference line. How fast CMMG leaves the body with no kidney function is set from a single published dialysis case, and this regimen is far above any studied dose, so the CMMG height here is an extrapolation: measured levels in patients with symptoms have reached about 38 mg/L. The Intermittent HD curve shows what a 4-hour session every 48 hours takes back out. Freeze a baseline, then lower the dose or lengthen the interval to see the effect.'},
+  {id:'kidneyInjury',label:'Oral valacyclovir with kidney injury mid-course',primary:'No dialysis',visible:['No dialysis'],
+   config:(()=>{const config={...base(),route:'Valacyclovir oral',dosingMode:'repeat',dose:1000,every:8,doseCount:21,horizon:168,crcl:95,renalMode:'profile',crclSource:'manual'};config.renalProfile=kidneyInjuryExample(95,168);return config;})(),
+   note:'Valacyclovir 1,000 mg every 8 hours for 7 days. Kidney function is normal until day 3.5, then falls to one fifth by day 5.25 and stays there, the general pattern described in published neurotoxicity case reports [22][23]. It is not a reconstruction of any patient. Watch the troughs rise after the fall begins while the dose stays the same, and CMMG rise proportionally more than acyclovir. The Clearance & sessions tab shows the kidney function curve.'},
+  {id:'modalities',label:'Same dose, three dialysis modalities',primary:'Intermittent HD',visible:['No dialysis','Intermittent HD','Peritoneal dialysis','CRRT'],
+   config:{...base(),crcl:0,renalMode:'constant',crclSource:'manual',dose:350,every:24,doseCount:4},
+   note:'350 mg IV once daily with no kidney function, shown with no dialysis, intermittent HD, peritoneal dialysis and CRRT as separate what-if curves. Open the Dialysis comparison table at the bottom of this tab and compare “Acyclovir removed by dialysis”: one HD session removes drug quickly but briefly, CRRT removes it continuously, and PD removes little.'}
+ ];
+}
+function showScenarioNote(title,text){
+ $('scenarioNoteTitle').textContent=title;$('scenarioNoteText').textContent=text;
+ $('scenarioNote').classList.toggle('hidden',!title);
+}
+function loadGuidedScenario(id){
+ const scenario=guidedScenarios().find(item=>item.id===id);if(!scenario)return;
+ const errors=[...new Set(scenario.visible.concat(scenario.primary).flatMap(mode=>E.validate(scenario.config,mode)))];
+ if(errors.length){researchStatus('Guided scenario could not be loaded: '+errors.slice(0,2).join('; '),true);return;}
+ rememberVersion('Before guided scenario: '+scenario.label);
+ studyOverlay=null;
+ applyVersion({config:scenario.config,primary:scenario.primary,visible:scenario.visible,palette:paletteMode,unit:concUnit});
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');
+ researchStatus('Loaded guided scenario: '+scenario.label+'.');alertMessage('');
+ showScenarioNote('Guided scenario: '+scenario.label,scenario.note);
+ switchTab('concentration');defer();
+}
+for(const scenario of guidedScenarios()){
+ const button=document.createElement('button');
+ button.type='button';button.className='btn secondary';button.dataset.guided=scenario.id;button.textContent=scenario.label;
+ $('guidedButtons').append(button);
+}
+$('guidedButtons').addEventListener('click',e=>{const button=e.target.closest('[data-guided]');if(button)loadGuidedScenario(button.dataset.guided);});
+$('resetDefaults').addEventListener('click',()=>{
+ rememberVersion('Before reset to defaults');
+ studyOverlay=null;
+ applyVersion({config:{...structuredClone(E.DEFAULTS),observations:[]},primary:'No dialysis',visible:['No dialysis','Intermittent HD','Custom sequence'],palette:paletteMode,unit:concUnit});
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');showScenarioNote('','');
+ researchStatus('All settings reset to defaults. Use Undo last import to go back.');alertMessage('');defer();
+});
+$('scenarioNoteClose').addEventListener('click',()=>showScenarioNote('',''));
+$('undoImport').addEventListener('click',()=>restoreVersion(0));
+$('importHistoryList').addEventListener('click',e=>{const button=e.target.closest('[data-restore]');if(button)restoreVersion(Number(button.dataset.restore));});
+$('downloadMigrated').addEventListener('click',()=>{if(migratedPayload)downloadJSON(migratedPayload,'ayflux_migrated_schema2.json');});
+// ---------- Published-study overlay ----------
+function loadStudy(id){
+ const study=STUDIES?.find(id);
+ if(!study){studyOverlay=null;renderStudyStatus();if(results)render();return;}
+ const config=STUDIES.configFor(study,E,{vcScale:c.vcScale,clearanceScale:c.clearanceScale}),errors=E.validate(config,study.mode);
+ if(errors.length){researchStatus('Study regimen could not be loaded: '+errors.slice(0,2).join('; '),true);studyOverlay=null;renderStudyStatus();return;}
+ rememberVersion('Before study comparison: '+study.short);
+ applyVersion({config,primary:study.mode,visible:[study.mode],palette:paletteMode,unit:concUnit});
+ studyOverlay=study.id;migratedPayload=null;$('downloadMigrated').classList.add('hidden');alertMessage('');
+ researchStatus('Loaded the '+study.short+' regimen for comparison.');
+ showScenarioNote('Published study: '+study.label,study.note+' Use Undo last import in Research tools to return to your previous settings.');
+ renderStudyStatus();switchTab('concentration');defer();
+ // Bring the plasma graph into view when the study was loaded from elsewhere (for example the evidence scorecard).
+ const card=$('plasmaChart')?.closest('.card'),box=card?.getBoundingClientRect();
+ if(box&&(box.bottom<80||box.top>window.innerHeight-80))card.scrollIntoView({block:'start'});
+}
+// Published studies with measured concentrations, then teaching cases that have none.
+if(STUDIES)for(const [label,list] of [['Measured concentrations',STUDIES.STUDIES],['Teaching cases (no measured levels)',STUDIES.CASES||[]]]){
+ if(!list.length)continue;
+ const group=document.createElement('optgroup');group.label=label;
+ for(const study of list){const option=document.createElement('option');option.value=study.id;option.textContent=study.label;group.append(option);}
+ $('studySelect').append(group);
+}
+$('studySelect').addEventListener('change',e=>loadStudy(e.target.value));
+// Vary one reconstruction assumption (from #68). The published values are unchanged; the measured
+// points hide because the settings no longer match the reconstruction.
+$('studyExploreRun').addEventListener('click',()=>{
+ const study=studyOverlay&&STUDIES?STUDIES.find(studyOverlay):null;if(!study?.explore)return;
+ try{
+  const raw=$('studyExploreValue').value;if(!raw.trim())throw new Error('Enter a value for the assumption.');
+  const value=Number(raw),calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale};
+  const original=STUDIES.configFor(study,E,calibration),config=STUDIES.exploreConfig(study,E,value,calibration);
+  const errors=E.validate(config,study.mode);if(errors.length)throw new Error(errors[0]);
+  let kept=false;
+  if(savedRegimens.length<REG.MAX_SAVED&&!savedRegimens.some(r=>r.name===('Original: '+study.short).slice(0,40))){
+   const d=E.simulateMany({...original,variability:0,draws:1,requestedModes:[study.mode]})[study.mode];
+   savedRegimens.push({name:('Original: '+study.short).slice(0,40),primary:study.mode,config:structuredClone(original),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
+   savedRevision++;kept=true;
+  }
+  rememberVersion('Before exploring an assumption: '+study.short);
+  applyVersion({config,primary:study.mode,visible:[study.mode],palette:paletteMode,unit:concUnit});
+  studyOverlay=study.id;
+  const spec=study.explore;
+  showScenarioNote('Hypothetical assumption: '+study.short,spec.label+' set to '+value+' '+spec.unit+' (the reconstruction uses '+spec.value+' '+spec.unit+'). '+(kept?'The original reconstruction is saved as a regimen for comparison. ':'')+'The published measurements are unchanged but hidden, because the settings no longer match the reconstruction. Use Undo last import in Research tools to return to your previous settings.');
+  $('studyExploreStatus').textContent='Exploring '+value+' '+spec.unit+'.';
+  renderRegimens();renderStudyStatus();switchTab('concentration');defer();
+ }catch(error){$('studyExploreStatus').textContent=error.message;}
+});
+// Evidence scorecard on the Methods tab. Recomputed only when calibration multipliers change.
+let scorecardKey='',scorecardRun=0,scorecardScores=[],scorecardCalibration=null;
+function renderScorecard(){
+ const body=$('scorecardRows');if(!body||!STUDIES)return;
+ const calibration={vcScale:c.vcScale,clearanceScale:c.clearanceScale};
+ const evidence=$('evidenceFilter').value,studies=STUDIES.filterEvidence(STUDIES.STUDIES,evidence),key=JSON.stringify([calibration,evidence]);
+ if(key===scorecardKey)return;
+ scorecardKey=key;const run=++scorecardRun,rows=[],scores=[];
+ scorecardScores=[];$('scorecardCsv').disabled=true;
+ body.innerHTML='<tr><td colspan="7">Calculating…</td></tr>';
+ const next=index=>setTimeout(()=>{
+  if(run!==scorecardRun)return;
+  const study=studies[index];
+  try{const r=STUDIES.score(study,E,{calibration,draws:400});scores.push(r);
+   rows.push(`<tr><td>${study.short} <a class="source-id" href="#${study.ref}">${study.cite}</a></td><td>${study.regimen}<details class="study-assumptions"><summary>Study assumptions and source data</summary><p>${study.note}</p></details></td><td>${r.total} ${study.pointsLabel} (${study.n>1?'n='+study.n:'one patient'})</td><td>${r.gmr.toFixed(2)}</td><td>${r.inside} of ${r.total}</td><td>${provenanceSummary(study)}</td><td><button type="button" class="btn secondary" data-study="${study.id}">Show on chart</button></td></tr>`);
+  }catch(error){rows.push(`<tr><td>${study.short}</td><td colspan="6">Could not be calculated: ${error.message.replace(/[<>&]/g,'')}</td></tr>`);}
+  if(index+1<studies.length){body.innerHTML=rows.join('')+'<tr><td colspan="7">Calculating…</td></tr>';next(index+1);return;}
+  body.innerHTML=rows.join('');scorecardScores=scores;scorecardCalibration=calibration;$('scorecardCsv').disabled=!scores.length;
+  const summary=STUDIES.summarize(scores),overall=summary.overall;
+  const description=r=>r.total+' points; bias ratio '+r.gmr.toFixed(2)+'; geometric mean absolute fold error '+r.absoluteFoldError.toFixed(2)+'; '+r.withinTwo+'/'+r.total+' within twofold; '+r.inside+'/'+r.total+' inside assumed model bands.';
+  $('scorecardCaption').textContent=(calibration.vcScale===1&&calibration.clearanceScale===1?'Default parameters. ':'Calibration multipliers active: central volume ×'+calibration.vcScale+', clearance ×'+calibration.clearanceScale+'. ')+
+   summary.scenarios+' comparison scenarios from '+summary.sources+' reference sources. '+(overall?description(overall):'No results.')+
+   ' The pooled ratio measures bias, not accuracy; opposite errors cancel. Repeated samples, group means and author-fitted values have equal point weight, not independent patient weight. Band inclusion is descriptive, not validated predictive coverage. Label values are not independent after label-based calibration.';
+  $('scorecardGroups').textContent=summary.groups.filter(r=>r.total).map(r=>r.name+': '+description(r)).join('\n');
+  drawScorecardFigure();drawResidualFigure();
+ },30);
+ next(0);
+}
+async function drawScorecardFigure(){
+ const target=$('scorecardFigure'),status=$('scorecardFigureStatus');if(!target||!scorecardScores.length)return;
+ const groups=[['Plasma acyclovir, no dialysis','#2367a0','circle',s=>s.mode==='No dialysis'],['Plasma acyclovir, dialysis','#ba591d','diamond',s=>s.mode!=='No dialysis']];
+ const point=(study,r)=>[r.observed,r.predicted,study.short+' '+study.cite+', '+(r.analyte==='cmmg'?'CMMG':'acyclovir')+' at '+Number(r.time.toFixed(2))+' h'];
+ const series=groups.map(([name,color,symbol,test])=>({name,type:'scatter',symbol,symbolSize:10,itemStyle:{color,borderColor:'#fff',borderWidth:1},
+  data:scorecardScores.flatMap(score=>{const study=STUDIES.find(score.id);return test(study)?score.rows.filter(r=>r.analyte==='plasma').map(r=>point(study,r)):[];})}));
+ series.push({name:'Plasma CMMG',type:'scatter',symbol:'triangle',symbolSize:11,itemStyle:{color:'#6b3fa0',borderColor:'#fff',borderWidth:1},
+  data:scorecardScores.flatMap(score=>{const study=STUDIES.find(score.id);return score.rows.filter(r=>r.analyte==='cmmg').map(r=>point(study,r));})});
+ const values=scorecardScores.flatMap(s=>s.rows.flatMap(r=>[r.observed,r.predicted]));
+ const lo=10**Math.floor(Math.log10(Math.min(...values)/2)),hi=10**Math.ceil(Math.log10(Math.max(...values)*2));
+ const guide=(name,k,type)=>({name,type:'line',silent:true,showSymbol:false,tooltip:{show:false},itemStyle:{color:'#5b6670'},lineStyle:{color:'#5b6670',width:k===1?1.6:1,type},data:[[lo,lo*k],[hi,hi*k]]});
+ series.push(guide('Perfect agreement',1,'solid'),guide('Twofold',2,'dashed'),{...guide('Twofold',.5,'dashed'),name:'Twofold '});
+ try{
+  await window.AyFluxCharts.ensure();
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true,label:{description:'Predicted versus observed concentration for each published point, log scales, with lines for perfect agreement and twofold error.'}},series,
+   legend:{bottom:0,data:groups.map(g=>g[0]).concat('Plasma CMMG','Perfect agreement','Twofold')},grid:{top:16,left:70,right:20,bottom:84},
+   tooltip:{trigger:'item',confine:true,formatter:p=>p.data?.[2]?p.data[2]+'\nObserved '+Number(p.data[0].toPrecision(3))+' mg/L, predicted '+Number(p.data[1].toPrecision(3))+' mg/L':''},
+   xAxis:{type:'log',min:lo,max:hi,name:'Published (mg/L)',nameLocation:'middle',nameGap:30},
+   yAxis:{type:'log',min:lo,max:hi,name:'AyFlux nominal prediction (mg/L)',nameLocation:'middle',nameGap:46}});
+  status.textContent='Points above the solid line are overpredicted, points below underpredicted. Dashed lines mark twofold error.';
+ }catch{status.textContent='Figure unavailable. The table and CSV contain the same values.';}
+}
+// Residuals: predicted/observed for each published value against hours since the most recent dose,
+// marked by the sample type each source reports.
+function renderResidualTable(){
+ const body=$('residualRows');if(!body||!scorecardScores.length)return;
+ const two=v=>v.toFixed(2),h=v=>String(Number(v.toFixed(2)));
+ const listed=(list,fitted)=>list.length?list.map(r=>two(r.ratio)+' at '+h(r.time)+' h'+(r.analyte==='cmmg'?' (CMMG)':'')).join('; ')+(fitted?' (author-fitted)':''):'—';
+ const direction={below:'All below 1 (underpredicted)',above:'All above 1 (overpredicted)',mixed:'Mixed'};
+ body.replaceChildren(...STUDIES.residualsByStudy(scorecardScores).map(s=>{
+  const tr=document.createElement('tr'),cell=text=>{const td=document.createElement('td');td.textContent=text;tr.append(td);};
+  cell(s.short+' '+s.cite);cell(String(s.total));cell(two(s.median));cell(two(s.min)+'–'+two(s.max));cell(direction[s.direction]);
+  cell(listed(s.peaks,s.fitted));cell(listed(s.troughs,s.fitted));return tr;
+ }));
+}
+async function drawResidualFigure(){
+ renderResidualTable();
+ const target=$('residualFigure');if(!target||!scorecardScores.length)return;
+ const KIND={peak:['Peak','triangle'],trough:['Trough','path://M0,0L10,0L5,10Z'],'post-infusion':['Post-infusion','rect'],'hd-start':['HD inlet','diamond'],'hd-end':['HD inlet','diamond'],serial:['Serial (no peak/trough label)','circle']};
+ const SETTING=[['No dialysis','#2367a0',(s,r)=>r.analyte==='plasma'&&s.mode==='No dialysis'],['Dialysis','#ba591d',(s,r)=>r.analyte==='plasma'&&s.mode!=='No dialysis'],['CMMG','#6b3fa0',(s,r)=>r.analyte==='cmmg']];
+ const series=[],ratios=[];
+ for(const [setting,color,test] of SETTING)for(const kind of ['peak','trough','post-infusion','hd','serial']){
+  const data=[];
+  for(const score of scorecardScores){const study=STUDIES.find(score.id);for(const r of score.rows){
+   const k=r.kind.startsWith('hd-')?'hd':r.kind;
+   if(k!==kind||!test(study,r)||r.sinceDose===null)continue;
+   const ratio=r.predicted/r.observed;ratios.push(ratio);
+   data.push([r.sinceDose,ratio,study.short+' '+study.cite+' · '+KIND[r.kind][0].toLowerCase()+' '+(r.analyte==='cmmg'?'CMMG':'acyclovir')+' at hour '+Number(r.time.toFixed(2))]);
+  }}
+  if(data.length)series.push({name:setting+' · '+KIND[kind==='hd'?'hd-start':kind][0],type:'scatter',symbol:KIND[kind==='hd'?'hd-start':kind][1],symbolSize:kind==='serial'?8:12,itemStyle:{color,borderColor:'#fff',borderWidth:1},data});
+ }
+ const lo=Math.min(.25,...ratios)/1.15,hi=Math.max(4,...ratios)*1.15,xmax=Math.ceil(Math.max(...scorecardScores.flatMap(s=>s.rows.map(r=>r.sinceDose??0)))+1);
+ const guide=(name,y,width,type)=>({name,type:'line',silent:true,showSymbol:false,tooltip:{show:false},itemStyle:{color:'#5b6670'},lineStyle:{color:'#5b6670',width,type},data:[[0,y],[xmax,y]]});
+ series.push(guide('Predicted = observed',1,1.8,'solid'),guide('Twofold',2,1,'dashed'),{...guide('Twofold',.5,1,'dashed'),name:'Twofold '});
+ try{
+  await window.AyFluxCharts.ensure();
+  window.AyFluxCharts.draw(target,{animation:false,aria:{enabled:true,label:{description:'Predicted over observed ratio for each published value against hours since the most recent dose, by sample type.'}},series,
+   legend:{bottom:0,itemGap:12},grid:{top:16,left:70,right:20,bottom:110},
+   tooltip:{trigger:'item',confine:true,formatter:p=>p.data?.[2]?p.data[2]+'\nPredicted/observed '+p.data[1].toFixed(2)+', '+Number(p.data[0].toFixed(2))+' h after dose start':''},
+   xAxis:{type:'value',min:0,max:xmax,name:'Hours since the start of the most recent dose',nameLocation:'middle',nameGap:30},
+   yAxis:{type:'log',min:lo,max:hi,name:'Predicted / observed',nameLocation:'middle',nameGap:46,axisLabel:{formatter:v=>Number(v.toPrecision(2))}}});
+  $('residualFigureStatus').textContent='Points above 1 are overpredicted, below 1 underpredicted; dashed lines mark twofold. Shape gives the sample type as each source reports it; serial time courses have no peak or trough label.';
+ }catch{$('residualFigureStatus').textContent='Figure unavailable. The CSV contains the same values.';}
+}
+$('scorecardCsv').addEventListener('click',()=>{
+ if(!scorecardScores.length)return;
+ const a=document.createElement('a'),url=URL.createObjectURL(new Blob([STUDIES.csv(scorecardScores,scorecardCalibration)],{type:'text/csv;charset=utf-8'}));
+ a.href=url;a.download='ayflux_evidence_scorecard.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+});
+$('evidenceFilter').addEventListener('change',renderScorecard);
+$('scorecardRows').addEventListener('click',e=>{const button=e.target.closest('[data-study]');if(button)loadStudy(button.dataset.study);});
+$('saveConfig').addEventListener('click',()=>{
+ const data={format:'acyclovir-pk-simulator',schemaVersion:2,appVersion:(typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown',savedAt:new Date().toISOString(),config:structuredClone(c),primary,visibleScenarios:[...visible],appearance:{palette:paletteMode}};
+ downloadJSON(data,'ayflux_simulation_v'+((typeof window!=='undefined'&&window.AyFluxVersion?.version)||'unknown')+'.json');researchStatus('Configuration exported as JSON; stored locally in your download folder.');
+});
+$('loadConfig').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ migratedPayload=null;$('downloadMigrated').classList.add('hidden');
+ try{
+  if(file.size>1000000)throw Error('File is too large (maximum 1 MB). No settings were changed.');
+  let input;
+  try{input=JSON.parse(await file.text());}
+  catch(_){throw Error('This is not valid JSON. Export a configuration using Save configuration (JSON).');}
+  const {next,palette:importedPalette,migrating,converted}=parseConfiguration(input);
+  rememberVersion('Before importing '+file.name);
+  applyVersion({config:next,primary:input.primary,visible:input.visibleScenarios,palette:importedPalette,unit:concUnit});
   migratedPayload=migrating?converted:null;
   $('downloadMigrated').classList.toggle('hidden',!migratedPayload);
   const note=migrating?`Migrated schema 1 (Version ${String(input.appVersion??'unknown')}) to schema 2. ${input.appearance?'PK settings preserved.':'PK settings preserved; standard graph palette applied (not saved in this old file).'} Download the converted JSON to keep a reusable copy.`:'AyFlux configuration loaded. All parameters validated.';
@@ -957,8 +1624,10 @@ $('loadConfig').addEventListener('change',async e=>{
  finally{e.target.value='';}
 });
 
+openSharedLink(true);
 $('primary').value=primary;renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxEditor();calculate();
 })();
+
 
 
 

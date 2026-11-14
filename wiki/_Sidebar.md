@@ -1,12 +1,14 @@
 **AyFlux Wiki**
 
 - [Home](Home)
+- [Research modules](Research-Modules)
+- [References](References)
 - [Roadmap](Roadmap)
 - [Release plan](Release-Plan)
 - [User guide](https://ayflux.org/learn/)
+- [Complete bibliography](https://ayflux.org/references/)
 - [Model methods](https://ayflux.org/learn/model-methods/)
-- [CSV / R / OSP](https://ayflux.org/learn/interoperability/)
-- [Contributing](https://github.com/khalilm3264/acyclovirpksim/blob/main/CONTRIBUTING.md)
+- [Data exchange](https://ayflux.org/learn/interoperability/)
 - [GitHub repository](https://github.com/khalilm3264/acyclovirpksim)
 
-*Educational modeling only — not for clinical care.*
+*Educational and exploratory modeling.*

@@ -49,7 +49,10 @@ async function timeline(){
  }}];
  option.tooltip={trigger:'item',renderMode:'richText',formatter:p=>lanes[p.value[2]]+' · '+p.value[3]+' · '+p.value[0]+'–'+p.value[1]+' h'};
  const zoom=main?.getOption().dataZoom?.find(z=>z.xAxisIndex?.includes?.(0)||z.xAxisIndex===0);
- option.dataZoom=[{id:'eventZoom',type:'inside',xAxisIndex:0,filterMode:'none',zoomOnMouseWheel:false,moveOnMouseMove:false,start:zoom?.start??0,end:zoom?.end??100}];
+ // The strip follows the plasma chart: same x-zoom id, no vertical zoom or navigation buttons of its own.
+ option.dataZoom=[{id:'ayNavX',type:'inside',xAxisIndex:0,filterMode:'none',zoomOnMouseWheel:false,moveOnMouseMove:false,start:zoom?.start??0,end:zoom?.end??100}];
+ option.toolbox.feature.dataZoom.yAxisIndex='none';
+ for(const name of ['myPan','myZoomIn','myZoomOut'])delete option.toolbox.feature[name];
  const chart=charts.draw($('eventStrip'),option);
  chart.group='ayflux-dose-time';if(main)main.group=chart.group;window.echarts.connect(chart.group);
 }

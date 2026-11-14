@@ -2,3 +2,5 @@
 
 #trajectoryPanel{min-width:0;max-width:100%}
 #trajectory{width:100%;min-width:0;max-width:100%;contain:inline-size;overflow:hidden}
+
+.map button{font-weight:600}

@@ -39,3 +39,19 @@ Outputs are exploratory and should not be interpreted as independently validated
 - The PD model approximates membrane transport; it is not parameterized from this study's patient-specific exchange measurements.
 - The low CMMG CSF partition discrepancy highlighted by Smith et al. (2010) remains unresolved and is **not silently modified**.
 - No UI or simulation defaults are changed in this release. The saved JSON configuration schema stays version 2.
+
+## Cross-study comparison
+
+Run `node research/validation/compare-benchmarks.cjs` to reproduce the [benchmark comparison](COMPARISON-RESULTS.md). It selects clearance and central-volume multipliers against two parent acyclovir samples, then applies them to serum, CSF, CMMG, urinary recovery and dialysis recovery endpoints in the other studies.
+
+## CRRT clearance
+
+[Collignon CRRT comparison](COLLIGNON-CRRT.md) evaluates the extracorporeal clearance calculation against blood- and effluent-based estimates.
+
+## Oral valacyclovir and hemodialysis
+
+[Hara 2008](HARA-HD.md) compares the model with acyclovir and CMMG endpoints after oral valacyclovir. Run `node research/validation/hara-hd.cjs`.
+
+## Continuous infusion and PD/HD reconstructability
+
+[Manders 2026 & Sadjadi 2018 protocol](MANDERS2026-SADJADI2018-PROTOCOL.md) and [results](MANDERS2026-SADJADI2018-RESULTS.md) test continuous IV acyclovir (`n = 6` steady-state plasma levels plus Case F CSF check) and audit Sadjadi 2018 reconstructability under the pinned `304ce53` engine without modifying parameters or the 37-point scorecard. Run `node research/validation/manders2026-sadjadi2018.cjs`.

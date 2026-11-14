@@ -1,37 +1,52 @@
 # Release and verification plan
 
-## Versioning
+## Release identity
 
-AyFlux uses semantic-style versions for app releases, e.g., `v0.21.0`. Its configuration `schemaVersion: 2` is separately tracked; an application release does not automatically change the file schema. The GNU AGPLv3 is the **license** version, not the application version.
+The current application metadata identifies **v0.27.0 preview** (released 2026-11-13, [#55](https://github.com/khalilm3264/acyclovirpksim/issues/55)). Configuration schema 2 and AGPL-3.0-only are tracked separately.
 
 ## Before merging
 
-- [ ] Explain the change, including intended model or interface behavior.
-- [ ] Keep existing saved configurations readable; if a new config field is optional, supply a documented default.
-- [ ] Run `node --test tests/*.test.cjs` and JavaScript syntax checks.
-- [ ] Test example zero-renal-clearance, normal CrCl, HD, PD, CRRT, oral and IV scenarios.
-- [ ] For numerical changes, compare against previous constant-input outputs and check mass balance and convergence.
-- [ ] Ensure UI fields validate units, ranges, event order and missing values.
-- [ ] Review desktop/mobile Firefox and Chrome layouts, footer position and accessibility.
-- [ ] Do not include protected health information or secrets in screenshots, demos or exports.
-- [ ] Update `CHANGELOG.md`, `CITATION.cff`, documentation and export labels when a new release is issued.
+- [ ] Describe the actual behavior and identify dependencies or overlapping PRs.
+- [ ] Keep existing configuration files readable and validate imported values and units.
+- [ ] Run syntax checks and the relevant regression, numerical and browser suites.
+- [ ] For model changes, test CrCl zero, IV/oral dosing, HD/PD/CRRT, event boundaries, mass balance and time-step convergence.
+- [ ] Distinguish original observed samples, source-author fitted estimates, reconstructed inputs and synthetic results.
+- [ ] Update user guidance, source notes and bibliography where behavior or evidence changes.
+- [ ] Check mobile layout, keyboard access, exports, share links and offline behavior when affected.
 
-## After merging
+## Before issuing v0.27.0
 
-- [ ] Verify the GitHub Actions test and Cloudflare deployment jobs.
-- [ ] Check https://ayflux.org/ in a browser, including the Research tab, CSV import/export and print report.
-- [ ] Check service-worker update and an offline reload after the site has been successfully cached.
-- [ ] Confirm help pages, citation, license, source links and custom-domain email contact.
-- [ ] Create a GitHub release tag only after the production site and release artifacts are checked.
+- [ ] Resolve or explicitly defer release blockers and record remaining scientific limitations.
+- [ ] Freeze the manuscript commit and archive the corresponding settings, scripts and outputs ([#48](https://github.com/khalilm3264/acyclovirpksim/issues/48)).
+- [ ] Align changelog, application identity, citation files, site labels and export metadata.
+- [ ] Run `node scripts/references.cjs --check` and the sitemap check after staging dependencies.
+- [ ] Verify CI and deployment, then check the production interface and links.
+- [ ] Publish the reviewed wiki pages and confirm they match the source in `wiki/`.
+- [ ] Create a version tag/release only after these checks; record the actual release date.
 
-## Future milestones
+## Reproducibility and interpretation
 
-**Milestone A — reliable research UX:** formalize input-validation tests, dynamic kidney profile tests, uniform layout, explicit units and accessibility.
+Numerical verification, matching an external simulator and comparison with measured data are different checks. Report the model version, population, treatment schedule, units, source version, fitting/evaluation split and unavailable inputs. Small cases and author-fitted reference values should retain those labels.
 
-**Milestone B — reproducible model comparison:** schema-documented result exchange, model/source identifiers, curated example comparisons, R workflows and PDF reports.
+See [Roadmap](Roadmap), [Research modules](Research-Modules), [References](References) and [Home](Home).
 
-**Milestone C — external scientific assessment:** obtain appropriately sourced independent empirical datasets, publish prespecified evaluation criteria, distinguish fitted and held-out results, and disclose limitations.
+## Model baseline after the CMMG updates
 
-There are **no fixed dates** for these milestones. None makes AyFlux clinical decision support without further evidence, review and applicable compliance work.
+For the merged model after #85 and #88–#90, the reference revision is `bcee70c0c3498c5c406a3a02c499599efb4f6198`. This identifies a model baseline for reproduction. The manuscript freeze remains tracked in #48.
 
-See [Roadmap](Roadmap) · [Home](Home).
+Record the engine blob as well as the commit. From a clean checkout of the reference revision:
+
+```sh
+git checkout --detach bcee70c0c3498c5c406a3a02c499599efb4f6198
+git hash-object public/assets/pk-engine.js
+node --version
+node research/validation/evidence-scorecard.cjs scorecard.csv
+node research/validation/ablation-study.cjs ablation.csv
+node research/validation/lindstrom-csf.cjs
+```
+
+Use Node 24 when reproducing the stored research results and record its full version. Install the locked site dependencies with `npm ci` before running the full site suite. The CSV citation numbers follow the website bibliography, so map them to manuscript references by study identifier and DOI.
+
+The manuscript should distinguish the historical Python case studies, the #85 serum-CMMG revision, the #88 intact-barrier default and the #89 fitted damaged-barrier preset. Recompute CSF CMMG figures with the chosen final model. In an updated analysis, 0.025 is the default and 0.25 can be labeled as the previous setting. Archive each figure's inputs and plotted values beside its model revision.
+
+PR #86 supplies an exchange inspector and replay download. Publish its user-facing wiki entry after the page is deployed. Confirm the production page and the downloaded values before marking this release item complete.
