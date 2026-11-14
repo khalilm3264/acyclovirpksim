@@ -92,3 +92,18 @@ Hintz et al. report mean peak/trough concentrations in neonates treated for herp
 Predictions use the three age/size profiles, three indexed renal inputs and three fixed-effect model variants above. We assumed a one-hour infusion, steady state, an end-infusion peak and an immediately predose trough. Individual dose histories, maturational covariates and sample clocks are unavailable in the Hintz abstract. All three measured mean peaks exceed the tested range while the troughs fall inside it. For instance, at 10 mg/kg, 1.37 kg, 31.3 weeks and indexed CrCl 15.8, D’Agate’s base variant gives 8.36/2.26 mg/L. Matching that trough leaves a peak 39% below the measured mean. The comparison uses group means from a different cohort and cannot identify bias in an individual neonate.
 
 Assuming seven hours between samples, the peak/trough means imply two-point half-lives of 2.80, 2.69 and 2.65 h. The primary source reports a mean terminal half-life of 3.78 h (SD 1.21). A ratio of group means and a mean fitted terminal slope summarize different quantities. [Source transcription and reproduction script](hintz-neonatal-sampling.cjs)
+
+## Maximova pediatric oncology cohort at the measured sampling times
+
+Maximova et al. measured acyclovir in 120 children on the first monitoring occasion after at least four treatment days. The infusions lasted one hour. Plasma was drawn 30 minutes after infusion end and ten minutes before the next dose. The measured post-infusion mean pooled both schedules, 7.6 mg/L (SD 5.4). The q6h and q8h predose means were 1.00 (SD 1.10) and 0.85 mg/L (SD 1.30). Children had a mixture of prophylaxis and treatment, and doses changed for some on later occasions. [Maximova et al., Methods, Results and Figure 2](https://doi.org/10.3389/fphar.2022.865871)
+
+Using Abdalla at the reported median age of 9.5 years, weight 27.8 kg and indexed eGFR 209.4 mL/min/1.73 m² gives CL 9.61 L/h and V 30.02 L. With the reported median starting daily dose of 40.7 mg/kg/day, the predictions below compare the sampled times against the theoretical steady-state extremes. The groups’ actual interval-specific dose distributions are unavailable.
+
+| Scenario | Dose (mg) | End infusion / +30 min (mg/L) | −10 min / predose (mg/L) |
+|---|---:|---:|---:|
+| q6h at median daily dose | 282.9 | 9.45 / 8.05 | 2.01 / 1.91 |
+| q8h at median daily dose | 377.2 | 11.65 / 9.93 | 1.31 / 1.24 |
+| q6h at median individual dose | 350 | 11.69 / 9.96 | 2.49 / 2.36 |
+| q8h at median individual dose | 350 | 10.81 / 9.21 | 1.21 / 1.15 |
+
+Matching the sampling clock lowers the model’s post-infusion concentration by 14.8%, and raises the predose value by 5.5% at these inputs. Both scenario conventions give higher troughs than the respective measured group means. At 350 mg the Abdalla interval AUC is 36.43 mg·h/L, compared with a median **fitted** AUC of 23.3 mg·h/L in Table 3. The tabulated fitted CL and V medians were 14.6 L/h and 26.1 L. This comparison combines separate marginal summaries and does not evaluate individual accuracy. The nominal eGFR is above the upper bound of 5.7 L/h/m² in the Zeng comparison, so extending that equation here would require extrapolation. [Source equations and time checks](maximova-timed-sampling.cjs)
