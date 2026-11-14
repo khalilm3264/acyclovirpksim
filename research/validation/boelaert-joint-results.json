@@ -1,0 +1,435 @@
+{
+  "protocol": {
+    "source": "Boelaert 1987 Tables I–II",
+    "recoveryWindowHours": [
+      96,
+      120
+    ],
+    "engineSha256": "019c02b31fb273fa0d019d9c0766d4f8dccacd08b0d758e0cdd2f247cdf3755c",
+    "systemicScales": [
+      0.75,
+      1,
+      1.25,
+      1.5,
+      2,
+      2.5,
+      3
+    ],
+    "transportScales": [
+      0.5,
+      0.75,
+      1,
+      1.5,
+      2,
+      3,
+      4
+    ],
+    "residualCrcl": 0,
+    "objective": "Mean sum of squared log ratios for day-5 trough and daily dialysate recovery",
+    "interpretation": "Exploratory calibration against known data; systemic multiplier scales both other and CMMG-formation clearance"
+  },
+  "baseline": [
+    {
+      "subject": 1,
+      "systemic": 1,
+      "transport": 1,
+      "day5TroughMgL": 1.744400717314351,
+      "day5RecoveryPct": 14.350824762725816,
+      "troughRatio": 1.2294702843937197,
+      "recoveryRatio": 1.3538513927099827,
+      "day5PeakRatio": 1.183613726648445,
+      "score": 0.13445747791442658,
+      "massResidualMg": 3.410605131648481e-13
+    },
+    {
+      "subject": 4,
+      "systemic": 1,
+      "transport": 1,
+      "day5TroughMgL": 2.0019855915606106,
+      "day5RecoveryPct": 12.221272331979348,
+      "troughRatio": 2.9631389837050017,
+      "recoveryRatio": 0.8986229655867168,
+      "day5PeakRatio": 1.571411926522838,
+      "score": 1.1913631088117578,
+      "massResidualMg": 2.2737367544323206e-13
+    },
+    {
+      "subject": 5,
+      "systemic": 1,
+      "transport": 1,
+      "day5TroughMgL": 1.9056152198032168,
+      "day5RecoveryPct": 14.050101035466792,
+      "troughRatio": 2.9177598529544326,
+      "recoveryRatio": 1.1422846370298203,
+      "day5PeakRatio": 1.2252163551254287,
+      "score": 1.1643442904988153,
+      "massResidualMg": 5.684341886080801e-13
+    }
+  ],
+  "bestShared": {
+    "systemic": 1.5,
+    "transport": 2,
+    "score": 0.2242165204670127
+  },
+  "sharedPredictions": [
+    {
+      "subject": 1,
+      "systemic": 1.5,
+      "transport": 2,
+      "day5TroughMgL": 0.9083598158365145,
+      "day5RecoveryPct": 13.612822996797512,
+      "troughRatio": 0.6402206729356054,
+      "recoveryRatio": 1.2842285846035388,
+      "day5PeakRatio": 1.0291024881691209,
+      "score": 0.2614437214143099,
+      "massResidualMg": 2.2737367544323206e-13
+    },
+    {
+      "subject": 4,
+      "systemic": 1.5,
+      "transport": 2,
+      "day5TroughMgL": 1.0592871663771435,
+      "day5RecoveryPct": 11.582064303754096,
+      "troughRatio": 1.5678509929652966,
+      "recoveryRatio": 0.8516223752760366,
+      "day5PeakRatio": 1.359737283448981,
+      "score": 0.22803162282028072,
+      "massResidualMg": 3.410605131648481e-13
+    },
+    {
+      "subject": 5,
+      "systemic": 1.5,
+      "transport": 2,
+      "day5TroughMgL": 0.9944372926934263,
+      "day5RecoveryPct": 13.32528883389349,
+      "troughRatio": 1.5226207152151114,
+      "recoveryRatio": 1.0833568157636984,
+      "day5PeakRatio": 1.0645778840284568,
+      "score": 0.18317421716644758,
+      "massResidualMg": 2.2737367544323206e-13
+    }
+  ],
+  "perSubject": [
+    {
+      "subject": 1,
+      "systemic": 1.25,
+      "transport": 0.75,
+      "day5TroughMgL": 1.2923232265518148,
+      "day5RecoveryPct": 10.298927289041277,
+      "troughRatio": 0.9108417516151166,
+      "recoveryRatio": 0.9715969140604979,
+      "day5PeakRatio": 1.109216206090619,
+      "score": 0.009551226117337596,
+      "massResidualMg": 3.410605131648481e-13
+    },
+    {
+      "subject": 4,
+      "systemic": 2,
+      "transport": 4,
+      "day5TroughMgL": 0.6346505380629572,
+      "day5RecoveryPct": 10.420350149442624,
+      "troughRatio": 0.9393462961427959,
+      "recoveryRatio": 0.7662022168707813,
+      "day5PeakRatio": 1.2436512971857154,
+      "score": 0.07483570463954087,
+      "massResidualMg": 4.547473508864641e-13
+    },
+    {
+      "subject": 5,
+      "systemic": 2,
+      "transport": 4,
+      "day5TroughMgL": 0.5903687101189091,
+      "day5RecoveryPct": 12.007227127937893,
+      "troughRatio": 0.9039359588045932,
+      "recoveryRatio": 0.9761973274746254,
+      "day5PeakRatio": 0.9750688848899287,
+      "score": 0.010780699953260664,
+      "massResidualMg": 3.410605131648481e-13
+    }
+  ],
+  "convergence": [
+    {
+      "subject": 1,
+      "systemic": 1.5,
+      "transport": 2,
+      "day5TroughMgL": 0.9083566448606872,
+      "day5RecoveryPct": 13.613043976408306,
+      "troughRatio": 0.6402184380015599,
+      "recoveryRatio": 1.2842494317366326,
+      "day5PeakRatio": 1.0291157936687918,
+      "score": 0.2614549568269442,
+      "massResidualMg": 2.2737367544323206e-13
+    },
+    {
+      "subject": 4,
+      "systemic": 1.5,
+      "transport": 2,
+      "day5TroughMgL": 1.0592840940354482,
+      "day5RecoveryPct": 11.582255577872386,
+      "troughRatio": 1.5678464455921852,
+      "recoveryRatio": 0.8516364395494402,
+      "day5PeakRatio": 1.3597508679855705,
+      "score": 0.22802370958525361,
+      "massResidualMg": 5.684341886080801e-13
+    },
+    {
+      "subject": 5,
+      "systemic": 1.5,
+      "transport": 2,
+      "day5TroughMgL": 0.9944339056454791,
+      "day5RecoveryPct": 13.32550568099139,
+      "troughRatio": 1.5226155291773333,
+      "recoveryRatio": 1.083374445609056,
+      "day5PeakRatio": 1.0645911824054937,
+      "score": 0.18317395926336086,
+      "massResidualMg": 4.547473508864641e-13
+    }
+  ],
+  "shared": [
+    {
+      "systemic": 1.5,
+      "transport": 2,
+      "score": 0.2242165204670127
+    },
+    {
+      "systemic": 1.5,
+      "transport": 1.5,
+      "score": 0.22662519022130234
+    },
+    {
+      "systemic": 1.5,
+      "transport": 3,
+      "score": 0.24105349919900856
+    },
+    {
+      "systemic": 1.5,
+      "transport": 4,
+      "score": 0.2526268812809584
+    },
+    {
+      "systemic": 1.5,
+      "transport": 1,
+      "score": 0.28268564724379536
+    },
+    {
+      "systemic": 2,
+      "transport": 4,
+      "score": 0.34850276553353204
+    },
+    {
+      "systemic": 2,
+      "transport": 3,
+      "score": 0.35240995058335717
+    },
+    {
+      "systemic": 2,
+      "transport": 2,
+      "score": 0.3721077028165399
+    },
+    {
+      "systemic": 1.5,
+      "transport": 0.75,
+      "score": 0.38262762237994635
+    },
+    {
+      "systemic": 1.25,
+      "transport": 1.5,
+      "score": 0.40515442331009327
+    },
+    {
+      "systemic": 2,
+      "transport": 1.5,
+      "score": 0.4130514770445941
+    },
+    {
+      "systemic": 1.25,
+      "transport": 2,
+      "score": 0.4217971714494156
+    },
+    {
+      "systemic": 1.25,
+      "transport": 1,
+      "score": 0.4230114044146221
+    },
+    {
+      "systemic": 1.25,
+      "transport": 3,
+      "score": 0.4563136316314995
+    },
+    {
+      "systemic": 1.25,
+      "transport": 4,
+      "score": 0.4755565439088006
+    },
+    {
+      "systemic": 1.25,
+      "transport": 0.75,
+      "score": 0.48698699096448034
+    },
+    {
+      "systemic": 2,
+      "transport": 1,
+      "score": 0.5432615835479412
+    },
+    {
+      "systemic": 1.5,
+      "transport": 0.5,
+      "score": 0.64228196112827
+    },
+    {
+      "systemic": 1.25,
+      "transport": 0.5,
+      "score": 0.683395060075998
+    },
+    {
+      "systemic": 2,
+      "transport": 0.75,
+      "score": 0.7100685867421018
+    },
+    {
+      "systemic": 1,
+      "transport": 1,
+      "score": 0.8300549590749998
+    },
+    {
+      "systemic": 1,
+      "transport": 1.5,
+      "score": 0.8490517194022535
+    },
+    {
+      "systemic": 1,
+      "transport": 0.75,
+      "score": 0.8573825855777913
+    },
+    {
+      "systemic": 1,
+      "transport": 2,
+      "score": 0.8829606226917955
+    },
+    {
+      "systemic": 1,
+      "transport": 3,
+      "score": 0.9327507813923921
+    },
+    {
+      "systemic": 2.5,
+      "transport": 4,
+      "score": 0.9486946294095278
+    },
+    {
+      "systemic": 1,
+      "transport": 4,
+      "score": 0.9586265608307131
+    },
+    {
+      "systemic": 2.5,
+      "transport": 3,
+      "score": 0.9665524931801576
+    },
+    {
+      "systemic": 1,
+      "transport": 0.5,
+      "score": 0.9863275643386098
+    },
+    {
+      "systemic": 2.5,
+      "transport": 2,
+      "score": 1.0208841056559261
+    },
+    {
+      "systemic": 2,
+      "transport": 0.5,
+      "score": 1.0826302930502796
+    },
+    {
+      "systemic": 2.5,
+      "transport": 1.5,
+      "score": 1.098343965164755
+    },
+    {
+      "systemic": 2.5,
+      "transport": 1,
+      "score": 1.2971295930038833
+    },
+    {
+      "systemic": 2.5,
+      "transport": 0.75,
+      "score": 1.5238015734533972
+    },
+    {
+      "systemic": 0.75,
+      "transport": 0.75,
+      "score": 1.6149390375542676
+    },
+    {
+      "systemic": 0.75,
+      "transport": 1,
+      "score": 1.6223898984659453
+    },
+    {
+      "systemic": 0.75,
+      "transport": 1.5,
+      "score": 1.6725778435293528
+    },
+    {
+      "systemic": 0.75,
+      "transport": 0.5,
+      "score": 1.6744337826135112
+    },
+    {
+      "systemic": 0.75,
+      "transport": 2,
+      "score": 1.7188842391382593
+    },
+    {
+      "systemic": 0.75,
+      "transport": 3,
+      "score": 1.7778779653261527
+    },
+    {
+      "systemic": 0.75,
+      "transport": 4,
+      "score": 1.8075338292419516
+    },
+    {
+      "systemic": 3,
+      "transport": 4,
+      "score": 1.9085217818503832
+    },
+    {
+      "systemic": 3,
+      "transport": 3,
+      "score": 1.938197303748779
+    },
+    {
+      "systemic": 2.5,
+      "transport": 0.5,
+      "score": 1.9939861297532107
+    },
+    {
+      "systemic": 3,
+      "transport": 2,
+      "score": 2.0241258889337934
+    },
+    {
+      "systemic": 3,
+      "transport": 1.5,
+      "score": 2.13545246333777
+    },
+    {
+      "systemic": 3,
+      "transport": 1,
+      "score": 2.397351735291439
+    },
+    {
+      "systemic": 3,
+      "transport": 0.75,
+      "score": 2.678122961436083
+    },
+    {
+      "systemic": 3,
+      "transport": 0.5,
+      "score": 3.234486967430094
+    }
+  ]
+}
