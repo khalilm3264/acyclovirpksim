@@ -1,13 +1,17 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-ito-source-review-20261113";
+const CACHE = "ayflux-static-v0.27.0-ito-review-20261114";
 const CORE = [
+ "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
+ "/assets/teaching-exports.js",
+ "/assets/academic-exports.js", "/references/ayflux.bib",
  "/research/exchanges/", "/research/exchanges/view.js", "/research/exchanges/style.css",
  "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js",
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
  "/assets/pk-engine.js", "/assets/simulator-ui.js", "/assets/study-library.js", "/assets/regimen-tools.js",
- "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
+ "/assets/scenario-summary.js", "/assets/scenario-summary.css",
+ "/assets/scenario-script.js", "/assets/ayflux-exchange.js", "/assets/ayflux-version.js",
  "/assets/model-integrity.js", "/assets/research-workspace.js",
  "/assets/charts.js", "/assets/analysis-views.js",
  "/lite/", "/lite/lite.js",
@@ -38,7 +42,7 @@ self.addEventListener("fetch", event => {
    return;
  }
  event.respondWith(caches.match(request,{ignoreSearch:true}).then(cached => cached || fetch(request).then(response => {
-   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || ["/assets/vendor/echarts-5.6.0.min.js","/assets/vendor/echarts-gl-2.0.9.min.js"].includes(url.pathname))) {
+   if(response.ok && response.type === "basic" && (CORE.includes(url.pathname) || ["/assets/vendor/echarts-6.1.0.min.js","/assets/vendor/echarts-gl-2.1.0.min.js"].includes(url.pathname))) {
      const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(request,copy)).catch(()=>{});
    }
    return response;

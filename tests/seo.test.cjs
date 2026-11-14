@@ -13,7 +13,8 @@ const fileFor=url=>{
  const rel=decodeURIComponent(url.slice(ORIGIN.length));
  return rel.endsWith('/')?path.join(pub,rel,'index.html'):path.join(pub,rel+'.html');
 };
-const decode=t=>t.replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#x27;|&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+const ENTITIES={'&quot;':'"','&#x27;':"'",'&#39;':"'",'&lt;':'<','&gt;':'>','&amp;':'&'};
+const decode=t=>t.replace(/&(?:quot|#x27|#39|lt|gt|amp);/g,m=>ENTITIES[m]||m);
 const meta=(html,attr,name)=>{const m=html.match(new RegExp('<meta\\s+'+attr+'="'+name+'"\\s+content="([^"]*)"'));return m&&decode(m[1]);};
 
 test('every sitemap page has a title, a description, a matching canonical URL and social tags',()=>{

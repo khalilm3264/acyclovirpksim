@@ -33,3 +33,7 @@ The observed follow-up points were known before this calculation. This is an exp
 The primary predicted/observed ratios are 0.99 and 0.65. Halving the numerical step from 0.01 to 0.005 h agrees within 0.001 mg/L at both times. Assumed residual kidney clearance and initial peripheral drug concentration materially change the comparison. Even the zero-dialysis scenario approaches the two observations under these assumptions, limiting inference about CHDF-specific clearance.
 
 This case supports an observed decline during interrupted CHDF. It leaves the magnitude and timing of any interruption-related rebound unresolved. The apparent agreement at 15 h cannot establish adult CRRT validation, CMMG kinetics, or treatment efficacy.
+
+## Independent integration check
+
+On integration review, SciPy matrix exponentiation propagated the two parent-drug amounts separately across each fixed-clearance interval, using the same nominal engine coefficients. With equal admission central and peripheral concentrations, the primary results were 2.955773134 mg/L at 15 h and 0.323536775 mg/L at 39 h. The saved RK4 results agree within 0.000001 mg/L. This is an independent integration-method check with shared equations and input assumptions.

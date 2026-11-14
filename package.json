@@ -10,12 +10,14 @@
   "scripts": {
     "stage": "node scripts/stage-visualizations.cjs && node scripts/stage-poppins.cjs",
     "test": "node scripts/references.cjs --check && node scripts/sitemap.cjs && node --test tests/*.test.cjs",
-    "dev": "npm run stage && npx --yes http-server public -p 8080 -c-1"
+    "dev": "npm run stage && npx --yes http-server public -p 8080 -c-1",
+    "benchmark:report": "node scripts/benchmark-report.cjs",
+    "benchmark:verify": "node scripts/benchmark-report.cjs --verify"
   },
   "devDependencies": {
     "@fontsource/poppins": "5.3.0",
-    "echarts": "5.6.0",
-    "echarts-gl": "2.0.9",
+    "echarts": "6.1.0",
+    "echarts-gl": "2.1.0",
     "parse5": "7.3.0"
   }
 }
