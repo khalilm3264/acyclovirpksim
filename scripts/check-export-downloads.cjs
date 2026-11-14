@@ -31,8 +31,12 @@ const server=http.createServer((req,res)=>{
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth+1);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await png();
-  await page.route('**/echarts-5.6.0.min.js',r=>r.abort());await page.reload();
-  await page.waitForSelector('#acvChart > canvas');await page.waitForFunction(()=>document.querySelector('#liteResults').children.length===5);await png();
+  let blockedRendererRequests=0;
+  await page.route(/\/echarts-(?!gl-)[^/]+\.min\.js(?:\?.*)?$/,r=>{blockedRendererRequests++;return r.abort();});await page.reload();
+  await page.waitForSelector('#acvChart > canvas');await page.waitForFunction(()=>document.querySelector('#liteResults').children.length===5);
+  assert.ok(blockedRendererRequests>0,'Offline export check must block an actual renderer request');
+  assert.equal(await page.evaluate(()=>!!window.echarts),false,'PNG fallback must run without ECharts');
+  await png();
   assert.deepEqual(errors,[]);console.log('Python/R downloads and 1920×1280 Lite PNG passed on desktop/mobile and offline canvas fallback.');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});
