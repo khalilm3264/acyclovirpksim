@@ -14,7 +14,7 @@ The patient was a 14-day-old female at presentation, with disseminated HSV-1, he
 
 | Reported time origin | Drug, circuit or sample event | Evidence and limits |
 | --- | --- | --- |
-| Presentation / initial treatment | IV acyclovir 20 mg/kg per dose every 8 h | Clinical course, pp. 230–231 column continuation. Initial dose count and infusion duration are not specified. |
+| Presentation / initial treatment | IV acyclovir 20 mg/kg per dose every 8 h | Clinical course, p. 230 column continuation. Initial dose count and infusion duration are not specified. |
 | Hospital day 1 | Hypotension, fluid resuscitation and vasoactive support; serum creatinine 1.14 mg/dL reported during the initial deterioration | p. 230. This is not a measured ACV concentration or a measured renal clearance. |
 | Day 2 into day 3 | ECLS cannulation for hemodynamic support and to facilitate CRRT after renal failure with fluid overload | p. 230. Separate circuit start clocks and any interruptions are not given. |
 | With conversion to ECLS and CRRT | Empiric increase to IV acyclovir 30 mg/kg per dose every 8 h; 12 doses over 4 days | p. 230. Authors cite concern about additional circuit distribution volume and elimination; neither mechanism is independently measured in this patient. Exact administration times and the last intermittent dose clock are absent. |
