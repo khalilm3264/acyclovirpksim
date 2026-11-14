@@ -12,6 +12,9 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+### Clarified
+- Cockcroft–Gault weight selection can change estimated CrCl and predicted concentrations, while the entered dose and actual-weight model scaling stay unchanged. The concentration guide distinguishes label reference observations from therapeutic targets and identifies the displayed trough as pre-dose within the simulated window, without assuming steady state.
+
 ### Added
 - **Usability pass from inpatient pharmacist feedback.**
   - *Results first:* on the Concentration tab the plasma acyclovir graph now follows the summary. Baseline, regimen and hemodialysis-timing tools move below the graphs under "Comparison tools".
