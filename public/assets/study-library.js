@@ -25,7 +25,7 @@
   group:'dialysis',mode:'Peritoneal dialysis',regimen:b.dose+' mg IV daily ×5, CAPD 4/4/4/12 h dwells, CrCl 0',
   config:{age:b.age,sex:b.sex,weight:b.weight,crcl:0,crclSource:'manual',renalMode:'constant',route:'Acyclovir IV',dosingMode:'repeat',
    dose:b.dose,every:24,doseCount:5,infusion:1,horizon:120,pdMethod:'manual',pdRxEnabled:true,pdRxRows:CAPD_ROWS,pdVolume:2,pdGlucose:1.36},
-  provenance:boelaertProvenance(b),sourceCheck:SOURCE_CHECK.boelaert,explore:EXPLORE.boelaert,
+  provenance:boelaertProvenance(b),explore:EXPLORE.boelaert,
   points:[1,24,97,120].map((t,i)=>[t,b.values[i]*ACV_MW/1000]),kinds:['peak','trough','peak','trough'],
   note:'One continuous ambulatory PD patient ('+b.weight+' kg) given '+b.dose+' mg IV over 1 hour daily for 5 days, with four 2 L, 1.36% exchanges a day (dwells of 4, 4, 4 and 12 hours). The dots are the day-1 and day-5 peaks and troughs the authors derived from their own curve fits, not raw samples. No urinary recovery was reported, so CrCl is set to 0; that is an assumption.'});
  // Vasquez Vasquez J et al. Br J Clin Pharmacol 2025 [22], Table 1A: dialyzer-inlet plasma at the start and
@@ -47,7 +47,7 @@
   P('Plasma values compared','calculated','Day-1 and day-5 peaks and troughs fitted by the authors; not raw samples','The fitted values, converted from µmol/L',BOELAERT_SOURCE+' (Tables I–II)'),
   P('Sample times','calculated','Not stated; implied by the fitted Cmax and Cmin','Hours 1, 24, 97 and 120: end of infusion and just before the next dose','Implied by the fitted values'),
   P('Dialysate recovery','reported','Percent of dose recovered in dialysate','Not used in the scorecard; used in case study 3',BOELAERT_SOURCE+' (Table II)')];
- const VASQUEZ_SOURCE='Vasquez Vasquez 2024 preprint (Authorea), case report';
+ const VASQUEZ_SOURCE='Vasquez Vasquez et al., Br J Clin Pharmacol 2025, p. 2470';
  const VASQUEZ_PROVENANCE=[
   P('Dose','reported','Valacyclovir 1,000 mg, four doses','Valacyclovir 1,000 mg, four doses',VASQUEZ_SOURCE),
   P('Dose interval','assumed','Three times daily; clock times not given','Every 8 h',VASQUEZ_SOURCE),
@@ -56,15 +56,12 @@
   P('Serum creatinine','reported','11.3 mg/dL; author eGFR 3.3 mL/min','11.3 mg/dL',VASQUEZ_SOURCE),
   P('Residual kidney function','calculated','No measured CrCl; urinary recovery 17.7 mg over 30 h','Cockcroft–Gault CrCl 3.70 mL/min from age, sex, weight and creatinine; urinary recovery not used',VASQUEZ_SOURCE),
   P('Admission to first HD','reported','16 h','16 h (first session at simulation hour 44)','Urine collected from admission to just before the first session'),
-  P('First HD duration','calculated','4.5 h of HD in total; second session 2.5 h','2 h (4.5 − 2.5)',VASQUEZ_SOURCE),
+  P('First HD duration','reported','2 h on hospital day 1','2 h',VASQUEZ_SOURCE),
   P('Gap between sessions','reported','14 h','14 h','Urine collected over 14 h between sessions'),
   P('Second HD duration','reported','2.5 h','2.5 h',VASQUEZ_SOURCE),
   P('HD drug clearance','assumed','Blood flow 250 and dialysate flow 500 mL/min; drug clearance not reported','AyFlux default 81.8 mL/min',VASQUEZ_SOURCE),
   P('Plasma values compared','reported','8.8 and 3.2 mg/L, dialyzer-inlet plasma at the start and end of the first session','Same values',VASQUEZ_SOURCE+', Table 1A'),
   P('Sample times','reported','Start and end of the first session','Simulation hours 44 and 46',VASQUEZ_SOURCE)];
- // Source checks still outstanding for the provenance rows, shown on the page.
- const SOURCE_CHECK={
-  vasquez:'Pending source check: these rows were checked against the 2024 Authorea preprint. They have not yet been checked against the final Br J Clin Pharmacol 2025 article.'};
  // Boelaert 1987 rows were checked against the original paper on 2026-11-13: Table I (age, weight, dose,
  // fitted day-1 and day-5 Cmax/Cmin), Table II (dialysate recovery, peritoneal clearance, no urine listed)
  // and Methods (2 L 1.36% exchanges at 4/4/4/12 h, 60 min infusions for 5 days).
@@ -103,9 +100,9 @@
    ref:'ref22',cite:'[22]',n:1,pointsLabel:'measured concentrations',group:'dialysis',mode:'Custom sequence',regimen:'Valacyclovir 1,000 mg q8h ×4, then two HD sessions; estimated CrCl',
    config:{age:69,sex:'female',weight:49.9,scr:11.3,crclSource:'estimated',renalMode:'constant',route:'Valacyclovir oral',dosingMode:'repeat',
     dose:1000,every:8,doseCount:4,schedule:VASQUEZ_HD,horizon:VASQUEZ_HD[1].end},
-   provenance:VASQUEZ_PROVENANCE,sourceCheck:SOURCE_CHECK.vasquez,explore:EXPLORE.vasquez,
+   provenance:VASQUEZ_PROVENANCE,explore:EXPLORE.vasquez,
    points:[[VASQUEZ_HD[0].start,8.8],[VASQUEZ_HD[0].end,3.2]],kinds:['hd-start','hd-end'],
-   note:'A 69-year-old woman (49.9 kg, serum creatinine 11.3 mg/dL) took four 1,000 mg valacyclovir doses 8 hours apart. The dots are dialyzer-inlet plasma levels at the start and end of her first 2-hour HD session. The paper does not give the time from the last dose to admission; AyFlux assumes 4 hours, so the first session starts at hour 44. research/validation/vasquez-hd.cjs shows how the result changes for 0 and 8 hours.'},
+   note:'A 69-year-old woman (49.9 kg, serum creatinine 11.3 mg/dL) took four 1,000 mg doses of valacyclovir prescribed three times daily. AyFlux spaces the doses 8 hours apart. The dots are dialyzer-inlet plasma levels at the start and end of her first 2-hour HD session. The paper does not give the time from the last dose to admission; AyFlux assumes 4 hours, so the first session starts at hour 44. research/validation/vasquez-hd.cjs shows how the result changes for 0 and 8 hours.'},
   ...BOELAERT.map(boelaert)
  ];
  // Teaching cases: published regimens with no measured concentrations. They load like a study but have
