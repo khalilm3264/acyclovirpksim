@@ -1,0 +1,39 @@
+name: AyFlux mechanism hypothesis experiments
+on:
+  push:
+    branches: [research/capd-cmmg-mechanisms-20261109]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mechanism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Mechanism sensitivity run
+        run: |
+          node research/validation/mechanism-sensitivity.cjs /tmp/mechanism-sensitivity.json
+          cp /tmp/mechanism-sensitivity.json research/validation/mechanism-sensitivity-results.json
+      - name: Independent CAPD study check and unit tests
+        run: |
+          node --test tests/external-capd-research.test.cjs
+          node research/validation/external-capd-holdouts.cjs research/validation/external-capd-holdouts-results.json
+      - name: CSF albumin quotient observational audit
+        run: node research/validation/lindstrom-albumin-audit.cjs research/validation/lindstrom-albumin-audit-results.json
+      - name: Renal cohort CMMG stress test
+        run: node research/validation/smith-renal-cohort-stress.cjs research/validation/smith-renal-cohort-stress-results.json
+      - name: Oral valacyclovir CSF exposure benchmark
+        run: node research/validation/csf-acyclovir-cohorts.cjs research/validation/csf-acyclovir-cohort-results.json
+      - name: Upload research outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: capd-cmmg-mechanisms
+          path: |
+            research/validation/mechanism-sensitivity-results.json
+            research/validation/external-capd-holdouts-results.json
+            research/validation/lindstrom-albumin-audit-results.json
+            research/validation/smith-renal-cohort-stress-results.json
+            research/validation/csf-acyclovir-cohort-results.json
