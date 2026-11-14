@@ -315,6 +315,165 @@ function runComparison() {
   };
 }
 
+function trapz(times, values) {
+  let area = 0;
+  for (let i = 0; i < times.length - 1; i++) {
+    const dt = times[i + 1] - times[i];
+    area += 0.5 * (values[i] + values[i + 1]) * dt;
+  }
+  return area;
+}
+
+function computeTrapezoidalExposure(comp) {
+  const times = DIGITIZED_FIGURE3.sampling_hours;
+  const t0_24 = times.filter(t => t <= 24);
+  const t24_48 = times.filter(t => t >= 24);
+  const idx24 = times.indexOf(24);
+
+  const genotypes = ['*1/*1', '*1/*2', '*2/*2'];
+  const rows = [];
+
+  genotypes.forEach(gKey => {
+    const obsUg = DIGITIZED_FIGURE3.groups[gKey].means_ug_mL;
+    const obsUmol = obsUg.map(v => (v * 1000) / MW_CMMG);
+
+    const sim = comp.simulations[gKey];
+    const predUmol = times.map(t => sim.sampled[t].CMMG_umol_L);
+    const denseUmol = sim.auc0_48_umol_h_L;
+
+    // 0-48h total AUCs
+    const figTot = trapz(times, obsUmol);
+    const sparseTot = trapz(times, predUmol);
+
+    // 0-24h and 24-48h intervals
+    const fig0_24 = trapz(t0_24, obsUmol.slice(0, t0_24.length));
+    const fig24_48 = trapz(t24_48, obsUmol.slice(idx24));
+
+    const sparse0_24 = trapz(t0_24, predUmol.slice(0, t0_24.length));
+    const sparse24_48 = trapz(t24_48, predUmol.slice(idx24));
+
+    // Signed errors (Model sparse - Figure)
+    const err0_24 = sparse0_24 - fig0_24;
+    const pctErr0_24 = (err0_24 / fig0_24) * 100;
+
+    const err24_48 = sparse24_48 - fig24_48;
+    const pctErr24_48 = (err24_48 / fig24_48) * 100;
+
+    const errTot = sparseTot - figTot;
+    const pctErrTot = (errTot / figTot) * 100;
+
+    const samplingBias = sparseTot - denseUmol;
+    const pctSamplingBias = (samplingBias / denseUmol) * 100;
+
+    rows.push({
+      genotype: gKey,
+      fig_auc_0_48_umol: figTot,
+      fig_auc_0_48_ug: figTot * (MW_CMMG / 1000),
+      model_sparse_auc_umol: sparseTot,
+      model_dense_auc_umol: denseUmol,
+      sampling_bias_umol: samplingBias,
+      pct_sampling_bias: pctSamplingBias,
+      fig_0_24_umol: fig0_24,
+      fig_24_48_umol: fig24_48,
+      sparse_0_24_umol: sparse0_24,
+      sparse_24_48_umol: sparse24_48,
+      err_0_24_umol: err0_24,
+      pct_err_0_24: pctErr0_24,
+      err_24_48_umol: err24_48,
+      pct_err_24_48: pctErr24_48,
+      err_tot_umol: errTot,
+      pct_err_tot: pctErrTot
+    });
+  });
+
+  const refFig = rows[0].fig_auc_0_48_umol;
+  const refSparse = rows[0].model_sparse_auc_umol;
+  const refDense = rows[0].model_dense_auc_umol;
+
+  rows.forEach(r => {
+    r.ratio_fig = r.fig_auc_0_48_umol / refFig;
+    r.ratio_sparse = r.model_sparse_auc_umol / refSparse;
+    r.ratio_dense = r.model_dense_auc_umol / refDense;
+  });
+
+  // Early marker sensitivity: lowest & highest readings consistent with figure
+  const earlySensitivity = {};
+  genotypes.forEach(gKey => {
+    const base = [...DIGITIZED_FIGURE3.groups[gKey].means_ug_mL];
+    const low = [...base];
+    low[0] = 0.00;
+    low[1] = 0.05;
+    low[2] = Math.max(0.8, base[2] - 0.3);
+
+    const high = [...base];
+    high[0] = 0.05;
+    high[1] = 0.40;
+    high[2] = base[2] + 0.3;
+
+    const baseAuc = trapz(times, base.map(v => (v * 1000) / MW_CMMG));
+    const lowAuc = trapz(times, low.map(v => (v * 1000) / MW_CMMG));
+    const highAuc = trapz(times, high.map(v => (v * 1000) / MW_CMMG));
+
+    earlySensitivity[gKey] = {
+      base_auc: baseAuc,
+      low_auc: lowAuc,
+      high_auc: highAuc,
+      delta_low: lowAuc - baseAuc,
+      delta_high: highAuc - baseAuc,
+      pct_range: ((highAuc - lowAuc) / baseAuc) * 100
+    };
+  });
+
+  // Late marker sensitivity (Reading 1 outer envelope vs Reading 2 centroid/visual)
+  const lateSensitivity = {};
+  genotypes.forEach(gKey => {
+    const base = [...DIGITIZED_FIGURE3.groups[gKey].means_ug_mL];
+    const r = RAW_READINGS_24_44_48[gKey];
+
+    const r1 = [...base];
+    r1[8] = r[24].r1_ug;
+    r1[9] = r[44].r1_ug;
+    r1[10] = r[48].r1_ug;
+
+    const r2 = [...base];
+    r2[8] = r[24].r2_ug;
+    r2[9] = r[44].r2_ug;
+    r2[10] = r[48].r2_ug;
+
+    const r1Auc = trapz(times, r1.map(v => (v * 1000) / MW_CMMG));
+    const r2Auc = trapz(times, r2.map(v => (v * 1000) / MW_CMMG));
+
+    lateSensitivity[gKey] = {
+      r1_envelope_auc: r1Auc,
+      r2_centroid_auc: r2Auc,
+      diff_r1_r2: r1Auc - r2Auc,
+      pct_diff: ((r1Auc - r2Auc) / r2Auc) * 100
+    };
+  });
+
+  // Assertions on exposure and genotype ordering invariants
+  assert.ok(rows[1].fig_auc_0_48_umol > rows[0].fig_auc_0_48_umol, '*1/*2 figure AUC > *1/*1 figure AUC');
+  assert.ok(rows[0].fig_auc_0_48_umol > rows[2].fig_auc_0_48_umol, '*1/*1 figure AUC > *2/*2 figure AUC');
+
+  assert.ok(rows[0].model_sparse_auc_umol > rows[1].model_sparse_auc_umol, '*1/*1 model AUC > *1/*2 model AUC');
+  assert.ok(rows[1].model_sparse_auc_umol > rows[2].model_sparse_auc_umol, '*1/*2 model AUC > *2/*2 model AUC');
+
+  // Sparse sampling bias is small (<2% across all genotypes)
+  rows.forEach(r => {
+    assert.ok(Math.abs(r.pct_sampling_bias) < 2.0, `Sampling bias within 2% for ${r.genotype}`);
+  });
+
+  // Ordering survives adversarial sensitivity bounds: lowest *1/*2 > highest *1/*1 > highest *2/*2
+  assert.ok(lateSensitivity['*1/*2'].r2_centroid_auc > lateSensitivity['*1/*1'].r1_envelope_auc, 'Adversarial ordering *1/*2 > *1/*1');
+  assert.ok(lateSensitivity['*1/*1'].r2_centroid_auc > earlySensitivity['*2/*2'].high_auc, 'Adversarial ordering *1/*1 > *2/*2');
+
+  return {
+    rows,
+    earlySensitivity,
+    lateSensitivity
+  };
+}
+
 function generateSvgOverlay(data, outputPath) {
   const width = 800;
   const height = 550;
@@ -450,6 +609,26 @@ if (require.main === module) {
   console.log('\n=== Full 11-Point Comparison Table ===');
   console.table(comp.fullTableRows);
 
+  const exp = computeTrapezoidalExposure(comp);
+  console.log('\n=== 48-Hour CMMG Exposure Integration (Trapezoidal AUC) ===');
+  const summaryRows = exp.rows.map(r => ({
+    genotype: r.genotype,
+    'fig_auc_0_48 (umol*h/L)': `${r.fig_auc_0_48_umol.toFixed(1)} (${r.fig_auc_0_48_ug.toFixed(1)} ug*h/mL)`,
+    'model_sparse (umol*h/L)': r.model_sparse_auc_umol.toFixed(1),
+    'model_dense (umol*h/L)': r.model_dense_auc_umol.toFixed(1),
+    'sampling_bias': `${r.sampling_bias_umol.toFixed(1)} (${r.pct_sampling_bias.toFixed(1)}%)`,
+    'ratio_vs_11 (fig/sparse)': `${r.ratio_fig.toFixed(3)} / ${r.ratio_sparse.toFixed(3)}`,
+    'err_0_24 (umol*h/L)': `${r.err_0_24_umol >= 0 ? '+' : ''}${r.err_0_24_umol.toFixed(1)} (${r.pct_err_0_24.toFixed(1)}%)`,
+    'err_24_48 (umol*h/L)': `${r.err_24_48_umol >= 0 ? '+' : ''}${r.err_24_48_umol.toFixed(1)} (${r.pct_err_24_48.toFixed(1)}%)`
+  }));
+  console.table(summaryRows);
+
+  console.log('\n=== Early Marker Sensitivity Range (Hours 0-2) ===');
+  console.table(exp.earlySensitivity);
+
+  console.log('\n=== Late Marker Sensitivity Range (Hours 24, 44, 48 Envelope vs Centroid) ===');
+  console.table(exp.lateSensitivity);
+
   const svgPath = path.join(__dirname, 'hara-aldh2-overlay.svg');
   generateSvgOverlay(comp, svgPath);
   console.log(`\nGenerated overlay SVG: ${svgPath}`);
@@ -462,5 +641,7 @@ module.exports = {
   GOOGLE_CONSTANTS,
   simulateGoogleAldh2,
   runComparison,
+  trapz,
+  computeTrapezoidalExposure,
   generateSvgOverlay
 };

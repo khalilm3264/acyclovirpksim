@@ -152,7 +152,59 @@ All predictions and signed errors generated directly from `simulateGoogleAldh2`:
 
 ---
 
-## 5. Scientific Findings & Mechanistic Evaluation
+## 5. 48-Hour CMMG Exposure Integration (Figure 3 vs. Google Model)
+
+Because Hara's Table 2 leaves 48-hour CMMG exposure ($\text{AUC}_{0\text{--}48\text{h}}$) unreported, we integrate the digitized group-mean curves from Figure 3 using the linear trapezoidal rule and compare them against Google's fixed reversible-redundant model.
+
+### Three-Row Exposure Summary Table
+
+| Genotype | Estimated AUC from Digitized Group Means ($\mu\text{mol}\cdot\text{h/L}$) [$\mu\text{g}\cdot\text{h/mL}$] | Model AUC at Paper Sampling Times (11 pts, $\mu\text{mol}\cdot\text{h/L}$) | Model AUC Full Dense Curve ($\mu\text{mol}\cdot\text{h/L}$) | Sparse Sampling Bias ($\mu\text{mol}\cdot\text{h/L}$) [%] | AUC Ratio vs. `*1/*1` (Figure / Sparse Model / Dense Model) | Signed Error 0–24 h ($\mu\text{mol}\cdot\text{h/L}$) [%] | Signed Error 24–48 h ($\mu\text{mol}\cdot\text{h/L}$) [%] | Total Signed Error 0–48 h ($\mu\text{mol}\cdot\text{h/L}$) [%] |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **`*1/*1`** | **1202.2** [287.6] | 914.6 | 928.5 | −13.9 [−1.5%] | 1.000 / 1.000 / 1.000 | −207.8 [−40.0%] | −79.8 [−11.7%] | **−287.6 [−23.9%]** |
+| **`*1/*2`** | **1314.7** [314.5] | 788.4 | 800.4 | −12.0 [−1.5%] | **1.094** / 0.862 / 0.862 | −238.7 [−48.8%] | −287.6 [−34.8%] | **−526.3 [−40.0%]** |
+| **`*2/*2`** | **997.2** [238.5] | 665.8 | 675.4 | −9.6 [−1.4%] | **0.829** / 0.728 / 0.727 | −202.2 [−50.4%] | −129.2 [−21.7%] | **−331.4 [−33.2%]** |
+
+*(Note: Linear trapezoidal integration over sampling hours $t \in [0, 1, 2, 3, 4, 6, 8, 12, 24, 44, 48]\text{ h}$. Molar mass $MW_{\text{CMMG}} = 239.19\text{ g/mol}$; conversion factor $1\ \mu\text{g/mL} = 4.18078\ \mu\text{mol/L}$).*
+
+### Sampling Bias Analysis
+- The difference between trapezoidal integration on the paper's 11 sampling times and continuous numerical integration of the differential equations ($dt = 0.0005\text{ h}$) is minimal:
+  - `*1/*1`: $-13.9\ \mu\text{mol}\cdot\text{h/L}$ ($-1.5\%$)
+  - `*1/*2`: $-12.0\ \mu\text{mol}\cdot\text{h/L}$ ($-1.5\%$)
+  - `*2/*2`: $-9.6\ \mu\text{mol}\cdot\text{h/L}$ ($-1.4\%$)
+- **Sparse sampling accounts for only ~1.5% underestimation**; it does not explain the large discrepancy between model and clinical observations (which ranges from $-287.6$ to $-526.3\ \mu\text{mol}\cdot\text{h/L}$).
+
+### Error Split: Early Accumulation (0–24 h) vs. Later Plateau (24–48 h)
+- For `*1/*1`: $72.3\%$ of the total model underprediction occurs in the first 24 hours ($-207.8\ \mu\text{mol}\cdot\text{h/L}$ during 0–24 h vs. $-79.8\ \mu\text{mol}\cdot\text{h/L}$ during 24–48 h). The model underpredicts early accumulation rate, but approaches the late plateau reasonably closely by 44–48 h.
+- For `*1/*2`: Massive underprediction persists across both phases ($-238.7\ \mu\text{mol}\cdot\text{h/L}$ during 0–24 h, and $-287.6\ \mu\text{mol}\cdot\text{h/L}$ during 24–48 h). The clinical heterozygote group continues to accumulate to a higher mean ($8.69\ \mu\text{g/mL}$ at 48 h), while the model suppresses heterozygote exposure due to $10\%$ ALDH2 activity.
+- For `*2/*2`: $61.0\%$ of the underprediction occurs in the first 24 hours ($-202.2\ \mu\text{mol}\cdot\text{h/L}$ during 0–24 h vs. $-129.2\ \mu\text{mol}\cdot\text{h/L}$ during 24–48 h).
+
+### Digitization Sensitivity Analysis
+
+1. **Early Overlapping Markers (Hours 0–2):**
+   - Testing lowest consistent readings ($0.00\ \mu\text{g/mL}$ at 0 h, $0.05\ \mu\text{g/mL}$ at 1 h, lower envelope at 2 h) vs. highest consistent readings ($0.05\ \mu\text{g/mL}$ at 0 h, $0.40\ \mu\text{g/mL}$ at 1 h, upper envelope at 2 h):
+     - `*1/*1`: $1200.2\text{ to }1204.3\ \mu\text{mol}\cdot\text{h/L}$ ($\Delta = \pm 2.0\ \mu\text{mol}\cdot\text{h/L}$, $0.34\%$)
+     - `*1/*2`: $1312.9\text{ to }1317.0\ \mu\text{mol}\cdot\text{h/L}$ ($\Delta = \pm 2.0\ \mu\text{mol}\cdot\text{h/L}$, $0.31\%$)
+     - `*2/*2`: $995.8\text{ to }999.6\ \mu\text{mol}\cdot\text{h/L}$ ($\Delta = \pm 1.9\ \mu\text{mol}\cdot\text{h/L}$, $0.38\%$)
+   - Ambiguity in early overlapping markers changes the estimated AUC by **less than $0.4\%$**.
+
+2. **Late Markers (Hours 24, 44, 48 — Outer Envelope vs. Visual Centroid/Lumen):**
+   - `*1/*1`: $1185.1\text{ to }1204.3\ \mu\text{mol}\cdot\text{h/L}$ ($\Delta = 19.2\ \mu\text{mol}\cdot\text{h/L}$, $1.6\%$)
+   - `*1/*2`: $1293.2\text{ to }1317.7\ \mu\text{mol}\cdot\text{h/L}$ ($\Delta = 24.4\ \mu\text{mol}\cdot\text{h/L}$, $1.9\%$)
+   - `*2/*2`: $991.0\text{ to }994.3\ \mu\text{mol}\cdot\text{h/L}$ ($\Delta = 3.3\ \mu\text{mol}\cdot\text{h/L}$, $0.3\%$)
+
+3. **Survival of Genotype Ordering:**
+   - Under the most adversarial extreme reading (lowest bound for `*1/*2` = $1293.2\ \mu\text{mol}\cdot\text{h/L}$, highest bound for `*1/*1` = $1204.3\ \mu\text{mol}\cdot\text{h/L}$, and highest bound for `*2/*2` = $999.6\ \mu\text{mol}\cdot\text{h/L}$):
+     $$\text{AUC}_{*1/*2}\ (1293.2) > \text{AUC}_{*1/*1}\ (1204.3) > \text{AUC}_{*2/*2}\ (999.6)$$
+   - **The observed clinical genotype ordering (`*1/*2 > *1/*1 > *2/*2`) unconditionally survives all digitization sensitivity ranges.**
+
+4. **Scope & Individual Data Reservation:**
+   - Figure 3 presents descriptive group summaries ($n=6$ per genotype).
+   - Standard deviation intervals overlap substantially across groups (e.g. at 48 h, `*1/*1` SD lower cap is $4.67\ \mu\text{g/mL}$, `*1/*2` SD upper cap is $13.10\ \mu\text{g/mL}$, `*2/*2` SD lower cap is $0.90\ \mu\text{g/mL}$).
+   - Therefore, patient-level confidence intervals and formal bioequivalence/inferential claims must be reserved for individual-level patient data.
+
+---
+
+## 6. Scientific Findings & Mechanistic Evaluation
 
 ### 1. Visible Genotype Ordering Discrepancy
 - **Model Prediction:** By tying biotransformation directly to ALDH2 catalytic activity, Google's model predicts that CMMG concentrations must strictly follow the enzyme activity hierarchy at all times:
@@ -177,7 +229,7 @@ All predictions and signed errors generated directly from `simulateGoogleAldh2`:
 
 ---
 
-## 6. Decision & Summary
+## 7. Decision & Summary
 
 > **Decision:** **Do NOT incorporate the Google ALDH2 architecture into the AyFlux engine.**
 
@@ -188,7 +240,7 @@ All predictions and signed errors generated directly from `simulateGoogleAldh2`:
 
 ---
 
-## 7. Verification Commands
+## 8. Verification Commands
 
 ```sh
 # Run standalone comparison script and generate overlay SVG
