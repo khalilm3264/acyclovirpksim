@@ -32,6 +32,15 @@ async function main(){
   assert.ok(await page.locator('#metrics .metric.minor').count()>=5);
   assert.match(await page.textContent('#levelGuide'),/start with plasma acyclovir/);
   assert.match(await page.textContent('#troughMetric'),/just before the last dose/);
+  const primaryWidths=await page.locator('#metrics .metric.primary').evaluateAll(cards=>cards.map(card=>card.getBoundingClientRect().width));
+  const metricsWidth=await page.locator('#metrics').evaluate(el=>el.getBoundingClientRect().width);
+  assert.ok(primaryWidths.every(width=>width>metricsWidth*0.28),'Primary metrics use the available row');
+  await page.locator('#levelGuide summary').click();
+  assert.ok(await page.locator('#levelGuide details p').isVisible());
+  await page.locator('#levelGuide summary').click();
+  await page.locator('.graph-help summary').click();
+  assert.ok(await page.locator('.graph-help .zoom-hint').isVisible());
+  await page.locator('.graph-help summary').click();
   // Start-here strip can be dismissed.
   assert.ok(await page.isVisible('#startHere'));await page.click('#startHereClose');assert.ok(!(await page.isVisible('#startHere')));
   // Height unlocks BMI, ideal and adjusted body weight; Cockcroft–Gault can use them.
@@ -59,6 +68,13 @@ async function main(){
   // Phone width: no sideways scrolling.
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=window.innerWidth+2,null,{timeout:10000});
+  const troughWidth=await page.locator('#troughMetric').evaluate(el=>el.getBoundingClientRect().width);
+  const phoneMetricsWidth=await page.locator('#metrics').evaluate(el=>el.getBoundingClientRect().width);
+  assert.ok(troughWidth>phoneMetricsWidth*0.9,'Phone trough uses a full row');
+  for(const id of ['concUnit','csv']) {
+   const height=await page.locator('#'+id).evaluate(el=>el.getBoundingClientRect().height);
+   assert.ok(height>=39.9,'Phone picker '+id+' target height '+height);
+  }
   // Guide navigation follows all content at desktop and phone widths.
   for (const width of [1280,390]) {
    await page.setViewportSize({width,height:900});
