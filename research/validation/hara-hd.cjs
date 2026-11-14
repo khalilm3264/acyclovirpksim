@@ -29,7 +29,7 @@ function simulate(step = 0.0625, overrides = {}) {
     cmmgPeak:Math.max(...beforeHd('cmmg')),
     plasmaDeclinePct:100*(1-at('plasma',52)/at('plasma',48)),
     cmmgDeclinePct:100*(1-at('cmmg',52)/at('cmmg',48))};
-  return {config, observed, predicted};
+  return {config, observed, predicted, run};
 }
 function report() {
   const nominal=simulate(),finer=simulate(0.03125);
