@@ -817,6 +817,37 @@ function downloadTidyCSV(){
  }catch(error){alertMessage('Unable to export R / OSP CSV: '+error.message);}
 }
 
+let summaryLoader=null;
+async function printScenarioSummary(){
+ if(!results?.[primary]||!dataIsCurrent)return;
+ const {observations,...settings}=c;
+ const captured={config:structuredClone(settings),run:structuredClone(results[primary]),mode:primary,
+  meta:{version:window.AyFluxVersion?.version||'unknown',generatedAt:new Date().toISOString(),fitCount:(observations||[]).filter(x=>x.role==='fit').length}};
+ try{
+  if(!summaryLoader)summaryLoader=new Promise((resolve,reject)=>{
+   const css=document.createElement('link');css.rel='stylesheet';css.href='/assets/scenario-summary.css';
+   const script=document.createElement('script');script.src='/assets/scenario-summary.js';
+   let loaded=0;const ready=()=>{if(++loaded===2)resolve();};
+   css.onload=script.onload=ready;
+   css.onerror=script.onerror=()=>{css.remove();script.remove();summaryLoader=null;reject(Error('Print preview could not load. Please retry.'));};
+   document.head.append(css,script);
+  });
+  await summaryLoader;
+  const snapshot=window.AyFluxScenarioSummary.snapshot(E,captured.config,captured.run,captured.mode,captured.meta);
+  window.AyFluxScenarioSummary.show(document,snapshot);
+ }catch(error){alertMessage('Unable to create summary: '+error.message);}
+}
+
+function downloadScenarioScript(language){
+ try{
+  const content=window.AyFluxScenarioScript.generate(E,c,primary,language,window.AyFluxVersion?.version||'unknown');
+  const url=URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download='ayflux_scenario.'+(language==='python'?'py':'R');a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  $('status').textContent='Exported nominal systemic '+primary+' scenario. Ensemble bands and CSF proxies are not included.';
+ }catch(error){alertMessage('Unable to export scenario script: '+error.message);}
+}
+
 async function downloadOSPWorkbook(){
  if(!results||!dataIsCurrent)return;
  const snapshot=results;
@@ -1052,7 +1083,7 @@ $('applyFullTimeline').addEventListener('click',()=>{
  pdStatusText('Applied dialysis sessions, exchange prescriptions and medication administrations together.');
 });
 $('applyFullTimelineBottom').addEventListener('click',()=>$('applyFullTimeline').click());
-$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent||!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
+$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent)return;if(format==='print'){printScenarioSummary();return;}if(['python','r'].includes(format)){downloadScenarioScript(format);return;}if(!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;

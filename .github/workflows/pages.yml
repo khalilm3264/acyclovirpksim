@@ -25,7 +25,7 @@ jobs:
           node-version: '22'
       - name: Stage chart and font assets
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund parse5@7.3.0 echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0
+          npm install --no-save --ignore-scripts --no-audit --no-fund parse5@7.3.0 echarts@6.1.0 echarts-gl@2.1.0 @fontsource/poppins@5.3.0
           node scripts/stage-visualizations.cjs
           node scripts/stage-poppins.cjs
       - name: Check JavaScript syntax
@@ -60,6 +60,7 @@ jobs:
           npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
           npx playwright install --with-deps chromium firefox
           node scripts/check-script-markup.cjs
+          node scripts/check-scenario-summary.cjs
           node scripts/check-visualizations.cjs
 
           node scripts/check-pediatric.cjs
@@ -70,6 +71,7 @@ jobs:
           node scripts/check-regimens.cjs
           node scripts/check-literature.cjs
           node scripts/check-exchanges.cjs
+          node scripts/check-export-downloads.cjs
 
       - name: Compare surface startup when the ECharts renderer changes
         if: github.event_name == 'push'
@@ -102,7 +104,7 @@ jobs:
           fetch-depth: 0
       - name: Stage chart and font assets
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund parse5@7.3.0 echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0
+          npm install --no-save --ignore-scripts --no-audit --no-fund parse5@7.3.0 echarts@6.1.0 echarts-gl@2.1.0 @fontsource/poppins@5.3.0
           node scripts/stage-visualizations.cjs
           node scripts/stage-poppins.cjs
       - name: Add lastmod dates to the sitemap
@@ -148,7 +150,7 @@ jobs:
           fi
       - name: Stage chart and font assets
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund parse5@7.3.0 echarts@5.6.0 echarts-gl@2.0.9 @fontsource/poppins@5.3.0
+          npm install --no-save --ignore-scripts --no-audit --no-fund parse5@7.3.0 echarts@6.1.0 echarts-gl@2.1.0 @fontsource/poppins@5.3.0
           node scripts/stage-visualizations.cjs
           node scripts/stage-poppins.cjs
       - name: Add lastmod dates to the sitemap

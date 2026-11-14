@@ -7,7 +7,7 @@
   if(!pending)pending=new Promise((resolve,reject)=>{
    const script=document.createElement('script');
    script.async=true;
-   script.src='/assets/vendor/echarts-5.6.0.min.js';
+   script.src='/assets/vendor/echarts-6.1.0.min.js';
    script.onload=()=>root.echarts?.init?resolve(root.echarts):reject(Error('Chart library unavailable.'));
    script.onerror=()=>{script.remove?.();reject(Error('Chart library could not be loaded.'));};
    document.head.appendChild(script);

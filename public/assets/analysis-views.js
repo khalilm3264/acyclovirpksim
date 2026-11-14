@@ -102,8 +102,9 @@ function density(values){
  const points=Array.from({length:51},(_,i)=>{const v=lo+(hi-lo)*i/50;return [v,values.reduce((sum,x)=>sum+Math.exp(-.5*((x-v)/bandwidth)**2),0)];});
  const max=Math.max(...points.map(p=>p[1]));return points.map(([v,d])=>[v,d/max]);
 }
+function distributionGroups(result){return (result.groups||[]).filter(g=>Array.isArray(g.values)&&g.values.length&&g.values.every(Number.isFinite));}
 function ensembleOption(result,kind){
- const x=+$('ensembleX')?.value||0,y=+$('ensembleY')?.value||2;
+ const x=Number($('ensembleX')?.value??0),y=Number($('ensembleY')?.value??2);
  if(kind==='scatter'){
   const o=charts.options([{type:'scatter',name:'Prior draws',symbolSize:6,data:result.points.map(p=>[p[x],p[y]])}],dimensions[x],dimensions[y]);
   o.tooltip.trigger='item';return o;
@@ -118,7 +119,7 @@ function ensembleOption(result,kind){
   }
   return {animation:false,tooltip:{trigger:'item',renderMode:'richText'},grid,xAxis,yAxis,series};
  }
- const groups=(result.groups||[]).filter(g=>Array.isArray(g.values)&&g.values.length>0);
+ const groups=distributionGroups(result);
  const o=charts.options([],'','Plasma acyclovir (mg/L)');o.xAxis={type:'category',data:groups.map(g=>g.name),axisLabel:{rotate:18,hideOverlap:true}};o.tooltip.trigger='item';
  if(kind==='box'){
   o.series=[{type:'boxplot',name:'Prior distribution',data:groups.map(g=>[0,.25,.5,.75,1].map(p=>quantile(g.values,p)))}];
@@ -126,7 +127,6 @@ function ensembleOption(result,kind){
   const shapes=groups.map(g=>density(g.values));
   o.series=[{type:'custom',name:'Prior distribution',encode:{x:0,y:[1,2]},data:groups.map((g,i)=>[i,g.values[0],g.values.at(-1)]),renderItem:(p,api)=>{
    const i=api.value(0),width=api.size([1,0])[0]*.38,shape=shapes[i];
-   if(!shape||!shape.length)return null;
    const edge=side=>shape.map(([v,d])=>{const [x,y]=api.coord([i,v]);return [x+side*width*d,y];});
    if(shape.length===1){const [x,y]=api.coord([i,shape[0][0]]);return {type:'line',shape:{x1:x-width,x2:x+width,y1:y,y2:y},style:{stroke:'#366988',lineWidth:2}};}
    return {type:'polygon',shape:{points:edge(-1).concat(edge(1).reverse())},style:{fill:'#7daac3',stroke:'#396981'}};
@@ -137,6 +137,7 @@ function ensembleOption(result,kind){
 async function renderEnsemble(){
  if(!ensemble)return;const kind=$('ensembleView').value;await charts.ensure();if(!ensemble)return;
  charts.draw($('ensembleChart'),ensembleOption(ensemble,kind));
+ if(['box','violin'].includes(kind)&&!distributionGroups(ensemble).length){$('ensembleStatus').textContent='No valid concentration samples are available for this distribution.';return;}
  $('ensembleStatus').textContent=ensemble.mode+' · '+ensemble.points.length+' prior draws · '+ensemble.hour+' h. '+({matrix:'V: central volume; CL: systemic clearance; AUC: plasma exposure; C: sampled plasma concentration.',box:'Box: quartiles and median; whiskers: minimum and maximum.',violin:'Width shows relative density within each scenario.','scatter':''}[kind]);
 }
 if($('ensembleRun'))$('ensembleRun').onclick=()=>{

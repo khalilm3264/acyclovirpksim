@@ -18,7 +18,7 @@ test('ECharts is not downloaded until an actual chart requests it, and concurren
  const first=window.AyFluxCharts.ensure();
  const second=window.AyFluxCharts.ensure();
  assert.equal(scripts.length,1,'only one ECharts request should be inserted');
- assert.equal(scripts[0].src,'/assets/vendor/echarts-5.6.0.min.js');
+ assert.equal(scripts[0].src,'/assets/vendor/echarts-6.1.0.min.js');
  assert.equal(scripts[0].async,true);
  window.echarts={init:()=>{}};
  scripts[0].onload();
@@ -49,12 +49,12 @@ test('full site charts and research tools request ECharts only when used',()=>{
  const research=read('public/assets/research-workspace.js');
  const sw=read('public/sw.js');
  assert.match(html,/src="\.\/assets\/charts\.js"/);
- assert.doesNotMatch(html,/<script[^>]+src="\.\/assets\/vendor\/echarts-5/);
+ assert.doesNotMatch(html,/<script[^>]+src="\.\/assets\/vendor\/echarts-[56]/);
  assert.match(ui,/chartWait=window\.AyFluxCharts\.ensure\(\)/);
  assert.match(research,/await window\.AyFluxCharts\.ensure\(\)/);
  assert.ok(sw.includes('"/assets/charts.js"'));
  // The heavyweight library is stored on first use, rather than precached.
  const precache=sw.slice(sw.indexOf('const CORE = ['),sw.indexOf('];')+2);
- assert.doesNotMatch(precache,/echarts-5/);
- assert.match(sw,/\["\/assets\/vendor\/echarts-5\.6\.0\.min\.js"/);
+ assert.doesNotMatch(precache,/echarts-[56]/);
+ assert.match(sw,/\["\/assets\/vendor\/echarts-6\.1\.0\.min\.js"/);
 });

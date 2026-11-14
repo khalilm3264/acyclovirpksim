@@ -14,4 +14,4 @@ The font is used only for the two-weight AyFlux wordmark. The application's AGPL
 
 ## Chart libraries
 
-The build distributes Apache ECharts 5.6.0 and ECharts GL 2.0.9 with their upstream LICENSE and NOTICE files in /assets/vendor/.
+The build distributes Apache ECharts 6.1.0 and ECharts GL 2.1.0 with their upstream LICENSE and NOTICE files in /assets/vendor/.
