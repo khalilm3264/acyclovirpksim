@@ -261,7 +261,7 @@ html body .shell > footer.site-footer{
 }
 
 /* AyFlux v0.20 optional research workspace, aligned with rectangular clinical UI. */
-#research .research-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;margin:10px 0}
+#research .research-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(165px,100%),1fr));gap:10px;margin:10px 0}
 #research .research-inputs label{display:flex;flex-direction:column;gap:4px;color:#28485e;font-weight:700}
 #research .research-inputs input,#research .research-inputs select{min-width:0;width:100%;padding:8px;border:1px solid #9db4c5;background:#fff;color:#243e53;border-radius:0}
 #research .research-tools-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
@@ -585,6 +585,17 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
  html body #timeline #pdRxEnable {width:20px;height:20px;flex-shrink:0;}
  html body #timeline #pdRxPanel>.check {min-height:40px;}
 }
+
+.site-subtitle, .refs, #concentration .scenario {overflow-wrap:anywhere}
+@media (max-width:359px) {
+ #concentration .graph-controls .scenarios, #concentration .results-actions {grid-template-columns:minmax(0,1fr)}
+ #concentration .results-actions label {white-space:normal}
+}
+@media (max-width:319px) {
+ html body .shell {overflow-wrap:anywhere}
+ html body .shell input, html body .shell select, html body .shell button {max-width:100%}
+ html body .shell .ref-nav {flex-wrap:wrap}
+}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
@@ -658,7 +669,7 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 <p class="research-note">Enter actual assay measurements from the same dosing and dialysis scenario. Rows marked <strong>Fit</strong> update the relative probabilities of the model's sampled parameter sets using a Gaussian assay-error assumption. <strong>Hold-out</strong> rows are never used for fitting and test whether the 90% posterior predictive interval contains each observed value. The posterior is an importance-sampling approximation, not a clinically validated population model. Do not enter identifiable patient information.</p>
 <div class="measure-grid"><div><span>Held-out coverage</span><strong id="covFraction">Not assessed</strong><small id="covCount">No held-out observations</small></div><div><span>95% CI for observed coverage</span><strong id="covCI">—</strong><small>Wilson binomial interval; not a guarantee</small></div><div><span>Effective posterior sample size</span><strong id="posteriorESS">—</strong><small id="posteriorNote">No fitting measurements</small></div></div>
 <div class="inputrow"><label>Primary scenario for measurements</label><strong id="fitScenario"></strong><p class="tip">Change the primary dialysis scenario to change which prescription the measured values are compared with.</p></div>
-<table class="medmeas"><thead><tr><th>Hour</th><th>Analyte</th><th>Observed (mg/L)</th><th>Role</th><th></th></tr></thead><tbody id="measureRows"></tbody></table>
+<div class="scroll" role="region" aria-label="Assay measurements" tabindex="0"><table class="medmeas"><thead><tr><th>Hour</th><th>Analyte</th><th>Observed (mg/L)</th><th>Role</th><th></th></tr></thead><tbody id="measureRows"></tbody></table></div>
 <div class="timeline-actions"><button class="btn secondary" id="addMeasure">+ Add measurement</button><button class="btn" id="applyMeasures">Update model & evaluate</button><button class="btn secondary" id="clearMeasures">Clear measurements</button></div>
 <div id="measureWarning" class="warning hidden"></div><div id="validationResults" class="measure-stat">No observations entered. Coverage has not been assessed.</div>
 <p class="tip">Assessment requires <em>independent</em> held-out measurements. Fitted data cannot validate coverage. With only a few hold-outs the coverage percentage is statistically unstable. An assay-error CV is assumed; the actual laboratory error structure may differ.</p></div>
