@@ -24,7 +24,10 @@ const server=http.createServer((req,res)=>{
   assert.ok((await page.textContent('#ayfluxScenarioSummary')).includes('Removed by dialysis'));
   assert.ok((await page.textContent('#ayfluxScenarioSummary')).includes('AyFlux 0.27.0'));
   async function onePage(name){
+   await page.emulateMedia({media:'print'});
+   console.log(name, 'print layout', await page.evaluate(()=>Object.fromEntries(['body','dialog.ay-summary','.ay-summary-sheet'].map(sel=>{const e=document.querySelector(sel),r=e.getBoundingClientRect(),s=getComputedStyle(e);return [sel,{width:r.width,height:r.height,display:s.display,page:s.page,position:s.position}];}))));
    const pdf=await page.pdf({preferCSSPageSize:true,printBackground:true});
+   await page.emulateMedia({media:'screen'});
    const pages=(pdf.toString('latin1').match(/\/Type\s*\/Page\b/g)||[]).length;
    assert.equal(pages,1,name+' must fit one PDF page');
    if(process.env.SUMMARY_PREVIEW_DIR){fs.mkdirSync(process.env.SUMMARY_PREVIEW_DIR,{recursive:true});fs.writeFileSync(path.join(process.env.SUMMARY_PREVIEW_DIR,name+'.pdf'),pdf);}

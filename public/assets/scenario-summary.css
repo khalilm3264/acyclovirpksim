@@ -14,7 +14,7 @@
 @media(max-width:500px){.ay-summary{padding:12px}.ay-summary-inputs{grid-template-columns:1fr;gap:1px}.ay-summary-inputs dd{margin-bottom:5px}.ay-summary-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media print{
  @page ayflux-summary{size:A4 portrait;margin:10mm}
- body.ay-summary-open{margin:0!important;padding:0!important;background:#fff!important;min-width:0!important}
+ body.ay-summary-open{page:ayflux-summary;margin:0!important;padding:0!important;background:#fff!important;min-width:0!important}
  body.ay-summary-open>:not(.ay-summary){display:none!important}
  body.ay-summary-open dialog.ay-summary{display:block!important;position:static!important;inset:auto!important;width:100%!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;overflow:visible!important;box-shadow:none!important;font-size:10px;line-height:1.3;print-color-adjust:exact;-webkit-print-color-adjust:exact}
  .ay-summary::backdrop,.ay-summary-tools{display:none!important}
@@ -23,6 +23,6 @@
  .ay-summary-metrics{grid-template-columns:repeat(5,minmax(0,1fr))!important}
  .ay-summary-sheet h1{font-size:20px}.ay-summary-notice{font-size:10px}.ay-summary-meta,.ay-summary-foot{font-size:9px}
  .ay-summary-sheet svg{max-height:56mm}
- .ay-summary-sheet{page:ayflux-summary;break-inside:avoid}
+ .ay-summary-sheet{break-inside:auto}
  body:not(.ay-summary-open) .ay-summary{display:none!important}
 }
