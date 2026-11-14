@@ -55,7 +55,7 @@ At the damaged preset of 0.11 the visit-weighted predicted/observed CMMG concent
 ## Other sources
 
 - **Smith 2010** ([doi:10.1128/AAC.00729-09](https://doi.org/10.1128/AAC.00729-09)): CSF:plasma CMMG AUC ratio about 0.025 in healthy volunteers and 0.026 in chronic kidney disease, neither with CNS infection. This is the calibration source for 0.025.
-- **Unita 2023** (case report, J Infect Chemother; [doi:10.1016/j.jiac.2023.07.001](https://doi.org/10.1016/j.jiac.2023.07.001)): before dialysis, CSF CMMG was about 1% of plasma.
+- **Unita 2023** (case report, J Infect Chemother; [doi:10.1016/j.jiac.2023.07.001](https://doi.org/10.1016/j.jiac.2023.07.001)): before dialysis, CSF CMMG was 0.50 mg/L one hour after plasma CMMG of 42 mg/L. The approximate concentration ratio was 0.012. [Sampling and HD follow-up](CMMG-EVIDENCE.md#unita-2023-plasma-sampling-around-three-hd-sessions)
 - **Helldén 2006** ([J Antimicrob Chemother 57:945](https://doi.org/10.1093/jac/dkl067)) reports serum concentrations by subject in Table 1 and CSF concentrations by symptom group in Figure 2. The [author’s 2010 thesis](https://files01.core.ac.uk/download/pdf/70338802.pdf) reports a symptomatic CSF/serum CMMG concentration ratio of 0.065 ± 0.037 for this cohort (printed p. 16). Serum and CSF sampling times varied. The ratio describes sampled concentrations and does not establish a dosing-interval AUC ratio. Barrier status was unreported.
 
 ## Serum, as a by-product
