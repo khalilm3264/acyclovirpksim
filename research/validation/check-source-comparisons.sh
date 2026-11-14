@@ -18,7 +18,7 @@ cd "$root"
 studies=(
   almond-paired-post-hd boulieu-cvvhd burgess-iv-terminal cmmg-formation-bound collignon-crrt davenport-dialysis-washout
   de-miranda-iv-recovery hara-genotype-terminal hellden-ms-sampling hellden-iv-profiles hellden-renal-clearance ito2025 izzedine-capd jamez-oral-sampling
-  kably-auc-comparison kably-renal-slope kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
+  kably-auc-comparison kably-renal-slope kacirova-iv-cohort kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
   laskin-anuric-course laskin-clearance laskin-fitted-distribution lindstrom-course-6-20
   lindstrom-patient19 lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
   stathoulopoulou-1996-recovery sun-cns-comparison unita-hd-sampling vasquez-hd-extraction vasquez-urine-intervals weller-single-dose yang-three-hd
