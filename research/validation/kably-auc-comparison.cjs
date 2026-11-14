@@ -12,12 +12,12 @@ const strata = [
   {eGFR: '31–60', crcls: [45], parent: 63.6, metabolite: 37.7, ratioPct: 47.6},
   {eGFR: '<30', crcls: [15, 25], parent: 88.7, metabolite: 103.1, ratioPct: 129.9}
 ];
-function day11(crcl) {
+function day11(crcl, every = 8, metRenal = 1, step = 0.0625) {
   const config = {...structuredClone(engine.DEFAULTS), weight: 70, crcl, renalMode: 'constant',
     crclSource: 'manual', route: 'Valacyclovir oral', dosingMode: 'repeat', dose: 2000,
-    every: 8, doseCount: 33, horizon: 264, draws: 1, variability: 0, observations: []};
+    every, doseCount: 264 / every, metRenal, horizon: 264, draws: 1, variability: 0, observations: []};
   assert.deepEqual(engine.validate(config, 'No dialysis'), []);
-  const run = engine.single(config, engine.drawParams(config)[0], [], 0.0625, engine.buildDoses(config));
+  const run = engine.single(config, engine.drawParams(config)[0], [], step, engine.buildDoses(config));
   const start = run.t.indexOf(240);
   assert.ok(start >= 0);
   assert.equal(run.t.at(-1), 264);
@@ -29,8 +29,20 @@ function day11(crcl) {
     return sum;
   }
   const acv = area(run.cols.plasma), cmmg = area(run.cols.cmmg);
-  return {ayfluxAcv: +acv.toFixed(2), ayfluxCmmg: +cmmg.toFixed(2), ayfluxRatioPct: +(100 * cmmg / acv).toFixed(1)};
+  const final = run.t.length - 1;
+  const concentrations = key => ({predose: run.cols[key][final],
+    minimum: Math.min(...run.cols[key].slice(start))});
+  return {parent: {auc: acv, ...concentrations('plasma')},
+    metabolite: {auc: cmmg, ...concentrations('cmmg')}};
 }
-console.table(strata.flatMap(s => s.crcls.map(crcl => ({
-  eGFR: s.eGFR, crcl, kablyAcv: s.parent, kablyCmmg: s.metabolite, kablyRatioPct: s.ratioPct, ...day11(crcl)
-}))));
+
+if (require.main === module) {
+  function summary(crcl) {
+    const {parent: {auc: acv}, metabolite: {auc: cmmg}} = day11(crcl);
+    return {ayfluxAcv: +acv.toFixed(2), ayfluxCmmg: +cmmg.toFixed(2), ayfluxRatioPct: +(100 * cmmg / acv).toFixed(1)};
+  }
+  console.table(strata.flatMap(s => s.crcls.map(crcl => ({
+    eGFR: s.eGFR, crcl, kablyAcv: s.parent, kablyCmmg: s.metabolite, kablyRatioPct: s.ratioPct, ...summary(crcl)
+  }))));
+}
+module.exports = {day11};
