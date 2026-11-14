@@ -30,7 +30,7 @@
    crcl+=`\nelse kidney=${s.profile.at(-1).crcl};`;
   }
   const dial=s.windows.map(w=>`if(SOLVERTIME>=${w.start} && SOLVERTIME<${w.end})dial+=${w.type==='HD'?p.hd:p.crrt};`).join('\n');
-  const code=`$CMT CENT PERI MET DEPOT\n$ODE\n${crcl}\ndouble dial=0;\n${dial}\ndouble cc=CENT/${p.vc}, cp=PERI/${p.vp}, cm=MET/${p.vm};\ndouble exchange=${p.q}*(cc-cp);\ndxdt_CENT=${p.oralKa}*DEPOT-(${p.other}+${p.renal}*kidney+${p.form}+dial)*cc-exchange;\ndxdt_PERI=exchange;\ndxdt_MET=${p.form}*cc*(239.19/225.21)-(${p.mn}+${p.mr}*kidney+dial*${s.metDial})*cm;\ndxdt_DEPOT=-${p.oralKa}*DEPOT;\n$TABLE\ncapture plasma_acyclovir_mg_L=CENT/${p.vc};\ncapture plasma_cmmg_mg_L=MET/${p.vm};`;
+  const code=`$CMT CENT PERI MET DEPOT\n$ODE\n${crcl}\ndouble dial=0;\n${dial}\ndouble cc=CENT/${p.vc};\ndouble cp=PERI/${p.vp};\ndouble cm=MET/${p.vm};\ndouble exchange=${p.q}*(cc-cp);\ndxdt_CENT=${p.oralKa}*DEPOT-(${p.other}+${p.renal}*kidney+${p.form}+dial)*cc-exchange;\ndxdt_PERI=exchange;\ndxdt_MET=${p.form}*cc*(239.19/225.21)-(${p.mn}+${p.mr}*kidney+dial*${s.metDial})*cm;\ndxdt_DEPOT=-${p.oralKa}*DEPOT;\n$TABLE\ncapture plasma_acyclovir_mg_L=CENT/${p.vc};\ncapture plasma_cmmg_mg_L=MET/${p.vm};`;
   const events=s.breaks.map(time=>({time,evid:2,cmt:1,amt:0,rate:0}));
   for(const d of s.doses)if(d.amount>0)events.push({time:d.time,evid:1,cmt:d.route==='Acyclovir IV'?1:4,amt:d.route==='Acyclovir IV'?d.amount:d.amount*(225.21/324.34)*p.oralF,rate:d.route==='Acyclovir IV'?d.amount/d.infusion:0});
   events.sort((a,b)=>a.time-b.time||a.evid-b.evid);
