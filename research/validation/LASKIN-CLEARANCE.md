@@ -68,3 +68,18 @@ In the original scan, Table I row 2 at 1 h is **36.1** µmol/L. Re-summing the s
 | 48 | 1.38 | 0.18 | 1.41 |
 
 All SDs are in µmol/L. Weight-only results use 2.5 mg/kg IV over one hour, CrCl zero, and default PK coefficients with random variability disabled. The other column uses all six parameter sets fitted by the source authors to these data. It describes in-sample dispersion. The calculation pairs no patient identifiers across papers and supplies no coverage estimate for the model’s Monte Carlo band. The paper’s post-HD draws varied from 15 to 90 minutes, so modeled SDs stop at 48 h. [CPT parameter source](https://doi.org/10.1038/clpt.1982.83) · [Digitized rows and reproduction script](laskin-individual-spread.cjs)
+
+## How the displayed 90% prior band compares with the six pre-HD profiles
+
+The public engine’s unfitted 90% plasma band contains 32 of 36 observed concentrations (88.9%) at the six pre-HD times, using the cohort mean weight of 57.5 kg. This count is the same with the default 120 and maximum 400 deterministic draws. Only two of six people have every one of their six samples inside the band. Individual counts in Table I order are 5, 6, 5, 6, 5 and 5. The band is pointwise, and measures within each person are correlated.
+
+| Time, h | 120-draw band, µmol/L | 400-draw band, µmol/L | People inside, out of six |
+|---:|---:|---:|---:|
+| 1 | 22.23–37.63 | 21.42–36.35 | 5 |
+| 2 | 15.06–24.47 | 15.76–24.39 | 4 |
+| 8 | 6.79–15.59 | 7.14–15.52 | 5 |
+| 12 | 5.10–14.05 | 5.32–14.05 | 6 |
+| 24 | 2.18–10.94 | 2.26–10.67 | 6 |
+| 48 | 0.33–6.86 | 0.43–6.86 | 6 |
+
+The 83.9 µmol/L peak is above both upper bounds. Two 14.9 µmol/L measurements at 2 h fall below both lower bounds, and the 16.1 µmol/L value at 8 h exceeds both upper bounds. Using each of the six reported weights in turn as a common scenario, without assuming a cross-paper identity, gives totals of 32–34/36 with 120 draws and 31–32/36 with 400. This descriptive check reuses a development benchmark, provides no prospective coverage estimate, and does not calibrate assay error or interindividual variation. [Original measured rows](https://doi.org/10.1016/0002-9343(82)90090-0) · [Reproduction using the public simulator](laskin-prior-band.cjs)
