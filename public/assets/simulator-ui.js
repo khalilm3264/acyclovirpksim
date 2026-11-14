@@ -817,6 +817,23 @@ function downloadTidyCSV(){
  }catch(error){alertMessage('Unable to export R / OSP CSV: '+error.message);}
 }
 
+let academicExporterLoading;
+async function downloadAcademic(format){
+ if(!dataIsCurrent||!results?.[primary])return;
+ const snapshot={run:structuredClone(results[primary]),config:structuredClone(c),primary,version:window.AyFluxVersion?.version};
+ try{
+  if(format==='bibtex'){
+   const a=document.createElement('a');a.href='/references/ayflux.bib';a.download='ayflux.bib';a.click();return;
+  }
+  if(!window.AyFluxAcademic){
+   if(!academicExporterLoading)academicExporterLoading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/assets/academic-exports.js';script.onload=resolve;script.onerror=()=>{academicExporterLoading=null;script.remove();reject(Error('LaTeX exporter could not load.'));};document.head.append(script);});
+   await academicExporterLoading;
+  }
+  const content=window.AyFluxAcademic.latex(snapshot),url=URL.createObjectURL(new Blob([content],{type:'application/x-tex;charset=utf-8'}));
+  const a=document.createElement('a');a.href=url;a.download='ayflux_summary.tex';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+ }catch(error){alertMessage('Unable to export academic file: '+error.message);}
+}
+
 async function downloadOSPWorkbook(){
  if(!results||!dataIsCurrent)return;
  const snapshot=results;
@@ -1052,7 +1069,7 @@ $('applyFullTimeline').addEventListener('click',()=>{
  pdStatusText('Applied dialysis sessions, exchange prescriptions and medication administrations together.');
 });
 $('applyFullTimelineBottom').addEventListener('click',()=>$('applyFullTimeline').click());
-$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent||!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
+$('csv').addEventListener('change',event=>{const format=event.target.value;event.target.value='';if(!dataIsCurrent)return;if(['latex','bibtex'].includes(format)){downloadAcademic(format);return;}if(!['wide','tidy','xlsx'].includes(format))return;if(modes.some(m=>!results[m])){pendingCsvExport=format;calculate(true);}else if(format==='tidy')downloadTidyCSV();else if(format==='xlsx')downloadOSPWorkbook();else download();});
 // Medication timeline is separate from dialysis timeline. Mixed routes share the same drug state.
 function renderDoseRows(){
  const target=$('doseRows');if(!target)return;
