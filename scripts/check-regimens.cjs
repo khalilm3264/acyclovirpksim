@@ -87,16 +87,16 @@ async function main(){
   // Provenance view for a published case and the scorecard column.
   await page.selectOption('#studySelect','vasquez');
   await page.waitForFunction(()=>!document.querySelector('#studyProvenance').classList.contains('hidden'));
-  assert.match(await page.textContent('#studyProvenanceCounts'),/8 reported by the source, 2 calculated from reported values, 2 assumed by AyFlux, 1 unknown/);
+  assert.match(await page.textContent('#studyProvenanceCounts'),/9 reported by the source, 1 calculated from reported values, 2 assumed by AyFlux, 1 unknown/);
   assert.match(await page.textContent('#studyProvenanceRows'),/Time from last dose to admission\s*Unknown/);
-  // Two provenance columns, a pending source check, and exploring one assumption (from #68).
+  // Two provenance columns, the final article, and exploring one assumption (from #68).
   const heads=await page.$$eval('#studyProvenance thead th',ths=>ths.map(th=>th.textContent));
   assert.deepEqual(heads,['Input and status','What the paper reports','What AyFlux uses']);
   const gapRow=await page.$$eval('#studyProvenanceRows tr',trs=>trs.map(tr=>[...tr.cells].map(td=>td.textContent)).find(r=>r[0].startsWith('Time from last dose to admission')));
   assert.match(gapRow[0],/^Time from last dose to admissionUnknown$/);assert.match(gapRow[1],/Not reported/);assert.match(gapRow[2],/^4 h/);
   assert.ok(await page.evaluate(()=>{const w=document.querySelector('#studyProvenance .scroll');return w.scrollWidth<=w.clientWidth+1;}),'provenance table fits its panel without sideways scrolling');
-  assert.match(await page.textContent('#studySourceCheck'),/not yet been checked against the final Br J Clin Pharmacol 2025 article/);
-  assert.ok(await page.isVisible('#studySourceCheck'));assert.ok(await page.isVisible('#studyExplore'));
+  assert.match(await page.textContent('#studyMainSource'),/Br J Clin Pharmacol 2025/);
+  assert.equal(await page.isVisible('#studySourceCheck'),false);assert.ok(await page.isVisible('#studyExplore'));
   const sessionsBefore=await page.evaluate(()=>window.AyFluxResearchBridge.snapshot().config.schedule.map(r=>r.start));
   await page.fill('#studyExploreValue','99');await page.click('#studyExploreRun');
   assert.match(await page.textContent('#studyExploreStatus'),/from 0 to 24 h/);
@@ -125,7 +125,7 @@ async function main(){
   await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.querySelector('#residualFigure')),null,{timeout:120000});
   const points=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#residualFigure')).getOption().series.filter(s=>s.type==='scatter').reduce((n,s)=>n+s.data.length,0));
   const prov=await page.$$eval('#scorecardRows tr',trs=>trs.map(tr=>tr.cells[5]?.textContent||''));
-  assert.ok(prov.some(t=>/R 8 C 2 A 2 U 1/.test(t)),'Vasquez counts in the scorecard');assert.ok(prov.some(t=>/Not yet recorded/.test(t)));
+  assert.ok(prov.some(t=>/R 9 C 1 A 2 U 1/.test(t)),'Vasquez counts in the scorecard');assert.ok(prov.some(t=>/Not yet recorded/.test(t)));
   assert.equal(points,await page.evaluate(()=>window.AyFluxStudies.STUDIES.reduce((n,s)=>n+s.points.length+(s.cmmgPoints||[]).length,0)));
   assert.ok(doseRows>0);
   assert.deepEqual(errors,[]);
