@@ -59,6 +59,17 @@ async function main(){
   // Phone width: no sideways scrolling.
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=window.innerWidth+2,null,{timeout:10000});
+  // Guide navigation follows all content at desktop and phone widths.
+  for (const width of [1280,390]) {
+   await page.setViewportSize({width,height:900});
+   for (const guide of ['/learn/index.html','/learn/interoperability/index.html']) {
+    await page.goto('http://127.0.0.1:'+server.address().port+guide);
+    assert.equal(await page.locator('main > :last-child.actions a[href="/"]').count(),1);
+    await page.locator('main > .actions').scrollIntoViewIfNeeded();
+    assert.ok(await page.locator('main > .actions a').isVisible());
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
+   }
+  }
   assert.deepEqual(errors,[]);
   console.log('Results-first layout, summary hierarchy and dosing-weight checks passed.');
  }finally{await browser?.close();server.close();}
