@@ -36,7 +36,7 @@ Default CSF CMMG curves are ten times lower than in v0.27.0. Nothing else in a s
 | Lindström 2019 [4], intact barrier | 3 measured, 7 below limit (albumin ratio within age-specific normal) | Independent check | 0.025 within twofold for 3/3; consistent with all 7 below-limit values. 0.25 fits none |
 | Lindström 2019 [4], disrupted barrier | 17 measured, 6 below limit | Contrary for CNS infection | implies about 0.11; basis of the exploratory Damaged preset |
 | Unita 2023 | 1 case before dialysis | Supporting | CSF CMMG about 1% of plasma |
-| Helldén 2006 | symptomatic patients, barrier not reported | Context only | CSF/serum CMMG 0.065 ± 0.037 |
+| Helldén 2006 cohort, summarized in [Helldén’s 2010 thesis](https://files01.core.ac.uk/download/pdf/70338802.pdf), p. 16 | symptomatic patients, barrier status unreported | Context only | Sampled CSF/serum CMMG concentration ratio 0.065 ± 0.037. Sampling times varied. |
 
 **Sensitivity.** Predicted CSF CMMG is proportional to the partition, so the Lindström fit can be read off for any value:
 
