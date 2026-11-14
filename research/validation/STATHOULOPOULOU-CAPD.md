@@ -6,6 +6,8 @@ Stathoulopoulou et al. administered a single 500 mg oral valacyclovir dose after
 
 The manuscript describes these percentages as fractions of administered acyclovir despite administering valacyclovir, and doubles them when assuming 50% bioavailability. It does not provide the calculation needed to resolve whether recovery was divided by tablet mass or by the equimolar acyclovir dose. Both interpretations are retained here.
 
+The methods on printed p. 165 define the acyclovir-equivalent dose as 500 × 0.6944 = 347.2 mg for the apparent-clearance calculation. A cross-check of the separate concentration prediction reveals a discrepancy. Multiply each Table 1 predicted concentration for 500 mg every 24 hours (µmol/L) by 0.22521 mg/µmol, 24 hours and the corresponding Table 2 apparent clearance (L/h). For patient 1, 20.13 × 0.22521 × 24 × 4.6 = 500.5 mg. All twelve rows imply 500.2–500.7 mg with the printed rounded values. Thus the predicted concentrations are consistent with approximately 500 mg in the numerator. The paper gives no individual recovered masses for an analogous check of the recovery percentages. The concentration calculation alone cannot resolve which denominator was used for recovery.
+
 A 500 mg valacyclovir dose corresponds to 347.18 mg acyclovir before the bioavailability factor, using molecular weights of 324.34 and 225.21 g/mol. The alternative observed recovery masses are therefore:
 
 | Published mean | Tablet mass denominator | Acyclovir equivalent denominator |
