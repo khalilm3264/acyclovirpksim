@@ -32,7 +32,7 @@ Reference 22 previously described only the 2024 Vasquez Vasquez preprint. The fi
 
 ## Added 2026-11-13
 
-[45] Helldén 2007, *BMJ* 335:1305, checked against the full text (printed page 1305). [46] Helldén 2010 thesis, checked against the open-access copy at core.ac.uk: title, year and ISBN 978-91-7409-994-2 from the title page. Both support the CMMG benchmarks; neither is used to fit a parameter.
+[45] Helldén 2007, *BMJ* 335:1305, checked against the full text (printed page 1305). [46] Helldén 2010 thesis, checked against the open-access copy at core.ac.uk: title, year and ISBN 978-91-7409-994-2 from the title page. The subsequent #46 model change used case 1 of [45] to select nominal nonrenal CMMG clearance of 0.5 L/h at 70 kg. Hara was a separate cohort already examined before that change. Paper V of [46] supplies comparison profiles and renal-clearance slopes. The 3.7474 CMMG slope is tested in research scenarios. [Calibration record](../research/validation/MODEL-CHANGE-46.md) · [Thesis comparisons](../research/validation/CMMG-EVIDENCE.md)
 
 ## Evidence boundaries
 
