@@ -53,11 +53,13 @@ function report(){
   rows,shared};
 }
 if(require.main===module){
+ const out=process.argv[2] || __dirname;
+ fs.mkdirSync(out,{recursive:true});
  const result=report();
  const {rows,shared,...summary}=result;
- fs.writeFileSync(path.join(__dirname,'boelaert-joint-results.json'),JSON.stringify({...summary,shared},null,2)+'\n');
+ fs.writeFileSync(path.join(out,'boelaert-joint-results.json'),JSON.stringify({...summary,shared},null,2)+'\n');
  const keys=Object.keys(result.rows[0]);
- fs.writeFileSync(path.join(__dirname,'boelaert-joint-grid.csv'),keys.join(',')+'\n'+result.rows.map(r=>keys.map(k=>r[k]).join(',')).join('\n')+'\n');
+ fs.writeFileSync(path.join(out,'boelaert-joint-grid.csv'),keys.join(',')+'\n'+result.rows.map(r=>keys.map(k=>r[k]).join(',')).join('\n')+'\n');
  console.log(JSON.stringify({baseline:result.baseline,bestShared:result.bestShared,sharedPredictions:result.sharedPredictions,perSubject:result.perSubject,convergence:result.convergence},null,2));
 }
 module.exports={evaluate,report};
