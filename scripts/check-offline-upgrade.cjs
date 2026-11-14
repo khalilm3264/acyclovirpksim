@@ -7,7 +7,12 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '../public');
 const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-const oldSimulation = 'document.documentElement.dataset.priorShell = "true";';
+const oldSimulation = `document.documentElement.dataset.priorShell = "true";
+ document.getElementById('tabs')?.addEventListener('click',event=>{
+  const button=event.target.closest('[data-tab]');if(!button)return;
+  for(const tab of document.querySelectorAll('#tabs [data-tab]'))tab.classList.toggle('active',tab===button);
+  for(const panel of document.querySelectorAll('main>section'))panel.classList.toggle('hidden',panel.id!==button.dataset.tab);
+ });`;
 const priorHtml = '<!doctype html><label>Measurement<input id="sample"></label>' +
  '<span id="connectivityStatus"></span><script src="/assets/pwa-register.js"></script>';
 const controlCssPath = '/learn/research-controls-v1.css';
@@ -35,7 +40,8 @@ async function check(browser, legacy) {
            self.addEventListener('fetch', event => event.respondWith(event.request.mode === 'navigate'
              ? fetch(event.request) : caches.match(event.request).then(hit => hit || fetch(event.request))));`);
        } else res.end(worker.replace(/^const CACHE = .+?;$/m, 'const CACHE = "ayflux-static-prior";')
-         .replace(' "'+controlCssPath+'",\n', ''));
+         .replace(' "'+controlCssPath+'",\n', '')
+         .replace(' "/assets/simulator-navigation.js",\n', ''));
        return;
      }
      if (pathname === '/' || pathname === '/index.html') {
@@ -66,6 +72,22 @@ async function check(browser, legacy) {
    assert.equal(await research.locator('#download').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(255, 255, 255)');
    assert.equal(await page.inputValue('#sample'), '7.15');
    await research.close();
+   // A legacy worker can mix new HTML with its cached old simulator script.
+   // Navigation must arrive through the new asset path while the original tab stays unsaved.
+   if (legacy) {
+     const navigation = await context.newPage();
+     await navigation.goto(origin + '/?navigation-check=1');
+     assert.equal(await navigation.evaluate(() => document.documentElement.dataset.priorShell), 'true');
+     await navigation.locator('#tab-concentration').focus();
+     await navigation.keyboard.press('ArrowRight');
+     assert.equal(await navigation.evaluate(() => document.activeElement.id), 'tab-clearance');
+     assert.equal(await navigation.locator('#tab-concentration').getAttribute('aria-selected'), 'true');
+     await navigation.keyboard.press('Enter');
+     await navigation.waitForFunction(() => document.querySelector('#tab-clearance').getAttribute('aria-selected') === 'true');
+     assert.ok(await navigation.locator('#clearance').isVisible());
+     assert.equal(await page.inputValue('#sample'), '7.15');
+     await navigation.close();
+   }
    // Old clients only acquire the new update bootstrap on their next chosen navigation.
    if (legacy) {
      await page.reload();

@@ -794,11 +794,11 @@ function timelineErrors(errs){$('timelineErrors').textContent=errs.join('\n');$(
 function checkDraft(){return E.validate({...c,schedule:draft},'Custom sequence');}
 function applyTimeline(){const errs=checkDraft();timelineErrors(errs);if(errs.length)return;
  c.schedule=structuredClone(draft);dirtyTimeline=false;$('timelinePending').classList.add('hidden');primary='Custom sequence';$('primary').value=primary;visible.add(primary);renderInputs();calculate();}
-function switchTab(next){if(next==='doses')next='timeline';tab=next;
+function switchTab(next){if(next==='doses')next='timeline';tab=next;for(const btn of document.querySelectorAll('[data-tab]'))btn.classList.toggle('active',btn.dataset.tab===tab);
  // Drug reference and methods share one tab; legacy 'reference' and 'table' targets still resolve.
  if(tab==='reference')tab='method';
  if(tab==='table'){tab='concentration';$('tablePanel').open=true;}
- for(const btn of document.querySelectorAll('#tabs [data-tab]')){const selected=btn.dataset.tab===tab;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',String(selected));btn.tabIndex=selected?0:-1;}
+ for(const btn of document.querySelectorAll('[data-tab]'))btn.classList.toggle('active',btn.dataset.tab===tab);
  for(const name of ['concentration','clearance','timeline','validation','reference','method','research','experimental'])$(name).classList.toggle('hidden',name!==tab&&!(name==='reference'&&tab==='method'));
  if(tableOpen()&&(!dataIsCurrent||!results||modes.some(m=>!results[m])))calculate(true);
  else if(results)render();
@@ -1100,19 +1100,6 @@ document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
-// Manual activation avoids running a research panel while browsing tab labels.
-$('tabs').addEventListener('keydown',e=>{
- const current=e.target.closest('[role="tab"]');if(!current)return;
- const buttons=Array.from($('tabs').querySelectorAll('[role="tab"]'));
- const index=buttons.indexOf(current);let next;
- if(e.key==='ArrowRight')next=(index+1)%buttons.length;
- else if(e.key==='ArrowLeft')next=(index+buttons.length-1)%buttons.length;
- else if(e.key==='Home')next=0;
- else if(e.key==='End')next=buttons.length-1;
- else return;
- e.preventDefault();for(const button of buttons)button.tabIndex=-1;
- buttons[next].tabIndex=0;buttons[next].focus();
-});
 $('timeAboveLevel').addEventListener('input',e=>{const value=e.target.valueAsNumber;aboveLevelMg=Number.isFinite(value)&&value>=0?value/unitFactor('acyclovir'):null;renderTimeAbove();});
 $('concUnit').addEventListener('change',e=>{setConcUnit(e.target.value);renderTimeAbove(true);metricsSignature='';tableRevision=-1;if(results)render();});
 $('tablePanel').addEventListener('toggle',()=>{if(!tableOpen())return;if(!dataIsCurrent||!results||modes.some(m=>!results[m]))calculate(true);else render();});
