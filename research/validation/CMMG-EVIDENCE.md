@@ -26,7 +26,9 @@ Once the dialyzer matches each study's acyclovir data, the unchanged CMMG dialys
 
 ## 2. Kidney clearance of CMMG: sources conflict
 
-AyFlux uses CMMG kidney clearance ≈ 2.0 × CrCl and acyclovir ≈ 3.37 × CrCl (mL/min). Helldén's Paper V fits 3.75 × CrCl and 1.54 × CrCl. Raising the CMMG coefficient would lower the CMMG/acyclovir exposure ratio. Kably 2025 suggests AyFlux's ratio is already about half the observed one at both eGFR > 90 and < 30. Paper V is small, preliminary and uses a 50 mg dose, and Kably's population is liver-transplant recipients on oral valacyclovir. Neither is strong enough to override the other, so no change.
+AyFlux uses CMMG kidney clearance ≈ 2.0 × CrCl and acyclovir ≈ 3.37 × CrCl (mL/min). Helldén's Paper V fits 3.75 × CrCl and 1.54 × CrCl. Raising the CMMG coefficient would lower the CMMG/acyclovir exposure ratio. The Kably population model predicts higher median CMMG/acyclovir AUC ratios than the illustrative AyFlux scenarios. Kably reports simulated exposure by indexed eGFR category. AyFlux uses absolute CrCl. Paper V is small, preliminary and uses a 50 mg dose, and Kably's population is liver-transplant recipients on oral valacyclovir. Neither is strong enough to override the other, so no change.
+
+Run `node research/validation/kably-auc-comparison.cjs` to compare both analytes at day 11 (2000 mg valacyclovir every eight hours). At absolute CrCl 104 mL/min, AyFlux predicts acyclovir and CMMG AUCs of 99.84 and 13.08 mg·h/L. Kably’s simulated medians for indexed eGFR above 90 are 44.8 and 13.3 mg·h/L. At CrCl 25, AyFlux gives 335.33 and 162.84 mg·h/L, compared with 88.7 and 103.1 for Kably’s below-30 stratum. A lower metabolite/parent ratio can coexist with similar or higher absolute metabolite exposure. These model comparisons do not isolate formation or elimination.
 
 ## 3. CrCl 0 accumulation: not identifiable from the data in hand at the time
 
