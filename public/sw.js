@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-case-bibliography-20261114";
+const CACHE = "ayflux-static-v0.27.0-laskin-overlay-20261114";
 const CORE = [
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",

@@ -28,6 +28,17 @@ test('Smith fifth-interval AUCs use analyte units and changing only CSF transpor
  const other={...c,csfMetRatio:.25},b=pk.single(other,pk.drawParams(other)[0],[],.125);
  assert.deepEqual(a.cols.plasma,b.cols.plasma);assert.deepEqual(a.cols.cmmg,b.cols.cmmg);
 });
+test('Laskin overlay uses only the two calibration inputs on the fixed anuric case',()=>{
+ const nominal=literature.runCase('laskin');
+ assert.equal(nominal.alternative,undefined);
+ const scales={vcScale:.8,clearanceScale:1.3};
+ const result=literature.runCase('laskin',.125,{...scales,crcl:120,dose:999});
+ const study={...nominal.study.config,...scales};
+ const expected=pk.single(study,pk.drawParams(study)[0],[],.125);
+ assert.deepEqual(result.alternative,expected.cols.plasma);
+ assert.deepEqual(result.values,nominal.values);
+ assert.notDeepEqual(result.alternative,result.values);
+});
 test('research worker returns the same summaries and handles errors',()=>{
  const messages=[],self={RenalPKV7:pk,AyFluxLiterature:literature,postMessage:x=>messages.push(x)};
  vm.runInNewContext(fs.readFileSync(require.resolve('../public/assets/research-worker.js'),'utf8'),{self,importScripts(){},performance});
