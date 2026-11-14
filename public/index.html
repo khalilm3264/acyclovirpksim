@@ -586,6 +586,11 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
  html body #timeline #pdRxPanel>.check {min-height:40px;}
 }
 
+.site-subtitle, .refs, #concentration .scenario {overflow-wrap:anywhere}
+@media (max-width:359px) {
+ #concentration .graph-controls .scenarios, #concentration .results-actions {grid-template-columns:minmax(0,1fr)}
+ #concentration .results-actions label {white-space:normal}
+}
 @media (max-width:319px) {
  html body .shell {overflow-wrap:anywhere}
  html body .shell input, html body .shell select, html body .shell button {max-width:100%}
