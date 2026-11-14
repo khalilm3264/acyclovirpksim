@@ -1,0 +1,270 @@
+{
+  "protocol": {
+    "days": 20,
+    "stepHours": 0.125,
+    "interpretation": "Numerical approach to a repeating regimen under fixed assumptions; measured source steady state is a separate observation"
+  },
+  "records": [
+    {
+      "subject": 1,
+      "candidate": "baseline",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 1.6736520000241868,
+          "recoveryPct": 13.796037349908698
+        },
+        {
+          "day": 5,
+          "troughMgL": 1.7443963914082117,
+          "recoveryPct": 14.350986413001694
+        },
+        {
+          "day": 10,
+          "troughMgL": 1.754802282847151,
+          "recoveryPct": 14.432614646586176
+        },
+        {
+          "day": 20,
+          "troughMgL": 1.7548647276675569,
+          "recoveryPct": 14.433104490288274
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.5965323762167629,
+      "day5vsDay20RecoveryPercent": -0.5689564385945922,
+      "massResidualMg": 1.5916157281026244e-12
+    },
+    {
+      "subject": 1,
+      "candidate": "shared-grid minimum",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 0.7867499651358363,
+          "recoveryPct": 12.652723361463146
+        },
+        {
+          "day": 5,
+          "troughMgL": 0.7939035583053345,
+          "recoveryPct": 12.759228037543616
+        },
+        {
+          "day": 10,
+          "troughMgL": 0.7942375758366265,
+          "recoveryPct": 12.764200983045646
+        },
+        {
+          "day": 20,
+          "troughMgL": 0.7942377164263147,
+          "recoveryPct": 12.764203076183817
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.04207280944598102,
+      "day5vsDay20RecoveryPercent": -0.03897649238661094,
+      "massResidualMg": 4.092726157978177e-12
+    },
+    {
+      "subject": 1,
+      "candidate": "patient-4 minimum",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 0.6070917532193387,
+          "recoveryPct": 13.04055244073191
+        },
+        {
+          "day": 5,
+          "troughMgL": 0.6101744794857968,
+          "recoveryPct": 13.10274970689331
+        },
+        {
+          "day": 10,
+          "troughMgL": 0.6102699545100437,
+          "recoveryPct": 13.104676016588519
+        },
+        {
+          "day": 20,
+          "troughMgL": 0.6102699694515189,
+          "recoveryPct": 13.104676318048611
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.015647167729371247,
+      "day5vsDay20RecoveryPercent": -0.014701707303121925,
+      "massResidualMg": 3.183231456205249e-12
+    },
+    {
+      "subject": 4,
+      "candidate": "baseline",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 1.9017914411530843,
+          "recoveryPct": 11.638638885127657
+        },
+        {
+          "day": 5,
+          "troughMgL": 2.0019814362721657,
+          "recoveryPct": 12.221414517059019
+        },
+        {
+          "day": 10,
+          "troughMgL": 2.0195776287900133,
+          "recoveryPct": 12.323766375665157
+        },
+        {
+          "day": 20,
+          "troughMgL": 2.0197336479305323,
+          "recoveryPct": 12.32467389295868
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.8789382538908486,
+      "day5vsDay20RecoveryPercent": -0.8378264349749309,
+      "massResidualMg": 3.637978807091713e-12
+    },
+    {
+      "subject": 4,
+      "candidate": "shared-grid minimum",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 0.9164384670771508,
+          "recoveryPct": 10.716987734973225
+        },
+        {
+          "day": 5,
+          "troughMgL": 0.9279113562590239,
+          "recoveryPct": 10.84095121627583
+        },
+        {
+          "day": 10,
+          "troughMgL": 0.9285852665589247,
+          "recoveryPct": 10.848232753257236
+        },
+        {
+          "day": 20,
+          "troughMgL": 0.9285857563524194,
+          "recoveryPct": 10.84823804542955
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.07262658174346237,
+      "day5vsDay20RecoveryPercent": -0.0671706236828995,
+      "massResidualMg": 8.640199666842818e-12
+    },
+    {
+      "subject": 4,
+      "candidate": "patient-4 minimum",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 0.7114803192298881,
+          "recoveryPct": 11.068618860983378
+        },
+        {
+          "day": 5,
+          "troughMgL": 0.7166187636176502,
+          "recoveryPct": 11.143468926992794
+        },
+        {
+          "day": 10,
+          "troughMgL": 0.7168225362048379,
+          "recoveryPct": 11.146437216702855
+        },
+        {
+          "day": 20,
+          "troughMgL": 0.7168225941646308,
+          "recoveryPct": 11.146438060984524
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.028435284914274384,
+      "day5vsDay20RecoveryPercent": -0.02663751393481295,
+      "massResidualMg": 6.821210263296962e-12
+    },
+    {
+      "subject": 5,
+      "candidate": "baseline",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 1.8260019880485505,
+          "recoveryPct": 13.490636821636409
+        },
+        {
+          "day": 5,
+          "troughMgL": 1.9056106039129297,
+          "recoveryPct": 14.050260023857879
+        },
+        {
+          "day": 10,
+          "troughMgL": 1.917612399800311,
+          "recoveryPct": 14.134628824570926
+        },
+        {
+          "day": 20,
+          "troughMgL": 1.9176884648212373,
+          "recoveryPct": 14.135163537429953
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.6298135035939456,
+      "day5vsDay20RecoveryPercent": -0.6006546252347866,
+      "massResidualMg": 3.410605131648481e-12
+    },
+    {
+      "subject": 5,
+      "candidate": "shared-grid minimum",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 0.8612051772856149,
+          "recoveryPct": 12.378354157292721
+        },
+        {
+          "day": 5,
+          "troughMgL": 0.8693925963823466,
+          "recoveryPct": 12.48726984888469
+        },
+        {
+          "day": 10,
+          "troughMgL": 0.8697872304093989,
+          "recoveryPct": 12.492519590894277
+        },
+        {
+          "day": 20,
+          "troughMgL": 0.8697874096226924,
+          "recoveryPct": 12.49252197493494
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.0453919240469447,
+      "day5vsDay20RecoveryPercent": -0.042042159787969435,
+      "massResidualMg": 5.002220859751105e-12
+    },
+    {
+      "subject": 5,
+      "candidate": "patient-4 minimum",
+      "windows": [
+        {
+          "day": 3,
+          "troughMgL": 0.6650598361365625,
+          "recoveryPct": 12.761032803247668
+        },
+        {
+          "day": 5,
+          "troughMgL": 0.6686061506470693,
+          "recoveryPct": 12.824920702131307
+        },
+        {
+          "day": 10,
+          "troughMgL": 0.6687197985911879,
+          "recoveryPct": 12.826968103268666
+        },
+        {
+          "day": 20,
+          "troughMgL": 0.6687198179120549,
+          "recoveryPct": 12.82696845133972
+        }
+      ],
+      "day5vsDay20TroughPercent": -0.016997741347124506,
+      "day5vsDay20RecoveryPercent": -0.015964405121771108,
+      "massResidualMg": 2.0463630789890885e-12
+    }
+  ]
+}
