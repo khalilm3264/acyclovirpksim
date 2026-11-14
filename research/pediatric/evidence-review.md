@@ -78,3 +78,17 @@ The comparison assumes 20 mg/kg IV over one hour every eight hours to hold the i
 | 3.20 kg / 49 cm / 40 weeks | 31.26 | 85.40 | 17.78 / 5.55 | 13.14 / 8.50 |
 
 AUC is in mg·h/L and concentrations are steady-state mg/L. At 1.37 kg the renal term accounts for 20.0% of D’Agate’s typical total clearance. Varying the indexed input over the reported 9.4–40.0 mL/min/1.73 m² summary interval changes that share from 12.9% to 38.7% and interval AUC from 82.84 to 58.28 mg·h/L. A different volume changes peak and trough at fixed clearance, while interval AUC remains dose/clearance. The apparent agreement or difference between these equations is sensitive to age and renal input. No independent neonatal cohort, dialysis function or individual disease classification enters the comparison. The research runner uses the existing IV infusion solver with explicit model parameters and independently integrates each final interval to check the AUC identity. [Run the comparison](neonatal-model-comparison.cjs)
+
+## Independent 1982 neonatal peak and trough summaries
+
+Hintz et al. report mean peak/trough concentrations in neonates treated for herpesvirus infections. The historical Canadian monograph reproduces the same means and SDs for q8h administration. Using 0.22521 mg/L per µmol/L gives the values below. The nearby Yeager report describes nine neonates treated at 5–15 mg/kg q8h and shares an author. Overlap between the 1982 reports is uncertain. These data precede the Sampson and D’Agate trials. [Hintz et al.](https://pubmed.ncbi.nlm.nih.gov/6285713/) · [Monograph, Table 4](https://pdf.hres.ca/dpd_pm/00001146.PDF) · [Yeager](https://pubmed.ncbi.nlm.nih.gov/6285712/)
+
+| Dose, mg/kg q8h | Observed mean peak / trough, mg/L | Predicted peak range, mg/L | Predicted trough range, mg/L |
+|---|---:|---:|---:|
+| 5 | 6.76 / 1.19 | 1.90–4.62 | 0.38–2.86 |
+| 10 | 13.78 / 2.27 | 3.80–9.24 | 0.77–5.71 |
+| 15 | 19.39 / 3.11 | 5.71–13.86 | 1.15–8.57 |
+
+Predictions use the three age/size profiles, three indexed renal inputs and three fixed-effect model variants above. We assumed a one-hour infusion, steady state, an end-infusion peak and an immediately predose trough. Individual dose histories, maturational covariates and sample clocks are unavailable in the Hintz abstract. All three measured mean peaks exceed the tested range while the troughs fall inside it. For instance, at 10 mg/kg, 1.37 kg, 31.3 weeks and indexed CrCl 15.8, D’Agate’s base variant gives 8.36/2.26 mg/L. Matching that trough leaves a peak 39% below the measured mean. The comparison uses group means from a different cohort and cannot identify bias in an individual neonate.
+
+Assuming seven hours between samples, the peak/trough means imply two-point half-lives of 2.80, 2.69 and 2.65 h. The primary source reports a mean terminal half-life of 3.78 h (SD 1.21). A ratio of group means and a mean fitted terminal slope summarize different quantities. [Source transcription and reproduction script](hintz-neonatal-sampling.cjs)

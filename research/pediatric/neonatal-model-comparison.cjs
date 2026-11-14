@@ -12,13 +12,13 @@ const indexedClearances = [9.4,15.8,40];
 function gehanGeorge(weight,length) {
   return .02350*weight**.51456*length**.42246;
 }
-function compare(profile,indexed) {
+function compare(profile,indexed,doseMgKg=20) {
   const {weight,length,pma} = profile;
   const bsa=gehanGeorge(weight,length);
   const renal=indexed*bsa/1.73*.06; // mL/min/1.73 m² -> absolute L/h
   const residual=.748*(weight/1.37)**.75*pma/(50+pma);
   const v=1.93*weight/1.37;
-  const scenario={weight,dose:20,interval:8,infusion:1,doses:100};
+  const scenario={weight,dose:doseMgKg,interval:8,infusion:1,doses:100};
   const models = {
     sampson:{cl:weight*.305*(pma/31.3)**3.02,v:2.8*weight},
     dagateBase:{cl:residual+renal,v},
@@ -40,4 +40,7 @@ function compare(profile,indexed) {
   return {...profile,indexed,bsa,renalLh:renal,residualLh:residual,
     renalPct:100*renal/(residual+renal),summaries};
 }
-console.log(JSON.stringify(profiles.flatMap(p=>indexedClearances.map(i=>compare(p,i))),null,2));
+if (require.main === module) {
+  console.log(JSON.stringify(profiles.flatMap(p=>indexedClearances.map(i=>compare(p,i))),null,2));
+}
+module.exports = {profiles,indexedClearances,compare};
