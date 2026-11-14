@@ -1,0 +1,284 @@
+{
+  "baseline": {
+    "assumptions": {
+      "weight": 66.2,
+      "admissionMgL": 14.1,
+      "followup": [
+        {
+          "hour": 15,
+          "mgL": 3
+        },
+        {
+          "hour": 39,
+          "mgL": 0.5
+        }
+      ],
+      "start": 4.5,
+      "firstDuration": 7,
+      "interruption": 5.5,
+      "firstEffluentLh": 2.1,
+      "secondEffluentLh": 0.8,
+      "crcl": 12.9,
+      "sieving": 0.95,
+      "delivered": 1,
+      "initialPeripheralRatio": 1,
+      "dt": 0.01
+    },
+    "predictions": [
+      {
+        "hour": 15,
+        "mgL": 3,
+        "predictedMgL": 2.9557731339946045,
+        "predictedObserved": 0.9852577113315348
+      },
+      {
+        "hour": 39,
+        "mgL": 0.5,
+        "predictedMgL": 0.32353677451675117,
+        "predictedObserved": 0.6470735490335023
+      }
+    ]
+  },
+  "sensitivities": [
+    {
+      "assumptions": {
+        "weight": 66.2,
+        "admissionMgL": 14.1,
+        "followup": [
+          {
+            "hour": 15,
+            "mgL": 3
+          },
+          {
+            "hour": 39,
+            "mgL": 0.5
+          }
+        ],
+        "start": 4.5,
+        "firstDuration": 7,
+        "interruption": 5.5,
+        "firstEffluentLh": 2.1,
+        "secondEffluentLh": 0.8,
+        "crcl": 0,
+        "sieving": 0.95,
+        "delivered": 1,
+        "initialPeripheralRatio": 1,
+        "dt": 0.01
+      },
+      "predictions": [
+        {
+          "hour": 15,
+          "mgL": 3,
+          "predictedMgL": 6.135521390626662,
+          "predictedObserved": 2.045173796875554
+        },
+        {
+          "hour": 39,
+          "mgL": 0.5,
+          "predictedMgL": 1.9074749846976555,
+          "predictedObserved": 3.814949969395311
+        }
+      ]
+    },
+    {
+      "assumptions": {
+        "weight": 66.2,
+        "admissionMgL": 14.1,
+        "followup": [
+          {
+            "hour": 15,
+            "mgL": 3
+          },
+          {
+            "hour": 39,
+            "mgL": 0.5
+          }
+        ],
+        "start": 4.5,
+        "firstDuration": 7,
+        "interruption": 5.5,
+        "firstEffluentLh": 2.1,
+        "secondEffluentLh": 0.8,
+        "crcl": 12.9,
+        "sieving": 0.95,
+        "delivered": 1,
+        "initialPeripheralRatio": 0.5,
+        "dt": 0.01
+      },
+      "predictions": [
+        {
+          "hour": 15,
+          "mgL": 3,
+          "predictedMgL": 2.0797964250762035,
+          "predictedObserved": 0.6932654750254011
+        },
+        {
+          "hour": 39,
+          "mgL": 0.5,
+          "predictedMgL": 0.2276528378067713,
+          "predictedObserved": 0.4553056756135426
+        }
+      ]
+    },
+    {
+      "assumptions": {
+        "weight": 66.2,
+        "admissionMgL": 14.1,
+        "followup": [
+          {
+            "hour": 15,
+            "mgL": 3
+          },
+          {
+            "hour": 39,
+            "mgL": 0.5
+          }
+        ],
+        "start": 4.5,
+        "firstDuration": 7,
+        "interruption": 5.5,
+        "firstEffluentLh": 2.1,
+        "secondEffluentLh": 0.8,
+        "crcl": 12.9,
+        "sieving": 0.95,
+        "delivered": 1,
+        "initialPeripheralRatio": 2,
+        "dt": 0.01
+      },
+      "predictions": [
+        {
+          "hour": 15,
+          "mgL": 3,
+          "predictedMgL": 4.707726551831383,
+          "predictedObserved": 1.5692421839437944
+        },
+        {
+          "hour": 39,
+          "mgL": 0.5,
+          "predictedMgL": 0.5153046479367129,
+          "predictedObserved": 1.0306092958734259
+        }
+      ]
+    },
+    {
+      "assumptions": {
+        "weight": 66.2,
+        "admissionMgL": 14.1,
+        "followup": [
+          {
+            "hour": 15,
+            "mgL": 3
+          },
+          {
+            "hour": 39,
+            "mgL": 0.5
+          }
+        ],
+        "start": 4.5,
+        "firstDuration": 8.5,
+        "interruption": 5,
+        "firstEffluentLh": 2.1,
+        "secondEffluentLh": 0.8,
+        "crcl": 12.9,
+        "sieving": 0.95,
+        "delivered": 1,
+        "initialPeripheralRatio": 1,
+        "dt": 0.01
+      },
+      "predictions": [
+        {
+          "hour": 15,
+          "mgL": 3,
+          "predictedMgL": 2.797154595059288,
+          "predictedObserved": 0.9323848650197627
+        },
+        {
+          "hour": 39,
+          "mgL": 0.5,
+          "predictedMgL": 0.31262870106341206,
+          "predictedObserved": 0.6252574021268241
+        }
+      ]
+    },
+    {
+      "assumptions": {
+        "weight": 66.2,
+        "admissionMgL": 14.1,
+        "followup": [
+          {
+            "hour": 15,
+            "mgL": 3
+          },
+          {
+            "hour": 39,
+            "mgL": 0.5
+          }
+        ],
+        "start": 4.5,
+        "firstDuration": 7,
+        "interruption": 5.5,
+        "firstEffluentLh": 0,
+        "secondEffluentLh": 0,
+        "crcl": 12.9,
+        "sieving": 0.95,
+        "delivered": 1,
+        "initialPeripheralRatio": 1,
+        "dt": 0.01
+      },
+      "predictions": [
+        {
+          "hour": 15,
+          "mgL": 3,
+          "predictedMgL": 3.69567091553884,
+          "predictedObserved": 1.2318903051796133
+        },
+        {
+          "hour": 39,
+          "mgL": 0.5,
+          "predictedMgL": 0.5437677319466402,
+          "predictedObserved": 1.0875354638932804
+        }
+      ]
+    },
+    {
+      "assumptions": {
+        "weight": 66.2,
+        "admissionMgL": 14.1,
+        "followup": [
+          {
+            "hour": 15,
+            "mgL": 3
+          },
+          {
+            "hour": 39,
+            "mgL": 0.5
+          }
+        ],
+        "start": 4.5,
+        "firstDuration": 7,
+        "interruption": 5.5,
+        "firstEffluentLh": 2.1,
+        "secondEffluentLh": 0.8,
+        "crcl": 12.9,
+        "sieving": 0.95,
+        "delivered": 1,
+        "initialPeripheralRatio": 1,
+        "dt": 0.005
+      },
+      "predictions": [
+        {
+          "hour": 15,
+          "mgL": 3,
+          "predictedMgL": 2.955773133996934,
+          "predictedObserved": 0.9852577113323114
+        },
+        {
+          "hour": 39,
+          "mgL": 0.5,
+          "predictedMgL": 0.3235367745167732,
+          "predictedObserved": 0.6470735490335464
+        }
+      ]
+    }
+  ]
+}

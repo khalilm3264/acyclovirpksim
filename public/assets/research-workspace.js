@@ -17,6 +17,50 @@ $('openVisualExplorer')?.addEventListener('click',event=>{
   sessionStorage.setItem('ayflux-explorer',JSON.stringify({config,mode:snap.primary}));
  }catch(error){event.preventDefault();$('visualExplorerStatus').textContent=error.message+' Settings could not be copied.';}
 });
+// Ito et al., Figure 2. Hours are relative to the admission concentration.
+const itoSamples=[
+ {hour:0,concentration:14.1,estimated:false},
+ {hour:15,concentration:3.0,estimated:true},
+ {hour:39,concentration:0.5,estimated:true}
+];
+const itoSessions=[
+ {start:4.5,end:13,flow:1800},
+ {start:18,end:48,flow:500}
+];
+$('itoStudy').addEventListener('toggle',async()=>{
+ if(!$('itoStudy').open)return;
+ const rows=$('itoRows');
+ rows.replaceChildren();
+ for(const sample of itoSamples){
+  const row=rows.insertRow(),prefix=sample.estimated?'≈':'';
+  row.insertCell().textContent=prefix+sample.hour;
+  row.insertCell().textContent=prefix+sample.concentration.toFixed(1);
+  row.insertCell().textContent=sample.estimated?'Read from Figure 2':'Reported at admission';
+ }
+ $('itoIntervals').textContent='Approximate CHDF intervals from Figure 2: '+itoSessions.map(s=>
+  s.start+'–'+s.end+' h at '+s.flow.toLocaleString('en-US')+' mL/h').join(' and ')+'. Flow values refer to dialysate. The narrative reports a 7-hour initial session and 5.5-hour interruption, which differ from these plotted boundaries.';
+ try{
+  const charts=window.AyFluxCharts;
+  await charts.ensure();
+  if(!$('itoStudy').open)return;
+  const series=itoSamples.map(s=>[s.hour,s.concentration]);
+  const option=charts.options([{name:'Observed serum acyclovir',type:'scatter',symbolSize:9,
+   itemStyle:{color:'#26354a'},clip:false,data:series,markArea:{silent:true,
+    itemStyle:{color:'rgba(35,126,160,0.16)'},label:{position:'insideTop',color:'#17475c',fontSize:11},
+    data:itoSessions.map(s=>[{name:s.flow.toLocaleString('en-US')+'\nmL/h',xAxis:s.start},{xAxis:s.end}])}}],
+   'Time from admission (h)','Serum acyclovir (mg/L)');
+  option.xAxis.max=48;option.xAxis.interval=12;
+  Object.assign(option.yAxis,{type:'log',min:0.1,max:100});
+  option.tooltip={trigger:'item',renderMode:'richText',formatter:p=>{
+   const sample=itoSamples[p.dataIndex],prefix=sample.estimated?'≈':'';
+   return prefix+sample.hour+' h · '+prefix+sample.concentration.toFixed(1)+' mg/L';
+  }};
+  charts.draw($('itoPlot'),option);
+  $('itoStatus').textContent='';
+ }catch{
+  $('itoStatus').textContent='Chart unavailable. The measurements and intervals are listed below.';
+ }
+});
 let externalTable=null, lastExternal=null;
 const getSnapshot=()=>{
  const snapshot=bridge.snapshot();
