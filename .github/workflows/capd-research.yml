@@ -35,3 +35,19 @@ jobs:
           name: ayflux-boelaert-capd
           path: research/validation/results/
           if-no-files-found: error
+
+  source-comparisons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Run source-specific research comparisons
+        run: bash research/validation/check-source-comparisons.sh
+      - name: Archive comparison reports and engine identity
+        uses: actions/upload-artifact@v4
+        with:
+          name: ayflux-source-comparisons
+          path: research/validation/results/source-comparisons/
+          if-no-files-found: error
