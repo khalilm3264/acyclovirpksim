@@ -52,6 +52,10 @@ Run `node research/validation/compare-benchmarks.cjs` to reproduce the [benchmar
 
 [Hara 2008](HARA-HD.md) compares the model with acyclovir and CMMG endpoints after oral valacyclovir. Run `node research/validation/hara-hd.cjs`.
 
+## Obesity and renal-function estimation
+
+[Smith 2016](SMITH2016-OBESITY.md) separates CrCl estimation from PK weight scaling in one obese patient with measured renal impairment. Run `node research/validation/smith2016-obesity.cjs`; source-derived endpoints and unknown infusion duration are explicitly identified. This is a diagnostic sensitivity comparison, not a blinded validation or an obesity correction. It changes no model defaults or pooled scorecard statistics.
+
 ## Continuous infusion and PD/HD reconstructability
 
 [Manders 2026 & Sadjadi 2018 protocol](MANDERS2026-SADJADI2018-PROTOCOL.md) and [results](MANDERS2026-SADJADI2018-RESULTS.md) test continuous IV acyclovir (`n = 6` steady-state plasma levels plus Case F CSF check) and audit Sadjadi 2018 reconstructability under the pinned `304ce53` engine without modifying parameters or the 37-point scorecard. Run `node research/validation/manders2026-sadjadi2018.cjs`.
