@@ -125,6 +125,25 @@ async function main(){
   assert.ok(predictionFields[1]>predictionFields[0],'Prediction fields stack on a phone');
   await page.locator('#scenarioDifference summary').focus();
   await page.keyboard.press('Enter');
+  // Timeline editors keep phone targets readable and the wide exchange table scrollable.
+  await page.locator('#tab-timeline').click();
+  assert.match(await page.textContent('#timelinePending'),/Apply custom timeline/);
+  assert.match(await page.textContent('#dosePending'),/Apply custom timeline/);
+  await page.locator('#addDose').click();
+  await page.locator('#pdRxEnable').check();
+  await page.locator('#generatePdRx').click();
+  assert.ok(await page.locator('#pdRxRows tr').count()>0,'Generated exchange rows');
+  for(const control of await page.locator('#scheduleRows input, #scheduleRows select, #scheduleRows button, #doseRows input, #doseRows select, #doseRows button, #pdRxRows input, #pdRxRows select, #pdRxRows button, #addRow, #addDose, #generatePdRx, #applyFullTimelineBottom').all()) {
+   const bounds=await control.boundingBox();
+   assert.ok(bounds.height>=39.9,'Timeline phone target '+await control.evaluate(el=>el.outerHTML)+' '+JSON.stringify(bounds));
+  }
+  const session=await page.locator('#scheduleRows .intervals').first().evaluate(row=>({width:row.getBoundingClientRect().width,mode:row.querySelector('select').getBoundingClientRect().width}));
+  assert.ok(session.mode>session.width*0.9,'Phone session mode uses a full row');
+  await page.locator('#pdRxTableWrap').focus();
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(()=>document.querySelector('#pdRxTableWrap').scrollLeft>0,null,{timeout:5000});
+  assert.ok(await page.locator('#pdRxScrollHint').isVisible());
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Timeline tables scroll within the page');
   // Guide navigation follows all content at desktop and phone widths.
   for (const width of [1280,390]) {
    await page.setViewportSize({width,height:900});
