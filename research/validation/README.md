@@ -51,3 +51,7 @@ Run `node research/validation/compare-benchmarks.cjs` to reproduce the [benchmar
 ## Oral valacyclovir and hemodialysis
 
 [Hara 2008](HARA-HD.md) compares the model with acyclovir and CMMG endpoints after oral valacyclovir. Run `node research/validation/hara-hd.cjs`.
+
+## Continuous infusion and PD/HD reconstructability
+
+[Manders 2026 & Sadjadi 2018 protocol](MANDERS2026-SADJADI2018-PROTOCOL.md) and [results](MANDERS2026-SADJADI2018-RESULTS.md) test continuous IV acyclovir (`n = 6` steady-state plasma levels plus Case F CSF check) and audit Sadjadi 2018 reconstructability under the pinned `304ce53` engine without modifying parameters or the 37-point scorecard. Run `node research/validation/manders2026-sadjadi2018.cjs`.
