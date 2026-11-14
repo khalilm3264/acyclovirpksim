@@ -26,3 +26,14 @@ The filter combined diffusion and convection. The authors explicitly state that 
 The paper combines samples from two infusions one day apart. H2, H5 and H7 belong to the first, while H1, H4 and H8 belong to the second. Connecting all table rows as a single concentration curve would misrepresent the observations. The first interval also included a predose sample. The authors report interval AUCs of 75 and 65 mg·h/L and an estimated total clearance of 52.2 mL/min.
 
 Kidney function was preserved before CKRT, with creatinine 22 µmol/L. Endogenous clearance was estimated at 25.9–33 mL/min. Adult Cockcroft–Gault scaling is inapplicable at 21 months. A full concentration reconstruction requires an explicit pediatric endogenous-clearance model and alignment of the two sampling intervals. This report evaluates the existing CRRT clearance component only.
+
+## Adult comparison from Khajehdehi 2000
+
+One anuric adult received CVVHD and CVVHDF on separate occasions. The authors report extracorporeal clearance of 14 and 17 mL/min, extraction of 84% and 60%, and estimated 24-hour removal of 18% and 65% of the respective daily doses. The two prescriptions had different flows, dialyzers and daily doses. The endpoints were verified against the authors' abstract. Detailed flow and concentration inputs below come from the project's prior transcription of Table 1 and pp. 352–353. The primary scan was unavailable for this reanalysis. [Primary abstract](https://pubmed.ncbi.nlm.nih.gov/11076113/)
+
+| Occasion | Outflow, L/h | Effluent / inlet concentration, mg/L | Default coefficient and delivery, mL/min | Measured ratio and full delivery, mL/min |
+| --- | ---: | ---: | ---: | ---: |
+| CVVHD | 1.0 | 11 / 13 | 13.46 | 14.10 |
+| CVVHDF | 1.7 | 7.9 / 13 | 22.88 | 17.22 |
+
+Holding these effluent concentrations constant for 24 hours gives 264 and 322 mg. The corresponding daily doses of 1500 and 500 mg yield 17.6% and 64.5%. The 24-hour figures are projections. The first circuit reportedly clotted after six hours, for which the same calculation gives 66 mg. The measured-ratio calculation reproduces the clearance arithmetic. The nominal coefficient of 0.95 with full delivery would give 15.83 and 26.92 mL/min. All calculations address the circuit term only. Reported outflow is specified in absolute volume per hour, so converting it to mL/kg/h and back cancels body weight. This comparison adds no systemic weight-scaling endpoint to the scorecard. [Reproduction script](khajehdehi-crrt.cjs)
