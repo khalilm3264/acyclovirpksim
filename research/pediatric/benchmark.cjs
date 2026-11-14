@@ -9,5 +9,5 @@ const scenarios = [
   { name: 'higher_weight', ...m.defaults, weight: 30 },
 ];
 const results = { source: m.source, status: 'Equation reproduction only; generated model outputs, not measured clinical data', scenarios: scenarios.map(c => ({ input: c, summary: m.summary(c), concentrations: [0, 0.5, 1, 2, 4, 8, 9, 16, 24, 40, 41, 48].map(time_h => ({ time_h, plasma_mg_L: m.concentration(time_h, c) })) })) };
-fs.writeFileSync(path.join(__dirname, 'reference-results.json'), JSON.stringify(results, null, 2) + '\n');
-console.log('Wrote research/pediatric/reference-results.json');
+fs.writeFileSync(path.join(process.argv[2] || __dirname, 'reference-results.json'), JSON.stringify(results, null, 2) + '\n');
+console.log('Wrote reference-results.json');

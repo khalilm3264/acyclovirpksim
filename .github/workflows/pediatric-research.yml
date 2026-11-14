@@ -1,0 +1,49 @@
+name: Pediatric research reproducibility
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'research/pediatric/**'
+      - 'public/research/pediatric/model.js'
+      - 'tests/pediatric-*.test.cjs'
+      - '.github/workflows/pediatric-research.yml'
+  pull_request:
+    paths:
+      - 'research/pediatric/**'
+      - 'public/research/pediatric/model.js'
+      - 'tests/pediatric-*.test.cjs'
+      - '.github/workflows/pediatric-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+jobs:
+  comparisons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Check pediatric model and study comparisons
+        run: |
+          node --test tests/pediatric-*.test.cjs
+          output="$RUNNER_TEMP/pediatric-research"
+          mkdir -p "$output"
+          node research/pediatric/benchmark.cjs "$output"
+          node research/pediatric/compare.cjs "$output"
+          for fixture in reference-results model-comparison; do
+            cmp "research/pediatric/$fixture.json" "$output/$fixture.json"
+          done
+          for study in funaki-crrt-sampling neonatal-model-comparison hintz-neonatal-sampling maximova-timed-sampling; do
+            node "research/pediatric/$study.cjs" > "$output/$study.json"
+            node -e "JSON.parse(require('node:fs').readFileSync(process.argv[1],'utf8'))" "$output/$study.json"
+          done
+          git rev-parse HEAD > "$output/commit.txt"
+          git hash-object public/research/pediatric/model.js > "$output/model-blob.txt"
+      - name: Archive pediatric research outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: pediatric-research
+          path: ${{ runner.temp }}/pediatric-research/
+          if-no-files-found: error
