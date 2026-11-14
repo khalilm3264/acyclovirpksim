@@ -112,7 +112,9 @@ async function main(){
    const height=await page.locator('#'+id).evaluate(el=>el.getBoundingClientRect().height);
    assert.ok(height>=39.9,'Phone picker '+id+' target height '+height);
   }
-  await page.locator('#scenarioDifference summary').click();
+  await page.locator('#scenarioDifference summary').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('#scenarioDifference').evaluate(el=>el.open),true,'Comparison details opens by keyboard');
   await page.locator('#differenceFrom').waitFor({state:'visible'});
   for(const id of ['saveBaseline','clearBaseline','regimenName','saveRegimen','predictMetric','predictChoice','revealPrediction','differenceFrom','differenceTo','applyPostHd']) {
    const bounds=await page.locator('#'+id).boundingBox();
@@ -121,7 +123,8 @@ async function main(){
   }
   const predictionFields=await page.locator('.predict-row .comparison-field').evaluateAll(fields=>fields.map(field=>field.getBoundingClientRect().top));
   assert.ok(predictionFields[1]>predictionFields[0],'Prediction fields stack on a phone');
-  await page.locator('#scenarioDifference summary').click();
+  await page.locator('#scenarioDifference summary').focus();
+  await page.keyboard.press('Enter');
   // Guide navigation follows all content at desktop and phone widths.
   for (const width of [1280,390]) {
    await page.setViewportSize({width,height:900});
