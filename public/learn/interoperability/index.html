@@ -54,6 +54,11 @@
       <p>Open the simulator's <strong>Research tools</strong> tab, import a PK-Sim or MoBi results CSV, and choose its time and concentration columns and units. AyFlux draws the two concentration curves together, plots their difference, and reports curve-to-curve error metrics. Imported data remain in the browser. This is not native model import or clinical validation.</p>
     </section>
     <section class="card">
+      <h2>Printable scenario summary</h2>
+      <p>Choose <strong>Printable summary</strong> from Export results to preview a one-page teaching handout. It includes the selected primary scenario, key patient and regimen inputs, two systemic concentration charts and model-version information. Use Print / save PDF in the preview to open your browser's print dialog. Long dose and exchange schedules are summarized; keep the configuration JSON and results CSV for the full settings.</p>
+      <p>The handout shows the calculated model medians and assumed parameter bands in mg/L. Entered measurements are omitted. When fitting measurements informed the curves, the handout states that reweighting occurred. Clinical validity is not implied.</p>
+    </section>
+    <section class="card">
       <h2>Export a nominal scenario as Python or R</h2>
       <p>In the main simulator, choose <strong>Nominal Python</strong> or <strong>Nominal R / mrgsolve</strong> from Export results. Each file contains the active primary scenario's nominal systemic acyclovir and CMMG parameters, exact doses and dialysis windows. Python requires NumPy/SciPy; R requires mrgsolve and a C++ toolchain. Both write a concentration CSV in mg/L.</p>
       <p>No dialysis, HD, CRRT and their custom sequences are supported, including mixed IV/oral schedules and changing CrCl. Exchange-resolved PD and applied Bayesian fitting are rejected. These scripts omit CSF proxies and uncertainty bands; their nominal curves differ from the displayed ensemble medians. Solver agreement is an implementation check, not clinical validation.</p>

@@ -129,3 +129,23 @@ The cases cover off-grid HD events, overlapping infusions, oral/IV transitions,
 changing CrCl, CRRT→HD, anuria and zero dosing. The comparison threshold is
 0.005% normalized maximum systemic concentration error against a fine-grid engine
 run; it is an implementation check, not a clinical acceptance limit.
+
+## Printable teaching handout
+
+Choose **Printable summary** from Export results. The renderer captures the current
+primary scenario before loading the preview, so later updates cannot relabel an
+older curve. The handout includes model version, capture time, patient/kidney
+inputs, regimen and dialysis summary, selected non-default modifiers, five output
+metrics and plasma acyclovir/CMMG curves. Parameter bands retain the configured
+coverage; fitting is disclosed as a count, never as individual measurements.
+
+The handout is a summary, not a complete model file. Custom dosing lists, CrCl knots
+and dialysis schedules are abbreviated explicitly. Keep the configuration JSON and
+CSV alongside it for reproducibility. End-window concentration is not labeled as a
+steady-state trough. Numerical outputs, prior assumptions and clinical limitations
+are unchanged. The local preview supports Print / save PDF; it transmits nothing.
+
+The summary renderer and stylesheet load only when requested. Print styling is
+scoped to an open preview, so closing it restores the application's normal print
+behavior. Browser regression checks require a single PDF page for the default,
+mobile, 200-dose/dynamic-kidney, PD and fitted-result summaries.
