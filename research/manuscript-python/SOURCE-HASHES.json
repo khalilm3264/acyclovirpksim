@@ -1,0 +1,12 @@
+{
+  "archive": "AyFlux_reproducibility.zip",
+  "archiveSha256": "6744d3c85f3a2b846d5bd7b8b7381437ad626c707e7b8851bb189d40b0316563",
+  "files": {
+    "analysis/run_studies.py": "d921411566852f158ecd3daca13b74dc13fa446fb9ed52a2179176c6626d7c5d",
+    "analysis/laskin_fulltext_update.py": "b69b44544102aca6594445f352bb307cdea171edf74e3b92c83104c63a6d84b2",
+    "analysis/test_reproduction.py": "855151615e7f774c2a4a9486a0b04a49e921bea75ee9280a9ba1d085948173f5",
+    "reconciled/analysis/run_studies.py": "9b6a9fa5a749f67a145f05efb77145272c92f1f0050cd36774cc4d67097e4177",
+    "reconciled/analysis/laskin_fulltext_update.py": "b69b44544102aca6594445f352bb307cdea171edf74e3b92c83104c63a6d84b2",
+    "reconciled/analysis/test_reproduction.py": "855151615e7f774c2a4a9486a0b04a49e921bea75ee9280a9ba1d085948173f5"
+  }
+}
