@@ -8,12 +8,14 @@
  'use strict';
  const MAX_SAVED=4;
  function interp(time,values,t){
+  if(!time||!time.length||!values||!values.length)return 0;
   if(t<=time[0])return values[0];
   for(let i=1;i<time.length;i++)if(time[i]>=t){const f=(time[i]-time[i-1])?(t-time[i-1])/(time[i]-time[i-1]):1;return values[i-1]+f*(values[i]-values[i-1]);}
   return values[values.length-1];
  }
  // Trapezoidal AUC from 0 to T (mg·h/L when values are mg/L).
  function aucTo(time,values,T){
+  if(!time||!time.length||!values||!values.length)return 0;
   let sum=0;
   for(let i=1;i<time.length&&time[i-1]<T;i++){
    const t1=Math.min(time[i],T),v1=time[i]<=T?values[i]:interp(time,values,T);

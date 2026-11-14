@@ -92,8 +92,9 @@ function selectFactor(label){
 const dimensions=['Central volume (L)','Systemic clearance (L/h)','Plasma AUC (mg·h/L)','Plasma at sample (mg/L)'];
 for(const id of ['ensembleX','ensembleY'])$(id).replaceChildren(...dimensions.map((v,i)=>new Option(v,i)));
 $('ensembleY').value='2';
-function quantile(sorted,p){const pos=(sorted.length-1)*p,i=Math.floor(pos);return sorted[i]+(pos-i)*((sorted[i+1]??sorted[i])-sorted[i]);}
+function quantile(sorted,p){if(!sorted||!sorted.length)return 0;const pos=(sorted.length-1)*p,i=Math.floor(pos);return sorted[i]+(pos-i)*((sorted[i+1]??sorted[i])-sorted[i]);}
 function density(values){
+ if(!values||!values.length)return [];
  const lo=values[0],hi=values.at(-1);if(hi===lo)return [[lo,1]];
  const bandwidth=Math.max((quantile(values,.75)-quantile(values,.25))/1.349,(hi-lo)/20)*Math.pow(values.length,-.2);
  const points=Array.from({length:51},(_,i)=>{const v=lo+(hi-lo)*i/50;return [v,values.reduce((sum,x)=>sum+Math.exp(-.5*((x-v)/bandwidth)**2),0)];});

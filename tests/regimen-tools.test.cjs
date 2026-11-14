@@ -108,3 +108,12 @@ test('prediction exercise hides results until revealed',()=>{
  assert.match(ui,/f=v=>hidden\?'\?'/,'metric cells hidden while predicting');
  assert.match(ui,/\$\('predictMode'\)\.checked=false;renderRegimens\(\);/,'reveal ends the exercise');
 });
+
+test('regimen-tools interpolation and AUC handle empty or singleton inputs safely',()=>{
+ assert.equal(R.interp([],[],5),0);
+ assert.equal(R.interp(null,null,5),0);
+ assert.equal(R.interp([0],[10],5),10);
+ assert.equal(R.aucTo([],[],10),0);
+ assert.equal(R.aucTo(null,null,10),0);
+ assert.equal(R.aucTo([0],[10],10),0);
+});
