@@ -118,6 +118,7 @@ a:focus-visible { outline: 2px solid #238ac4; outline-offset: 2px; }
   font-weight: 700;
 }
 .card h3 { margin: 12px 0 6px; font-size: 12px; }
+.card pre { max-width: 100%; overflow-x: auto; }
 .card p { max-width: 115ch; margin: 0 0 10px; }
 .card p:last-child, .card ul:last-child, .card ol:last-child { margin-bottom: 0; }
 .card ul, .card ol { max-width: 112ch; margin: 8px 0 11px; padding-left: 20px; }

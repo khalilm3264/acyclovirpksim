@@ -67,7 +67,8 @@ async function main(){
     assert.equal(await page.locator('main > :last-child.actions a[href="/"]').count(),1);
     await page.locator('main > .actions').scrollIntoViewIfNeeded();
     assert.ok(await page.locator('main > .actions a').isVisible());
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
+    const dimensions=await page.evaluate(()=>({page:document.documentElement.scrollWidth,viewport:innerWidth}));
+    assert.ok(dimensions.page<=dimensions.viewport+2,guide+' '+JSON.stringify(dimensions));
    }
   }
   assert.deepEqual(errors,[]);
