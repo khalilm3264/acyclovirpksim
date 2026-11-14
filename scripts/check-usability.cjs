@@ -23,6 +23,29 @@ async function main(){
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('http://127.0.0.1:'+server.address().port);
   await page.waitForFunction(()=>!document.querySelector('#saveBaseline').disabled,null,{timeout:60000});
+  // Tabs expose selection, support manual keyboard activation and return to results.
+  assert.equal(await page.locator('#tabs[role="tablist"] [role="tab"]').count(),7);
+  assert.equal(await page.locator('#tabs [aria-selected="true"]').getAttribute('id'),'tab-concentration');
+  await page.locator('#tab-concentration').focus();
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'tab-clearance');
+  assert.ok(await page.locator('#concentration').isVisible(),'Arrow keys move focus without changing panels');
+  await page.keyboard.press('Enter');
+  assert.ok(await page.locator('#clearance').isVisible());
+  assert.equal(await page.locator('#tab-clearance').getAttribute('aria-selected'),'true');
+  await page.keyboard.press('End');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'tab-method');
+  await page.keyboard.press('Space');
+  assert.ok(await page.locator('#method').isVisible());
+  assert.ok(await page.locator('#reference').isVisible());
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'tab-concentration');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'tab-method');
+  await page.keyboard.press('Home');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'tab-concentration');
+  assert.equal(await page.locator('#tabs [tabindex="0"]').count(),1);
   // Results first: summary, then the plasma graph, then the optional comparison tools.
   const order=await page.evaluate(()=>{const top=s=>document.querySelector(s).getBoundingClientRect().top+scrollY;
    return {summary:top('.summary-card'),chart:top('#plasmaChart'),tools:top('#comparisonTools'),baseline:top('#baselinePanel'),regimen:top('#regimenPanel')};});
@@ -68,6 +91,12 @@ async function main(){
   // Phone width: no sideways scrolling.
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=window.innerWidth+2,null,{timeout:10000});
+  const navBounds=await page.locator('#tabs').boundingBox();
+  const finalTabBounds=await page.locator('#tab-method').boundingBox();
+  assert.ok(finalTabBounds.width>navBounds.width*0.98,'Final phone tab fills its row');
+  for(const button of await page.locator('#tabs [role="tab"]').all()) {
+   const bounds=await button.boundingBox();assert.ok(bounds.height>=39.9,'Tab touch target');
+  }
   const troughWidth=await page.locator('#troughMetric').evaluate(el=>el.getBoundingClientRect().width);
   const phoneMetricsWidth=await page.locator('#metrics').evaluate(el=>el.getBoundingClientRect().width);
   assert.ok(troughWidth>phoneMetricsWidth*0.9,'Phone trough uses a full row');
