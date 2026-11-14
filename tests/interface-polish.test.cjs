@@ -59,7 +59,7 @@ test('page layout: primary mode first, merged reference tab, table under Concent
  assert.deepEqual(tabs,['concentration','clearance','timeline','validation','research','experimental','method']);
  const aside=html.slice(html.indexOf('<aside>'),html.indexOf('</aside>'));
  assert.ok(aside.indexOf('id="primary"')<aside.indexOf('id="patientControls"'),'primary dialysis mode precedes patient inputs');
- const concentration=html.slice(html.indexOf('<section id="concentration">'),html.indexOf('<section id="clearance"'));
+ const concentration=html.slice(html.indexOf('<section id="concentration"'),html.indexOf('<section id="clearance"'));
  assert.match(concentration,/<details class="card" id="tablePanel">[\s\S]*id="resultTable"/);
  assert.doesNotMatch(html,/<section id="table"/);
  const research=html.slice(html.indexOf('<section id="research"'),html.indexOf('id="status"'));
