@@ -97,3 +97,22 @@ Smith et al. measured systemic acyclovir and CMMG over the fifth oral dosing int
 Using the three CKD clearances increases predicted mean CMMG AUC by 14% over the default calculation at their mean CrCl. The cohort's measured CMMG-to-parent ratio of group means is 0.257. Imposing the higher slope changes the modeled ratio from 0.485 to 0.283, while absolute CMMG AUC moves from 23% above to 28% below the observed mean. The parent prediction remains 35% low. In the normal group the higher slope leaves CMMG 48% low. Matching a ratio with an underpredicted parent concentration cannot establish a renal clearance coefficient.
 
 Subject weights and matched individual AUCs were unavailable for this calculation. Weight sensitivities (50/70/90 kg), nominal oral bioavailability 0.545, the estimated CrCl inputs and the extrapolation of a preliminary 50 mg IV clearance fit to repeated oral doses limit inference. The prior exploratory grid in draft #14 used the same CKD clearances. Here the comparison uses the published normal-group mean, current engine, source sampling grid and the Paper V coefficient specifically. The Smith CSF ratio informed the model's existing CSF calibration. These systemic comparisons reuse those participants. [Smith 2010, Table 1 and Methods](https://doi.org/10.1128/AAC.00729-09) · [Paper V, Figure 8](https://files01.core.ac.uk/download/pdf/70338802.pdf) · [Reproduction script](smith-systemic-exposure.cjs)
+
+## Paper V slope against Kably’s day-11 transplant simulations
+
+Kably et al. collected 255 plasma samples from 50 early liver-transplant recipients. Of those, 33, 13, 3 and 1 fell in the four indexed eGFR strata from highest to lowest. Tables 3–5 report simulations in 1,000 virtual recipients per regimen (684, 236, 60 and 20 in the respective strata). The two most frequent observed regimens were 2,000 mg valacyclovir every 12 h (24 recipients) and every 8 h (17). Both are evaluated here with the nominal AyFlux model at 70 kg, varying only absolute CrCl and the CMMG renal clearance slope. Absolute CrCl is a scenario input, not a conversion from CKD-EPI eGFR. [Kably, methods and Tables 1, 3–5](https://doi.org/10.1093/jac/dkaf070)
+
+| 2,000 mg q8h, day 11 | Parent AUC | CMMG AUC | Parent predose | CMMG predose | CMMG/parent AUC |
+|---|---:|---:|---:|---:|---:|
+| Kably simulation, eGFR >90 | 44.8 | 13.3 | 1.0 | 0.5 | 30.4% |
+| AyFlux, CrCl 104, default slope 2 | 99.9 | 13.1 | 0.67 | 0.21 | 13.1% |
+| AyFlux, CrCl 104, Paper V slope 3.7474 | 99.9 | 7.1 | 0.67 | 0.07 | 7.1% |
+| Kably simulation, eGFR <30 | 88.7 | 103.1 | 3.7 | 3.8 | 129.9% |
+| AyFlux, CrCl 25, default slope 2 | 335.4 | 162.8 | 7.25 | 6.10 | 48.6% |
+| AyFlux, CrCl 25, Paper V slope 3.7474 | 335.4 | 93.1 | 7.25 | 3.22 | 27.8% |
+| AyFlux, CrCl 15, default slope 2 | 478.0 | 353.2 | 12.49 | 13.99 | 73.9% |
+| AyFlux, CrCl 15, Paper V slope 3.7474 | 478.0 | 209.7 | 12.49 | 8.03 | 43.9% |
+
+AUC units are mg·h/L and concentrations are mg/L. Kably reports simulated median troughs and the median **individual** AUC ratio. Dividing 103.1 by 88.7 gives 116.2%, the ratio of the low-stratum AUC medians, whereas Table 5 gives 129.9%. The two summaries have different denominators. AyFlux reports central plasma at hour 264 just before a hypothetical next dose, plus the minimum over hours 240–264 in the script output.
+
+At CrCl 25 the higher slope brings both absolute CMMG endpoints closer to the low-stratum medians despite taking the ratio farther away. At CrCl 104 the higher slope makes CMMG AUC and trough both lower than Kably’s normal-stratum medians. With 2,000 mg q12h the low-stratum CMMG AUC and trough medians were 68.8 and 2.3. At CrCl 25 AyFlux gives 108.6 and 3.62 with the default slope, or 62.1 and 1.77 with Paper V. A renal metabolite coefficient cannot correct the several-fold difference in parent exposure in the low stratum. The source provides no dialysis cases or measured anuric formation fraction. [Reproduction script with all strata and both regimens](kably-renal-slope.cjs)
