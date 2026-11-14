@@ -94,7 +94,7 @@ test('kidney profile editor, CSV format selector and layout share consistent UI 
  assert.ok(html.includes('--ui-space-3:14px'));
 });
 
-test('checkSimulation handles boundary profile configurations without NaN',()=>{
+test('checkSimulation rejects duplicate profile times instead of silently passing invalid input',()=>{
  const sim={
   time:[0,1,2],
   plasma:{median:[0,1,0],lower:[0,0.5,0],upper:[0,1.5,0]},
@@ -107,5 +107,17 @@ test('checkSimulation handles boundary profile configurations without NaN',()=>{
   renalMode:'profile',
   renalProfile:[{time:0,crcl:20},{time:0,crcl:20},{time:2,crcl:0}]
  });
- assert.ok(res.passed);
+ assert.equal(res.passed,false);
+ assert.ok(res.issues.some(issue=>issue.includes("Invalid renal profile")));
+});
+
+test('integrity diagnostics reject malformed trajectories and check valid zero clearance',()=>{
+ const zero={median:[0,0,0],lower:[0,0,0],upper:[0,0,0]},sim={time:[0,1,2],plasma:zero,csf:zero,cmmg:zero,csfCmmg:zero,kidneyClear:{median:[0,0,0]}};
+ for(const renalProfile of [[],[{time:0,crcl:0}], [{time:0,crcl:20},{time:1,crcl:NaN}], [{time:0,crcl:20},{time:-1,crcl:0}], [{time:1,crcl:20},{time:2,crcl:0}], [{time:0,crcl:20},{time:1,crcl:141}], [null,{time:1,crcl:0}]]){
+  assert.equal(quality.checkSimulation(sim,{renalMode:'profile',renalProfile}).passed,false,JSON.stringify(renalProfile));
+ }
+ const cfg={renalMode:'profile',renalProfile:[{time:0,crcl:20},{time:2,crcl:0}]};
+ assert.equal(quality.checkSimulation(sim,cfg).passed,true);
+ const nonzero={...sim,kidneyClear:{median:[0,0,1]}};
+ assert.ok(quality.checkSimulation(nonzero,cfg).issues.includes('Renal acyclovir clearance is nonzero at CrCl = 0'));
 });

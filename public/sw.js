@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-evidence-replay-20261113";
+const CACHE = "ayflux-static-v0.27.0-missing-data-20261114";
 const CORE = [
  "/research/exchanges/", "/research/exchanges/view.js", "/research/exchanges/style.css",
  "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js",
