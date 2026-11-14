@@ -81,7 +81,7 @@ function getSupplementDoses(startHour, endHour) {
     .map(d => ({ ...d, time: d.time - startHour }));
 }
 
-function simulateSupplementSchedule(visit, timingVariant = 'default', renalMode = 'constant', lookback = 312, step = 0.25) {
+function simulateSupplementSchedule(visit, timingVariant = 'default', renalMode = 'constant', lookback = 312, step = 0.25, onset = null) {
   let sampleT;
   if (visit.id === '4a') {
     if (timingVariant === 'day2_literal') {
@@ -111,34 +111,28 @@ function simulateSupplementSchedule(visit, timingVariant = 'default', renalMode 
 
   let renalProfile = [];
   if (renalMode === 'profile') {
-    // Narrative recovery profile:
-    // Days 1-3: CrCl 30 mL/min (acute renal failure)
+    // Assumed recovery profile, beyond the measured CrCl values:
+    // Early impairment is either sustained from hour zero or begins at the specified onset.
     // Days 4-5: linear recovery 30 -> 125 mL/min
     // Day 6 to 9: normal CrCl 125 mL/min
     // Day 9 to 16: linear rise 125 -> 149 mL/min (profile capped at engine maximum 140 mL/min)
     const globalKnots = [
-      { time: 0, crcl: 30 },
+      ...(onset === null ? [{time: 0, crcl: 30}] : [
+        {time: 0, crcl: 125}, {time: onset, crcl: 125}, {time: onset + 0.25, crcl: 30}
+      ]),
       { time: 72, crcl: 30 },
       { time: 120, crcl: 125 },
       { time: 199.5, crcl: 125 },
       { time: 368.0, crcl: 140 } // capped at engine max 140 for profile knots
     ];
 
-    function clearanceAt(t) {
-      if (t <= globalKnots[0].time) return globalKnots[0].crcl;
-      for (let i = 1; i < globalKnots.length; i++) {
-        const a = globalKnots[i - 1], b = globalKnots[i];
-        if (t <= b.time) return a.crcl + (b.crcl - a.crcl) * (t - a.time) / (b.time - a.time);
-      }
-      return globalKnots.at(-1).crcl;
-    }
-
+    const clearanceAt = time => engine.renalCrClAt({renalMode: 'profile', renalProfile: globalKnots}, time);
     renalProfile = [
-      { time: 0, crcl: Math.min(140, clearanceAt(startT)) },
+      { time: 0, crcl: clearanceAt(startT) },
       ...globalKnots
         .filter(k => k.time > startT && k.time < sampleT)
-        .map(k => ({ time: k.time - startT, crcl: Math.min(140, k.crcl) })),
-      { time: horizon, crcl: Math.min(140, clearanceAt(sampleT)) }
+        .map(k => ({ time: k.time - startT, crcl: k.crcl })),
+      { time: horizon, crcl: clearanceAt(sampleT) }
     ];
   }
 
@@ -160,37 +154,32 @@ function formatRow(visit, scenario, values, observed) {
 }
 
 const tableRows = [];
-
-// Visit 4a
-tableRows.push(formatRow(visits[0], 'Table 1 constant baseline (6 doses, 46h)', simulateTable1Baseline(visits[0]), visits[0].serum));
-tableRows.push(formatRow(visits[0], 'Supplement schedule, Day 2 literal (4 doses, 30h)', simulateSupplementSchedule(visits[0], 'day2_literal'), visits[0].serum));
-tableRows.push(formatRow(visits[0], 'Supplement schedule, Day 3 narrative (9 doses, 70h)', simulateSupplementSchedule(visits[0], 'day3_narrative'), visits[0].serum));
-
-// Visit 4b
-tableRows.push(formatRow(visits[1], 'Table 1 constant baseline (12 mg/kg q8h, CrCl 125)', simulateTable1Baseline(visits[1]), visits[1].serum));
-tableRows.push(formatRow(visits[1], 'Supplement schedule, constant CrCl 125 (identical renal)', simulateSupplementSchedule(visits[1], 'default', 'constant'), visits[1].serum));
-tableRows.push(formatRow(visits[1], 'Supplement schedule, dynamic renal recovery profile', simulateSupplementSchedule(visits[1], 'default', 'profile'), visits[1].serum));
-
-// Visit 4c
-tableRows.push(formatRow(visits[2], 'Table 1 constant baseline (12 mg/kg q8h, CrCl 149)', simulateTable1Baseline(visits[2]), visits[2].serum));
-tableRows.push(formatRow(visits[2], 'Supplement schedule, constant CrCl 149 (identical renal)', simulateSupplementSchedule(visits[2], 'default', 'constant'), visits[2].serum));
-tableRows.push(formatRow(visits[2], 'Supplement schedule, dynamic renal recovery profile (capped at 140)', simulateSupplementSchedule(visits[2], 'default', 'profile'), visits[2].serum));
-
-// Convergence checks: finer step 0.125 h and shorter lookback 240 h
-for (const v of visits) {
-  const base = simulateSupplementSchedule(v, 'default', 'constant', 312, 0.25);
-  const finer = simulateSupplementSchedule(v, 'default', 'constant', 312, 0.125);
-  assert.ok(Math.abs(base[0] / finer[0] - 1) < 0.002, `ACV step convergence check passed for ${v.id}`);
-  assert.ok(Math.abs(base[1] / finer[1] - 1) < 0.002, `CMMG step convergence check passed for ${v.id}`);
-  if (v.id !== '4a') {
-    const shorter = simulateSupplementSchedule(v, 'default', 'constant', 240, 0.25);
-    assert.ok(Math.abs(base[0] - shorter[0]) < 0.001, `ACV lookback check passed for ${v.id}`);
-    assert.ok(Math.abs(base[1] - shorter[1]) < 0.001, `CMMG lookback check passed for ${v.id}`);
+function addRow(visit, label, predict) {
+  const values = predict(.125, 312), finer = predict(.0625, 312), shorter = predict(.125, 240);
+  values.forEach((v, i) => {
+    assert.ok(Math.abs(v / finer[i] - 1) < .001, label + ' step convergence');
+    assert.ok(Math.abs(v - shorter[i]) < .001, label + ' history sensitivity');
+  });
+  tableRows.push(formatRow(visit, label, values, visit.serum));
+  return values;
+}
+for (const visit of visits) {
+  addRow(visit, 'Table 1, constant CrCl ' + visit.crcl, step => simulateTable1Baseline(visit, step));
+  const supplement = (label, timing, mode, onset = null) =>
+    addRow(visit, label, (step, history) => simulateSupplementSchedule(visit, timing, mode, history, step, onset));
+  if (visit.id === '4a') {
+    const early = supplement('4 doses, 30 h, constant CrCl 30', 'day2_literal', 'constant');
+    const late = supplement('9 doses, 70 h, constant CrCl 30', 'day3_narrative', 'constant');
+    const pct = late.map((v, i) => 100 * (v / early[i] - 1));
+    assert.ok(pct[0] > 2 && pct[0] < 3 && pct[1] > 6 && pct[1] < 7);
+    for (const onset of [24, 48, 64]) {
+      supplement('9 doses, 70 h, CrCl fall starts at ' + onset + ' h', 'day3_narrative', 'profile', onset);
+    }
+  } else {
+    supplement('Supplement, constant CrCl ' + visit.crcl, 'default', 'constant');
+    supplement('Supplement, assumed renal recovery', 'default', 'profile');
   }
 }
 
-if (require.main === module) {
-  console.table(tableRows);
-}
-
-module.exports = { PT4, visits, simulateTable1Baseline, simulateSupplementSchedule, tableRows };
+if (require.main === module) console.table(tableRows);
+module.exports = {PT4, visits, simulateTable1Baseline, simulateSupplementSchedule, tableRows};
