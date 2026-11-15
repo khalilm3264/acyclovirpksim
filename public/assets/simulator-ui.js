@@ -180,10 +180,21 @@ function renderTimeAbove(rewrite=false){
 }
 function tableOpen(){return tab==='concentration'&&!!$('tablePanel')?.open;}
 function requestedModes(all=false){return all||tableOpen()?[...modes]:modes.filter(m=>m===primary||visible.has(m));}
+function chartMessage(target,message,busy=true){
+ if(!target)return;
+ let status=target.querySelector('.chart-status');
+ if(message){
+  if(!status){status=document.createElement('span');status.className='chart-status';status.setAttribute('aria-hidden','true');target.append(status);}
+  status.textContent=message;
+ }else status?.remove();
+ target.setAttribute('aria-busy',String(!!message&&busy));
+}
 function setBusy(busy){
  $('calculationState').classList.toggle('hidden',!busy);
  if(typeof renderTimeAbove==='function')renderTimeAbove();
  document.querySelector('main').setAttribute('aria-busy',String(busy));
+ document.querySelectorAll('#plasmaChart,#csfChart,#cmmgChart,#csfCmmgChart,#kidneyClearChart,#dialClearChart,#clearanceChart,#dialRateChart,#pdUfChart,#pdConChart').forEach(target=>
+  chartMessage(target,busy?'Calculating simulation…':dataIsCurrent?'Loading chart…':'Simulation not updated. Check inputs.',busy||dataIsCurrent));
  $('csv').disabled=busy||!dataIsCurrent;
  $('copyTeaching').disabled=busy||!dataIsCurrent;
  if(!dataIsCurrent){$('teachingFallback').hidden=true;$('teachingStatus').textContent='';}
@@ -596,6 +607,7 @@ function requestPlotFrame(){
     requestPlotFrame();
    }).catch(error=>{
     chartWait=null;
+    for(const where of pendingPlots.keys())chartMessage($(where),'Chart unavailable. Check your connection.',false);
     pendingPlots.clear();
     alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'.');
    });
@@ -625,11 +637,12 @@ function drawNextPlot(){
   if(where==='plasmaChart'&&$('eventsPanel').open)window.AyFluxViews.timeline();
   const rect=target.getBoundingClientRect();
   chartStates.set(where,{signature:job.signature,resultsRevision:job.resultsRevision,unitFactor:job.unitFactor,width:rect.width,height:rect.height});
+  chartMessage(target,'');
   if(document.documentElement.dataset.ayfluxReady!=='true'){
    document.documentElement.dataset.ayfluxReady='true';
    window.dispatchEvent(new Event('ayflux:charts-ready'));
   }
- }).catch(error=>{alertMessage('Unable to draw chart: '+error.message);})
+ }).catch(error=>{chartMessage(target,'Chart unavailable. See the message above.',false);alertMessage('Unable to draw chart: '+error.message);})
  .finally(()=>{plotRunning=false;activePlot=null;requestPlotFrame();});
 }
 function resizeVisibleCharts(){
