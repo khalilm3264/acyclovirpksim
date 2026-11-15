@@ -20,7 +20,7 @@ studies=(
   de-miranda-iv-recovery feldman-measured-washout hara-aldh2-cmmg hara-genotype-terminal hellden-ms-sampling hellden-serum-hd hellden-iv-profiles hellden-renal-clearance izzedine-capd jamez-oral-sampling
   kably-auc-comparison kably-renal-slope kacirova-iv-cohort kato-aki-hd-course khajehdehi-crrt krasny-hd-recovery
   laskin-anuric-course laskin-clearance laskin-fitted-distribution laskin-individual-spread laskin-prior-band lindstrom-course-6-20
-  lindstrom-patient19 lindstrom-patient4-course lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
+  mahad-paired-capd lindstrom-patient19 lindstrom-patient4-course lindstrom-patient7-course shah-mixed-exchanges smith-systemic-exposure soul-lawton-crossover soul-lawton-radiolabel
   stathoulopoulou-1996-recovery sun-cns-comparison ueno-hdf-blood unita-hd-sampling vasquez-hd-extraction vasquez-urine-intervals weller-single-dose whitley-iv-course yang-three-hd
   davenport-case2-course
 )
