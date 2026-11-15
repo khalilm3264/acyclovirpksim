@@ -26,7 +26,7 @@ This audit evaluates the mobile loading, failure, and recovery feedback states i
 | **2** | **Slow Chart Download** (Worker released, ECharts held) | `#plasmaChart .chart-status` | `"Loading chart…"`<br>`color: #284f6b`<br>`bg: rgba(244,248,251,.96)`<br>`aria-busy="true"` | **PASSED**<br>Immediate transition upon simulation accept | **PASSED**<br>Immediate transition upon simulation accept |
 | **3** | **Clean Chart Render** (ECharts released) | `#plasmaChart` | Canvas renders;<br>`.chart-status` removed (`count === 0`);<br>`aria-busy="false"` | **PASSED**<br>Overlay completely cleared; interactive curves visible | **PASSED**<br>Overlay completely cleared; interactive curves visible |
 | **4** | **Failed Download** (ECharts request aborted) | `#plasmaChart .chart-status`<br>& `#alerts` | `"Chart unavailable. Check your connection."`<br>`aria-busy="false"`<br>Alert banner with `<a href="/lite/">open AyFlux Lite</a>` | **PASSED**<br>Non-busy error message visible; fallback link present | **PASSED**<br>Non-busy error message visible; fallback link present |
-| **5** | **Recovery & Retry** (Unrouted, dose updated to 725 mg) | `#plasmaChart` | Triggers recalculation,<br>downloads ECharts,<br>renders canvas, removes overlay | **PASSED**<br>Recalculated & rendered cleanly with updated curve | **PASSED**<br>Recalculated & rendered cleanly with updated curve |
+| **5** | **Cleared-Threshold Recovery & Retry** (Threshold entered, download aborted, threshold cleared, dose updated to 725 mg) | `#plasmaChart` | Triggers recalculation,<br>commits new dose,<br>downloads ECharts,<br>renders canvas, removes overlay,<br>clears threshold line & legend | **PASSED**<br>Recalculated & rendered cleanly with updated curve; line & legend gone | **PASSED**<br>Recalculated & rendered cleanly with updated curve; line & legend gone |
 
 ---
 
@@ -65,9 +65,9 @@ This audit evaluates the mobile loading, failure, and recovery feedback states i
     ```
   - Both the container overlay and the alert banner remained legible in portrait and landscape without horizontal page overflow.
 
-### Phase 5: Recalculation & Recovery
-- **Mechanism:** Unrouted ECharts network gate and modified dose field (`#num_dose = 725`).
-- **Observations:** Recalculation initiated; ECharts download succeeded on retry; `#plasmaChart` successfully drew the updated 725 mg concentration profile and cleared the error overlay.
+### Phase 5: Cleared-Threshold Recalculation & Recovery
+- **Mechanism:** Entered 10 mg/L threshold into `#timeAboveLevel` while chart download was pending; aborted ECharts download to confirm failure state (`"Chart unavailable. Check your connection."`, `aria-busy="false"`, and Lite fallback); cleared the threshold input field while in failed state; unrouted ECharts network gate and updated dose (`#num_dose = 725`).
+- **Observations:** Recalculation initiated; ECharts download succeeded on retry; `#plasmaChart` successfully committed dose 725 mg (`snapshot.config.dose === 725`, `snapshot.updated === true`), drew the updated concentration profile, verified exact equality of plotted points with model output, completely removed the error overlay (`count === 0`), and confirmed that the cleared threshold markLine and legend entry were absent (`hasThresholdLine: false`, `legendHasThreshold: false`).
 
 ---
 
