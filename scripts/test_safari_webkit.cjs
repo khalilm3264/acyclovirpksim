@@ -65,9 +65,9 @@ async function runTestSuite(baseUrl, label) {
       });
 
       // -----------------------------------------------------------------
-      // 1. LITE APP TESTING: /lite/ (Graph zoom, pinch, pan & rotation)
+      // 1. LITE APP TESTING: /lite/ (Visible time controls #213 & synthetic touch events)
       // -----------------------------------------------------------------
-      console.log(`\n--- [${deviceType.toUpperCase()}] Lite App: Pinch, Pan & Rotation ---`);
+      console.log(`\n--- [${deviceType.toUpperCase()}] Lite App: Visible Time-Axis Controls (#213) & Synthetic Touch Events ---`);
       const litePage = await context.newPage();
       const liteErrors = [];
       litePage.on('pageerror', err => liteErrors.push(err.message));
@@ -75,31 +75,106 @@ async function runTestSuite(baseUrl, label) {
       await litePage.goto(baseUrl + '/lite/');
       await litePage.waitForFunction(() => window.echarts?.getInstanceByDom(document.querySelector('#acvChart')) !== undefined, null, { timeout: 20000 });
 
-      // Step A1: Inspect initial graph state
-      const initialChartState = await litePage.evaluate(() => {
-        const el = document.querySelector('#acvChart');
-        const chart = window.echarts.getInstanceByDom(el);
-        const opt = chart.getOption();
-        const style = window.getComputedStyle(el);
-        return {
-          touchAction: style.touchAction,
-          dragMode: el.dataset.dragMode,
-          toolboxShow: opt.toolbox ? opt.toolbox[0]?.show : false,
-          dataZoom: opt.dataZoom?.map(z => ({ id: z.id, type: z.type, start: z.start, end: z.end }))
-        };
+      // Helper to read xAxis extent from an ECharts instance
+      const getTimeExtent = (chartId = 'acvChart') => litePage.evaluate((id) => {
+        const chart = window.echarts.getInstanceByDom(document.getElementById(id));
+        return chart.getModel().getComponent('xAxis').axis.scale.getExtent();
+      }, chartId);
+
+      const getTimeWindowLabel = () => litePage.locator('#liteTimeWindow').innerText();
+
+      // Step 1: Verify touch target sizes of time control buttons (min-height >= 44px)
+      console.log('  1. Verifying time-axis control buttons (#liteTimeIn, #liteTimeOut, #liteTimeReset)...');
+      const inBox = await litePage.locator('#liteTimeIn').boundingBox();
+      const outBox = await litePage.locator('#liteTimeOut').boundingBox();
+      const resetBox = await litePage.locator('#liteTimeReset').boundingBox();
+
+      assert.ok(inBox.height >= 44, `#liteTimeIn touch target height (${inBox.height}px) >= 44px`);
+      assert.ok(outBox.height >= 44, `#liteTimeOut touch target height (${outBox.height}px) >= 44px`);
+      assert.ok(resetBox.height >= 44, `#liteTimeReset touch target height (${resetBox.height}px) >= 44px`);
+      console.log(`     ✓ Button touch targets verified: in=${inBox.height}px, out=${outBox.height}px, reset=${resetBox.height}px (all >= 44px)`);
+
+      // Step 2: Initial visible time range
+      const initialExtent = await getTimeExtent('acvChart');
+      const initialLabel = await getTimeWindowLabel();
+      console.log(`  2. Initial visible time range: [${initialExtent.join(', ')}] h, label: "${initialLabel}"`);
+      assert.deepEqual(initialExtent, [0, 96], 'Initial time range is [0, 96]');
+      assert.ok(/^Time:\s*0(\.0)?–96(\.0)?\s*h$/.test(initialLabel), `Initial label matches Time: 0–96 h (actual: "${initialLabel}")`);
+
+      // Step 3: Test "Zoom time in" button
+      console.log('  3. Clicking "Zoom time in" (#liteTimeIn)...');
+      await litePage.locator('#liteTimeIn').click();
+      await litePage.waitForFunction(() => {
+        const c = window.echarts?.getInstanceByDom(document.getElementById('acvChart'));
+        const ext = c?.getModel().getComponent('xAxis').axis.scale.getExtent();
+        return ext && Math.abs(ext[0] - 24) < 0.1 && Math.abs(ext[1] - 72) < 0.1;
       });
+      const zoomedExtent = await getTimeExtent('acvChart');
+      const zoomedLabel = await getTimeWindowLabel();
+      console.log(`     ✓ Time range narrowed: [${zoomedExtent.join(', ')}] h, label: "${zoomedLabel}"`);
+      assert.deepEqual(zoomedExtent, [24, 72], 'Zoomed extent narrowed to [24, 72]');
+      assert.ok(/^Time:\s*24(\.0)?–72(\.0)?\s*h$/.test(zoomedLabel), `Zoomed label matches Time: 24–72 h (actual: "${zoomedLabel}")`);
 
-      console.log('  1. Initial chart touch-action:', initialChartState.touchAction);
-      console.log('     Toolbox visible on Lite:', initialChartState.toolboxShow);
-      console.log('     Initial x-axis dataZoom range: start=' + initialChartState.dataZoom[0].start + '%, end=' + initialChartState.dataZoom[0].end + '%');
+      // Assert all visible charts updated synchronously
+      const cmmgZoomedExtent = await getTimeExtent('cmmgChart');
+      assert.deepEqual(cmmgZoomedExtent, [24, 72], 'cmmgChart synchronized to [24, 72]');
 
-      assert.equal(initialChartState.touchAction, 'pan-y pinch-zoom', 'Chart has pan-y pinch-zoom touch-action');
-      assert.equal(initialChartState.toolboxShow, false, 'Toolbox is hidden on Lite');
-      assert.equal(initialChartState.dataZoom[0].start, 0);
-      assert.equal(initialChartState.dataZoom[0].end, 100);
+      // Step 4: Rotate to landscape and verify time range persists
+      console.log(`  4. Rotating to LANDSCAPE (${profile.landscape.width} x ${profile.landscape.height})...`);
+      await litePage.setViewportSize(profile.landscape);
+      await litePage.waitForTimeout(400);
 
-      // Step A2: Test pinch gesture on #acvChart
-      console.log('  2. Dispatching two-finger pinch gesture on #acvChart...');
+      const landscapeExtent = await getTimeExtent('acvChart');
+      const landscapeLabel = await getTimeWindowLabel();
+      const landscapeCanvas = await litePage.evaluate(() => {
+        const c = window.echarts.getInstanceByDom(document.getElementById('acvChart'));
+        return { width: c.getWidth(), height: c.getHeight() };
+      });
+      console.log(`     ✓ Canvas resized under ResizeObserver: ${landscapeCanvas.width} x ${landscapeCanvas.height} px`);
+      console.log(`     ✓ Time range persisted across rotation: [${landscapeExtent.join(', ')}] h, label: "${landscapeLabel}"`);
+      assert.deepEqual(landscapeExtent, [24, 72], 'Time range persists across rotation');
+      assert.ok(/^Time:\s*24(\.0)?–72(\.0)?\s*h$/.test(landscapeLabel), `Label persists across rotation (actual: "${landscapeLabel}")`);
+
+      // Step 5: Test "Zoom time out" in landscape
+      console.log('  5. Testing "Zoom time out" (#liteTimeOut) in Landscape...');
+      await litePage.locator('#liteTimeOut').click();
+      await litePage.waitForFunction(() => {
+        const c = window.echarts?.getInstanceByDom(document.getElementById('acvChart'));
+        const ext = c?.getModel().getComponent('xAxis').axis.scale.getExtent();
+        return ext && Math.abs(ext[0] - 0) < 0.1 && Math.abs(ext[1] - 96) < 0.1;
+      });
+      const zoomOutExtent = await getTimeExtent('acvChart');
+      const zoomOutLabel = await getTimeWindowLabel();
+      console.log(`     ✓ Time range widened: [${zoomOutExtent.join(', ')}] h, label: "${zoomOutLabel}"`);
+      assert.deepEqual(zoomOutExtent, [0, 96], 'Time range widened back to [0, 96]');
+      assert.ok(/^Time:\s*0(\.0)?–96(\.0)?\s*h$/.test(zoomOutLabel), `Label reset to Time: 0–96 h (actual: "${zoomOutLabel}")`);
+
+      // Step 6: Test "Reset time axis" button
+      console.log('  6. Testing "Reset time axis" (#liteTimeReset)...');
+      await litePage.locator('#liteTimeIn').click();
+      await litePage.waitForFunction(() => {
+        const c = window.echarts?.getInstanceByDom(document.getElementById('acvChart'));
+        const ext = c?.getModel().getComponent('xAxis').axis.scale.getExtent();
+        return ext && Math.abs(ext[0] - 24) < 0.1;
+      });
+      await litePage.locator('#liteTimeReset').click();
+      await litePage.waitForFunction(() => {
+        const c = window.echarts?.getInstanceByDom(document.getElementById('acvChart'));
+        const ext = c?.getModel().getComponent('xAxis').axis.scale.getExtent();
+        return ext && Math.abs(ext[0] - 0) < 0.1 && Math.abs(ext[1] - 96) < 0.1;
+      });
+      const resetExtent = await getTimeExtent('acvChart');
+      const resetLabel = await getTimeWindowLabel();
+      console.log(`     ✓ Time range reset: [${resetExtent.join(', ')}] h, label: "${resetLabel}"`);
+      assert.deepEqual(resetExtent, [0, 96], 'Reset restored [0, 96]');
+      assert.ok(/^Time:\s*0(\.0)?–96(\.0)?\s*h$/.test(resetLabel), `Reset restored Time: 0–96 h (actual: "${resetLabel}")`);
+
+      // Step 7: Rotate back to portrait
+      await litePage.setViewportSize(profile.portrait);
+      await litePage.waitForTimeout(200);
+
+      // Step 8: Synthetic DOM TouchEvents checks
+      console.log('  7. Dispatching synthetic two-finger pinch TouchEvents over #acvChart...');
       const box = await litePage.locator('#acvChart').boundingBox();
       const cx = box.x + box.width / 2;
       const cy = box.y + box.height / 2;
@@ -125,23 +200,12 @@ async function runTestSuite(baseUrl, label) {
         dispatchTouch('touchend', []);
       }, { cx, cy });
 
-      const postPinchState = await litePage.evaluate(() => {
-        const el = document.querySelector('#acvChart');
-        const chart = window.echarts.getInstanceByDom(el);
-        const opt = chart.getOption();
-        return {
-          dataZoom: opt.dataZoom?.map(z => ({ id: z.id, start: z.start, end: z.end })),
-          visualViewportScale: window.visualViewport ? window.visualViewport.scale : 1.0
-        };
-      });
+      const postPinchExtent = await getTimeExtent('acvChart');
+      console.log(`     Observed: Synthetic TouchEvents do not modify chart dataZoom; range remains [${postPinchExtent.join(', ')}] h.`);
+      console.log(`     (Note: Genuine on-device physical Safari pinch-to-zoom behavior remains open / unverified.)`);
+      assert.deepEqual(postPinchExtent, [0, 96], 'Chart extent unchanged by synthetic DOM touch events');
 
-      console.log('     Post-pinch x-axis dataZoom range: start=' + postPinchState.dataZoom[0].start + '%, end=' + postPinchState.dataZoom[0].end + '%');
-      console.log('     Observed behavior: Pinch gesture does NOT change chart time axis (retains start=0, end=100); CSS touch-action: pan-y pinch-zoom delegates pinch to page magnification.');
-      assert.equal(postPinchState.dataZoom[0].start, 0, 'Chart start remained 0');
-      assert.equal(postPinchState.dataZoom[0].end, 100, 'Chart end remained 100');
-
-      // Step A3: Test single-finger pan gesture on #acvChart
-      console.log('  3. Dispatching single-finger pan gesture on #acvChart...');
+      console.log('  8. Dispatching synthetic single-finger pan TouchEvents over #acvChart...');
       await litePage.evaluate(({ cx, cy }) => {
         const el = document.querySelector('#acvChart');
         function dispatchTouch(type, touchesList) {
@@ -161,89 +225,25 @@ async function runTestSuite(baseUrl, label) {
         dispatchTouch('touchend', []);
       }, { cx, cy });
 
-      const postPanState = await litePage.evaluate(() => {
-        const el = document.querySelector('#acvChart');
-        const chart = window.echarts.getInstanceByDom(el);
-        const opt = chart.getOption();
-        return {
-          dataZoom: opt.dataZoom?.map(z => ({ id: z.id, start: z.start, end: z.end }))
-        };
-      });
-      console.log('     Post-pan x-axis dataZoom range: start=' + postPanState.dataZoom[0].start + '%, end=' + postPanState.dataZoom[0].end + '%');
-      console.log('     Observed behavior: Panning on Lite does not translate chart time axis (retains start=0, end=100); pan mode is off without toolbox.');
-      assert.equal(postPanState.dataZoom[0].start, 0);
-      assert.equal(postPanState.dataZoom[0].end, 100);
+      const postPanExtent = await getTimeExtent('acvChart');
+      console.log(`     Observed: Single-finger synthetic drag does not translate full-range time axis; range remains [${postPanExtent.join(', ')}] h.`);
+      assert.deepEqual(postPanExtent, [0, 96], 'Chart extent unchanged by synthetic drag');
 
-      // Step A4: Rotation to landscape
-      console.log(`  4. Rotating to LANDSCAPE (${profile.landscape.width} x ${profile.landscape.height})...`);
-      await litePage.setViewportSize(profile.landscape);
-      await litePage.waitForTimeout(400);
-
-      const postRotationState = await litePage.evaluate(() => {
-        const el = document.querySelector('#acvChart');
-        const chart = window.echarts.getInstanceByDom(el);
-        const opt = chart.getOption();
-        return {
-          clientWidth: el.clientWidth,
-          clientHeight: el.clientHeight,
-          chartWidth: chart.getWidth(),
-          chartHeight: chart.getHeight(),
-          dataZoom: opt.dataZoom?.map(z => ({ id: z.id, start: z.start, end: z.end }))
-        };
-      });
-      console.log(`     Canvas resized cleanly under ResizeObserver: width=${postRotationState.chartWidth}px, height=${postRotationState.chartHeight}px`);
-      assert.ok(postRotationState.chartWidth > 0, 'Chart width resized in landscape');
-
-      // Step A5: Test panning after rotation in landscape
-      console.log('  5. Testing pan gesture after rotation in Landscape...');
-      const boxLandscape = await litePage.locator('#acvChart').boundingBox();
-      const lcx = boxLandscape.x + boxLandscape.width / 2;
-      const lcy = boxLandscape.y + boxLandscape.height / 2;
-
-      await litePage.evaluate(({ lcx, lcy }) => {
-        const el = document.querySelector('#acvChart');
-        function dispatchTouch(type, touchesList) {
-          const ev = document.createEvent('TouchEvent');
-          ev.initEvent(type, true, true);
-          Object.defineProperty(ev, 'touches', { value: touchesList });
-          Object.defineProperty(ev, 'targetTouches', { value: touchesList });
-          Object.defineProperty(ev, 'changedTouches', { value: touchesList });
-          el.dispatchEvent(ev);
-        }
-        const tStart = { identifier: 1, target: el, clientX: lcx, clientY: lcy, pageX: lcx, pageY: lcy };
-        dispatchTouch('touchstart', [tStart]);
-
-        const tMove = { identifier: 1, target: el, clientX: lcx - 70, clientY: lcy, pageX: lcx - 70, pageY: lcy };
-        dispatchTouch('touchmove', [tMove]);
-
-        dispatchTouch('touchend', []);
-      }, { lcx, lcy });
-
-      const postLandscapePan = await litePage.evaluate(() => {
-        const el = document.querySelector('#acvChart');
-        const chart = window.echarts.getInstanceByDom(el);
-        const opt = chart.getOption();
-        return {
-          dataZoom: opt.dataZoom?.map(z => ({ id: z.id, start: z.start, end: z.end }))
-        };
-      });
-      console.log('     Post-landscape pan x-axis dataZoom range: start=' + postLandscapePan.dataZoom[0].start + '%, end=' + postLandscapePan.dataZoom[0].end + '%');
-      assert.equal(postLandscapePan.dataZoom[0].start, 0);
-      assert.equal(postLandscapePan.dataZoom[0].end, 100);
+      assert.deepEqual(liteErrors, [], 'No uncaught page errors on Lite');
 
       results.push({
         device: profile.name,
-        test: 'Lite App: Pinch, Pan & Rotation Behavior',
+        test: 'Lite App: Time-Axis Controls (#213) & Synthetic Touch Events',
         status: 'PASSED',
-        details: 'Pinch delegates to visual viewport page zoom (chart axis unchanged); pan does not translate chart time axis; canvas resizes cleanly across rotations via ResizeObserver.'
+        details: 'Visible time-axis controls (#213) narrow axis to 24–72 h, persist across rotation, and reset to 0–96 h with button heights >= 44px; synthetic touch events leave axis unchanged.'
       });
 
       await litePage.close();
 
       // -----------------------------------------------------------------
-      // 2. FULL SIMULATOR TESTING: / (Timeline dose editing & Apply with keyboard)
+      // 2. FULL SIMULATOR TESTING: / (Reduced-height viewport test)
       // -----------------------------------------------------------------
-      console.log(`\n--- [${deviceType.toUpperCase()}] Full Simulator: Timeline Dose Editing & Apply with Virtual Keyboard ---`);
+      console.log(`\n--- [${deviceType.toUpperCase()}] Full Simulator: Timeline Dose Editing & Apply under Reduced-Height Viewport ---`);
       const fullPage = await context.newPage();
       const fullErrors = [];
       fullPage.on('pageerror', err => fullErrors.push(err.message));
@@ -264,13 +264,13 @@ async function runTestSuite(baseUrl, label) {
       assert.equal(afterAddRows, initialDoseRows + 1, 'New dose row added');
       assert.ok(await fullPage.locator('#dosePending').isVisible(), 'Pending notice is visible');
 
-      // Simulate Virtual Keyboard Open (viewport height reduction)
+      // Viewport height reduction emulation
       const reducedHeight = profile.portrait.height - profile.keyboardHeight;
-      console.log(`  3. Simulating on-screen keyboard open: reducing viewport from ${profile.portrait.height}px to ${reducedHeight}px...`);
+      console.log(`  3. Applying reduced-height portrait viewport: reducing viewport from ${profile.portrait.height}px to ${reducedHeight}px...`);
       await fullPage.setViewportSize({ width: profile.portrait.width, height: reducedHeight });
 
-      // Edit the draft dose row with keyboard active
-      console.log('  4. Filling unapplied dose fields while keyboard is active (500 mg, Valacyclovir oral, 36 h)...');
+      // Edit the draft dose row in reduced-height viewport
+      console.log('  4. Filling unapplied dose fields in reduced-height viewport (500 mg, Valacyclovir oral, 36 h)...');
       const newRowIdx = initialDoseRows;
       const routeSelect = fullPage.locator(`select[data-dose-index="${newRowIdx}"][data-dose-field="route"]`);
       await routeSelect.selectOption('Valacyclovir oral');
@@ -289,14 +289,14 @@ async function runTestSuite(baseUrl, label) {
       assert.equal(await timeInput.inputValue(), '36');
       assert.equal(await routeSelect.inputValue(), 'Valacyclovir oral');
 
-      // Reach and verify Apply action under keyboard-reduced viewport
-      console.log('  5. Reaching Apply button (#applyFullTimeline) with keyboard visible...');
+      // Reach and verify Apply action under reduced-height viewport
+      console.log('  5. Reaching Apply button (#applyFullTimeline) in reduced-height viewport...');
       const applyBtn = fullPage.locator('#applyFullTimeline');
       await applyBtn.scrollIntoViewIfNeeded();
       assert.ok(await applyBtn.isVisible(), '#applyFullTimeline is visible and reachable');
 
       // Click Apply
-      console.log('  6. Applying schedule while keyboard visible...');
+      console.log('  6. Applying schedule while reduced-height viewport is active...');
       await applyBtn.click();
       await fullPage.waitForTimeout(400);
 
@@ -311,16 +311,19 @@ async function runTestSuite(baseUrl, label) {
       assert.equal(appliedDose.amount, 500, 'Applied dose amount is 500 mg');
       assert.equal(appliedDose.route, 'Valacyclovir oral', 'Applied dose route is Valacyclovir oral');
       console.log(`     ✓ Applied model configuration verified: hour=${appliedDose.time}, amount=${appliedDose.amount} mg, route="${appliedDose.route}".`);
+      console.log(`     (Note: Genuine on-device physical Safari virtual keyboard interaction and layout shifting remain open / unverified.)`);
 
-      // Dismiss virtual keyboard (restore original viewport)
+      // Restore original viewport
       await fullPage.setViewportSize(profile.portrait);
       await fullPage.waitForTimeout(200);
 
+      assert.deepEqual(fullErrors, [], 'No uncaught page errors on Full Simulator');
+
       results.push({
         device: profile.name,
-        test: 'Full Simulator: Timeline Dose Editing & Apply with Virtual Keyboard',
+        test: 'Full Simulator: Timeline Dose Editing & Apply under Reduced-Height Viewport',
         status: 'PASSED',
-        details: 'Dose inputs edited and #applyFullTimeline reached and clicked under keyboard viewport reduction; applied 500 mg Valacyclovir @ 36 h verified in engine.'
+        details: 'Dose inputs edited and #applyFullTimeline reached and clicked under reduced-height portrait viewport; applied 500 mg Valacyclovir @ 36 h verified in engine.'
       });
 
       await fullPage.close();
@@ -375,39 +378,50 @@ async function main() {
     // 1. Run on Local Exact Build
     const localResults = await runTestSuite(localBase, `LOCAL BUILD (commit ${commitLabel})`);
 
-    // 2. Run on Production Deployed Site
+    // 2. Run on Production Deployed Site (Optional / skipped if localOnly)
     let prodResults = [];
-    if (localOnly) {
-      console.log('\n[INFO] Skipping production test suite (--local-only specified).');
-    } else {
-      const targetProd = process.env.AYFLUX_PROD_URL || 'https://ayflux.org';
-      const reachability = await checkUrlReachable(targetProd);
-      if (!reachability.connected) {
-        console.warn(`\n[OFFLINE SKIP] Production site ${targetProd} connection failed (${reachability.error}). Skipping optional production tests.`);
-      } else if (reachability.statusCode < 200 || reachability.statusCode >= 400) {
-        const errorMsg = `Production site ${targetProd} responded with HTTP ${reachability.statusCode} (expected HTTP 200-399)`;
-        console.error(`\n❌ PRODUCTION PREFLIGHT HTTP ERROR: ${errorMsg}`);
-        throw new Error(errorMsg);
+    if (!localOnly) {
+      const prodUrl = 'https://khalilm3264.github.io/acyclovirpksim';
+      console.log(`\nChecking production reachability (${prodUrl})...`);
+      const reachability = await checkUrlReachable(prodUrl);
+      if (reachability.connected) {
+        if (reachability.statusCode >= 200 && reachability.statusCode < 400) {
+          prodResults = await runTestSuite(prodUrl, 'PRODUCTION DEPLOYED SITE');
+        } else {
+          console.error(`❌ PRODUCTION PREFLIGHT HTTP ERROR: received status ${reachability.statusCode}`);
+          process.exitCode = 1;
+          return;
+        }
       } else {
-        console.log(`\n[PREFLIGHT PASSED] Production site ${targetProd} is reachable (HTTP ${reachability.statusCode}). Running full production test suite...`);
-        prodResults = await runTestSuite(targetProd, `PRODUCTION DEPLOYED (${targetProd})`);
+        console.log(`[OFFLINE SKIP] Production preflight check failed: ${reachability.error}. Skipping production run.`);
       }
+    } else {
+      console.log('\n[INFO] Skipping production test suite (--local-only specified).');
     }
 
-    console.log('\n========================================================================');
-    console.log('SUMMARY OF SAFARI WEBKIT USABILITY TEST RESULTS');
-    console.log('========================================================================\n');
-    for (const r of [...localResults, ...prodResults]) {
+    const allResults = [...localResults, ...prodResults];
+    console.log(`\n========================================================================`);
+    console.log(`SUMMARY OF SAFARI WEBKIT USABILITY TEST RESULTS`);
+    console.log(`========================================================================\n`);
+    for (const r of allResults) {
       console.log(`[${r.status}] ${r.device}: ${r.test}`);
       console.log(`       Details: ${r.details}\n`);
     }
 
+    const anyFailed = allResults.some(r => r.status === 'FAILED');
+    if (anyFailed) {
+      process.exitCode = 1;
+    }
   } finally {
     localServer.close();
   }
 }
 
-main().catch(err => {
-  console.error('\n❌ Safari Test Suite Failed:', err.message || err);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch(err => {
+    console.error('Fatal error in test suite:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { runTestSuite, PROFILES };

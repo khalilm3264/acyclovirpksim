@@ -1,17 +1,18 @@
-# Safari WebKit (iPhone & iPad) Graph-Zoom, Responsive Layout, and Virtual Keyboard Usability Audit
+# Safari WebKit (iPhone & iPad) Usability Audit: Time-Axis Controls (#213), Synthetic Touch Events, and Reduced-Height Viewport
 
 Audit date: November 14, 2026.  
-Base commit: `79df313fcfb217ad07f4022e2a6d61dc6b767b47` (`main`).  
+Base commit: `28281079f34938a31e93ff707368407771ab189a` (`main`, including merged PR #213).  
 Target branch: `test/safari-graph-zoom-usability`.  
 
 ---
 
-## 1. Emulation scope & testing environment
+## 1. Emulation scope & hardware status
 
 > [!NOTE]
-> **Emulation scope disclosure:** Results in this audit represent **Playwright WebKit (v26.0 build 2215) with iPhone and iPad device emulation**. Physical Apple hardware running native iOS/iPadOS Safari was not connected over Apple Remote Web Inspector. Real mobile touch latency, physical Safari address bar expansion/collapse, iOS 16 virtual keyboard layout shifting, and hardware multi-touch gesture processing still require physical iPhone and iPad verification.
+> **Emulation scope disclosure:** Results in this audit represent **Playwright WebKit (v26.0 build 2215) with iPhone 14 and iPad Pro 11 device emulation**. Physical Apple hardware running native iOS/iPadOS Safari was not connected over Apple Remote Web Inspector.  
+> **Physical Safari behavior remains open:** Real mobile touch latency, physical Safari address bar expansion/collapse, iOS virtual keyboard layout shifting, and hardware multi-touch gesture processing remain unverified on genuine hardware.
 
-The usability evaluation was executed via Playwright WebKit with device parameters, mobile touch event dispatching (`hasTouch: true`, `isMobile: true`), WebKit User-Agent tokens, and simulated software keyboard viewport reduction.
+The usability evaluation was executed via Playwright WebKit with device profile parameters, mobile touch event dispatching (`hasTouch: true`, `isMobile: true`), WebKit User-Agent tokens, and reduced-height viewport emulation.
 
 | Device profile | OS / Browser | Viewport portrait (px) | Viewport landscape (px) | Scale factor | UA token |
 | :--- | :--- | :---: | :---: | :---: | :--- |
@@ -20,80 +21,75 @@ The usability evaluation was executed via Playwright WebKit with device paramete
 
 ---
 
-## 2. Lite app (`/lite/`): graph zoom, pinch, pan, and rotation investigation
+## 2. Lite app (`/lite/`): visible time-axis controls (#213) & synthetic touch events
 
 ### Investigation objectives
-1. Determine whether two-finger pinching over `#acvChart` / `#cmmgChart` updates the chart's time axis domain or magnifies the visual viewport / entire page.
-2. Determine whether single-finger panning translates the time axis to a known time point before and after device rotation.
+1. Test visible time-axis controls integrated from PR #213 (`#liteTimeIn`, `#liteTimeOut`, `#liteTimeReset`, `#liteTimeWindow`):
+   - Verify button touch targets meet minimum accessible touch criteria ($\ge 44\text{ px}$ height).
+   - Record the visible time range at each step: initial, zoomed in, after rotation to landscape, zoomed out, and reset.
+2. Evaluate synthetic DOM TouchEvents (two-finger pinch and single-finger pan) over `#acvChart`.
 
-### Test protocol
-1. Loaded `/lite/` and waited for ECharts initialization on `#acvChart`.
-2. Inspected initial chart CSS styling, toolbox configuration, and `dataZoom` state:
-   - CSS `touch-action`: `pan-y pinch-zoom`
-   - Toolbox visibility: `option.toolbox.show === false`
-   - Initial x-axis `dataZoom`: `start: 0%, end: 100%` (`id: ayNavX`, `type: inside`)
-3. Dispatched a two-finger pinch gesture (spreading touches from $cx \pm 20\text{ px}$ to $cx \pm 80\text{ px}$). Recorded post-pinch `dataZoom` range and visual viewport scale.
-4. Dispatched a single-finger pan gesture (dragging touch horizontally across the chart area). Recorded post-pan `dataZoom` range.
-5. Rotated device from portrait to landscape (iPhone: $390 \times 664 \to 664 \times 390\text{ px}$; iPad: $834 \times 1194 \to 1194 \times 834\text{ px}$).
-6. Inspected canvas resize under `ResizeObserver` and repeated horizontal pan gesture in landscape orientation.
+### Observed time range at each step
 
-### Observed findings
-- **Pinch gesture behavior:**
-  - **The chart's time axis domain does NOT change** (`start: 0%, end: 100%` remains unchanged).
-  - **Root cause:** In `public/lite/index.html` (line 64), `.chart` is explicitly styled with:
-    ```css
-    .chart { width: 100%; height: 300px; display: block; touch-action: pan-y pinch-zoom; }
-    ```
-    On WebKit / Mobile Safari, `touch-action: pan-y pinch-zoom` informs the browser gesture recognizer that pinch gestures are handled natively as **page magnification (visual viewport zoom)**. WebKit consumes the multi-touch gesture at the browser level and does not dispatch zooming delta events to ECharts' `inside` dataZoom.
-  - **Conclusion:** On iPhone and iPad Safari, pinching over the graph **magnifies the entire page**, leaving the chart's time axis static.
-- **Pan gesture behavior:**
-  - **Single-finger panning does NOT translate the chart time axis** (`start: 0%, end: 100%`).
-  - **Root cause:** In `public/lite/lite.js` (line 267), `option.toolbox.show = false` hides the toolbar, and `public/assets/charts.js` (line 159) initializes `dragMode` to `'off'` on touch screens (`pointer: coarse`). Because pan mode is never enabled, horizontal touch dragging does not pan the dataZoom domain; vertical dragging simply scrolls the document (`pan-y`).
-- **Rotation behavior:**
-  - Rotating between portrait and landscape cleanly triggers `ResizeObserver`, updating chart width and height (iPhone: width 622 px, height 255 px; iPad: width 408 px, height 300 px in two-column graph layout).
-  - Panning after rotation continues to leave the time axis unchanged (`start: 0%, end: 100%`).
+| Step | Action | Visible time range (`xAxis`) | Live output label (`#liteTimeWindow`) | Result |
+| :---: | :--- | :---: | :---: | :---: |
+| **1** | Initial page load (Portrait) | `[0, 96] h` | `Time: 0.0–96.0 h` | Baseline full horizon verified |
+| **2** | Click "Zoom time in" (`#liteTimeIn`) | `[24, 72] h` | `Time: 24.0–72.0 h` | Time axis successfully narrowed |
+| **3** | Rotate to Landscape | `[24, 72] h` | `Time: 24.0–72.0 h` | Time window **persists across rotation** |
+| **4** | Click "Zoom time out" (`#liteTimeOut`) | `[0, 96] h` | `Time: 0.0–96.0 h` | Time axis widened back to full horizon |
+| **5** | Click "Zoom time in", then "Reset time axis" | `[0, 96] h` | `Time: 0.0–96.0 h` | Time axis cleanly reset to baseline |
+| **6** | Rotate back to Portrait | `[0, 96] h` | `Time: 0.0–96.0 h` | State preserved |
+
+- **Touch targets:** `#liteTimeIn`, `#liteTimeOut`, and `#liteTimeReset` all measure $44\text{ px}$ tall on iPhone 14 and iPad Pro 11, meeting WCAG / mobile accessibility targets.
+- **Multi-chart synchronization:** Modeled plasma acyclovir (`#acvChart`) and CMMG (`#cmmgChart`) update and synchronize time spans simultaneously.
+- **Canvas responsiveness:** Canvas cleanly resizes via `ResizeObserver` upon orientation change ($622 \times 255\text{ px}$ on iPhone 14; $408 \times 300\text{ px}$ in 2-column layout on iPad Pro 11).
+
+### Synthetic TouchEvents observations
+- **Two-finger pinch:** Dispatching synthetic DOM `TouchEvent`s (`touchstart`, `touchmove`, `touchend`) with spreading coordinates over `#acvChart` does **not** alter the chart's dataZoom range (remains at initial `[0, 96] h`).
+- **Single-finger drag:** Dispatching synthetic DOM touch move events horizontally does **not** translate the time axis.
+- **Hardware disclaimer:** These observations reflect synthetic DOM TouchEvents in WebKit emulation. **Genuine on-device physical Safari pinch and pan behavior remains open and requires verification on physical Apple hardware.**
 
 ---
 
-## 3. Full simulator (`/`): timeline dose editing & apply with virtual keyboard
+## 3. Full simulator (`/`): timeline dose editing & apply under reduced-height viewport
 
 ### Investigation objectives
-Verify that timeline custom dose editing and the "Apply timeline changes" action remain accessible, operable, and effective when the on-screen virtual keyboard is visible.
+Evaluate timeline custom dose editing and the "Apply timeline changes" action under a reduced-height viewport, emulating the vertical screen area available when an on-screen software keyboard is presented.
 
 ### Test protocol
-1. Loaded `/` and waited for baseline readiness.
-2. Navigated to the Timeline tab (`#tab-timeline`).
-3. Clicked `#addDose` to create a new draft dose row; confirmed unapplied advisory notice `#dosePending` appeared.
-4. **Simulated on-screen virtual keyboard open:** Reduced viewport height to emulate software keyboard presentation:
-   - iPhone 14: Viewport reduced from $664\text{ px}$ to $364\text{ px}$ ($300\text{ px}$ keyboard deduction).
-   - iPad Pro 11: Viewport reduced from $1194\text{ px}$ to $844\text{ px}$ ($350\text{ px}$ keyboard deduction).
-5. Filled draft inputs in the new row under keyboard-reduced viewport:
+1. Loaded `/` and navigated to the Timeline tab (`#tab-timeline`).
+2. Clicked `+ Add medication dose` (`#addDose`); verified unapplied notice (`#dosePending`) appeared.
+3. **Applied reduced-height portrait viewport:**
+   - iPhone 14: Reduced from $664\text{ px}$ to $364\text{ px}$ ($300\text{ px}$ reduction).
+   - iPad Pro 11: Reduced from $1194\text{ px}$ to $844\text{ px}$ ($350\text{ px}$ reduction).
+4. Populated draft fields under reduced-height viewport:
    - Dose amount: `500` mg
    - Route: `Valacyclovir oral`
    - Administration time: `36` h
    - Dispatched `input` events to commit values to internal `doseDraft`.
-6. Scrolled `#applyFullTimeline` into view using `scrollIntoViewIfNeeded()`. Verified button visibility and hit-target reachability.
-7. Clicked `#applyFullTimeline` while keyboard-reduced viewport was active.
-8. Verified that `#dosePending` cleared (`hidden === true`).
-9. **Engine configuration assertion:** Inspected `window.AyFluxResearchBridge.snapshot().config` directly in the simulation engine. Verified:
+5. Scrolled `#applyFullTimeline` into view via `scrollIntoViewIfNeeded()`. Verified button visibility and hit-target reachability.
+6. Clicked `#applyFullTimeline` while reduced-height viewport was active.
+7. Verified `#dosePending` cleared (`hidden === true`).
+8. **Engine configuration assertion:** Inspected `window.AyFluxResearchBridge.snapshot().config` directly in the simulation engine. Confirmed:
    - `dosingMode === 'custom'`
    - `customDoses` contains `{ time: 36, amount: 500, route: 'Valacyclovir oral' }`
-10. Restored original viewport height (simulating keyboard dismissal).
+9. Restored baseline viewport.
 
 ### Observed findings
-- **iPhone 14 (Mobile Safari):** PASSED. Draft inputs populated cleanly while keyboard height was deducted; `#applyFullTimeline` was successfully scrolled into view, clicked, and applied; engine received and applied the 500 mg oral dose at hour 36.
-- **iPad Pro 11 (Tablet Safari):** PASSED. Inputs and `#applyFullTimeline` remained operable under keyboard viewport reduction; custom dose applied cleanly to engine configuration.
+- **iPhone 14 (Mobile Safari profile):** PASSED. Draft inputs populated cleanly in reduced-height viewport; `#applyFullTimeline` was successfully scrolled into view, clicked, and applied; engine received and applied the 500 mg oral dose at hour 36.
+- **iPad Pro 11 (Tablet Safari profile):** PASSED. Inputs and `#applyFullTimeline` remained reachable and operable under reduced-height viewport; custom dose applied cleanly to engine configuration.
+- **Hardware disclaimer:** Genuine on-device physical Safari virtual keyboard interaction, automatic scrolling, and layout shifting remain open and require verification on physical Apple hardware.
 
 ---
 
 ## 4. Test Matrix Summary
 
-| Target environment | Device profile | Component | Test scenario | Status | Key observation |
+| Environment | Device profile | Component | Test scenario | Status | Key observation |
 | :--- | :--- | :--- | :--- | :---: | :--- |
-| Local build | iPhone 14 | Lite (`/lite/`) | Pinch, Pan & Rotation | **PASSED** | Pinch magnifies whole page (`touch-action: pan-y pinch-zoom`); time axis stays `0–100%`; pan does not shift axis; ResizeObserver resizes on rotation. |
-| Local build | iPhone 14 | Full (`/`) | Timeline Dose Edit + Keyboard | **PASSED** | Custom dose (500 mg oral @ 36 h) edited and applied under 300 px keyboard deduction; engine config verified. |
-| Local build | iPad Pro 11 | Lite (`/lite/`) | Pinch, Pan & Rotation | **PASSED** | Pinch magnifies whole page; time axis static; canvas resizes cleanly to 408 px width in 2-col landscape. |
-| Local build | iPad Pro 11 | Full (`/`) | Timeline Dose Edit + Keyboard | **PASSED** | Custom dose edited and applied under 350 px keyboard deduction; `#applyFullTimeline` reachable; engine config verified. |
+| Local build | iPhone 14 | Lite (`/lite/`) | Time Controls (#213) & Synthetic Touch | **PASSED** | Controls narrow axis to 24–72 h, persist across rotation, reset to 0–96 h; button height 44 px; synthetic touches leave axis unchanged. |
+| Local build | iPhone 14 | Full (`/`) | Timeline Edit in Reduced Viewport | **PASSED** | Custom dose (500 mg oral @ 36 h) edited and applied under 300 px viewport deduction; engine config verified. |
+| Local build | iPad Pro 11 | Lite (`/lite/`) | Time Controls (#213) & Synthetic Touch | **PASSED** | Controls narrow axis to 24–72 h, persist across rotation, reset to 0–96 h; canvas resizes cleanly to 408 px width in 2-col landscape. |
+| Local build | iPad Pro 11 | Full (`/`) | Timeline Edit in Reduced Viewport | **PASSED** | Custom dose edited and applied under 350 px viewport deduction; `#applyFullTimeline` reachable; engine config verified. |
 
 ---
 
@@ -117,4 +113,4 @@ node scripts/test_safari_webkit.cjs
 
 - Adult PK engine blob hash: `17971df66e0a97b4d382572a582d35c444a3c83f` (unmodified).
 - Pediatric PK engine blob hash: `4e598a8d4808fc50918541aaefb68594563345c0` (unmodified).
-- Regression suite: 193/193 tests pass (`npm test`).
+- Full regression suite passes cleanly (`npm test`).
