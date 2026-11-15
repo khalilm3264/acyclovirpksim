@@ -22,7 +22,7 @@
 <p align="center">
   <a href="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml"><img alt="Build and tests" src="https://github.com/khalilm3264/acyclovirpksim/actions/workflows/pages.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: AGPL-3.0-only" src="https://img.shields.io/badge/license-AGPL--3.0--only-315f7b"></a>
-  <a href="CHANGELOG.md"><img alt="Version 0.26.0 preview" src="https://img.shields.io/badge/version-0.26.0_preview-326f79"></a>
+  <a href="CHANGELOG.md"><img alt="Version 0.27.0 preview" src="https://img.shields.io/badge/version-0.27.0_preview-326f79"></a>
 </p>
 
 > [!IMPORTANT]
@@ -30,7 +30,7 @@
 
 ## Current status
 
-The application and software citation identify **v0.27.0 preview**, released 2026-11-13 ([release notes](https://github.com/khalilm3264/acyclovirpksim/releases/tag/v0.27.0)). Use the release tag, or an exact commit for later work from main.
+The application and software citation identify **v0.27.0 preview**, released 2026-11-13 ([release notes](https://github.com/khalilm3264/acyclovirpksim/releases/tag/v0.27.0)). The live site follows `main`, including later changes documented under [Unreleased](CHANGELOG.md#unreleased). Cite the release tag for that frozen release, or an exact commit for later work from main.
 
 ## What does AyFlux do?
 
@@ -53,7 +53,7 @@ AyFlux uses a simplified two-compartment acyclovir model with renal and nonrenal
 
 ## What's new in 0.27.0
 
-Released and live at [ayflux.org](https://ayflux.org/). Simulated concentrations are unchanged from 0.26.0; drug-removed accounting is now exact within each solver step, and probenecid is a new option that is off by default. Full details are in the [changelog](CHANGELOG.md#unreleased).
+For the tagged v0.27.0 release, simulated concentrations are unchanged from 0.26.0; drug-removed accounting is exact within each solver step, and probenecid is a new option that is off by default. See the [tagged release notes](https://github.com/khalilm3264/acyclovirpksim/releases/tag/v0.27.0) for that comparison. Later changes on `main`, including model updates, are recorded separately under [Unreleased](CHANGELOG.md#unreleased).
 
 - **Zoom like Plotly:** drag a box on any graph, double-click to reset; pan, zoom and download from the toolbar.
 - **Shareable links:** send someone a scenario as a link. The settings live in the link; nothing is uploaded.
