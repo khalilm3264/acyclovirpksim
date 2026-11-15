@@ -21,6 +21,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
+const { execSync } = require('node:child_process');
 const pk = require('../../public/assets/pk-engine.js');
 
 function createRng(seed = 44556677) {
@@ -1314,11 +1315,9 @@ function verifyRecordsIntegrity(records, allSummariesObj) {
   }
 }
 
-function verifyCsvReproduction(csvFilePath, allSummariesObj) {
-  console.log('Verifying exact reproduction of all summaries from unrounded CSV...');
-  const content = fs.readFileSync(csvFilePath, 'utf8').trim();
-  const lines = content.split('\n');
-  const headers = lines[0].split(',');
+function parseCsvRecords(content) {
+  const lines = content.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
   const records = [];
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
@@ -1349,6 +1348,13 @@ function verifyCsvReproduction(csvFilePath, allSummariesObj) {
     }
     records.push(row);
   }
+  return records;
+}
+
+function verifyCsvReproduction(csvFilePath, allSummariesObj) {
+  console.log('Verifying exact reproduction of all summaries from unrounded CSV...');
+  const content = fs.readFileSync(csvFilePath, 'utf8');
+  const records = parseCsvRecords(content);
 
   // 1. Positive Control Check
   verifyRecordsIntegrity(records, allSummariesObj);
@@ -1438,66 +1444,151 @@ const csvPath = path.resolve(__dirname, 'cmmg-forecast-patients.csv');
 fs.writeFileSync(csvPath, csvRows.join('\n'), 'utf8');
 console.log(`Saved per-patient CSV (${allPatientRecords.length} rows) to ${csvPath}`);
 
-function verifyIdentityToBaseline(newSummaries, refJsonPath) {
-  if (!fs.existsSync(refJsonPath)) return;
-  console.log('Verifying numerical identity of all 7 existing methods against 5826d04 baseline...');
-  const ref = JSON.parse(fs.readFileSync(refJsonPath, 'utf8'));
-  const conditions = ['exact_4pct_cv', 'perturbed_fixed32h_4pct_cv', 'perturbed_elapsed4h_4pct_cv', 'zero_noise_sanity'];
-  for (const c of conditions) {
-    const newCond = newSummaries[c];
-    const refCond = ref[c];
-    for (let sIdx = 0; sIdx < newCond.length; sIdx++) {
-      const nS = newCond[sIdx];
-      const rS = refCond[sIdx];
-      assert.equal(nS.scenario, rS.scenario);
-      // Check CF
-      assert.ok(Math.abs(nS.CF.medAbs - rS.CF.medAbs) < 1e-12, `CF medAbs mismatch in ${c} ${nS.scenario}`);
-      assert.ok(Math.abs(nS.CF.medSigned - rS.CF.medSigned) < 1e-12, `CF medSigned mismatch in ${c} ${nS.scenario}`);
-      assert.deepEqual(nS.CF.signs, rS.CF.signs, `CF signs mismatch in ${c} ${nS.scenario}`);
-      // Check ER
-      assert.ok(Math.abs(nS.ER.cmmgMedAbs - rS.ER.cmmgMedAbs) < 1e-12, `ER cmmgMedAbs mismatch in ${c} ${nS.scenario}`);
-      assert.ok(Math.abs(nS.ER.cmmgMedSigned - rS.ER.cmmgMedSigned) < 1e-12, `ER cmmgMedSigned mismatch in ${c} ${nS.scenario}`);
-      assert.deepEqual(nS.ER.cmmgSigns, rS.ER.cmmgSigns, `ER cmmgSigns mismatch in ${c} ${nS.scenario}`);
-      assert.ok(Math.abs(nS.ER.bothMedAbs - rS.ER.bothMedAbs) < 1e-12, `ER bothMedAbs mismatch in ${c} ${nS.scenario}`);
-      assert.ok(Math.abs(nS.ER.bothMedSigned - rS.ER.bothMedSigned) < 1e-12, `ER bothMedSigned mismatch in ${c} ${nS.scenario}`);
-      assert.deepEqual(nS.ER.bothSigns, rS.ER.bothSigns, `ER bothSigns mismatch in ${c} ${nS.scenario}`);
-      assert.equal(nS.ER.diffs.helped, rS.ER.diffs.helped);
-      assert.equal(nS.ER.diffs.worsened, rS.ER.diffs.worsened);
-      assert.equal(nS.ER.diffs.tied, rS.ER.diffs.tied);
-      assert.ok(Math.abs(nS.ER.diffs.medDiff - rS.ER.diffs.medDiff) < 1e-12);
-      // Check SU_Unw
-      assert.ok(Math.abs(nS.SU_Unw.cmmgMedAbs - rS.SU_Unw.cmmgMedAbs) < 1e-12);
-      assert.ok(Math.abs(nS.SU_Unw.cmmgMedSigned - rS.SU_Unw.cmmgMedSigned) < 1e-12);
-      assert.deepEqual(nS.SU_Unw.cmmgSigns, rS.SU_Unw.cmmgSigns);
-      assert.ok(Math.abs(nS.SU_Unw.bothMedAbs - rS.SU_Unw.bothMedAbs) < 1e-12);
-      assert.ok(Math.abs(nS.SU_Unw.bothMedSigned - rS.SU_Unw.bothMedSigned) < 1e-12);
-      assert.deepEqual(nS.SU_Unw.bothSigns, rS.SU_Unw.bothSigns);
-      assert.equal(nS.SU_Unw.diffs.helped, rS.SU_Unw.diffs.helped);
-      assert.equal(nS.SU_Unw.diffs.worsened, rS.SU_Unw.diffs.worsened);
-      assert.equal(nS.SU_Unw.diffs.tied, rS.SU_Unw.diffs.tied);
-      assert.ok(Math.abs(nS.SU_Unw.diffs.medDiff - rS.SU_Unw.diffs.medDiff) < 1e-12);
-      // Check SU_Rew
-      assert.ok(Math.abs(nS.SU_Rew.cmmgMedAbs - rS.SU_Rew.cmmgMedAbs) < 1e-12);
-      assert.ok(Math.abs(nS.SU_Rew.cmmgMedSigned - rS.SU_Rew.cmmgMedSigned) < 1e-12);
-      assert.deepEqual(nS.SU_Rew.cmmgSigns, rS.SU_Rew.cmmgSigns);
-      assert.ok(Math.abs(nS.SU_Rew.bothMedAbs - rS.SU_Rew.bothMedAbs) < 1e-12);
-      assert.ok(Math.abs(nS.SU_Rew.bothMedSigned - rS.SU_Rew.bothMedSigned) < 1e-12);
-      assert.deepEqual(nS.SU_Rew.bothSigns, rS.SU_Rew.bothSigns);
-      assert.equal(nS.SU_Rew.diffs.helped, rS.SU_Rew.diffs.helped);
-      assert.equal(nS.SU_Rew.diffs.worsened, rS.SU_Rew.diffs.worsened);
-      assert.equal(nS.SU_Rew.diffs.tied, rS.SU_Rew.diffs.tied);
-      assert.ok(Math.abs(nS.SU_Rew.diffs.medDiff - rS.SU_Rew.diffs.medDiff) < 1e-12);
+const EXISTING_7_METHODS_AND_WEIGHTS = [
+  // 7 existing forecast methods
+  'pred_cf',
+  'pred_er_cmmg',
+  'pred_er_both',
+  'pred_su_unw_cmmg',
+  'pred_su_unw_both',
+  'pred_su_rew_cmmg',
+  'pred_su_rew_both',
+  // Signed errors
+  'err_signed_cf',
+  'err_signed_er_cmmg',
+  'err_signed_er_both',
+  'err_signed_su_unw_cmmg',
+  'err_signed_su_unw_both',
+  'err_signed_su_rew_cmmg',
+  'err_signed_su_rew_both',
+  // Absolute errors
+  'err_abs_cf',
+  'err_abs_er_cmmg',
+  'err_abs_er_both',
+  'err_abs_su_unw_cmmg',
+  'err_abs_su_unw_both',
+  'err_abs_su_rew_cmmg',
+  'err_abs_su_rew_both',
+  // Exported history weights & ESS
+  'w_H1',
+  'w_H2',
+  'ess'
+];
+
+function loadBaselineFrom5826d04(customRef = '5826d04') {
+  const repoRoot = path.resolve(__dirname, '../..');
+  if (typeof customRef === 'string' && fs.existsSync(customRef) && fs.statSync(customRef).isFile()) {
+    const content = fs.readFileSync(customRef, 'utf8');
+    return parseCsvRecords(content);
+  }
+  try {
+    const rawCsv = execSync(
+      `git show ${customRef}:research/validation/cmmg-forecast-patients.csv`,
+      { cwd: repoRoot, maxBuffer: 25 * 1024 * 1024, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+    );
+    if (!rawCsv || !rawCsv.includes('param_draw_seed')) {
+      throw new Error(`Git returned empty or invalid CSV for ref '${customRef}'`);
+    }
+    return parseCsvRecords(rawCsv);
+  } catch (err) {
+    throw new Error(
+      `Baseline verification failed: required 5826d04 baseline data is unavailable from ref '${customRef}' (${err.message ? err.message.split('\n')[0] : 'unknown error'}).`
+    );
+  }
+}
+
+function compareRecordsAgainstBaseline(currentRecords, baselineRecords, fieldsToCompare = EXISTING_7_METHODS_AND_WEIGHTS) {
+  assert.equal(
+    currentRecords.length,
+    baselineRecords.length,
+    `Record count mismatch vs baseline: current=${currentRecords.length}, baseline=${baselineRecords.length}`
+  );
+
+  for (let i = 0; i < currentRecords.length; i++) {
+    const c = currentRecords[i];
+    const b = baselineRecords[i];
+
+    if (String(c.patient_id) !== String(b.patient_id) || c.condition !== b.condition || c.scenario !== b.scenario || c.target_mode !== b.target_mode) {
+      throw new assert.AssertionError({
+        message: `Row ${i} metadata mismatch: current=[pt${c.patient_id}, ${c.condition}, ${c.scenario}, ${c.target_mode}] vs baseline=[pt${b.patient_id}, ${b.condition}, ${b.scenario}, ${b.target_mode}]`
+      });
+    }
+
+    for (const f of fieldsToCompare) {
+      const vc = parseFloat(c[f]);
+      const vb = parseFloat(b[f]);
+      assert.ok(!Number.isNaN(vc), `Current row ${i} field ${f} is NaN`);
+      assert.ok(!Number.isNaN(vb), `Baseline row ${i} field ${f} is NaN`);
+
+      const diff = Math.abs(vc - vb);
+      if (diff > 1e-12) {
+        throw new assert.AssertionError({
+          message: `Row ${i} (${c.condition}/${c.scenario}/pt${c.patient_id}) ${f} mismatch vs 5826d04 baseline: current=${vc}, baseline=${vb} (diff=${diff})`
+        });
+      }
     }
   }
-  console.log('  [PASS] All 7 existing methods verified numerically identical (< 1e-12 mg/L) across all 4 conditions x 3 scenarios.');
+
+  return currentRecords.length;
+}
+
+function runBaselineVerification(currentRecords, gitRef = '5826d04') {
+  console.log('Verifying row-by-row numerical identity of all 7 existing methods against frozen 5826d04 baseline...');
+
+  // 1. Positive Control: row-by-row identity across all 6,000 records
+  const baselineRecords = loadBaselineFrom5826d04(gitRef);
+  const nVerified = compareRecordsAgainstBaseline(currentRecords, baselineRecords);
+  console.log(`  [PASS] Positive control: All ${nVerified} rows x ${EXISTING_7_METHODS_AND_WEIGHTS.length} fields matched 5826d04 baseline identically (< 1e-12 mg/L).`);
+
+  // 2. Negative Control 1: Missing Baseline throws explicit Error
+  let missingBaselineFailed = false;
+  try {
+    loadBaselineFrom5826d04('nonexistent_ref_missing_404');
+  } catch (err) {
+    missingBaselineFailed = true;
+    assert.match(
+      err.message,
+      /Baseline verification failed: required 5826d04 baseline data is unavailable/,
+      `Error message must indicate missing baseline, got: ${err.message}`
+    );
+  }
+  assert.ok(missingBaselineFailed, 'Negative control failed: missing baseline must throw explicit Error');
+  console.log('  [PASS] Negative control (missing baseline): Explicit error thrown when required baseline is unavailable.');
+
+  // 3. Negative Control 2: Altered Prediction fails row-by-row assertion
+  const alteredPredRecords = currentRecords.map(r => ({ ...r }));
+  alteredPredRecords[42].pred_su_unw_both = String(parseFloat(alteredPredRecords[42].pred_su_unw_both) + 0.35);
+  let alteredPredFailed = false;
+  try {
+    compareRecordsAgainstBaseline(alteredPredRecords, baselineRecords);
+  } catch (err) {
+    alteredPredFailed = true;
+    assert.ok(err instanceof assert.AssertionError, `Expected AssertionError, got: ${err.message}`);
+    assert.match(err.message, /mismatch vs 5826d04 baseline/);
+  }
+  assert.ok(alteredPredFailed, 'Negative control failed: altered prediction must throw AssertionError');
+  console.log('  [PASS] Negative control (altered prediction): Deliberately altered prediction caught by row-by-row assertion.');
+
+  // 4. Negative Control 3: Altered Exported Weight fails row-by-row assertion
+  const alteredWeightRecords = currentRecords.map(r => ({ ...r }));
+  alteredWeightRecords[500].w_H1 = String(parseFloat(alteredWeightRecords[500].w_H1) + 0.15);
+  let alteredWeightFailed = false;
+  try {
+    compareRecordsAgainstBaseline(alteredWeightRecords, baselineRecords);
+  } catch (err) {
+    alteredWeightFailed = true;
+    assert.ok(err instanceof assert.AssertionError, `Expected AssertionError, got: ${err.message}`);
+    assert.match(err.message, /mismatch vs 5826d04 baseline/);
+  }
+  assert.ok(alteredWeightFailed, 'Negative control failed: altered weight must throw AssertionError');
+  console.log('  [PASS] Negative control (altered weight): Deliberately altered exported weight caught by row-by-row assertion.');
 }
 
 // Verify that all summary statistics, sign counts, and quantiles reproduce identically from the unrounded CSV
 verifyCsvReproduction(csvPath, allSummaries);
 
-// Verify numerical identity of all 7 existing methods vs 5826d04 baseline
-const baselineRefPath = path.resolve(__dirname, 'results-5826d04-ref.json');
-verifyIdentityToBaseline(allSummaries, baselineRefPath);
+// Verify numerical identity of all 7 existing methods vs frozen 5826d04 baseline row by row with negative controls
+runBaselineVerification(allPatientRecords, '5826d04');
 
 // Generate and write Markdown Audit Report
 const mdPath = path.resolve(__dirname, 'CMMG-POST-HD-FORECAST-AUDIT.md');
@@ -1513,8 +1604,13 @@ module.exports = {
   eval2,
   eval3,
   eval4,
+  allPatientRecords,
   verifyCsvReproduction,
   verifyRecordsIntegrity,
+  parseCsvRecords,
+  loadBaselineFrom5826d04,
+  compareRecordsAgainstBaseline,
+  runBaselineVerification,
   generatePatientForecast,
   fcCandidates,
   fcSimsComplete,

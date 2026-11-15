@@ -9,7 +9,12 @@ const {
   runRevealedArmSensitivityAudit,
   runChartObservationIndependenceAudit
 } = require('../research/validation/cmmg-forecast-leakage-audit.cjs');
-const { generatePatientForecast } = require('../research/validation/cmmg-forecast-post-hd.cjs');
+const {
+  generatePatientForecast,
+  allPatientRecords,
+  loadBaselineFrom5826d04,
+  compareRecordsAgainstBaseline
+} = require('../research/validation/cmmg-forecast-post-hd.cjs');
 
 test('CMMG forecast pipeline exhibits no future-data leakage detected by target perturbation checks', () => {
   const n = runTargetPerturbationCheck(generatePatientForecast);
@@ -71,4 +76,34 @@ test('Deliberate-failure negative controls catch target leakage, input leakage, 
     return res;
   };
   assert.throws(() => runChartObservationIndependenceAudit(leakyChart), /Chart history observation leak detected/);
+});
+
+test('Baseline verification against frozen 5826d04 asserts row-by-row numerical identity and catches missing/altered baseline', () => {
+  // 1. Positive control: loads from frozen 5826d04 and asserts all 6000 rows match row by row
+  const baselineRecords = loadBaselineFrom5826d04('5826d04');
+  assert.equal(baselineRecords.length, 6000, 'Baseline must contain exactly 6000 records');
+  const nChecked = compareRecordsAgainstBaseline(allPatientRecords, baselineRecords);
+  assert.equal(nChecked, 6000, 'All 6000 records must match row by row');
+
+  // 2. Negative control: missing baseline fails explicitly with Error
+  assert.throws(
+    () => loadBaselineFrom5826d04('nonexistent_ref_missing_404'),
+    /Baseline verification failed: required 5826d04 baseline data is unavailable/
+  );
+
+  // 3. Negative control: altered prediction fails row-by-row check
+  const alteredPred = allPatientRecords.map(r => ({ ...r }));
+  alteredPred[42].pred_su_unw_both = String(parseFloat(alteredPred[42].pred_su_unw_both) + 0.4);
+  assert.throws(
+    () => compareRecordsAgainstBaseline(alteredPred, baselineRecords),
+    /mismatch vs 5826d04 baseline/
+  );
+
+  // 4. Negative control: altered weight fails row-by-row check
+  const alteredWeight = allPatientRecords.map(r => ({ ...r }));
+  alteredWeight[500].w_H1 = String(parseFloat(alteredWeight[500].w_H1) + 0.2);
+  assert.throws(
+    () => compareRecordsAgainstBaseline(alteredWeight, baselineRecords),
+    /mismatch vs 5826d04 baseline/
+  );
 });
