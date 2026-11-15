@@ -255,7 +255,7 @@ const VIRUSES={
  'VZV':{min:0.12,max:10.8,name:'VZV'}
 };
 function fieldDef(id){let d=[...DEFS[id]];if(id==='dose')d[3]=E.MAX_DOSE_MG[c.route];return d;}
-function numericField(id){let [lab,unit,min,max,step]=fieldDef(id);if(id==='dose')lab=c.route==='Valacyclovir oral'?'Valacyclovir oral dose':'Acyclovir IV dose';return `<div class="inputrow"><label for="num_${id}">${lab}</label><div class="entry"><input aria-label="${lab} slider" data-k="${id}" data-role="range" type="range" min="${min}" max="${max}" step="${step}" value="${c[id]}"><input aria-label="${lab} exact value" data-k="${id}" data-role="number" id="num_${id}" type="number" min="${min}" max="${max}" step="any" value="${c[id]}"></div><div class="unit">${unit}</div></div>`;}
+function numericField(id){let [lab,unit,min,max,step]=fieldDef(id);if(id==='dose')lab=c.route==='Valacyclovir oral'?'Valacyclovir oral dose':'Acyclovir IV dose';return `<div class="inputrow"><label for="num_${id}">${lab}</label><div class="entry"><input aria-label="${lab} slider" data-k="${id}" data-role="range" type="range" min="${min}" max="${max}" step="${step}" value="${c[id]}"><input aria-label="${lab} exact value" data-k="${id}" data-role="number" aria-describedby="inputError_${id}" id="num_${id}" type="number" min="${min}" max="${max}" step="any" value="${c[id]}"></div><div class="unit">${unit}</div><div id="inputError_${id}" class="warning hidden" role="status"></div></div>`;}
 function group(title,items,description=''){return `<h2>${title}</h2>${items.map(numericField).join('')}${description?`<p class="tip">${description}</p>`:''}`;}
 function pdGroup(){
  const fields=['pdCl','pdVolume','pdGlucose','pdTransport','pdUfBase','pdAbsorb'];
@@ -812,12 +812,22 @@ function calculate(forceAll=false){
  }catch(error){calculationError(error);}
 }
 function defer(){refreshLabelAdjust();pendingCsvExport=false;++calculationVersion;queuedJob=null;dataIsCurrent=false;setBusy(true);clearTimeout(timer);timer=setTimeout(calculate,180);}
-function updateParam(target){let id=target.dataset.k;if(!id)return;let value=Number(target.value);if(target.value.trim()===''||!Number.isFinite(value))return;
- const def=fieldDef(id);if(value<def[2]||value>def[3]){if(target.dataset.role==='number')target.setCustomValidity(`Use ${def[2]}–${def[3]}`);return;}target.setCustomValidity?.('');if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
+function updateParam(target){let id=target.dataset.k;if(!id)return;const def=fieldDef(id),value=Number(target.value);
+ const invalid=target.value.trim()===''||!Number.isFinite(value)||value<def[2]||value>def[3];
+ numericFeedback(id,invalid?`Enter a number from ${def[2]} to ${def[3]} ${def[1]}. This entry is not applied; the simulation uses ${c[id]} ${def[1]}.`:'');
+ if(invalid)return;
  const same=document.querySelectorAll(`[data-k="${id}"]`);for(const el of same)if(el!==target)el.value=value;
+ if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
  if((id==='weight'||id==='dose')&&typeof refreshBodySize==='function')refreshBodySize();
  if((id==='csfRatio'||id==='csfMetRatio')&&$('csfBarrier'))$('csfBarrier').closest('.inputrow').outerHTML=csfBarrierControl();
  defer();}
+function numericFeedback(id,message){
+ const input=document.getElementById('num_'+id),note=document.getElementById('inputError_'+id);
+ if(!input||!note)return;
+ input.setCustomValidity(message);
+ if(message)input.setAttribute('aria-invalid','true');else input.removeAttribute('aria-invalid');
+ note.textContent=message;note.classList.toggle('hidden',!message);
+}
 function renderSchedule(){const rows=draft;
  $('scheduleRows').innerHTML=rows.map((r,i)=>`<div class="intervals" data-row="${i}"><div><label>Mode</label><select data-index="${i}" data-field="type">${E.TYPES.map(m=>`<option ${m===r.type?'selected':''}>${m}</option>`).join('')}</select></div><div><label>Start (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="start" value="${r.start}"></div><div><label>End (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="end" value="${r.end}"></div><button class="btn secondary small" data-delete="${i}" aria-label="Delete session ${i+1}">✕</button></div>`).join('');
  paintSchedule(draft);renderPdRxRows();}
