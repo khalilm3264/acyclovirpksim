@@ -573,7 +573,13 @@ function chartNearViewport(target){
 }
 if(typeof IntersectionObserver!=='undefined'){
  const chartObserver=new IntersectionObserver(entries=>{
-  if(entries.some(entry=>entry.isIntersecting))render();
+  if(entries.some(entry=>entry.isIntersecting)){
+   // Start the renderer while the Worker is calculating, rather than adding a
+   // second network wait after results arrive. Offscreen graphs stay deferred.
+   // A failed warm-up remains retryable through the normal chart error path.
+   window.AyFluxCharts.ensure().catch(()=>{});
+   render();
+  }
  },{rootMargin:'160px 0px'});
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
