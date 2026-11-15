@@ -417,11 +417,16 @@ function checkUrlReachable(targetUrl) {
   const client = urlObj.protocol === 'https:' ? https : http;
   return new Promise((resolve) => {
     const req = client.request(urlObj, { method: 'HEAD', timeout: 5000 }, res => {
-      const ok = res.statusCode >= 200 && res.statusCode < 400;
-      resolve({ ok, statusCode: res.statusCode });
+      res.resume();
+      resolve({ connected: true, statusCode: res.statusCode });
     });
-    req.on('timeout', () => { req.destroy(); resolve({ ok: false, error: 'Connection timed out' }); });
-    req.on('error', err => resolve({ ok: false, error: err.message }));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve({ connected: false, error: 'Connection timed out' });
+    });
+    req.on('error', err => {
+      resolve({ connected: false, error: err.message });
+    });
     req.end();
   });
 }
@@ -443,8 +448,12 @@ async function main() {
     } else {
       const targetProd = process.env.AYFLUX_PROD_URL || 'https://ayflux.org';
       const reachability = await checkUrlReachable(targetProd);
-      if (!reachability.ok) {
-        console.warn(`\n[OFFLINE SKIP] Production site ${targetProd} is unreachable (${reachability.error || 'HTTP ' + reachability.statusCode}). Skipping production tests.`);
+      if (!reachability.connected) {
+        console.warn(`\n[OFFLINE SKIP] Production site ${targetProd} connection failed (${reachability.error}). Skipping optional production tests.`);
+      } else if (reachability.statusCode < 200 || reachability.statusCode >= 400) {
+        const errorMsg = `Production site ${targetProd} responded with HTTP ${reachability.statusCode} (expected HTTP 200-399)`;
+        console.error(`\n❌ PRODUCTION PREFLIGHT HTTP ERROR: ${errorMsg}`);
+        throw new Error(errorMsg);
       } else {
         console.log(`\n[PREFLIGHT PASSED] Production site ${targetProd} is reachable (HTTP ${reachability.statusCode}). Running full production test suite...`);
         // Once preflight passes, any failure (AssertionError, TypeError from missing bridge, TimeoutError from missing control)
