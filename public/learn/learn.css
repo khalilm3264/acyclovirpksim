@@ -21,7 +21,7 @@ body { margin: 0; overflow-wrap: anywhere; }
 button, input, select { font: inherit; }
 a { color: #245b7f; }
 a:hover { color: #173f5d; }
-a:focus-visible { outline: 2px solid #238ac4; outline-offset: 2px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid #387da8; outline-offset: 2px; }
 .site-header {
   min-height: 82px;
   padding: 13px 20px 12px;
