@@ -59,13 +59,27 @@ async function timeline(){
 async function multiples(){
  const s=snapshot();if(!$('comparisonPanel').open||!s.updated)return;
  await charts.ensure();if(!current(s)||!$('comparisonPanel').open)return;
- const area=$('multipleCharts');for(const el of area.children)charts.dispose(el);area.replaceChildren();
+ const area=$('multipleCharts'),zoomByMode=new Map();
+ for(const el of area.children){
+  const chart=window.echarts.getInstanceByDom(el);
+  if(el.dataset.revision===String(s.revision)&&chart)zoomByMode.set(el.dataset.mode,charts.zoomState(chart));
+  charts.dispose(el);
+ }
+ area.replaceChildren();
+ const thresholdMg=snapshot().plasmaThresholdMgL;
  const modes=[...document.querySelectorAll('input[data-mode]:checked')].map(el=>el.dataset.mode).filter(m=>s.results[m]);
- const ceiling=Math.max(1,...modes.map(m=>Math.max(...s.results[m].plasma.upper)));
+ const ceiling=Math.max(1,thresholdMg??0,...modes.map(m=>Math.max(...s.results[m].plasma.upper)));
  for(const name of modes){
-  const d=s.results[name],el=document.createElement('div');el.style.cssText='height:255px;contain:inline-size';area.append(el);
+  const d=s.results[name],el=document.createElement('div');el.style.cssText='height:255px;contain:inline-size';el.dataset.mode=name;el.dataset.revision=String(s.revision);area.append(el);
   const option=charts.options([charts.band('Model interval',d.time,d.plasma.lower,d.plasma.upper,'rgba(48,105,148,.2)'),charts.line('Median',d.time,d.plasma.median,'#236798')],'Time (h)','Plasma ACV (mg/L)');
-  option.yAxis.max=ceiling;option.xAxis.max=s.config.horizon;option.title={text:name,textStyle:{fontSize:14}};charts.draw(el,option);
+  const threshold=charts.plasmaThresholdLine(thresholdMg,'mg/L',s.config.horizon);
+  if(threshold){option.series.push(threshold);option.legend.data.push(threshold.name);}
+  const prior=zoomByMode.get(name)||[];
+  const y=prior.find(z=>z.id==='ayNavY'&&z.endValue!==undefined);
+  option.yAxis.max=Math.max(ceiling,y?.endValue??0);option.xAxis.max=s.config.horizon;option.title={text:name,textStyle:{fontSize:14}};
+  const chart=charts.draw(el,option);
+  chart.on('restore',()=>setTimeout(()=>{if(!chart.isDisposed())chart.setOption({yAxis:{max:ceiling}});},0));
+  if(prior.length)chart.dispatchAction({type:'dataZoom',batch:prior.map(z=>({...z,dataZoomId:z.id}))});
  }
 }
 let sensitivity,ensemble;
@@ -148,6 +162,7 @@ $('ensembleRun').onclick=()=>{
 for(const id of ['ensembleView','ensembleX','ensembleY'])$(id).onchange=renderEnsemble;
 $('eventsPanel').ontoggle=timeline;$('comparisonPanel').ontoggle=multiples;$('removalPanel').ontoggle=drawRemoval;
 $('sweepPanel').ontoggle=sweep;$('sweepFactor').onchange=sweep;$('tornadoMetric').addEventListener('change',sweep);
+window.addEventListener('ayflux:plasma-threshold-changed',multiples);
 window.addEventListener('ayflux:results-updated',()=>{cancel('ensemble');ensemble=null;charts.dispose($('ensembleChart'));$('ensembleStatus').textContent='';timeline();multiples();drawRemoval();});
 document.addEventListener('change',e=>{if(e.target.matches('input[data-mode]'))requestAnimationFrame(multiples);});
 window.AyFluxViews={setFactors,selectFactor,timeline};
