@@ -115,6 +115,29 @@
   if(!chart||chart.isDisposed?.())return;
   chart.dispatchAction({type:'restore'});
  }
+ const keyboardHandlers=new WeakMap();
+ function clearKeyboardAttributes(el){
+  for(const name of ['tabindex','aria-keyshortcuts','aria-description'])el.removeAttribute?.(name);
+ }
+ function installKeyboard(el,chart){
+  const previous=keyboardHandlers.get(el);
+  if(previous)el.removeEventListener?.('keydown',previous);
+  const handler=event=>{
+   if(event.target!==el||event.altKey||event.ctrlKey||event.metaKey||chart.isDisposed?.()||
+      !chart.getOption().dataZoom?.some(z=>z.id===NAV[0]))return;
+   const rect=gridRect(chart);
+   if(event.key==='+'||event.key==='=')zoomBy(chart,.5);
+   else if(event.key==='-')zoomBy(chart,2);
+   else if(event.key==='Home')resetView(chart);
+   else if(rect&&event.key==='ArrowLeft')panBy(chart,rect.width*.1,0);
+   else if(rect&&event.key==='ArrowRight')panBy(chart,-rect.width*.1,0);
+   else if(rect&&event.key==='ArrowUp')panBy(chart,0,rect.height*.1);
+   else if(rect&&event.key==='ArrowDown')panBy(chart,0,-rect.height*.1);
+   else return;
+   event.preventDefault();
+  };
+  el.addEventListener?.('keydown',handler);keyboardHandlers.set(el,handler);
+ }
  function navigation(){
   return {
    dataZoom:[
@@ -145,6 +168,7 @@
    chart=root.echarts.init(el);
    el.addEventListener?.('dblclick',()=>resetView(chart),true);
    installPan(el,chart);
+   installKeyboard(el,chart);
    // Restoring rebuilds the toolbox, so re-arm drag-to-zoom afterwards.
    chart.on('restore',()=>setTimeout(()=>{if(!chart.isDisposed()&&chart.getOption()?.toolbox?.[0]?.feature?.myPan)setDragMode(chart,finePointer()?'zoom':'off');},0));
    if(typeof ResizeObserver!=='undefined'){
@@ -155,11 +179,18 @@
    }
   }
   chart.setOption(option,{notMerge:true});
+  if(option.dataZoom?.some(z=>z.id===NAV[0])){
+   el.setAttribute?.('tabindex','0');
+   el.setAttribute?.('aria-keyshortcuts','= - ArrowLeft ArrowRight ArrowUp ArrowDown Home');
+   el.setAttribute?.('aria-description','Interactive chart. Plus and minus zoom, arrow keys pan, Home resets the axes. Tab moves to the next control.');
+  }else clearKeyboardAttributes(el);
   // Box zoom is armed by default with a mouse or trackpad; touch screens keep scrolling and use the toolbar.
   if(option.toolbox?.feature?.myPan&&option.toolbox.feature.dataZoom)setDragMode(chart,finePointer()?'zoom':'off');
   return chart;
  }
  function dispose(el){
+  const handler=keyboardHandlers.get(el);if(handler)el.removeEventListener?.('keydown',handler);keyboardHandlers.delete(el);
+  clearKeyboardAttributes(el);
   observers.get(el)?.disconnect();observers.delete(el);
   root.echarts?.getInstanceByDom(el)?.dispose();
  }

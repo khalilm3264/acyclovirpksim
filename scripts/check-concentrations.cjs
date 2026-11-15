@@ -64,6 +64,27 @@ async function main(){
   await verifyDose(700);
   assert.equal(await page.locator('#plasmaChart .chart-status').count(),0);
   assert.equal(await page.locator('#plasmaChart').getAttribute('aria-busy'),'false');
+  // Native Tab enters the chart from its preceding study picker.
+  await page.locator('#studySelect').focus();await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'plasmaChart');
+  assert.equal(await page.locator('#plasmaChart').evaluate(el=>getComputedStyle(el).outlineColor),'rgb(56, 125, 168)');
+  assert.equal(await page.locator('#plasmaChart').evaluate(el=>getComputedStyle(el).outlineWidth),'2px');
+  await page.keyboard.press('+');
+  const keyboardWindow=()=>page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom.map(z=>[z.start,z.end]));
+  let bounds=await keyboardWindow();assert.ok(bounds.every(([start,end])=>end-start===50));
+  await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowUp');
+  const panned=await keyboardWindow();assert.ok(panned[0][0]>bounds[0][0]&&panned[1][0]>bounds[1][0]);
+  await page.keyboard.press('-');assert.ok((await keyboardWindow()).every(([start,end])=>end-start===100));
+  await page.keyboard.press('+');await page.keyboard.press('Home');
+  assert.deepEqual(await keyboardWindow(),[[0,100],[0,100]]);
+  await page.keyboard.press('Tab');assert.notEqual(await page.evaluate(()=>document.activeElement.id),'plasmaChart','Chart must not trap focus');
+  // Wrapped export pickers and comparison buttons keep their blue focus cue.
+  await page.locator('#concUnit').focus();await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'csv');
+  assert.equal(await page.locator('#csv').evaluate(el=>getComputedStyle(el.parentElement).outlineColor),'rgb(56, 125, 168)');
+  await page.locator('#regimenName').focus();await page.keyboard.type('Keyboard audit');await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'saveRegimen');
+  await page.keyboard.press('Enter');assert.equal(await page.locator('#regimenRows tr').count(),2);
   // Exercise Firefox wheel zoom, pointer panning and responsive resizing.
   await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
   const plot=await page.locator('#plasmaChart').boundingBox();
@@ -115,7 +136,7 @@ async function main(){
    await failedPage.waitForFunction(()=>document.querySelector('#plasmaChart canvas')&&!document.querySelector('#plasmaChart .chart-status'));
   }finally{await failedPage.close();}
   assert.deepEqual(errors,[]);
-  console.log('Firefox: blue calculation/loading/error states, renderer retry, wheel zoom, pointer pan, resize/reset, exact plasma points and renal-profile axis passed.');
+  console.log('Firefox: chart Tab/focus, keyboard zoom/pan/reset and escape via Tab, export/comparison keyboard controls, loading/retry, pointer navigation, exact plasma points and renal axis passed.');
  }finally{await browser?.close();server.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
