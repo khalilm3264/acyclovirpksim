@@ -1170,35 +1170,54 @@ function verifyRecordsIntegrity(records, allSummariesObj) {
   // 1. Per-row arithmetic consistency across all 6000 records
   for (let i = 0; i < records.length; i++) {
     const r = records[i];
+    if (r.true_cmmg_target_mg_L === undefined || r.true_cmmg_target_mg_L === null || String(r.true_cmmg_target_mg_L).trim() === '') {
+      throw new assert.AssertionError({ message: `Row ${i} true_cmmg_target_mg_L is missing numeric output` });
+    }
     const target = parseFloat(r.true_cmmg_target_mg_L);
-    assert.ok(!Number.isNaN(target), `Row ${i} true_cmmg_target_mg_L must be a valid number`);
+    if (!Number.isFinite(target)) {
+      throw new assert.AssertionError({ message: `Row ${i} true_cmmg_target_mg_L must be a finite number, got: ${r.true_cmmg_target_mg_L}` });
+    }
 
-    const methods = [
-      { name: 'cf', pred: parseFloat(r.pred_cf), signed: parseFloat(r.err_signed_cf), abs: parseFloat(r.err_abs_cf) },
-      { name: 'chart', pred: parseFloat(r.pred_chart), signed: parseFloat(r.err_signed_chart), abs: parseFloat(r.err_abs_chart) },
-      { name: 'er_cmmg', pred: parseFloat(r.pred_er_cmmg), signed: parseFloat(r.err_signed_er_cmmg), abs: parseFloat(r.err_abs_er_cmmg) },
-      { name: 'er_both', pred: parseFloat(r.pred_er_both), signed: parseFloat(r.err_signed_er_both), abs: parseFloat(r.err_abs_er_both) },
-      { name: 'su_unw_cmmg', pred: parseFloat(r.pred_su_unw_cmmg), signed: parseFloat(r.err_signed_su_unw_cmmg), abs: parseFloat(r.err_abs_su_unw_cmmg) },
-      { name: 'su_unw_both', pred: parseFloat(r.pred_su_unw_both), signed: parseFloat(r.err_signed_su_unw_both), abs: parseFloat(r.err_abs_su_unw_both) },
-      { name: 'su_rew_cmmg', pred: parseFloat(r.pred_su_rew_cmmg), signed: parseFloat(r.err_signed_su_rew_cmmg), abs: parseFloat(r.err_abs_su_rew_cmmg) },
-      { name: 'su_rew_both', pred: parseFloat(r.pred_su_rew_both), signed: parseFloat(r.err_signed_su_rew_both), abs: parseFloat(r.err_abs_su_rew_both) }
-    ];
+    const methodNames = ['cf', 'chart', 'er_cmmg', 'er_both', 'su_unw_cmmg', 'su_unw_both', 'su_rew_cmmg', 'su_rew_both'];
+    for (const name of methodNames) {
+      const predRaw = r['pred_' + name];
+      const signedRaw = r['err_signed_' + name];
+      const absRaw = r['err_abs_' + name];
 
-    for (const m of methods) {
-      assert.ok(!Number.isNaN(m.pred), `Row ${i} ${m.name} prediction must be a valid number`);
-      assert.ok(!Number.isNaN(m.signed), `Row ${i} ${m.name} signed error must be a valid number`);
-      assert.ok(!Number.isNaN(m.abs), `Row ${i} ${m.name} abs error must be a valid number`);
+      if (predRaw === undefined || predRaw === null || String(predRaw).trim() === '') {
+        throw new assert.AssertionError({ message: `Row ${i} ${name} prediction is missing numeric output` });
+      }
+      if (signedRaw === undefined || signedRaw === null || String(signedRaw).trim() === '') {
+        throw new assert.AssertionError({ message: `Row ${i} ${name} signed error is missing numeric output` });
+      }
+      if (absRaw === undefined || absRaw === null || String(absRaw).trim() === '') {
+        throw new assert.AssertionError({ message: `Row ${i} ${name} abs error is missing numeric output` });
+      }
 
-      const expectedSigned = m.pred - target;
-      if (Math.abs(m.signed - expectedSigned) > 1e-12) {
+      const pred = parseFloat(predRaw);
+      const signed = parseFloat(signedRaw);
+      const absVal = parseFloat(absRaw);
+
+      if (!Number.isFinite(pred)) {
+        throw new assert.AssertionError({ message: `Row ${i} ${name} prediction must be a finite number, got: ${predRaw}` });
+      }
+      if (!Number.isFinite(signed)) {
+        throw new assert.AssertionError({ message: `Row ${i} ${name} signed error must be a finite number, got: ${signedRaw}` });
+      }
+      if (!Number.isFinite(absVal)) {
+        throw new assert.AssertionError({ message: `Row ${i} ${name} abs error must be a finite number, got: ${absRaw}` });
+      }
+
+      const expectedSigned = pred - target;
+      if (Math.abs(signed - expectedSigned) > 1e-12) {
         throw new assert.AssertionError({
-          message: `Row ${i} ${m.name} signed error mismatch: stored ${m.signed} vs expected (pred - target) ${expectedSigned}`
+          message: `Row ${i} ${name} signed error mismatch: stored ${signed} vs expected (pred - target) ${expectedSigned}`
         });
       }
-      const expectedAbs = Math.abs(m.signed);
-      if (Math.abs(m.abs - expectedAbs) > 1e-12) {
+      const expectedAbs = Math.abs(signed);
+      if (Math.abs(absVal - expectedAbs) > 1e-12) {
         throw new assert.AssertionError({
-          message: `Row ${i} ${m.name} abs error mismatch: stored ${m.abs} vs expected |signed| ${expectedAbs}`
+          message: `Row ${i} ${name} abs error mismatch: stored ${absVal} vs expected |signed| ${expectedAbs}`
         });
       }
     }
@@ -1412,6 +1431,62 @@ function verifyCsvReproduction(csvFilePath, allSummariesObj) {
   assert.ok(neg4Failed, 'Negative control 4 failed: altering err_signed_chart must throw AssertionError');
   console.log('  [PASS] Negative control 4: Deliberately altered err_signed_chart successfully caught by assertion.');
 
+  // 6. Negative Control 5: NaN in CSV prediction must throw
+  const negRecords5 = records.map(r => ({ ...r }));
+  negRecords5[10].pred_chart = 'NaN';
+  let neg5Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords5, allSummariesObj);
+  } catch (err) {
+    neg5Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 5 error must be AssertionError, got: ${err.message}`);
+    assert.match(err.message, /finite number/);
+  }
+  assert.ok(neg5Failed, 'Negative control 5 failed: NaN in prediction must throw AssertionError');
+  console.log('  [PASS] Negative control 5: NaN prediction successfully rejected by assertion.');
+
+  // 7. Negative Control 6: Infinity in CSV error must throw
+  const negRecords6 = records.map(r => ({ ...r }));
+  negRecords6[20].err_abs_er_both = 'Infinity';
+  let neg6Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords6, allSummariesObj);
+  } catch (err) {
+    neg6Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 6 error must be AssertionError, got: ${err.message}`);
+    assert.match(err.message, /finite number/);
+  }
+  assert.ok(neg6Failed, 'Negative control 6 failed: Infinity in error must throw AssertionError');
+  console.log('  [PASS] Negative control 6: Infinity error successfully rejected by assertion.');
+
+  // 8. Negative Control 7: Missing (empty) numeric output must throw
+  const negRecords7 = records.map(r => ({ ...r }));
+  negRecords7[30].pred_su_rew_cmmg = '';
+  let neg7Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords7, allSummariesObj);
+  } catch (err) {
+    neg7Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 7 error must be AssertionError, got: ${err.message}`);
+    assert.match(err.message, /missing numeric output/);
+  }
+  assert.ok(neg7Failed, 'Negative control 7 failed: empty numeric output must throw AssertionError');
+  console.log('  [PASS] Negative control 7: Missing (empty) numeric output successfully rejected by assertion.');
+
+  // 9. Negative Control 8: Undefined/deleted numeric output must throw
+  const negRecords8 = records.map(r => ({ ...r }));
+  delete negRecords8[40].pred_su_unw_both;
+  let neg8Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords8, allSummariesObj);
+  } catch (err) {
+    neg8Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 8 error must be AssertionError, got: ${err.message}`);
+    assert.match(err.message, /missing numeric output/);
+  }
+  assert.ok(neg8Failed, 'Negative control 8 failed: deleted numeric field must throw AssertionError');
+  console.log('  [PASS] Negative control 8: Missing (deleted) field successfully rejected by assertion.');
+
   console.log('  ALL ASSERTIONS & NEGATIVE CONTROLS PASSED.');
 }
 
@@ -1475,7 +1550,42 @@ const EXISTING_7_METHODS_AND_WEIGHTS = [
   'ess'
 ];
 
+const ALL_8_METHODS_AND_WEIGHTS = [
+  // 8 forecast methods (including unconditioned chart-history)
+  'pred_cf',
+  'pred_chart',
+  'pred_er_cmmg',
+  'pred_er_both',
+  'pred_su_unw_cmmg',
+  'pred_su_unw_both',
+  'pred_su_rew_cmmg',
+  'pred_su_rew_both',
+  // Signed errors
+  'err_signed_cf',
+  'err_signed_chart',
+  'err_signed_er_cmmg',
+  'err_signed_er_both',
+  'err_signed_su_unw_cmmg',
+  'err_signed_su_unw_both',
+  'err_signed_su_rew_cmmg',
+  'err_signed_su_rew_both',
+  // Absolute errors
+  'err_abs_cf',
+  'err_abs_chart',
+  'err_abs_er_cmmg',
+  'err_abs_er_both',
+  'err_abs_su_unw_cmmg',
+  'err_abs_su_unw_both',
+  'err_abs_su_rew_cmmg',
+  'err_abs_su_rew_both',
+  // Exported history weights & ESS
+  'w_H1',
+  'w_H2',
+  'ess'
+];
+
 const FULL_BASELINE_SHA = '5826d041b53555e7fd199b123872175185c90458';
+const FROZEN_34BD374_SHA = '34bd3743a8cfef7d8f64f096b9db33dfa7c32c2b';
 
 function loadBaselineFrom5826d04(customRef = FULL_BASELINE_SHA) {
   const repoRoot = path.resolve(__dirname, '../..');
@@ -1493,22 +1603,22 @@ function loadBaselineFrom5826d04(customRef = FULL_BASELINE_SHA) {
     }
     return parseCsvRecords(rawCsv);
   } catch (initialErr) {
-    // In a shallow clone, 5826d041b53555e7fd199b123872175185c90458 may not be in local history.
-    // If customRef is the baseline commit SHA, automate fetching the commit object from origin:
-    if (customRef === FULL_BASELINE_SHA) {
+    // In a shallow clone, the target commit may not be present in local history.
+    // If customRef is one of our full baseline SHAs, automate fetching the commit object from origin:
+    if (customRef === FULL_BASELINE_SHA || customRef === FROZEN_34BD374_SHA) {
       try {
-        console.warn(`[NOTICE] Baseline commit ${FULL_BASELINE_SHA} not present in local history (shallow clone detected). Fetching baseline object...`);
-        execSync(`git fetch --depth 1 origin ${FULL_BASELINE_SHA}`, {
+        console.warn(`[NOTICE] Baseline commit ${customRef} not present in local history (shallow clone detected). Fetching baseline object...`);
+        execSync(`git fetch --depth 1 origin ${customRef}`, {
           cwd: repoRoot,
           encoding: 'utf8',
           stdio: ['ignore', 'pipe', 'pipe']
         });
         const rawCsvRetry = execSync(
-          `git show ${FULL_BASELINE_SHA}:research/validation/cmmg-forecast-patients.csv`,
+          `git show ${customRef}:research/validation/cmmg-forecast-patients.csv`,
           { cwd: repoRoot, maxBuffer: 25 * 1024 * 1024, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
         );
         if (rawCsvRetry && rawCsvRetry.includes('param_draw_seed')) {
-          console.log(`[PASS] Successfully retrieved baseline ${FULL_BASELINE_SHA} via automated fetch.`);
+          console.log(`[PASS] Successfully retrieved baseline ${customRef} via automated fetch.`);
           return parseCsvRecords(rawCsvRetry);
         }
       } catch (fetchErr) {
@@ -1516,8 +1626,8 @@ function loadBaselineFrom5826d04(customRef = FULL_BASELINE_SHA) {
       }
     }
     throw new Error(
-      `Baseline verification failed: required ${FULL_BASELINE_SHA} baseline data is unavailable from ref '${customRef}' (${initialErr.message ? initialErr.message.split('\n')[0] : 'unknown error'}). ` +
-      `If using a shallow clone, fetch the baseline object using: git fetch --depth 1 origin ${FULL_BASELINE_SHA}`
+      `Baseline verification failed: required ${customRef} baseline data is unavailable (${initialErr.message ? initialErr.message.split('\n')[0] : 'unknown error'}). ` +
+      `If using a shallow clone, fetch the baseline object using: git fetch --depth 1 origin ${customRef}`
     );
   }
 }
@@ -1545,18 +1655,41 @@ function compareRecordsAgainstBaseline(currentRecords, baselineRecords, fieldsTo
     }
 
     for (const f of fieldsToCompare) {
+      // 1. Guard against missing numeric outputs (undefined, null, or whitespace-only)
+      if (c[f] === undefined || c[f] === null || String(c[f]).trim() === '') {
+        throw new assert.AssertionError({
+          message: `Current row ${i} (${c.condition}/${c.scenario}/pt${c.patient_id}) field ${f} is missing numeric output (value=${c[f]})`
+        });
+      }
+      if (b[f] === undefined || b[f] === null || String(b[f]).trim() === '') {
+        throw new assert.AssertionError({
+          message: `Baseline row ${i} (${b.condition}/${b.scenario}/pt${b.patient_id}) field ${f} is missing numeric output (value=${b[f]})`
+        });
+      }
+
+      const sC = String(c[f]).trim();
+      const sB = String(b[f]).trim();
+
+      const vc = parseFloat(sC);
+      const vb = parseFloat(sB);
+
+      // 2. Guard against NaN and Infinities
+      if (!Number.isFinite(vc)) {
+        throw new assert.AssertionError({
+          message: `Current row ${i} (${c.condition}/${c.scenario}/pt${c.patient_id}) field ${f} is invalid/non-finite numeric output (parsed=${vc}, raw='${sC}')`
+        });
+      }
+      if (!Number.isFinite(vb)) {
+        throw new assert.AssertionError({
+          message: `Baseline row ${i} (${b.condition}/${b.scenario}/pt${b.patient_id}) field ${f} is invalid/non-finite numeric output (parsed=${vb}, raw='${sB}')`
+        });
+      }
+
       totalComparisons++;
-      const sC = String(c[f]);
-      const sB = String(b[f]);
 
       if (sC === sB) {
         bitForBitMatches++;
       }
-
-      const vc = parseFloat(sC);
-      const vb = parseFloat(sB);
-      assert.ok(!Number.isNaN(vc), `Current row ${i} field ${f} is NaN`);
-      assert.ok(!Number.isNaN(vb), `Baseline row ${i} field ${f} is NaN`);
 
       const diff = Math.abs(vc - vb);
       if (diff > maxAbsDiff) {
@@ -1567,7 +1700,7 @@ function compareRecordsAgainstBaseline(currentRecords, baselineRecords, fieldsTo
         toleranceMatches++;
       } else {
         throw new assert.AssertionError({
-          message: `Row ${i} (${c.condition}/${c.scenario}/pt${c.patient_id}) ${f} mismatch vs ${FULL_BASELINE_SHA} baseline: current=${vc}, baseline=${vb} (diff=${diff})`
+          message: `Row ${i} (${c.condition}/${c.scenario}/pt${c.patient_id}) ${f} mismatch vs baseline: current=${vc}, baseline=${vb} (diff=${diff})`
         });
       }
     }
@@ -1586,14 +1719,14 @@ function compareRecordsAgainstBaseline(currentRecords, baselineRecords, fieldsTo
 }
 
 function runBaselineVerification(currentRecords, gitRef = FULL_BASELINE_SHA) {
-  console.log(`Verifying row-by-row numerical identity of all 7 existing methods against frozen ${FULL_BASELINE_SHA} baseline...`);
+  console.log(`Verifying row-by-row numerical identity against frozen ${gitRef} baseline...`);
 
   // 1. Positive Control: row-by-row identity across all 6,000 records
   const baselineRecords = loadBaselineFrom5826d04(gitRef);
-  const comparison = compareRecordsAgainstBaseline(currentRecords, baselineRecords);
-  console.log(`  [PASS] Positive control: All ${comparison.totalRows} rows x ${comparison.totalFields} fields verified:`);
-  console.log(`    - Bit-for-bit string equality: ${comparison.bitForBitMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.bitForBitRate * 100).toFixed(3)}%)`);
-  console.log(`    - Tolerance-based equality (< 1e-12 mg/L): ${comparison.toleranceMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.toleranceRate * 100).toFixed(3)}%), max diff = ${comparison.maxAbsDiff.toExponential(3)}`);
+  const comparison = compareRecordsAgainstBaseline(currentRecords, baselineRecords, EXISTING_7_METHODS_AND_WEIGHTS);
+  console.log(`  [PASS] Positive control (vs ${gitRef.slice(0, 7)}): All ${comparison.totalRows} rows x ${comparison.totalFields} fields verified:`);
+  console.log(`    - Serialized-value string equality: ${comparison.bitForBitMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.bitForBitRate * 100).toFixed(3)}%)`);
+  console.log(`    - Numerical-tolerance equality (< 1e-12 mg/L): ${comparison.toleranceMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.toleranceRate * 100).toFixed(3)}%), max diff = ${comparison.maxAbsDiff.toExponential(3)}`);
 
   // 2. Negative Control 1: Missing Baseline throws explicit Error
   let missingBaselineFailed = false;
@@ -1603,7 +1736,7 @@ function runBaselineVerification(currentRecords, gitRef = FULL_BASELINE_SHA) {
     missingBaselineFailed = true;
     assert.match(
       err.message,
-      new RegExp(`Baseline verification failed: required ${FULL_BASELINE_SHA} baseline data is unavailable`),
+      /Baseline verification failed: required nonexistent_ref_missing_404 baseline data is unavailable/,
       `Error message must indicate missing baseline, got: ${err.message}`
     );
   }
@@ -1619,7 +1752,7 @@ function runBaselineVerification(currentRecords, gitRef = FULL_BASELINE_SHA) {
   } catch (err) {
     alteredPredFailed = true;
     assert.ok(err instanceof assert.AssertionError, `Expected AssertionError, got: ${err.message}`);
-    assert.match(err.message, new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`));
+    assert.match(err.message, /mismatch vs baseline/);
   }
   assert.ok(alteredPredFailed, 'Negative control failed: altered prediction must throw AssertionError');
   console.log('  [PASS] Negative control (altered prediction): Deliberately altered prediction caught by row-by-row assertion.');
@@ -1633,10 +1766,62 @@ function runBaselineVerification(currentRecords, gitRef = FULL_BASELINE_SHA) {
   } catch (err) {
     alteredWeightFailed = true;
     assert.ok(err instanceof assert.AssertionError, `Expected AssertionError, got: ${err.message}`);
-    assert.match(err.message, new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`));
+    assert.match(err.message, /mismatch vs baseline/);
   }
   assert.ok(alteredWeightFailed, 'Negative control failed: altered weight must throw AssertionError');
   console.log('  [PASS] Negative control (altered weight): Deliberately altered exported weight caught by row-by-row assertion.');
+
+  // 5. Negative Control 4: NaN value rejected before comparison
+  const alteredNaNRecords = currentRecords.map(r => ({ ...r }));
+  alteredNaNRecords[10].pred_er_cmmg = 'NaN';
+  let nanFailed = false;
+  try {
+    compareRecordsAgainstBaseline(alteredNaNRecords, baselineRecords);
+  } catch (err) {
+    nanFailed = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /invalid\/non-finite numeric output/);
+  }
+  assert.ok(nanFailed, 'Negative control failed: NaN must throw AssertionError');
+  console.log('  [PASS] Negative control (NaN guard): NaN rejected before comparison.');
+
+  // 6. Negative Control 5: Infinity value rejected before comparison
+  const alteredInfRecords = currentRecords.map(r => ({ ...r }));
+  alteredInfRecords[20].pred_su_unw_both = 'Infinity';
+  let infFailed = false;
+  try {
+    compareRecordsAgainstBaseline(alteredInfRecords, baselineRecords);
+  } catch (err) {
+    infFailed = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /invalid\/non-finite numeric output/);
+  }
+  assert.ok(infFailed, 'Negative control failed: Infinity must throw AssertionError');
+  console.log('  [PASS] Negative control (Infinity guard): Infinity rejected before comparison.');
+
+  // 7. Negative Control 6: Missing numeric output rejected before comparison
+  const alteredMissingRecords = currentRecords.map(r => ({ ...r }));
+  delete alteredMissingRecords[30].w_H1;
+  let missingFailed = false;
+  try {
+    compareRecordsAgainstBaseline(alteredMissingRecords, baselineRecords);
+  } catch (err) {
+    missingFailed = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /missing numeric output/);
+  }
+  assert.ok(missingFailed, 'Negative control failed: missing numeric output must throw AssertionError');
+  console.log('  [PASS] Negative control (missing numeric output): Missing field rejected before comparison.');
+}
+
+function verifyAgainstFrozen34bd374(currentRecords) {
+  console.log(`Verifying all 8 forecast methods and weights remain identical against frozen ${FROZEN_34BD374_SHA}...`);
+  const baseline34 = loadBaselineFrom5826d04(FROZEN_34BD374_SHA);
+  const comparison = compareRecordsAgainstBaseline(currentRecords, baseline34, ALL_8_METHODS_AND_WEIGHTS);
+  console.log(`  [PASS] Frozen 34bd374 verification: All ${comparison.totalRows} rows x ${comparison.totalFields} fields verified:`);
+  console.log(`    - Serialized-value string equality: ${comparison.bitForBitMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.bitForBitRate * 100).toFixed(3)}%)`);
+  console.log(`    - Numerical-tolerance equality (< 1e-12 mg/L): ${comparison.toleranceMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.toleranceRate * 100).toFixed(3)}%), max diff = ${comparison.maxAbsDiff.toExponential(3)}`);
+  return comparison;
 }
 
 // Verify that all summary statistics, sign counts, and quantiles reproduce identically from the unrounded CSV
@@ -1644,6 +1829,9 @@ verifyCsvReproduction(csvPath, allSummaries);
 
 // Verify numerical identity of all 7 existing methods vs frozen 5826d041b53555e7fd199b123872175185c90458 baseline row by row with negative controls
 runBaselineVerification(allPatientRecords, FULL_BASELINE_SHA);
+
+// Verify numerical identity of all 8 methods and exported weights vs frozen 34bd3743a8cfef7d8f64f096b9db33dfa7c32c2b
+verifyAgainstFrozen34bd374(allPatientRecords);
 
 // Generate and write Markdown Audit Report
 const mdPath = path.resolve(__dirname, 'CMMG-POST-HD-FORECAST-AUDIT.md');
@@ -1655,6 +1843,9 @@ console.log('\n=== RUN COMPLETED SUCCESSFULLY WITH ALL INVARIANTS VERIFIED ===')
 
 module.exports = {
   FULL_BASELINE_SHA,
+  FROZEN_34BD374_SHA,
+  EXISTING_7_METHODS_AND_WEIGHTS,
+  ALL_8_METHODS_AND_WEIGHTS,
   allSummaries,
   eval1,
   eval2,
@@ -1667,6 +1858,7 @@ module.exports = {
   loadBaselineFrom5826d04,
   compareRecordsAgainstBaseline,
   runBaselineVerification,
+  verifyAgainstFrozen34bd374,
   generatePatientForecast,
   fcCandidates,
   fcSimsComplete,

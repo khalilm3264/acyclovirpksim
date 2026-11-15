@@ -14,7 +14,12 @@ const {
   allPatientRecords,
   loadBaselineFrom5826d04,
   compareRecordsAgainstBaseline,
-  FULL_BASELINE_SHA
+  verifyAgainstFrozen34bd374,
+  verifyRecordsIntegrity,
+  allSummaries,
+  FULL_BASELINE_SHA,
+  FROZEN_34BD374_SHA,
+  ALL_8_METHODS_AND_WEIGHTS
 } = require('../research/validation/cmmg-forecast-post-hd.cjs');
 
 test('CMMG forecast pipeline exhibits no future-data leakage detected by target perturbation checks', () => {
@@ -92,7 +97,7 @@ test('Baseline verification against frozen 5826d04 asserts row-by-row numerical 
   // 2. Negative control: missing baseline fails explicitly with Error
   assert.throws(
     () => loadBaselineFrom5826d04('nonexistent_ref_missing_404'),
-    new RegExp(`Baseline verification failed: required ${FULL_BASELINE_SHA} baseline data is unavailable`)
+    /Baseline verification failed: required nonexistent_ref_missing_404 baseline data is unavailable/
   );
 
   // 3. Negative control: altered prediction fails row-by-row check
@@ -100,7 +105,7 @@ test('Baseline verification against frozen 5826d04 asserts row-by-row numerical 
   alteredPred[42].pred_su_unw_both = String(parseFloat(alteredPred[42].pred_su_unw_both) + 0.4);
   assert.throws(
     () => compareRecordsAgainstBaseline(alteredPred, baselineRecords),
-    new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`)
+    /mismatch vs baseline/
   );
 
   // 4. Negative control: altered weight fails row-by-row check
@@ -108,6 +113,74 @@ test('Baseline verification against frozen 5826d04 asserts row-by-row numerical 
   alteredWeight[500].w_H1 = String(parseFloat(alteredWeight[500].w_H1) + 0.2);
   assert.throws(
     () => compareRecordsAgainstBaseline(alteredWeight, baselineRecords),
-    new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`)
+    /mismatch vs baseline/
   );
+
+  // 5. Negative control: NaN value rejected before comparison
+  const alteredNaN = allPatientRecords.map(r => ({ ...r }));
+  alteredNaN[10].pred_er_cmmg = 'NaN';
+  assert.throws(
+    () => compareRecordsAgainstBaseline(alteredNaN, baselineRecords),
+    /invalid\/non-finite numeric output/
+  );
+
+  // 6. Negative control: Infinity value rejected before comparison
+  const alteredInf = allPatientRecords.map(r => ({ ...r }));
+  alteredInf[20].pred_su_unw_both = 'Infinity';
+  assert.throws(
+    () => compareRecordsAgainstBaseline(alteredInf, baselineRecords),
+    /invalid\/non-finite numeric output/
+  );
+
+  // 7. Negative control: Missing numeric output rejected before comparison
+  const alteredMissing = allPatientRecords.map(r => ({ ...r }));
+  delete alteredMissing[30].w_H1;
+  assert.throws(
+    () => compareRecordsAgainstBaseline(alteredMissing, baselineRecords),
+    /missing numeric output/
+  );
+
+  // 8. Negative control: Empty string numeric output rejected before comparison
+  const alteredEmpty = allPatientRecords.map(r => ({ ...r }));
+  alteredEmpty[40].ess = '   ';
+  assert.throws(
+    () => compareRecordsAgainstBaseline(alteredEmpty, baselineRecords),
+    /missing numeric output/
+  );
+});
+
+test('Integrity checks reject NaN, infinities, and missing numeric outputs before evaluation', () => {
+  // 1. Missing target
+  const r1 = allPatientRecords.map(r => ({ ...r }));
+  r1[0].true_cmmg_target_mg_L = '';
+  assert.throws(() => verifyRecordsIntegrity(r1, allSummaries), /missing numeric output/);
+
+  // 2. NaN target
+  const r2 = allPatientRecords.map(r => ({ ...r }));
+  r2[0].true_cmmg_target_mg_L = 'NaN';
+  assert.throws(() => verifyRecordsIntegrity(r2, allSummaries), /finite number/);
+
+  // 3. Infinity prediction
+  const r3 = allPatientRecords.map(r => ({ ...r }));
+  r3[0].pred_cf = 'Infinity';
+  assert.throws(() => verifyRecordsIntegrity(r3, allSummaries), /finite number/);
+
+  // 4. Missing prediction
+  const r4 = allPatientRecords.map(r => ({ ...r }));
+  delete r4[0].pred_chart;
+  assert.throws(() => verifyRecordsIntegrity(r4, allSummaries), /missing numeric output/);
+
+  // 5. -Infinity signed error
+  const r5 = allPatientRecords.map(r => ({ ...r }));
+  r5[0].err_signed_er_both = '-Infinity';
+  assert.throws(() => verifyRecordsIntegrity(r5, allSummaries), /finite number/);
+});
+
+test('Valid forecasts and weights remain unchanged against frozen 34bd374 across all 8 methods', () => {
+  const comparison = verifyAgainstFrozen34bd374(allPatientRecords);
+  assert.equal(comparison.totalRows, 6000, 'Must verify all 6000 records');
+  assert.equal(comparison.totalFields, 27, 'Must verify all 27 fields across 8 methods + weights');
+  assert.equal(comparison.bitForBitMatches, 162000, 'All 162,000 comparisons must be bit-for-bit identical');
+  assert.equal(comparison.toleranceMatches, 162000, 'All 162,000 comparisons must match within tolerance (< 1e-12)');
+  assert.ok(comparison.maxAbsDiff <= 1e-12, 'Maximum absolute difference must be <= 1e-12');
 });
