@@ -14,11 +14,11 @@ function workspace(){
  const noop=()=>{},context={$,structuredClone,Set,c:{dose:700},concUnit:'mg',
   pendingConfigurationImport:null,primary:'No dialysis',visible:new Set(['No dialysis']),
   metricsSignature:'',tableRevision:0,studyOverlay:null,migratedPayload:null,
-  paletteMode:'standard',draft:[],doseDraft:[],renalDraft:[],renalDirty:false,
+  paletteMode:'standard',draft:[],doseDraft:[],dirtyTimeline:false,dirtyDoses:false,renalDraft:[],renalDirty:false,
   renalProfileEdited:false,measureDraft:[],rxDraft:[],researchRenderedPrimary:'',
   setPalette:noop,setConcUnit:noop,renderInputs:noop,renderSchedule:noop,
   renderDoseRows:noop,renderMeasureRows:noop,renderPdRxRows:noop,showScenarioNote:noop,
-  researchStatus:message=>messages.push(message),alertMessage:noop,defer:noop,
+  researchStatus:message=>messages.push(message),alertMessage:noop,defer:noop,timelineErrors:noop,
   rememberVersion:label=>history.push({label,dose:context.c.dose}),
   E:{DEFAULTS:{dose:700}},parseConfiguration:input=>{
    if(!input.config)throw Error('Invalid configuration.');

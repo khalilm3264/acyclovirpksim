@@ -1355,6 +1355,8 @@ function applyVersion(state,importRequest=null){
  Object.assign(c,structuredClone(state.config));setPalette(state.palette);setConcUnit(state.unit||concUnit);metricsSignature='';tableRevision=-1;primary=state.primary;
  visible=new Set(state.visible);
  draft=structuredClone(c.schedule);doseDraft=structuredClone(c.customDoses);
+ dirtyTimeline=false;dirtyDoses=false;
+ $('timelinePending').classList.add('hidden');$('dosePending').classList.add('hidden');timelineErrors([]);
  renalDraft=structuredClone(c.renalProfile);renalDirty=false;renalProfileEdited=c.renalMode==='profile';
  measureDraft=structuredClone(c.observations);rxDraft=structuredClone(c.pdRxRows);
  $('primary').value=primary;researchRenderedPrimary='';renderInputs();renderSchedule();renderDoseRows();renderMeasureRows();renderPdRxRows();
