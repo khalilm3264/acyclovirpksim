@@ -18,6 +18,16 @@
   return {name,type:'line',showSymbol:false,data:time.map((t,i)=>[t,values[i]]),
    itemStyle:{color},lineStyle:{color,width,type}};
  }
+ // A user-entered descriptive level, never a therapeutic or toxicity cutoff.
+ function plasmaThresholdLine(value,unit,horizon){
+  if(value===null||!Number.isFinite(value)||value<0)return null;
+  const text=Number(value.toPrecision(6))+' '+unit;
+  const result=line('Entered plasma ACV threshold, '+text,[0,horizon],[value,value],'#6b3b91',2.4,'dashed');
+  result.id='entered-plasma-threshold';result.silent=true;result.z=8;result.tooltip={show:false};
+  result.markLine={symbol:'none',silent:true,lineStyle:{opacity:0},
+   label:{show:true,position:'insideEndTop',formatter:'Threshold '+text,color:'#603183',fontSize:11,backgroundColor:'rgba(255,255,255,.92)',padding:[2,3]},data:[{yAxis:value}]};
+  return result;
+ }
  function band(name,time,lower,upper,color){
   // One quadrilateral per time segment. Both edges participate in axis scaling.
   const data=time.slice(1).map((t,i)=>[time[i],t,lower[i],lower[i+1],upper[i],upper[i+1]]);
@@ -174,5 +184,5 @@
    visualMap:{seriesIndex:0,dimension:2,min,max:max===min?min+1:max,left:'center',bottom:0,orient:'horizontal',inRange:{color:heatColors(diverging)}},
    series:[{type:'heatmap',data}]};
  }
- root.AyFluxCharts={ensure,line,band,options,draw,dispose,heatmap,heatColors,heatColorAt,accessible,setAccessible};
+ root.AyFluxCharts={ensure,line,plasmaThresholdLine,band,options,draw,dispose,heatmap,heatColors,heatColorAt,accessible,setAccessible};
 })(typeof window==='undefined'?globalThis:window);

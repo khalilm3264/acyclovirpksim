@@ -59,7 +59,7 @@ function rememberResult(key,data){
 }
 let renalDraft=structuredClone(c.renalProfile),renalDirty=false,renalProfileEdited=false;
 // Narrow read-only integration point for optional research workspace.
-window.AyFluxResearchBridge=Object.freeze({snapshot:()=>({results,config:structuredClone(c),primary,updated:dataIsCurrent,revision:resultsRevision})});
+window.AyFluxResearchBridge=Object.freeze({snapshot:()=>({results,config:structuredClone(c),primary,updated:dataIsCurrent,revision:resultsRevision,plasmaThresholdMgL:aboveLevelMg})});
 // Display units for concentrations. Simulation, exports and saved files always stay in mg/L.
 // A message that must survive the next successful calculation (for example a rejected shared link).
 let pendingNotice='';
@@ -584,7 +584,7 @@ if(typeof IntersectionObserver!=='undefined'){
  document.querySelectorAll('#concentration .chart, #clearance .chart').forEach(el=>chartObserver.observe(el));
 }
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
-function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,key==='plasma'||key==='cmmg'?savedRevision:0,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null]);}
+function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,key==='plasma'||key==='cmmg'?savedRevision:0,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null,key==='plasma'?aboveLevelMg:null]);}
 let chartWait=null;
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
@@ -610,11 +610,19 @@ function drawNextPlot(){
  const target=$(where);
  if(!dataIsCurrent||!chartNearViewport(target)){requestPlotFrame();return;}
  plotRunning=true;activePlot={where,signature:job.signature};
+ // Presentation-only plasma edits keep the current chart zoom.
+ if(job.preserveZoom){
+  const prior=window.echarts?.getInstanceByDom(target)?.getOption().dataZoom||[];
+  job.option.dataZoom=job.option.dataZoom.map(z=>{
+   const old=prior.find(p=>p.id===z.id);
+   return old?{...z,start:old.start,end:old.end}:z;
+  });
+ }
  Promise.resolve().then(()=>window.AyFluxCharts.draw(target,job.option))
  .then(()=>{
   if(where==='plasmaChart'&&$('eventsPanel').open)window.AyFluxViews.timeline();
   const rect=target.getBoundingClientRect();
-  chartStates.set(where,{signature:job.signature,width:rect.width,height:rect.height});
+  chartStates.set(where,{signature:job.signature,resultsRevision:job.resultsRevision,width:rect.width,height:rect.height});
   if(document.documentElement.dataset.ayfluxReady!=='true'){
    document.documentElement.dataset.ayfluxReady='true';
    window.dispatchEvent(new Event('ayflux:charts-ready'));
@@ -681,6 +689,10 @@ function curve(key,unit,where,ref=null){if(!results)return;
  if(key==='plasma'||key==='cmmg')savedRegimens.forEach((r,i)=>{series.push(charts.line(r.name,r.data.time,scale(r.data[key].median),REGIMEN_COLORS[i],2.6,'dashed'));horizon=Math.max(horizon,r.config.horizon);});
  const marker=key==='cmmg'?{value:E.MARKER*factor,label:'Neurotoxicity-associated CMMG level: '+(concUnit==='umol'?'10.8 µmol/L':'2.58 mg/L')+' [3]',color:'#cb496c'}:ref&&c.showStudy?ref:null;
  if(marker)series.push(charts.line(marker.label,[0,c.horizon],[marker.value,marker.value],marker.color,2,'dotted'));
+ if(key==='plasma'){
+  const threshold=charts.plasmaThresholdLine(aboveLevelMg===null?null:aboveLevelMg*factor,unitLabel(),horizon);
+  if(threshold)series.push(threshold);
+ }
  const study=key==='plasma'||key==='cmmg'?overlayStudy():null,studyPoints=study?(key==='plasma'?study.points:study.cmmgPoints):null;
  if(studyPoints?.length)series.push({name:study.legend+' '+study.cite,type:'scatter',z:6,symbol:'circle',symbolSize:10,
   itemStyle:{color:'#1d2733',borderColor:'#ffffff',borderWidth:1.5},data:studyPoints.map(([t,v])=>[t,v*factor])});
@@ -692,7 +704,7 @@ function curve(key,unit,where,ref=null){if(!results)return;
  const option=layout(unit,horizon,series);
  if(analyte&&option.yAxis?.name)option.yAxis.name=unitText(option.yAxis.name);
  option.toolbox.feature.saveAsImage.name='acyclovir_'+key;
- pendingPlots.set(where,{key,option,signature});requestPlotFrame();
+ pendingPlots.set(where,{key,option,signature,resultsRevision,preserveZoom:key==='plasma'&&chartStates.get(where)?.resultsRevision===resultsRevision});requestPlotFrame();
 }
 function baselineChanges(saved,config,selected){
  const changes=[];
@@ -1106,7 +1118,7 @@ document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
-$('timeAboveLevel').addEventListener('input',e=>{const value=e.target.valueAsNumber;aboveLevelMg=Number.isFinite(value)&&value>=0?value/unitFactor('acyclovir'):null;renderTimeAbove();});
+$('timeAboveLevel').addEventListener('input',e=>{const value=e.target.valueAsNumber;aboveLevelMg=Number.isFinite(value)&&value>=0?value/unitFactor('acyclovir'):null;renderTimeAbove();if(results)render();window.dispatchEvent(new Event('ayflux:plasma-threshold-changed'));});
 $('concUnit').addEventListener('change',e=>{setConcUnit(e.target.value);renderTimeAbove(true);metricsSignature='';tableRevision=-1;if(results)render();});
 $('tablePanel').addEventListener('toggle',()=>{if(!tableOpen())return;if(!dataIsCurrent||!results||modes.some(m=>!results[m]))calculate(true);else render();});
 document.querySelector('.ref-nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(!link)return;const target=document.querySelector(link.getAttribute('href'));if(!target)return;e.preventDefault();target.scrollIntoView({block:'start',behavior:'smooth'});});
