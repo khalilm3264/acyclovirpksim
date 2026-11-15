@@ -23,8 +23,23 @@ async function main(){
   browser=await firefox.launch();
   const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await page.goto('http://127.0.0.1:'+server.address().port);
-  await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
+  // Hold model startup to prove a visible chart starts loading independently.
+  // This checks event order rather than relying on a machine-dependent timing.
+  let releaseWorker;
+  const workerGate=new Promise(resolve=>{releaseWorker=resolve;});
+  await page.route('**/assets/simulator-worker.js',async route=>{
+   await workerGate;await route.continue();
+  });
+  const rendererRequested=page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
+  try{
+   // Firefox can include the deliberately held Worker in the page load event.
+   // The DOM is sufficient to scroll to the graph and inspect request order.
+   await page.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'domcontentloaded'});
+   assert.equal(await page.locator('#plasmaChart canvas').count(),0);
+   await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
+   await rendererRequested;
+   assert.equal(await page.locator('#csv').isDisabled(),true,'Renderer request must precede simulation completion');
+  }finally{releaseWorker();}
   async function verifyDose(dose){
    await page.waitForFunction(dose=>{
     const snapshot=window.AyFluxResearchBridge?.snapshot();
@@ -48,7 +63,7 @@ async function main(){
    return option?.yAxis.length===2&&option.series.some(s=>s.name==='User-entered CrCl'&&s.yAxisIndex===1);
   });
   assert.deepEqual(errors,[]);
-  console.log('Firefox: plasma curve matches every modeled point before and after dose edit; renal profile renders on the second axis.');
+  console.log('Firefox: renderer starts during calculation; plasma curve matches every modeled point before and after dose edit; renal profile renders on the second axis.');
  }finally{await browser?.close();server.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
