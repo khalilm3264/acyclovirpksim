@@ -586,6 +586,7 @@ if(typeof IntersectionObserver!=='undefined'){
 let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
 function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,key==='plasma'||key==='cmmg'?savedRevision:0,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null,key==='plasma'?aboveLevelMg:null]);}
 let chartWait=null;
+const plasmaRestoreCharts=new WeakSet();
 function requestPlotFrame(){
  if(!pendingPlots.size||plotFrame||plotRunning)return;
  if(!window.echarts?.init){
@@ -610,17 +611,17 @@ function drawNextPlot(){
  const target=$(where);
  if(!dataIsCurrent||!chartNearViewport(target)){requestPlotFrame();return;}
  plotRunning=true;activePlot={where,signature:job.signature};
- // Presentation-only plasma edits keep the current chart zoom.
- if(job.preserveZoom){
-  const factor=job.unitFactor/(chartStates.get(where)?.unitFactor||job.unitFactor);
-  const prior=window.AyFluxCharts.zoomState(window.echarts?.getInstanceByDom(target),factor);
-  job.option.dataZoom=job.option.dataZoom.map(z=>{
-   const old=prior.find(p=>p.id===z.id);
-   return old?{...z,...old}:z;
-  });
- }
+ // Restore the live view after drawing, so Reset axes still returns to full axes.
+ const factor=job.unitFactor/(chartStates.get(where)?.unitFactor||job.unitFactor);
+ const prior=job.preserveZoom?window.AyFluxCharts.zoomState(window.echarts?.getInstanceByDom(target),factor):[];
  Promise.resolve().then(()=>window.AyFluxCharts.draw(target,job.option))
- .then(()=>{
+ .then(chart=>{
+  if(where==='plasmaChart'&&!plasmaRestoreCharts.has(chart)){
+   chart.on('restore',()=>setTimeout(()=>{if(!chart.isDisposed())chart.setOption({yAxis:{max:null}});},0));plasmaRestoreCharts.add(chart);
+  }
+  const y=prior.find(z=>z.id==='ayNavY'&&z.endValue!==undefined);
+  if(y)chart.setOption({yAxis:{max:extent=>Math.max(extent.max,y.endValue)}});
+  if(prior.length)chart.dispatchAction({type:'dataZoom',batch:prior.map(z=>({...z,dataZoomId:z.id}))});
   if(where==='plasmaChart'&&$('eventsPanel').open)window.AyFluxViews.timeline();
   const rect=target.getBoundingClientRect();
   chartStates.set(where,{signature:job.signature,resultsRevision:job.resultsRevision,unitFactor:job.unitFactor,width:rect.width,height:rect.height});

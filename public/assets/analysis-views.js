@@ -75,8 +75,11 @@ async function multiples(){
   const threshold=charts.plasmaThresholdLine(thresholdMg,'mg/L',s.config.horizon);
   if(threshold){option.series.push(threshold);option.legend.data.push(threshold.name);}
   const prior=zoomByMode.get(name)||[];
-  option.dataZoom=option.dataZoom.map(z=>{const old=prior.find(p=>p.id===z.id);return old?{...z,...old}:z;});
-  option.yAxis.max=ceiling;option.xAxis.max=s.config.horizon;option.title={text:name,textStyle:{fontSize:14}};charts.draw(el,option);
+  const y=prior.find(z=>z.id==='ayNavY'&&z.endValue!==undefined);
+  option.yAxis.max=Math.max(ceiling,y?.endValue??0);option.xAxis.max=s.config.horizon;option.title={text:name,textStyle:{fontSize:14}};
+  const chart=charts.draw(el,option);
+  chart.on('restore',()=>setTimeout(()=>{if(!chart.isDisposed())chart.setOption({yAxis:{max:ceiling}});},0));
+  if(prior.length)chart.dispatchAction({type:'dataZoom',batch:prior.map(z=>({...z,dataZoomId:z.id}))});
  }
 }
 let sensitivity,ensemble;

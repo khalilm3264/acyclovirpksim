@@ -70,6 +70,17 @@ const server=http.createServer((req,res)=>{
 
   await field.fill('');s=await waitLine(null);assert.ok(!s.legend.some(n=>n.startsWith('Entered plasma ACV threshold')));assert.deepEqual(s.x,zoomed);assert.ok((await smallState(null)).every(p=>!p.legend.some(n=>n.startsWith('Entered plasma ACV threshold'))));
   await field.fill('-1');await waitLine(null);
+  // A zoom beyond the remaining curves survives clearing, then double-click resets it.
+  await field.fill('1000');await waitLine(1000);await smallState(1000);
+  await page.evaluate(()=>{for(const el of [document.getElementById('plasmaChart'),document.getElementById('multipleCharts').firstElementChild])echarts.getInstanceByDom(el).dispatchAction({type:'dataZoom',dataZoomId:'ayNavY',startValue:950,endValue:990});});
+  await field.fill('');s=await waitLine(null);assert.deepEqual(s.y,[950,990]);assert.deepEqual((await smallState(null))[0].y,[950,990]);
+  await page.locator('#plasmaChart').dblclick();
+  await page.waitForFunction(()=>echarts.getInstanceByDom(document.getElementById('plasmaChart')).getModel().getComponent('yAxis').axis.scale.getExtent()[1]<950);
+  assert.equal((await state()).x[0],0,'Main Reset axes returns to the full time window');
+  await page.locator('#multipleCharts > div').first().dblclick();
+  await page.waitForFunction(()=>echarts.getInstanceByDom(document.getElementById('multipleCharts').firstElementChild).getModel().getComponent('yAxis').axis.scale.getExtent()[1]<950);
+  assert.equal((await smallState(null))[0].x[0],0,'Small-multiple Reset axes returns to full time');
+
   await field.fill('5');await waitLine(5);
   for(const id of ['csfChart','cmmgChart','csfCmmgChart']){
    await page.locator('#'+id).scrollIntoViewIfNeeded();
