@@ -27,8 +27,13 @@ async function main(){
   // This checks event order rather than relying on a machine-dependent timing.
   let releaseWorker;
   const workerGate=new Promise(resolve=>{releaseWorker=resolve;});
+  let releaseRenderer;
+  const rendererGate=new Promise(resolve=>{releaseRenderer=resolve;});
   await page.route('**/assets/simulator-worker.js',async route=>{
    await workerGate;await route.continue();
+  });
+  await page.route('**/assets/vendor/echarts-6.1.0.min.js',async route=>{
+   await rendererGate;await route.continue();
   });
   const rendererRequested=page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
   try{
@@ -39,7 +44,12 @@ async function main(){
    await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
    await rendererRequested;
    assert.equal(await page.locator('#csv').isDisabled(),true,'Renderer request must precede simulation completion');
-  }finally{releaseWorker();}
+   assert.equal(await page.locator('#plasmaChart .chart-status').textContent(),'Calculating simulation…');
+   assert.equal(await page.locator('#plasmaChart .chart-status').evaluate(el=>getComputedStyle(el).color),'rgb(40, 79, 107)','Loading text uses the existing AyFlux blue');
+   releaseWorker();
+   await page.waitForFunction(()=>!document.querySelector('#csv').disabled);
+   assert.equal(await page.locator('#plasmaChart .chart-status').textContent(),'Loading chart…');
+  }finally{releaseWorker();releaseRenderer();}
   async function verifyDose(dose){
    await page.waitForFunction(dose=>{
     const snapshot=window.AyFluxResearchBridge?.snapshot();
@@ -52,6 +62,27 @@ async function main(){
    },dose,{timeout:60000});
   }
   await verifyDose(700);
+  assert.equal(await page.locator('#plasmaChart .chart-status').count(),0);
+  assert.equal(await page.locator('#plasmaChart').getAttribute('aria-busy'),'false');
+  // Exercise Firefox wheel zoom, pointer panning and responsive resizing.
+  await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
+  const plot=await page.locator('#plasmaChart').boundingBox();
+  const grid=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getModel().getComponent('grid',0).coordinateSystem.getRect());
+  const point=(x,y)=>({x:plot.x+grid.x+grid.width*x,y:plot.y+grid.y+grid.height*y});
+  let a=point(.25,.25),b=point(.75,.75);
+  await page.mouse.move(a.x,a.y);await page.keyboard.down('Shift');await page.mouse.wheel(0,-300);await page.keyboard.up('Shift');
+  await page.waitForFunction(()=>window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom[0].end-window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom[0].start<90);
+  const zoomBefore=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom[0].start);
+  await page.evaluate(()=>{const el=document.querySelector('#plasmaChart'),chart=window.echarts.getInstanceByDom(el);chart.getOption().toolbox[0].feature.myPan.onclick(null,{getDom:()=>el});});
+  a=point(.6,.5);b=point(.4,.5);
+  await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:12});await page.mouse.up();
+  await page.waitForFunction(before=>window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom[0].start>before,zoomBefore);
+  const zoomed=await page.evaluate(()=>window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom[0]);
+  await page.setViewportSize({width:1000,height:800});
+  await page.waitForFunction(()=>{const el=document.querySelector('#plasmaChart');return window.echarts.getInstanceByDom(el).getWidth()===el.clientWidth;});
+  assert.deepEqual(await page.evaluate(()=>{const z=window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom[0];return [z.start,z.end];}),[zoomed.start,zoomed.end]);
+  await page.locator('#plasmaChart').dblclick();
+  await page.waitForFunction(()=>{const z=window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().dataZoom[0];return z.start===0&&z.end===100;});
   await page.fill('#num_dose','725');
   await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
   await verifyDose(725);
@@ -62,8 +93,29 @@ async function main(){
    const option=window.echarts.getInstanceByDom(document.querySelector('#kidneyClearChart'))?.getOption();
    return option?.yAxis.length===2&&option.series.some(s=>s.name==='User-entered CrCl'&&s.yAxisIndex===1);
   });
+  assert.equal(await page.locator('#kidneyClearChart .chart-status').count(),0);
+  const failedPage=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
+  let heldRenderer;
+  const heldRequest=new Promise(resolve=>{heldRenderer=resolve;});
+  await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js',route=>heldRenderer(route));
+  try{
+   await failedPage.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'domcontentloaded'});
+   await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
+   const route=await heldRequest;
+   await failedPage.waitForFunction(()=>!document.querySelector('#csv').disabled);
+   // Let the accepted-results render attach its library error handler first.
+   await failedPage.waitForFunction(()=>document.querySelector('#plasmaChart .chart-status')?.textContent==='Loading chart…');
+   await failedPage.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+   await route.abort();
+   await failedPage.waitForFunction(()=>document.querySelector('#plasmaChart .chart-status')?.textContent==='Chart unavailable. Check your connection.');
+   assert.equal(await failedPage.locator('#plasmaChart').getAttribute('aria-busy'),'false');
+   await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js');
+   await failedPage.fill('#num_dose','725');
+   await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
+   await failedPage.waitForFunction(()=>document.querySelector('#plasmaChart canvas')&&!document.querySelector('#plasmaChart .chart-status'));
+  }finally{await failedPage.close();}
   assert.deepEqual(errors,[]);
-  console.log('Firefox: renderer starts during calculation; plasma curve matches every modeled point before and after dose edit; renal profile renders on the second axis.');
+  console.log('Firefox: blue calculation/loading/error states, renderer retry, wheel zoom, pointer pan, resize/reset, exact plasma points and renal-profile axis passed.');
  }finally{await browser?.close();server.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
