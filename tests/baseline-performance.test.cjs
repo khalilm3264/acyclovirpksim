@@ -29,7 +29,7 @@ test('new inputs cancel obsolete Worker work; same-settings requests keep the Wo
 });
 test('numeric change after input does not schedule the same simulation twice',()=>{
  let calls=0;const c={dose:700},target={dataset:{k:'dose',role:'number'},value:'725',setCustomValidity(){}};
- const update=new Function('c','fieldDef','document','defer','updateDrugCaution',section('function updateParam(', 'function renderSchedule(')+'return updateParam;')(c,()=>['Dose','mg',0,2000],{querySelectorAll:()=>[]},()=>calls++,()=>{});
+ const update=new Function('c','fieldDef','document','defer','updateDrugCaution',section('function updateParam(', 'function renderSchedule(')+'return updateParam;')(c,()=>['Dose','mg',0,2000],{querySelectorAll:()=>[],getElementById:()=>null},()=>calls++,()=>{});
  update(target);update(target);assert.equal(calls,1);assert.equal(c.dose,725);
 });
 function curveHarness(){
