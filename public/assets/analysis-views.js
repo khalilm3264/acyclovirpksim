@@ -62,7 +62,7 @@ async function multiples(){
  const area=$('multipleCharts'),zoomByMode=new Map();
  for(const el of area.children){
   const chart=window.echarts.getInstanceByDom(el);
-  if(el.dataset.revision===String(s.revision)&&chart)zoomByMode.set(el.dataset.mode,chart.getOption().dataZoom||[]);
+  if(el.dataset.revision===String(s.revision)&&chart)zoomByMode.set(el.dataset.mode,charts.zoomState(chart));
   charts.dispose(el);
  }
  area.replaceChildren();
@@ -75,7 +75,7 @@ async function multiples(){
   const threshold=charts.plasmaThresholdLine(thresholdMg,'mg/L',s.config.horizon);
   if(threshold){option.series.push(threshold);option.legend.data.push(threshold.name);}
   const prior=zoomByMode.get(name)||[];
-  option.dataZoom=option.dataZoom.map(z=>{const old=prior.find(p=>p.id===z.id);return old?{...z,start:old.start,end:old.end}:z;});
+  option.dataZoom=option.dataZoom.map(z=>{const old=prior.find(p=>p.id===z.id);return old?{...z,...old}:z;});
   option.yAxis.max=ceiling;option.xAxis.max=s.config.horizon;option.title={text:name,textStyle:{fontSize:14}};charts.draw(el,option);
  }
 }

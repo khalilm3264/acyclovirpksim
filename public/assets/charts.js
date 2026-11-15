@@ -28,6 +28,16 @@
    label:{show:true,position:'insideEndTop',formatter:'Threshold '+text,color:'#603183',fontSize:11,backgroundColor:'rgba(255,255,255,.92)',padding:[2,3]},data:[{yAxis:value}]};
   return result;
  }
+ // Keep an explicitly zoomed value window; full axes remain free to autoscale.
+ function zoomState(chart,yFactor=1){
+  if(!chart)return [];
+  return (chart.getOption().dataZoom||[]).filter(z=>['ayNavX','ayNavY'].includes(z.id)).map(z=>{
+   if(z.start===0&&z.end===100)return {id:z.id,start:0,end:100,rangeMode:['percent','percent']};
+   const axis=z.id==='ayNavX'?'xAxis':'yAxis',factor=axis==='yAxis'?yFactor:1;
+   const extent=chart.getModel().getComponent(axis).axis.scale.getExtent();
+   return {id:z.id,startValue:extent[0]*factor,endValue:extent[1]*factor,rangeMode:['value','value']};
+  });
+ }
  function band(name,time,lower,upper,color){
   // One quadrilateral per time segment. Both edges participate in axis scaling.
   const data=time.slice(1).map((t,i)=>[time[i],t,lower[i],lower[i+1],upper[i],upper[i+1]]);
@@ -184,5 +194,5 @@
    visualMap:{seriesIndex:0,dimension:2,min,max:max===min?min+1:max,left:'center',bottom:0,orient:'horizontal',inRange:{color:heatColors(diverging)}},
    series:[{type:'heatmap',data}]};
  }
- root.AyFluxCharts={ensure,line,plasmaThresholdLine,band,options,draw,dispose,heatmap,heatColors,heatColorAt,accessible,setAccessible};
+ root.AyFluxCharts={ensure,line,plasmaThresholdLine,zoomState,band,options,draw,dispose,heatmap,heatColors,heatColorAt,accessible,setAccessible};
 })(typeof window==='undefined'?globalThis:window);

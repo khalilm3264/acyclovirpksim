@@ -612,17 +612,18 @@ function drawNextPlot(){
  plotRunning=true;activePlot={where,signature:job.signature};
  // Presentation-only plasma edits keep the current chart zoom.
  if(job.preserveZoom){
-  const prior=window.echarts?.getInstanceByDom(target)?.getOption().dataZoom||[];
+  const factor=job.unitFactor/(chartStates.get(where)?.unitFactor||job.unitFactor);
+  const prior=window.AyFluxCharts.zoomState(window.echarts?.getInstanceByDom(target),factor);
   job.option.dataZoom=job.option.dataZoom.map(z=>{
    const old=prior.find(p=>p.id===z.id);
-   return old?{...z,start:old.start,end:old.end}:z;
+   return old?{...z,...old}:z;
   });
  }
  Promise.resolve().then(()=>window.AyFluxCharts.draw(target,job.option))
  .then(()=>{
   if(where==='plasmaChart'&&$('eventsPanel').open)window.AyFluxViews.timeline();
   const rect=target.getBoundingClientRect();
-  chartStates.set(where,{signature:job.signature,resultsRevision:job.resultsRevision,width:rect.width,height:rect.height});
+  chartStates.set(where,{signature:job.signature,resultsRevision:job.resultsRevision,unitFactor:job.unitFactor,width:rect.width,height:rect.height});
   if(document.documentElement.dataset.ayfluxReady!=='true'){
    document.documentElement.dataset.ayfluxReady='true';
    window.dispatchEvent(new Event('ayflux:charts-ready'));
@@ -704,7 +705,7 @@ function curve(key,unit,where,ref=null){if(!results)return;
  const option=layout(unit,horizon,series);
  if(analyte&&option.yAxis?.name)option.yAxis.name=unitText(option.yAxis.name);
  option.toolbox.feature.saveAsImage.name='acyclovir_'+key;
- pendingPlots.set(where,{key,option,signature,resultsRevision,preserveZoom:key==='plasma'&&chartStates.get(where)?.resultsRevision===resultsRevision});requestPlotFrame();
+ pendingPlots.set(where,{key,option,signature,resultsRevision,unitFactor:factor,preserveZoom:key==='plasma'&&chartStates.get(where)?.resultsRevision===resultsRevision});requestPlotFrame();
 }
 function baselineChanges(saved,config,selected){
  const changes=[];

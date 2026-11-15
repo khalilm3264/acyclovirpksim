@@ -43,14 +43,20 @@ const server=http.createServer((req,res)=>{
   await field.fill('100');let s=await waitLine(100);assert.ok(s.y[1]>=100,'Threshold participates in y-axis scaling');assert.ok(s.legend.includes('Entered plasma ACV threshold, 100 mg/L'));assert.equal(s.line.label,'Threshold 100 mg/L');
   assert.ok((await smallState(100)).every(p=>p.y[1]>=100&&p.legend.includes('Entered plasma ACV threshold, 100 mg/L')));
   await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('multipleCharts').firstElementChild).dispatchAction({type:'dataZoom',dataZoomId:'ayNavX',start:25,end:75}));
+  await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('multipleCharts').firstElementChild).dispatchAction({type:'dataZoom',dataZoomId:'ayNavY',startValue:5,endValue:10}));
   const smallZoom=(await smallState(100))[0].x;
+  const smallY=(await smallState(100))[0].y;assert.deepEqual(smallY,[5,10]);
   // ECharts action only establishes a zoomed starting view; edits use the normal form.
   await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('plasmaChart')).dispatchAction({type:'dataZoom',dataZoomId:'ayNavX',start:25,end:75}));
-  const zoomed=(await state()).x;
-  await field.fill('5');s=await waitLine(5);assert.deepEqual(s.x,zoomed,'Editing threshold preserves zoom');assert.deepEqual((await smallState(5))[0].x,smallZoom);
-  await page.selectOption('#concUnit','umol');s=await waitLine(5*1000/225.21);assert.match(s.line.name,/µmol\/L/);assert.ok(Math.abs(Number(await field.inputValue())-5*1000/225.21)<.0001);assert.deepEqual(s.x,zoomed);
+  await page.evaluate(()=>echarts.getInstanceByDom(document.getElementById('plasmaChart')).dispatchAction({type:'dataZoom',dataZoomId:'ayNavY',startValue:5,endValue:10}));
+  const zoomed=(await state()).x,zoomedY=(await state()).y;assert.deepEqual(zoomedY,[5,10]);
+  await field.fill('5');s=await waitLine(5);assert.deepEqual(s.x,zoomed,'Editing threshold preserves zoom');assert.deepEqual((await smallState(5))[0].x,smallZoom);assert.deepEqual(s.y,zoomedY);assert.deepEqual((await smallState(5))[0].y,smallY);
+  await page.selectOption('#concUnit','umol');s=await waitLine(5*1000/225.21);assert.match(s.line.name,/µmol\/L/);assert.ok(Math.abs(Number(await field.inputValue())-5*1000/225.21)<.0001);assert.deepEqual(s.x,zoomed);assert.ok(s.y.every((v,i)=>Math.abs(v-zoomedY[i]*1000/225.21)<.00001),'Zoomed concentration window follows converted units');
   assert.ok((await smallState(5)).every(p=>p.unit.includes('mg/L')&&p.label==='Threshold 5 mg/L'),'Small multiples keep their own mg/L scale');
-  await page.selectOption('#concUnit','mg');await waitLine(5);
+  await field.fill('10');await waitLine(10);await smallState(10*225.21/1000);
+  await field.fill(String(5*1000/225.21));await waitLine(5*1000/225.21);await smallState(5);
+  await page.selectOption('#concUnit','mg');s=await waitLine(5);assert.ok(s.y.every((v,i)=>Math.abs(v-zoomedY[i])<.00001));
+  await page.evaluate(()=>{for(const el of [document.getElementById('plasmaChart'),...document.getElementById('multipleCharts').children])echarts.getInstanceByDom(el).dispatchAction({type:'dataZoom',dataZoomId:'ayNavY',start:0,end:100});});
   await field.fill('0');s=await waitLine(0);assert.equal(s.line.label,'Threshold 0 mg/L');assert.ok((await smallState(0)).every(p=>p.label==='Threshold 0 mg/L'));
   const paintedLabel=await page.evaluate(()=>{
    const chart=echarts.getInstanceByDom(document.getElementById('plasmaChart'));
@@ -65,9 +71,11 @@ const server=http.createServer((req,res)=>{
   await field.fill('');s=await waitLine(null);assert.ok(!s.legend.some(n=>n.startsWith('Entered plasma ACV threshold')));assert.deepEqual(s.x,zoomed);assert.ok((await smallState(null)).every(p=>!p.legend.some(n=>n.startsWith('Entered plasma ACV threshold'))));
   await field.fill('-1');await waitLine(null);
   await field.fill('5');await waitLine(5);
-  await page.locator('#csfChart').scrollIntoViewIfNeeded();
-  await page.waitForFunction(()=>window.echarts?.getInstanceByDom(document.getElementById('csfChart')));
-  assert.ok(await page.evaluate(()=>!echarts.getInstanceByDom(document.getElementById('csfChart')).getOption().series.some(s=>s.id==='entered-plasma-threshold')),'Plasma threshold is not copied to CSF');
+  for(const id of ['csfChart','cmmgChart','csfCmmgChart']){
+   await page.locator('#'+id).scrollIntoViewIfNeeded();
+   await page.waitForFunction(id=>window.echarts?.getInstanceByDom(document.getElementById(id)),id);
+   assert.ok(await page.evaluate(id=>!echarts.getInstanceByDom(document.getElementById(id)).getOption().series.some(s=>s.id==='entered-plasma-threshold'),id),'Plasma threshold is not copied to '+id);
+  }
   assert.equal(await page.evaluate(()=>AyFluxResearchBridge.snapshot().revision),revision,'Threshold edits do not recompute predictions');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2));assert.deepEqual(errors,[]);
   console.log('PASS '+width+'px threshold high/zero/clear/invalid, legend, units, axis scale and preserved zoom');await page.close();
