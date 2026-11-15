@@ -6,11 +6,12 @@ const {
   runTargetPerturbationCheck,
   runOutcomeRemovalCheck,
   runMaskedArmAudit,
-  runRevealedArmSensitivityAudit
+  runRevealedArmSensitivityAudit,
+  runChartObservationIndependenceAudit
 } = require('../research/validation/cmmg-forecast-leakage-audit.cjs');
 const { generatePatientForecast } = require('../research/validation/cmmg-forecast-post-hd.cjs');
 
-test('CMMG forecast pipeline exhibits zero future-data leakage under target perturbation', () => {
+test('CMMG forecast pipeline exhibits no future-data leakage detected by target perturbation checks', () => {
   const n = runTargetPerturbationCheck(generatePatientForecast);
   assert.equal(n, 6000, 'Must verify all 6000 patient-scenario instances across all 4 conditions');
 });
@@ -30,7 +31,12 @@ test('Revealed arm (Both analytes) exhibits active sensitivity to end-HD ACV', (
   assert.equal(n, 100, 'Must verify revealed arm sensitivity');
 });
 
-test('Deliberate-failure negative controls catch target leakage, input leakage, and blindness', () => {
+test('Chart-history comparator is strictly invariant to end-HD observations (no leakage detected by observation independence check)', () => {
+  const n = runChartObservationIndependenceAudit(generatePatientForecast);
+  assert.equal(n, 500, 'Must verify 500 virtual patients under observation corruption');
+});
+
+test('Deliberate-failure negative controls catch target leakage, input leakage, blindness, and chart observation leakage', () => {
   // 1. Leaked future target must throw
   const leakyFuture = (obs, ...args) => {
     const res = generatePatientForecast(obs, ...args);
@@ -57,4 +63,12 @@ test('Deliberate-failure negative controls catch target leakage, input leakage, 
     return res;
   };
   assert.throws(() => runRevealedArmSensitivityAudit(blindRevealed), /Revealed arm blindness detected/);
+
+  // 4. Leaked observation into chart history must throw
+  const leakyChart = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    res.predCH += 0.05 * obs.measCMMG;
+    return res;
+  };
+  assert.throws(() => runChartObservationIndependenceAudit(leakyChart), /Chart history observation leak detected/);
 });

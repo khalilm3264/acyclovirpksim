@@ -403,12 +403,30 @@ function generatePatientForecast(patientObservation, fcCandidates, fcSimsComplet
 
     ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
 
-    predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
-    predER_Both = weightedMedian(cmmgTargetVals, wBoth);
-    predSU_Unw_CMMG = median(su_cmmg_pred);
-    predSU_Unw_Both = median(su_both_pred);
-    predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
-    predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
+    const priorWeights = new Array(M).fill(1 / M);
+    const predCH = weightedMedian(cmmgTargetVals, priorWeights);
+    const predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
+    const predER_Both = weightedMedian(cmmgTargetVals, wBoth);
+    const predSU_Unw_CMMG = median(su_cmmg_pred);
+    const predSU_Unw_Both = median(su_both_pred);
+    const predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
+    const predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
+
+    return {
+      predCF,
+      predCH,
+      predER_CMMG,
+      predER_Both,
+      predSU_Unw_CMMG,
+      predSU_Unw_Both,
+      predSU_Rew_CMMG,
+      predSU_Rew_Both,
+      wCMMG,
+      wBoth,
+      wH1,
+      wH2,
+      ess
+    };
 
   } else if (cfg.mode === 'mixture') {
     const logw_cmmg = [];
@@ -481,28 +499,31 @@ function generatePatientForecast(patientObservation, fcCandidates, fcSimsComplet
     wH2 = wBoth.slice(M).reduce((a, b) => a + b, 0);
     ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
 
-    predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
-    predER_Both = weightedMedian(cmmgTargetVals, wBoth);
-    predSU_Unw_CMMG = median(su_cmmg_pred);
-    predSU_Unw_Both = median(su_both_pred);
-    predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
-    predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
-  }
+    const priorWeights = new Array(2 * M).fill(0.5 / M);
+    const predCH = weightedMedian(cmmgTargetVals, priorWeights);
+    const predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
+    const predER_Both = weightedMedian(cmmgTargetVals, wBoth);
+    const predSU_Unw_CMMG = median(su_cmmg_pred);
+    const predSU_Unw_Both = median(su_both_pred);
+    const predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
+    const predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
 
-  return {
-    predCF,
-    predER_CMMG,
-    predER_Both,
-    predSU_Unw_CMMG,
-    predSU_Unw_Both,
-    predSU_Rew_CMMG,
-    predSU_Rew_Both,
-    wCMMG,
-    wBoth,
-    wH1,
-    wH2,
-    ess
-  };
+    return {
+      predCF,
+      predCH,
+      predER_CMMG,
+      predER_Both,
+      predSU_Unw_CMMG,
+      predSU_Unw_Both,
+      predSU_Rew_CMMG,
+      predSU_Rew_Both,
+      wCMMG,
+      wBoth,
+      wH1,
+      wH2,
+      ess
+    };
+  }
 }
 
 function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbations, isZeroNoise) {
@@ -557,6 +578,7 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
   for (const cfg of configurations) {
     const errs = {
       CF: { abs: [], signed: [] },
+      CH: { abs: [], signed: [] },
       ER_CMMG: { abs: [], signed: [] },
       ER_Both: { abs: [], signed: [] },
       SU_Unw_CMMG: { abs: [], signed: [] },
@@ -585,6 +607,11 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
       const cfAbs = Math.abs(cfSigned);
       errs.CF.abs.push(cfAbs);
       errs.CF.signed.push(cfSigned);
+
+      const chSigned = fc.predCH - target;
+      const chAbs = Math.abs(chSigned);
+      errs.CH.abs.push(chAbs);
+      errs.CH.signed.push(chSigned);
 
       errs.ER_CMMG.abs.push(Math.abs(fc.predER_CMMG - target));
       errs.ER_CMMG.signed.push(fc.predER_CMMG - target);
@@ -625,6 +652,7 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
         observed_cmmg_mg_L: p.measCMMG,
         true_cmmg_target_mg_L: target,
         pred_cf: fc.predCF,
+        pred_chart: fc.predCH,
         pred_er_cmmg: fc.predER_CMMG,
         pred_er_both: fc.predER_Both,
         pred_su_unw_cmmg: fc.predSU_Unw_CMMG,
@@ -632,6 +660,7 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
         pred_su_rew_cmmg: fc.predSU_Rew_CMMG,
         pred_su_rew_both: fc.predSU_Rew_Both,
         err_signed_cf: fc.predCF - target,
+        err_signed_chart: fc.predCH - target,
         err_signed_er_cmmg: fc.predER_CMMG - target,
         err_signed_er_both: fc.predER_Both - target,
         err_signed_su_unw_cmmg: fc.predSU_Unw_CMMG - target,
@@ -639,6 +668,7 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
         err_signed_su_rew_cmmg: fc.predSU_Rew_CMMG - target,
         err_signed_su_rew_both: fc.predSU_Rew_Both - target,
         err_abs_cf: Math.abs(fc.predCF - target),
+        err_abs_chart: Math.abs(fc.predCH - target),
         err_abs_er_cmmg: Math.abs(fc.predER_CMMG - target),
         err_abs_er_both: Math.abs(fc.predER_Both - target),
         err_abs_su_unw_cmmg: Math.abs(fc.predSU_Unw_CMMG - target),
@@ -663,6 +693,12 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
         medAbs: median(errs.CF.abs),
         medSigned: median(errs.CF.signed),
         signs: signCounts(errs.CF.signed)
+      },
+      CH: {
+        medAbs: median(errs.CH.abs),
+        medSigned: median(errs.CH.signed),
+        signs: signCounts(errs.CH.signed),
+        diffsVsCF: pairedDiffs(errs.CH.abs, errs.CF.abs)
       },
       ER: {
         cmmgMedAbs: median(errs.ER_CMMG.abs),
@@ -778,13 +814,27 @@ function generateMarkdownReport(evals) {
   $$\\sigma = \\max(0.1, \\hat{C} \\cdot 0.04)$$
   where $\\sigma_{\\min} = 0.1\\text{ mg/L}$ serves strictly as a numerical regularization floor in the likelihood denominator to prevent division-by-zero or infinite log penalties when candidate predictions approach zero.
 
+### 1.6 Comparator Taxonomy & Input Access
+The evaluation compares four distinct predictive paradigms:
+1. **Observed-CMMG Carry-Forward (CF):** Static persistence benchmark $\\hat{y} = y_{\\text{cmmg}}(t_{\\text{meas}})$.
+2. **Chart-History Simulation (CH):** Unconditioned median of candidate trajectories generated under the charted dosing history without conditioning on draw observations ($50/50$ prior weights on $H_1$ and $H_2$ in mixture). Strictly invariant to $y_{\\text{acv}}$ and $y_{\\text{cmmg}}$.
+3. **CMMG-Only Updating (ER / SU):** Conditioned or initialized using end-HD CMMG only; masked arm cannot access parent ACV.
+4. **Paired ACV + CMMG Updating (ER / SU):** Conditioned or initialized jointly using end-HD ACV and CMMG.
+
+### 1.7 Future-Data Leakage and Input Isolation Audit
+- **Audit Findings:** No leakage detected by these checks.
+- **Mathematical Invariant on Target Perturbation:** When the true future CMMG target is perturbed by $\\Delta$ ($y^*_{\\text{new}} = y^* + \\Delta$), candidate forecasts and fitting weights remain bit-for-bit identical ($0.000\\text{e}+0$). Signed errors translate predictably by exactly $-\\Delta$:
+  $$e_{\\text{signed}}^{(\\text{perturbed})} = \\hat{y} - (y^* + \\Delta) = e_{\\text{signed}} - \\Delta$$
+  Absolute errors $|e_{\\text{signed}} - \\Delta|$ transform non-linearly depending on the initial error sign and magnitude relative to $\\Delta$, and thus need not shift by the same amount.
+- **Observation Independence:** Corrupting end-HD ACV and CMMG produces exactly $0.000\\text{e}+0$ change in Chart-History predictions across all scenarios.
+
 ---
 
 ## 2. Benchmark Summaries & Paired Error Differences
 
 ### Table 1: Primary Metrics Across Evaluated Conditions
 
-| Condition & Scenario | Method | Median Abs. Error (mg/L) | Median Signed Error (mg/L) | Under / Over / Exact Sign Counts ($N_{\\text{under}} / N_{\\text{over}} / N_{\\text{exact}}$) | Median Paired Difference $\\text{med}(d)$ (mg/L) | Diff. of Marginal Medians $\\Delta_{\\text{marginal}}$ (mg/L) | % Patients Helped by Adding ACV ($N_{\\text{helped}} / N_{\\text{worsened}} / N_{\\text{tied}}$) |
+| Condition & Scenario | Method | Median Abs. Error (mg/L) | Median Signed Error (mg/L) | Under / Over / Exact Sign Counts ($N_{\\text{under}} / N_{\\text{over}} / N_{\\text{exact}}$) | Median Paired Difference $\\text{med}(d)$ (mg/L) | Diff. of Marginal Medians $\\Delta_{\\text{marginal}}$ (mg/L) | % Patients Helped ($N_{\\text{helped}} / N_{\\text{worsened}} / N_{\\text{tied}}$) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 `;
 
@@ -794,6 +844,7 @@ function generateMarkdownReport(evals) {
       const condLabel = `**${s.conditionLabel}**<br>*${s.config}*`;
       const methods = [
         'Carry-Forward (CF)',
+        'Chart History (CH)',
         'ER (CMMG-only)',
         'ER (Both)',
         'SU Unweighted (CMMG)',
@@ -804,6 +855,7 @@ function generateMarkdownReport(evals) {
 
       const medAbs = [
         fmtNum(s.CF.medAbs),
+        fmtNum(s.CH.medAbs),
         fmtNum(s.ER.cmmgMedAbs),
         s.scenario === 'hidden' ? `**${fmtNum(s.ER.bothMedAbs)}**` : fmtNum(s.ER.bothMedAbs),
         fmtNum(s.SU_Unw.cmmgMedAbs),
@@ -814,6 +866,7 @@ function generateMarkdownReport(evals) {
 
       const medSigned = [
         fmtSign(s.CF.medSigned),
+        fmtSign(s.CH.medSigned),
         fmtSign(s.ER.cmmgMedSigned),
         s.scenario === 'hidden' ? `**${fmtSign(s.ER.bothMedSigned)}**` : fmtSign(s.ER.bothMedSigned),
         fmtSign(s.SU_Unw.cmmgMedSigned),
@@ -824,6 +877,7 @@ function generateMarkdownReport(evals) {
 
       const signs = [
         `${s.CF.signs.under} / ${s.CF.signs.over} / ${s.CF.signs.exact}`,
+        `${s.CH.signs.under} / ${s.CH.signs.over} / ${s.CH.signs.exact}`,
         `${s.ER.cmmgSigns.under} / ${s.ER.cmmgSigns.over} / ${s.ER.cmmgSigns.exact}`,
         `${s.ER.bothSigns.under} / ${s.ER.bothSigns.over} / ${s.ER.bothSigns.exact}`,
         `${s.SU_Unw.cmmgSigns.under} / ${s.SU_Unw.cmmgSigns.over} / ${s.SU_Unw.cmmgSigns.exact}`,
@@ -834,6 +888,7 @@ function generateMarkdownReport(evals) {
 
       const pairedMedDiff = [
         '—',
+        fmtSign(s.CH.diffsVsCF.medDiff),
         '—',
         fmtSign(s.ER.diffs.medDiff),
         '—',
@@ -844,6 +899,7 @@ function generateMarkdownReport(evals) {
 
       const diffMarginal = [
         '—',
+        fmtSign(s.CH.diffsVsCF.diffOfMarginalMedians),
         '—',
         fmtSign(s.ER.diffs.diffOfMarginalMedians),
         '—',
@@ -854,6 +910,7 @@ function generateMarkdownReport(evals) {
 
       const helped = [
         '—',
+        `${s.CH.diffsVsCF.pctHelped} (${s.CH.diffsVsCF.helped} helped / ${s.CH.diffsVsCF.worsened} worsened / ${s.CH.diffsVsCF.tied} tied vs CF)`,
         '—',
         `${s.ER.diffs.pctHelped} (${s.ER.diffs.helped} helped, ${s.ER.diffs.worsened} worsened, ${s.ER.diffs.tied} tied)`,
         '—',
@@ -884,6 +941,7 @@ Evaluates the effect of sampling timestamp jitter ($t_{\\text{meas}} \\in [27.75
 
     md += `| **${s2.config}** | | | |\n`;
     md += `| Carry-Forward Median Abs Error | ${fmtNum(s2.CF.medAbs)} mg/L | ${fmtNum(s3.CF.medAbs)} mg/L | ${fmtNum(Math.abs(s2.CF.medAbs - s3.CF.medAbs))} mg/L |\n`;
+    md += `| Chart History Median Abs Error | ${fmtNum(s2.CH.medAbs)} mg/L | ${fmtNum(s3.CH.medAbs)} mg/L | ${fmtNum(Math.abs(s2.CH.medAbs - s3.CH.medAbs))} mg/L |\n`;
     md += `| ER (Both) Median Abs Error | ${fmtNum(s2.ER.bothMedAbs)} mg/L | ${fmtNum(s3.ER.bothMedAbs)} mg/L | ${fmtNum(Math.abs(s2.ER.bothMedAbs - s3.ER.bothMedAbs))} mg/L |\n`;
     md += `| ER (Both) Patients Helped vs Worsened vs Tied | ${s2.ER.diffs.pctHelped} (${s2.ER.diffs.helped} helped / ${s2.ER.diffs.worsened} worsened / ${s2.ER.diffs.tied} tied) | ${s3.ER.diffs.pctHelped} (${s3.ER.diffs.helped} helped / ${s3.ER.diffs.worsened} worsened / ${s3.ER.diffs.tied} tied) | ${fmtNum(Math.abs(parseFloat(s2.ER.diffs.pctHelped) - parseFloat(s3.ER.diffs.pctHelped)), 1)}% |\n`;
     md += `| SU Unweighted (Both) Median Abs Error | ${fmtNum(s2.SU_Unw.bothMedAbs)} mg/L | ${fmtNum(s3.SU_Unw.bothMedAbs)} mg/L | ${fmtNum(Math.abs(s2.SU_Unw.bothMedAbs - s3.SU_Unw.bothMedAbs))} mg/L |\n`;
@@ -1116,6 +1174,7 @@ function verifyRecordsIntegrity(records, allSummariesObj) {
 
     const methods = [
       { name: 'cf', pred: parseFloat(r.pred_cf), signed: parseFloat(r.err_signed_cf), abs: parseFloat(r.err_abs_cf) },
+      { name: 'chart', pred: parseFloat(r.pred_chart), signed: parseFloat(r.err_signed_chart), abs: parseFloat(r.err_abs_chart) },
       { name: 'er_cmmg', pred: parseFloat(r.pred_er_cmmg), signed: parseFloat(r.err_signed_er_cmmg), abs: parseFloat(r.err_abs_er_cmmg) },
       { name: 'er_both', pred: parseFloat(r.pred_er_both), signed: parseFloat(r.err_signed_er_both), abs: parseFloat(r.err_abs_er_both) },
       { name: 'su_unw_cmmg', pred: parseFloat(r.pred_su_unw_cmmg), signed: parseFloat(r.err_signed_su_unw_cmmg), abs: parseFloat(r.err_abs_su_unw_cmmg) },
@@ -1168,6 +1227,19 @@ function verifyRecordsIntegrity(records, allSummariesObj) {
       assert.ok(Math.abs(median(cfAbs) - expS.CF.medAbs) < 1e-12, `CF medAbs mismatch in ${cond} ${expS.scenario}`);
       assert.ok(Math.abs(median(cfSigned) - expS.CF.medSigned) < 1e-12, `CF medSigned mismatch in ${cond} ${expS.scenario}`);
       assert.deepEqual(signCounts(cfSigned), expS.CF.signs, `CF signs mismatch in ${cond} ${expS.scenario}`);
+
+      // Check CH
+      const chAbs = group.map(r => parseFloat(r.err_abs_chart));
+      const chSigned = group.map(r => parseFloat(r.err_signed_chart));
+      assert.ok(Math.abs(median(chAbs) - expS.CH.medAbs) < 1e-12, `CH medAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(chSigned) - expS.CH.medSigned) < 1e-12, `CH medSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(chSigned), expS.CH.signs, `CH signs mismatch in ${cond} ${expS.scenario}`);
+      const recomputedChDiffsVsCF = pairedDiffs(chAbs, cfAbs);
+      assert.equal(recomputedChDiffsVsCF.helped, expS.CH.diffsVsCF.helped, `CH helped mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedChDiffsVsCF.worsened, expS.CH.diffsVsCF.worsened, `CH worsened mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedChDiffsVsCF.tied, expS.CH.diffsVsCF.tied, `CH tied mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedChDiffsVsCF.medDiff - expS.CH.diffsVsCF.medDiff) < 1e-12, `CH medDiff mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedChDiffsVsCF.meanDiff - expS.CH.diffsVsCF.meanDiff) < 1e-12, `CH meanDiff mismatch in ${cond} ${expS.scenario}`);
 
       // Check ER
       const erCmmgAbs = group.map(r => parseFloat(r.err_abs_er_cmmg));
@@ -1308,6 +1380,32 @@ function verifyCsvReproduction(csvFilePath, allSummariesObj) {
   assert.ok(neg2Failed, 'Negative control 2 failed: altering a signed error must throw AssertionError');
   console.log('  [PASS] Negative control 2: Deliberately altered signed error successfully caught by assertion.');
 
+  // 4. Negative Control 3: Deliberately alter pred_chart in patient 88
+  const negRecords3 = records.map(r => ({ ...r }));
+  negRecords3[88].pred_chart = String(parseFloat(negRecords3[88].pred_chart) + 2.5);
+  let neg3Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords3, allSummariesObj);
+  } catch (err) {
+    neg3Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 3 error must be AssertionError, got: ${err.message}`);
+  }
+  assert.ok(neg3Failed, 'Negative control 3 failed: altering pred_chart must throw AssertionError');
+  console.log('  [PASS] Negative control 3: Deliberately altered pred_chart successfully caught by assertion.');
+
+  // 5. Negative Control 4: Deliberately alter err_signed_chart in patient 140
+  const negRecords4 = records.map(r => ({ ...r }));
+  negRecords4[140].err_signed_chart = String(parseFloat(negRecords4[140].err_signed_chart) + 0.75);
+  let neg4Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords4, allSummariesObj);
+  } catch (err) {
+    neg4Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 4 error must be AssertionError, got: ${err.message}`);
+  }
+  assert.ok(neg4Failed, 'Negative control 4 failed: altering err_signed_chart must throw AssertionError');
+  console.log('  [PASS] Negative control 4: Deliberately altered err_signed_chart successfully caught by assertion.');
+
   console.log('  ALL ASSERTIONS & NEGATIVE CONTROLS PASSED.');
 }
 
@@ -1340,8 +1438,66 @@ const csvPath = path.resolve(__dirname, 'cmmg-forecast-patients.csv');
 fs.writeFileSync(csvPath, csvRows.join('\n'), 'utf8');
 console.log(`Saved per-patient CSV (${allPatientRecords.length} rows) to ${csvPath}`);
 
+function verifyIdentityToBaseline(newSummaries, refJsonPath) {
+  if (!fs.existsSync(refJsonPath)) return;
+  console.log('Verifying numerical identity of all 7 existing methods against 5826d04 baseline...');
+  const ref = JSON.parse(fs.readFileSync(refJsonPath, 'utf8'));
+  const conditions = ['exact_4pct_cv', 'perturbed_fixed32h_4pct_cv', 'perturbed_elapsed4h_4pct_cv', 'zero_noise_sanity'];
+  for (const c of conditions) {
+    const newCond = newSummaries[c];
+    const refCond = ref[c];
+    for (let sIdx = 0; sIdx < newCond.length; sIdx++) {
+      const nS = newCond[sIdx];
+      const rS = refCond[sIdx];
+      assert.equal(nS.scenario, rS.scenario);
+      // Check CF
+      assert.ok(Math.abs(nS.CF.medAbs - rS.CF.medAbs) < 1e-12, `CF medAbs mismatch in ${c} ${nS.scenario}`);
+      assert.ok(Math.abs(nS.CF.medSigned - rS.CF.medSigned) < 1e-12, `CF medSigned mismatch in ${c} ${nS.scenario}`);
+      assert.deepEqual(nS.CF.signs, rS.CF.signs, `CF signs mismatch in ${c} ${nS.scenario}`);
+      // Check ER
+      assert.ok(Math.abs(nS.ER.cmmgMedAbs - rS.ER.cmmgMedAbs) < 1e-12, `ER cmmgMedAbs mismatch in ${c} ${nS.scenario}`);
+      assert.ok(Math.abs(nS.ER.cmmgMedSigned - rS.ER.cmmgMedSigned) < 1e-12, `ER cmmgMedSigned mismatch in ${c} ${nS.scenario}`);
+      assert.deepEqual(nS.ER.cmmgSigns, rS.ER.cmmgSigns, `ER cmmgSigns mismatch in ${c} ${nS.scenario}`);
+      assert.ok(Math.abs(nS.ER.bothMedAbs - rS.ER.bothMedAbs) < 1e-12, `ER bothMedAbs mismatch in ${c} ${nS.scenario}`);
+      assert.ok(Math.abs(nS.ER.bothMedSigned - rS.ER.bothMedSigned) < 1e-12, `ER bothMedSigned mismatch in ${c} ${nS.scenario}`);
+      assert.deepEqual(nS.ER.bothSigns, rS.ER.bothSigns, `ER bothSigns mismatch in ${c} ${nS.scenario}`);
+      assert.equal(nS.ER.diffs.helped, rS.ER.diffs.helped);
+      assert.equal(nS.ER.diffs.worsened, rS.ER.diffs.worsened);
+      assert.equal(nS.ER.diffs.tied, rS.ER.diffs.tied);
+      assert.ok(Math.abs(nS.ER.diffs.medDiff - rS.ER.diffs.medDiff) < 1e-12);
+      // Check SU_Unw
+      assert.ok(Math.abs(nS.SU_Unw.cmmgMedAbs - rS.SU_Unw.cmmgMedAbs) < 1e-12);
+      assert.ok(Math.abs(nS.SU_Unw.cmmgMedSigned - rS.SU_Unw.cmmgMedSigned) < 1e-12);
+      assert.deepEqual(nS.SU_Unw.cmmgSigns, rS.SU_Unw.cmmgSigns);
+      assert.ok(Math.abs(nS.SU_Unw.bothMedAbs - rS.SU_Unw.bothMedAbs) < 1e-12);
+      assert.ok(Math.abs(nS.SU_Unw.bothMedSigned - rS.SU_Unw.bothMedSigned) < 1e-12);
+      assert.deepEqual(nS.SU_Unw.bothSigns, rS.SU_Unw.bothSigns);
+      assert.equal(nS.SU_Unw.diffs.helped, rS.SU_Unw.diffs.helped);
+      assert.equal(nS.SU_Unw.diffs.worsened, rS.SU_Unw.diffs.worsened);
+      assert.equal(nS.SU_Unw.diffs.tied, rS.SU_Unw.diffs.tied);
+      assert.ok(Math.abs(nS.SU_Unw.diffs.medDiff - rS.SU_Unw.diffs.medDiff) < 1e-12);
+      // Check SU_Rew
+      assert.ok(Math.abs(nS.SU_Rew.cmmgMedAbs - rS.SU_Rew.cmmgMedAbs) < 1e-12);
+      assert.ok(Math.abs(nS.SU_Rew.cmmgMedSigned - rS.SU_Rew.cmmgMedSigned) < 1e-12);
+      assert.deepEqual(nS.SU_Rew.cmmgSigns, rS.SU_Rew.cmmgSigns);
+      assert.ok(Math.abs(nS.SU_Rew.bothMedAbs - rS.SU_Rew.bothMedAbs) < 1e-12);
+      assert.ok(Math.abs(nS.SU_Rew.bothMedSigned - rS.SU_Rew.bothMedSigned) < 1e-12);
+      assert.deepEqual(nS.SU_Rew.bothSigns, rS.SU_Rew.bothSigns);
+      assert.equal(nS.SU_Rew.diffs.helped, rS.SU_Rew.diffs.helped);
+      assert.equal(nS.SU_Rew.diffs.worsened, rS.SU_Rew.diffs.worsened);
+      assert.equal(nS.SU_Rew.diffs.tied, rS.SU_Rew.diffs.tied);
+      assert.ok(Math.abs(nS.SU_Rew.diffs.medDiff - rS.SU_Rew.diffs.medDiff) < 1e-12);
+    }
+  }
+  console.log('  [PASS] All 7 existing methods verified numerically identical (< 1e-12 mg/L) across all 4 conditions x 3 scenarios.');
+}
+
 // Verify that all summary statistics, sign counts, and quantiles reproduce identically from the unrounded CSV
 verifyCsvReproduction(csvPath, allSummaries);
+
+// Verify numerical identity of all 7 existing methods vs 5826d04 baseline
+const baselineRefPath = path.resolve(__dirname, 'results-5826d04-ref.json');
+verifyIdentityToBaseline(allSummaries, baselineRefPath);
 
 // Generate and write Markdown Audit Report
 const mdPath = path.resolve(__dirname, 'CMMG-POST-HD-FORECAST-AUDIT.md');

@@ -3,18 +3,25 @@
 /**
  * AyFlux CMMG Post-HD Forecasting: Comprehensive Future-Data & Input Leakage Audit
  * 
- * Verifies:
+ * Verifies (Audit Finding: No leakage detected by these checks):
  * 1. Future CMMG Target Perturbation:
  *    Perturbing only true future CMMG target leaves every prediction and fitting weight
  *    bit-for-bit identical (max diff < 1e-12 mg/L), while evaluation errors and summary metrics change.
+ *    Target shift Delta translates signed error predictably by -Delta (e_signed_new = e_signed - Delta),
+ *    while absolute errors |e_signed - Delta| transform non-linearly depending on initial error sign and magnitude.
  * 2. Complete Future Outcome Removal:
  *    Stripping true future outcome entirely leaves forecast generation fully functional and identical.
  * 3. Masked vs. Revealed Input Access:
  *    Masked arm (CMMG-only) is strictly invariant to end-HD ACV (max diff = 0.000e+0),
  *    while revealed arm exhibits proven sensitivity to end-HD ACV.
- * 4. Deliberate-Failure Controls:
+ * 4. Chart-History Observation Independence:
+ *    Chart-history simulation (predCH) uses the unconditioned candidate distribution under charted regimens
+ *    (predefined 50/50 prior history weights in mixture) and is strictly invariant (max diff = 0.000e+0)
+ *    when end-HD ACV and CMMG observations are corrupted.
+ * 5. Deliberate-Failure Controls:
  *    Automated negative controls proving that artificial leaks of future target, artificial
- *    ACV leaks into the masked arm, or artificial ACV blindness in the revealed arm immediately fail.
+ *    ACV leaks into the masked arm, artificial ACV blindness in the revealed arm, or artificial
+ *    observation leaks into chart-history immediately fail with AssertionError.
  */
 
 const assert = require('node:assert/strict');
@@ -76,6 +83,7 @@ function runTargetPerturbationCheck(generatorFn) {
         // Assert forecasts and weights must remain identical
         const checks = [
           ['predCF', fcPerturbed.predCF, fcBase.predCF],
+          ['predCH', fcPerturbed.predCH, fcBase.predCH],
           ['predER_CMMG', fcPerturbed.predER_CMMG, fcBase.predER_CMMG],
           ['predER_Both', fcPerturbed.predER_Both, fcBase.predER_Both],
           ['predSU_Unw_CMMG', fcPerturbed.predSU_Unw_CMMG, fcBase.predSU_Unw_CMMG],
@@ -109,6 +117,16 @@ function runTargetPerturbationCheck(generatorFn) {
               message: `Future-data leakage detected in wBoth[${j}]`
             });
           }
+        }
+
+        // Assert that signed error shifts predictably by exactly -targetShift:
+        // e_signed_pert = (pred - (target + targetShift)) = (pred - target) - targetShift = e_signed_base - targetShift
+        const baseSignedErr = fcBase.predCH - baseObs.trueCMMGAtTarget;
+        const pertSignedErr = fcPerturbed.predCH - perturbedObs.trueCMMGAtTarget;
+        if (Math.abs((pertSignedErr - baseSignedErr) - (-targetShift)) > 1e-12) {
+          throw new assert.AssertionError({
+            message: `Target perturbation did not shift signed error by exactly -targetShift: base=${baseSignedErr}, pert=${pertSignedErr}, shift=${targetShift}`
+          });
         }
 
         // Assert that evaluation error against perturbed target DOES change
@@ -153,6 +171,7 @@ function runOutcomeRemovalCheck(generatorFn) {
     const fcStripped = generatorFn(strippedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
 
     assert.equal(fcStripped.predCF, fcBase.predCF);
+    assert.equal(fcStripped.predCH, fcBase.predCH);
     assert.equal(fcStripped.predER_CMMG, fcBase.predER_CMMG);
     assert.equal(fcStripped.predER_Both, fcBase.predER_Both);
     assert.equal(fcStripped.predSU_Unw_CMMG, fcBase.predSU_Unw_CMMG);
@@ -271,6 +290,44 @@ function runRevealedArmSensitivityAudit(generatorFn) {
   return totalChecked;
 }
 
+function runChartObservationIndependenceAudit(generatorFn) {
+  const records = eval1.patientRecords.slice(0, 500);
+  let totalChecked = 0;
+
+  for (const rec of records) {
+    const cfg = { mode: rec.scenario, name: rec.scenario_name };
+    const assayCV = 0.04;
+
+    const baseObs = {
+      tMeas: rec.actual_draw_time_h,
+      targetTime: rec.target_time_h,
+      measACV: rec.observed_acv_mg_L,
+      measCMMG: rec.observed_cmmg_mg_L
+    };
+
+    const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+
+    // Corrupt BOTH end-HD ACV and CMMG observations significantly
+    const corruptedObs = {
+      ...baseObs,
+      measACV: rec.observed_acv_mg_L * 4.0 + 25.0,
+      measCMMG: rec.observed_cmmg_mg_L * 8.0 + 40.0
+    };
+
+    const fcCorrupted = generatorFn(corruptedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+
+    if (Math.abs(fcCorrupted.predCH - fcBase.predCH) > 1e-12) {
+      throw new assert.AssertionError({
+        message: `Chart history observation leak detected: baseline=${fcBase.predCH}, corrupted=${fcCorrupted.predCH} (diff=${fcCorrupted.predCH - fcBase.predCH})`
+      });
+    }
+
+    totalChecked++;
+  }
+
+  return totalChecked;
+}
+
 function runFullLeakageAudit() {
   console.log('========================================================================');
   console.log('STARTING FUTURE-DATA LEAKAGE & INPUT ISOLATION AUDIT');
@@ -297,10 +354,16 @@ function runFullLeakageAudit() {
   const nRevealed = runRevealedArmSensitivityAudit(generatePatientForecast);
   console.log(`   [PASS] Tested ${nRevealed} revealed arm cases: active sensitivity to ACV confirmed.\n`);
 
-  // 4. Deliberate-Failure Negative Controls
-  console.log('4. Executing Deliberate-Failure Negative Controls...');
+  // 4. Chart History Observation Independence Audit
+  console.log('4. Auditing Chart History Observation Independence...');
+  const nChart = runChartObservationIndependenceAudit(generatePatientForecast);
+  console.log(`   [PASS] Tested ${nChart} cases with scrambled end-HD ACV and CMMG.`);
+  console.log('   Chart-History comparator: exactly 0.000e+0 change across all predictions.\n');
 
-  // 4A. Negative Control: Future Data Leak
+  // 5. Deliberate-Failure Negative Controls
+  console.log('5. Executing Deliberate-Failure Negative Controls...');
+
+  // 5A. Negative Control: Future Data Leak
   let caughtFutureLeak = false;
   const leakyFutureGenerator = (obs, ...args) => {
     const res = generatePatientForecast(obs, ...args);
@@ -316,10 +379,10 @@ function runFullLeakageAudit() {
     assert.ok(err instanceof assert.AssertionError, 'Must throw AssertionError');
     assert.match(err.message, /Future-data leakage detected/);
   }
-  assert.ok(caughtFutureLeak, 'Deliberate-failure control 4A failed: target leak was not caught');
-  console.log('   [PASS] Control 4A: Artificially leaked future target caught by assertion.');
+  assert.ok(caughtFutureLeak, 'Deliberate-failure control 5A failed: target leak was not caught');
+  console.log('   [PASS] Control 5A: Artificially leaked future target caught by assertion.');
 
-  // 4B. Negative Control: Masked Arm Input Leak
+  // 5B. Negative Control: Masked Arm Input Leak
   let caughtMaskedLeak = false;
   const leakyMaskedGenerator = (obs, ...args) => {
     const res = generatePatientForecast(obs, ...args);
@@ -333,10 +396,10 @@ function runFullLeakageAudit() {
     assert.ok(err instanceof assert.AssertionError, 'Must throw AssertionError');
     assert.match(err.message, /Masked arm leakage detected/);
   }
-  assert.ok(caughtMaskedLeak, 'Deliberate-failure control 4B failed: masked ACV leak was not caught');
-  console.log('   [PASS] Control 4B: Artificially leaked ACV into masked arm caught by assertion.');
+  assert.ok(caughtMaskedLeak, 'Deliberate-failure control 5B failed: masked ACV leak was not caught');
+  console.log('   [PASS] Control 5B: Artificially leaked ACV into masked arm caught by assertion.');
 
-  // 4C. Negative Control: Revealed Arm Blindness
+  // 5C. Negative Control: Revealed Arm Blindness
   let caughtRevealedBlindness = false;
   const blindRevealedGenerator = (obs, ...args) => {
     const res = generatePatientForecast(obs, ...args);
@@ -353,11 +416,28 @@ function runFullLeakageAudit() {
     assert.ok(err instanceof assert.AssertionError, 'Must throw AssertionError');
     assert.match(err.message, /Revealed arm blindness detected/);
   }
-  assert.ok(caughtRevealedBlindness, 'Deliberate-failure control 4C failed: revealed blindness was not caught');
-  console.log('   [PASS] Control 4C: Artificial ACV blindness in revealed arm caught by assertion.\n');
+  assert.ok(caughtRevealedBlindness, 'Deliberate-failure control 5C failed: revealed blindness was not caught');
+  console.log('   [PASS] Control 5C: Artificial ACV blindness in revealed arm caught by assertion.');
+
+  // 5D. Negative Control: Observation Leaked into Chart History
+  let caughtChartLeak = false;
+  const leakyChartGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    res.predCH += 0.05 * obs.measCMMG;
+    return res;
+  };
+  try {
+    runChartObservationIndependenceAudit(leakyChartGenerator);
+  } catch (err) {
+    caughtChartLeak = true;
+    assert.ok(err instanceof assert.AssertionError, 'Must throw AssertionError');
+    assert.match(err.message, /Chart history observation leak detected/);
+  }
+  assert.ok(caughtChartLeak, 'Deliberate-failure control 5D failed: observation leak into predCH was not caught');
+  console.log('   [PASS] Control 5D: Artificial observation leak into chart-history caught by assertion.\n');
 
   console.log('========================================================================');
-  console.log('AUDIT COMPLETED: ZERO FUTURE-DATA LEAKAGE & ZERO MASKED ARM LEAKAGE');
+  console.log('AUDIT COMPLETED: NO LEAKAGE DETECTED BY THESE CHECKS');
   console.log('========================================================================\n');
 }
 
@@ -370,5 +450,6 @@ module.exports = {
   runTargetPerturbationCheck,
   runOutcomeRemovalCheck,
   runMaskedArmAudit,
-  runRevealedArmSensitivityAudit
+  runRevealedArmSensitivityAudit,
+  runChartObservationIndependenceAudit
 };
