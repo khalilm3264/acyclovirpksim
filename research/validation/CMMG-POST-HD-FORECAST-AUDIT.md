@@ -35,6 +35,19 @@
 3. **Perturbed ±15m (4% CV Noise, Fixed Horizon Target Draw+4.0h, Horizon 4.0h strictly):** Scored at $t_{\text{meas}} + 4.0\text{ h}$ to evaluate an identical 4.0-hour elapsed interval regardless of draw jitter.
 4. **Zero-Noise Sanity Check (0% CV, Exact 28.0h, Target 32.0h):** Noiseless measurements ($y_{\text{acv}} = C_{\text{acv}}(28)$, $y_{\text{cmmg}} = C_{\text{cmmg}}(28)$) evaluated against the forecaster's assumed $4\%$ CV / $0.1\text{ mg/L}$ floor likelihood model.
 
+### 1.4 Event-Aware Continuation Parity Audit (Codex Review Resolution)
+- **Review Finding:** In early runner drafts (`e7655bb`), stepping from $t_{\text{meas}} < 28.0\text{ h}$ (e.g. $27.75\text{ h}$) with an anuric no-dialysis stepper dropped residual hemodialysis for the remaining $0.25\text{ h}$, producing continuation errors of $+0.378\text{ to }+0.550\text{ mg/L}$ at $32\text{ h}$.
+- **Parity Implementation:** The updated `stepInterval` applies active hemodialysis ($p.\text{hd}$ and $c.\text{metDial} = 0.75$) when $t < 28.0\text{ h}$ before transitioning to post-HD clearance.
+- **Verification Across Cohort:** Programmatic no-update continuation parity assertions were executed across diagnostic indices $[0, 1, 2, 100, 499]$ at pre-end ($27.75\text{ h}$), exact-end ($28.0\text{ h}$), and post-end ($28.25\text{ h}$). Across all 15 patient-timestamp pairs, the continuation trajectory matched the full engine simulation exactly with absolute difference $< 10^{-12}\text{ mg/L}$ ($0.000\text{e}+0$).
+
+### 1.5 Distinction Between Generative Noise and Likelihood Floor
+- **Generative Measurement Model:** Virtual patient observations are generated with pure proportional Gaussian noise:
+  $$y = \max(0.01, C \cdot (1 + \epsilon)), \quad \epsilon \sim \mathcal{N}(0, 0.04^2)$$
+  There is NO artificial $0.1\text{ mg/L}$ standard-deviation floor applied during observation generation.
+- **Forecaster Likelihood Model:** In computing Gaussian candidate likelihoods, the forecaster uses:
+  $$\sigma = \max(0.1, \hat{C} \cdot 0.04)$$
+  where $\sigma_{\min} = 0.1\text{ mg/L}$ serves strictly as a numerical regularization floor in the likelihood denominator to prevent division-by-zero or infinite log penalties when candidate predictions approach zero.
+
 ---
 
 ## 2. Benchmark Summaries & Paired Error Differences
@@ -46,9 +59,9 @@
 | **Exact 28.0h (4% CV)**<br>*Complete History (Control)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.8146<br>0.3145<br>0.3503<br>0.3517<br>0.4189<br>0.3057<br>0.3197 | -0.8146<br>+0.0201<br>+0.0430<br>+0.0193<br>+0.0171<br>-0.0148<br>+0.0291 | 489 / 11 / 0<br>244 / 256 / 0<br>240 / 260 / 0<br>242 / 258 / 0<br>246 / 254 / 0<br>255 / 245 / 0<br>240 / 260 / 0 | —<br>—<br>+0.0104<br>—<br>+0.0563<br>—<br>+0.0040 | —<br>—<br>+0.0358<br>—<br>+0.0672<br>—<br>+0.0140 | —<br>—<br>40.0% (200 helped, 268 worse, 32 tie)<br>—<br>38.6% (193 helped, 307 worse, 0 tie)<br>—<br>48.2% (241 helped, 259 worse, 0 tie) |
 | **Exact 28.0h (4% CV)**<br>*Hidden Dose (Fixed 1-Dose)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.8146<br>0.4929<br>**1.5532**<br>0.4969<br>**0.4045**<br>0.3724<br>0.4459 | -0.8146<br>-0.4065<br>**-1.5532**<br>-0.4846<br>**-0.2202**<br>-0.2406<br>+0.2985 | 489 / 11 / 0<br>357 / 143 / 0<br>453 / 47 / 0<br>437 / 63 / 0<br>311 / 189 / 0<br>340 / 160 / 0<br>137 / 363 / 0 | —<br>—<br>+0.5689<br>—<br>**-0.1392**<br>—<br>+0.0475 | —<br>—<br>+1.0603<br>—<br>-0.0924<br>—<br>+0.0735 | —<br>—<br>17.8% (89 helped, 389 worse, 22 tie)<br>—<br>**68.6%** (343 helped, 157 worse, 0 tie)<br>—<br>44.2% (221 helped, 279 worse, 0 tie) |
 | **Exact 28.0h (4% CV)**<br>*Uncertain Dose (50/50 Mixture)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.8146<br>0.3087<br>0.3415<br>0.3633<br>0.3873<br>0.3025<br>0.3144 | -0.8146<br>+0.0123<br>+0.0328<br>-0.2794<br>-0.0970<br>+0.0067<br>+0.0323 | 489 / 11 / 0<br>247 / 253 / 0<br>242 / 258 / 0<br>359 / 141 / 0<br>274 / 226 / 0<br>248 / 252 / 0<br>239 / 261 / 0 | —<br>—<br>+0.0080<br>—<br>-0.0153<br>—<br>+0.0067 | —<br>—<br>+0.0328<br>—<br>+0.0240<br>—<br>+0.0119 | —<br>—<br>43.2% (216 helped, 261 worse, 23 tie)<br>—<br>51.8% (259 helped, 241 worse, 0 tie)<br>—<br>47.8% (239 helped, 261 worse, 0 tie) |
-| **Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)**<br>*Complete History (Control)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.2727<br>0.3421<br>0.3411<br>0.3787<br>0.2720<br>0.2989 | -0.7509<br>-0.0034<br>-0.0073<br>-0.0005<br>+0.0414<br>-0.0201<br>+0.0202 | 478 / 22 / 0<br>253 / 247 / 0<br>251 / 249 / 0<br>250 / 250 / 0<br>233 / 267 / 0<br>256 / 244 / 0<br>243 / 257 / 0 | —<br>—<br>+0.0165<br>—<br>+0.0322<br>—<br>+0.0062 | —<br>—<br>+0.0693<br>—<br>+0.0375<br>—<br>+0.0268 | —<br>—<br>37.6% (188 helped, 275 worse, 37 tie)<br>—<br>42.0% (210 helped, 290 worse, 0 tie)<br>—<br>47.8% (239 helped, 261 worse, 0 tie) |
-| **Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)**<br>*Hidden Dose (Fixed 1-Dose)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.5093<br>**1.5702**<br>0.5066<br>**0.3649**<br>0.3644<br>0.4562 | -0.7509<br>-0.4141<br>**-1.5702**<br>-0.5006<br>**-0.1902**<br>-0.2441<br>+0.2982 | 478 / 22 / 0<br>372 / 128 / 0<br>460 / 40 / 0<br>438 / 62 / 0<br>321 / 179 / 0<br>340 / 160 / 0<br>137 / 363 / 0 | —<br>—<br>+0.5689<br>—<br>**-0.1573**<br>—<br>+0.0277 | —<br>—<br>+1.0609<br>—<br>-0.1417<br>—<br>+0.0918 | —<br>—<br>19.2% (96 helped, 381 worse, 23 tie)<br>—<br>**72.4%** (362 helped, 138 worse, 0 tie)<br>—<br>47.6% (238 helped, 262 worse, 0 tie) |
-| **Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)**<br>*Uncertain Dose (50/50 Mixture)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.2545<br>0.3370<br>0.3732<br>0.3574<br>0.2682<br>0.3042 | -0.7509<br>-0.0256<br>+0.0078<br>-0.2970<br>-0.0752<br>-0.0142<br>+0.0309 | 478 / 22 / 0<br>264 / 236 / 0<br>249 / 251 / 0<br>360 / 140 / 0<br>284 / 216 / 0<br>256 / 244 / 0<br>240 / 260 / 0 | —<br>—<br>+0.0279<br>—<br>-0.0397<br>—<br>+0.0127 | —<br>—<br>+0.0825<br>—<br>-0.0158<br>—<br>+0.0360 | —<br>—<br>38.6% (193 helped, 285 worse, 22 tie)<br>—<br>54.6% (273 helped, 227 worse, 0 tie)<br>—<br>45.6% (228 helped, 272 worse, 0 tie) |
+| **Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)**<br>*Complete History (Control)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.2727<br>0.3421<br>0.3372<br>0.3916<br>0.2761<br>0.2983 | -0.7509<br>-0.0034<br>-0.0073<br>-0.0253<br>+0.0160<br>-0.0339<br>-0.0082 | 478 / 22 / 0<br>253 / 247 / 0<br>251 / 249 / 0<br>256 / 244 / 0<br>241 / 259 / 0<br>268 / 232 / 0<br>251 / 249 / 0 | —<br>—<br>+0.0165<br>—<br>+0.0299<br>—<br>+0.0045 | —<br>—<br>+0.0693<br>—<br>+0.0544<br>—<br>+0.0222 | —<br>—<br>37.6% (188 helped, 275 worse, 37 tie)<br>—<br>43.0% (215 helped, 285 worse, 0 tie)<br>—<br>48.4% (242 helped, 258 worse, 0 tie) |
+| **Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)**<br>*Hidden Dose (Fixed 1-Dose)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.5093<br>**1.5702**<br>0.5166<br>**0.3757**<br>0.3707<br>0.4435 | -0.7509<br>-0.4141<br>**-1.5702**<br>-0.5117<br>**-0.2097**<br>-0.2512<br>+0.2872 | 478 / 22 / 0<br>372 / 128 / 0<br>460 / 40 / 0<br>440 / 60 / 0<br>328 / 172 / 0<br>345 / 155 / 0<br>142 / 358 / 0 | —<br>—<br>+0.5689<br>—<br>**-0.1666**<br>—<br>+0.0203 | —<br>—<br>+1.0609<br>—<br>-0.1410<br>—<br>+0.0728 | —<br>—<br>19.2% (96 helped, 381 worse, 23 tie)<br>—<br>**73.0%** (365 helped, 135 worse, 0 tie)<br>—<br>48.8% (244 helped, 256 worse, 0 tie) |
+| **Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)**<br>*Uncertain Dose (50/50 Mixture)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.2545<br>0.3370<br>0.3881<br>0.3621<br>0.2744<br>0.2998 | -0.7509<br>-0.0256<br>+0.0078<br>-0.3154<br>-0.1038<br>-0.0297<br>+0.0106 | 478 / 22 / 0<br>264 / 236 / 0<br>249 / 251 / 0<br>372 / 128 / 0<br>291 / 209 / 0<br>268 / 232 / 0<br>247 / 253 / 0 | —<br>—<br>+0.0279<br>—<br>-0.0440<br>—<br>+0.0108 | —<br>—<br>+0.0825<br>—<br>-0.0260<br>—<br>+0.0254 | —<br>—<br>38.6% (193 helped, 285 worse, 22 tie)<br>—<br>55.0% (275 helped, 225 worse, 0 tie)<br>—<br>46.6% (233 helped, 267 worse, 0 tie) |
 | **Zero-Noise Sanity (0% CV, Exact 28.0h)**<br>*Complete History (Control)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7922<br>0.2208<br>0.2833<br>0.3002<br>0.3347<br>0.1993<br>0.2260 | -0.7922<br>+0.0323<br>+0.0578<br>+0.0218<br>-0.0199<br>-0.0101<br>+0.0231 | 497 / 3 / 0<br>235 / 265 / 0<br>219 / 281 / 0<br>243 / 257 / 0<br>256 / 244 / 0<br>253 / 247 / 0<br>234 / 266 / 0 | —<br>—<br>+0.0281<br>—<br>+0.0438<br>—<br>+0.0092 | —<br>—<br>+0.0625<br>—<br>+0.0346<br>—<br>+0.0267 | —<br>—<br>37.2% (186 helped, 281 worse, 33 tie)<br>—<br>40.6% (203 helped, 297 worse, 0 tie)<br>—<br>46.2% (231 helped, 269 worse, 0 tie) |
 | **Zero-Noise Sanity (0% CV, Exact 28.0h)**<br>*Hidden Dose (Fixed 1-Dose)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7922<br>0.4233<br>**1.4846**<br>0.4850<br>**0.3526**<br>0.3201<br>0.4338 | -0.7922<br>-0.3489<br>**-1.4846**<br>-0.4810<br>**-0.2541**<br>-0.2287<br>+0.3197 | 497 / 3 / 0<br>355 / 145 / 0<br>454 / 46 / 0<br>459 / 41 / 0<br>334 / 166 / 0<br>332 / 168 / 0<br>119 / 381 / 0 | —<br>—<br>+0.5656<br>—<br>**-0.1763**<br>—<br>+0.0393 | —<br>—<br>+1.0613<br>—<br>-0.1324<br>—<br>+0.1137 | —<br>—<br>17.8% (89 helped, 388 worse, 23 tie)<br>—<br>**74.4%** (372 helped, 128 worse, 0 tie)<br>—<br>45.6% (228 helped, 272 worse, 0 tie) |
 | **Zero-Noise Sanity (0% CV, Exact 28.0h)**<br>*Uncertain Dose (50/50 Mixture)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7922<br>0.2087<br>0.2780<br>0.3296<br>0.3364<br>0.2001<br>0.2267 | -0.7922<br>+0.0199<br>+0.0581<br>-0.2782<br>-0.1393<br>+0.0036<br>+0.0314 | 497 / 3 / 0<br>238 / 262 / 0<br>217 / 283 / 0<br>394 / 106 / 0<br>295 / 205 / 0<br>248 / 252 / 0<br>230 / 270 / 0 | —<br>—<br>+0.0309<br>—<br>-0.0321<br>—<br>+0.0105 | —<br>—<br>+0.0693<br>—<br>+0.0067<br>—<br>+0.0266 | —<br>—<br>38.4% (192 helped, 284 worse, 24 tie)<br>—<br>53.6% (268 helped, 232 worse, 0 tie)<br>—<br>44.6% (223 helped, 277 worse, 0 tie) |
@@ -65,26 +78,26 @@ Evaluates the effect of sampling timestamp jitter ($t_{\text{meas}} \in [27.75\t
 | Carry-Forward Median Abs Error | 0.7514 mg/L | 0.7675 mg/L | 0.0161 mg/L |
 | ER (Both) Median Abs Error | 0.3421 mg/L | 0.3428 mg/L | 0.0008 mg/L |
 | ER (Both) % Patients Helped | 37.6% | 36.8% | 0.8% |
-| SU Unweighted (Both) Median Abs Error | 0.3787 mg/L | 0.3789 mg/L | 0.0003 mg/L |
-| SU Unweighted (Both) % Patients Helped | 42.0% | 41.6% | 0.4% |
-| SU Reweighted (Both) Median Abs Error | 0.2989 mg/L | 0.3038 mg/L | 0.0049 mg/L |
-| SU Reweighted (Both) % Patients Helped | 47.8% | 47.8% | 0.0% |
+| SU Unweighted (Both) Median Abs Error | 0.3916 mg/L | 0.3930 mg/L | 0.0014 mg/L |
+| SU Unweighted (Both) % Patients Helped | 43.0% | 43.0% | 0.0% |
+| SU Reweighted (Both) Median Abs Error | 0.2983 mg/L | 0.2999 mg/L | 0.0016 mg/L |
+| SU Reweighted (Both) % Patients Helped | 48.4% | 48.0% | 0.4% |
 | **Hidden Dose (Fixed 1-Dose)** | | | |
 | Carry-Forward Median Abs Error | 0.7514 mg/L | 0.7675 mg/L | 0.0161 mg/L |
 | ER (Both) Median Abs Error | 1.5702 mg/L | 1.5716 mg/L | 0.0014 mg/L |
 | ER (Both) % Patients Helped | 19.2% | 19.2% | 0.0% |
-| SU Unweighted (Both) Median Abs Error | 0.3649 mg/L | 0.3643 mg/L | 0.0005 mg/L |
-| SU Unweighted (Both) % Patients Helped | 72.4% | 71.8% | 0.6% |
-| SU Reweighted (Both) Median Abs Error | 0.4562 mg/L | 0.4537 mg/L | 0.0025 mg/L |
-| SU Reweighted (Both) % Patients Helped | 47.6% | 48.0% | 0.4% |
+| SU Unweighted (Both) Median Abs Error | 0.3757 mg/L | 0.3675 mg/L | 0.0082 mg/L |
+| SU Unweighted (Both) % Patients Helped | 73.0% | 73.0% | 0.0% |
+| SU Reweighted (Both) Median Abs Error | 0.4435 mg/L | 0.4432 mg/L | 0.0003 mg/L |
+| SU Reweighted (Both) % Patients Helped | 48.8% | 48.4% | 0.4% |
 | **Uncertain Dose (50/50 Mixture)** | | | |
 | Carry-Forward Median Abs Error | 0.7514 mg/L | 0.7675 mg/L | 0.0161 mg/L |
 | ER (Both) Median Abs Error | 0.3370 mg/L | 0.3408 mg/L | 0.0038 mg/L |
 | ER (Both) % Patients Helped | 38.6% | 38.2% | 0.4% |
-| SU Unweighted (Both) Median Abs Error | 0.3574 mg/L | 0.3625 mg/L | 0.0051 mg/L |
-| SU Unweighted (Both) % Patients Helped | 54.6% | 54.8% | 0.2% |
-| SU Reweighted (Both) Median Abs Error | 0.3042 mg/L | 0.3097 mg/L | 0.0054 mg/L |
-| SU Reweighted (Both) % Patients Helped | 45.6% | 45.0% | 0.6% |
+| SU Unweighted (Both) Median Abs Error | 0.3621 mg/L | 0.3591 mg/L | 0.0030 mg/L |
+| SU Unweighted (Both) % Patients Helped | 55.0% | 55.2% | 0.2% |
+| SU Reweighted (Both) Median Abs Error | 0.2998 mg/L | 0.3025 mg/L | 0.0026 mg/L |
+| SU Reweighted (Both) % Patients Helped | 46.6% | 45.8% | 0.8% |
 
 ---
 

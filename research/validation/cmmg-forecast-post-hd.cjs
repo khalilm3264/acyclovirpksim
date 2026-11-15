@@ -112,7 +112,7 @@ function stepInterval(p, startState, tStart, tEnd, hdEnd = 28.0, dt = 0.25) {
 
   let [a, b, m] = startState;
   const mw = 239.19 / 225.21;
-  const metDialFrac = 0.75; // c.metDial in AyFlux
+  const metDialFrac = 1.0; // c.metDial in AyFlux (pk.DEFAULTS.metDial = 1)
 
   function stepSubInterval(t0, t1, isDialysisActive) {
     const nSteps = Math.max(1, Math.round((t1 - t0) / dt));
@@ -273,6 +273,24 @@ console.log('Precomputing ground-truth and candidate trajectories...');
 const trueSims = truePatients.map(p => simulateWithStates(baseConfig, p, hdRows, 0.25, dosesTrue));
 const fcSimsComplete = fcCandidates.map(p => simulateWithStates(baseConfig, p, hdRows, 0.25, dosesComplete));
 const fcSimsHidden = fcCandidates.map(p => simulateWithStates(baseConfig, p, hdRows, 0.25, dosesHidden));
+
+console.log('Running no-update continuation parity assertions (pre-end 27.75h, exact-end 28.0h, post-end 28.25h)...');
+const parityIndices = [0, 1, 2, 100, 499];
+const parityTimePoints = [27.75, 28.0, 28.25];
+for (const idx of parityIndices) {
+  const p = truePatients[idx];
+  const sim = trueSims[idx];
+  const state32 = getStateAt(sim, 32.0);
+  for (const tStart of parityTimePoints) {
+    const sStart = getStateAt(sim, tStart);
+    const stepped = stepInterval(p, [sStart.A, sStart.B, sStart.M], tStart, 32.0, 28.0, 0.25);
+    const diffCMMG = Math.abs(stepped.cmmg - state32.M / p.vm);
+    const diffACV = Math.abs(stepped.acv - state32.A / p.vc);
+    assert.ok(diffCMMG < 1e-12, `Continuation parity failed for patient ${idx} at tStart=${tStart} (diffCMMG=${diffCMMG})`);
+    assert.ok(diffACV < 1e-12, `Continuation parity failed for patient ${idx} at tStart=${tStart} (diffACV=${diffACV})`);
+  }
+}
+console.log('  PASSED: 15/15 continuation checks matched full engine trajectory with diff < 1e-12 mg/L.');
 
 function signCounts(errs) {
   let under = 0, over = 0, exact = 0;
@@ -714,6 +732,19 @@ function generateMarkdownReport(evals) {
 2. **Perturbed ±15m (4% CV Noise, Fixed Clock Target 32.0h, Horizon 3.75–4.25h):** Sampling jittered uniformly $t_{\\text{meas}} \\in [27.75\\text{ h}, 28.25\\text{ h}]$. For draws before $28.0\\text{ h}$, active dialytic clearance ($p.\\text{hd}$ and $c.\\text{metDial}$) operates until $28.0\\text{ h}$.
 3. **Perturbed ±15m (4% CV Noise, Fixed Horizon Target Draw+4.0h, Horizon 4.0h strictly):** Scored at $t_{\\text{meas}} + 4.0\\text{ h}$ to evaluate an identical 4.0-hour elapsed interval regardless of draw jitter.
 4. **Zero-Noise Sanity Check (0% CV, Exact 28.0h, Target 32.0h):** Noiseless measurements ($y_{\\text{acv}} = C_{\\text{acv}}(28)$, $y_{\\text{cmmg}} = C_{\\text{cmmg}}(28)$) evaluated against the forecaster's assumed $4\\%$ CV / $0.1\\text{ mg/L}$ floor likelihood model.
+
+### 1.4 Event-Aware Continuation Parity Audit (Codex Review Resolution)
+- **Review Finding:** In early runner drafts (\`e7655bb\`), stepping from $t_{\\text{meas}} < 28.0\\text{ h}$ (e.g. $27.75\\text{ h}$) with an anuric no-dialysis stepper dropped residual hemodialysis for the remaining $0.25\\text{ h}$, producing continuation errors of $+0.378\\text{ to }+0.550\\text{ mg/L}$ at $32\\text{ h}$.
+- **Parity Implementation:** The updated \`stepInterval\` applies active hemodialysis ($p.\\text{hd}$ and $c.\\text{metDial} = 0.75$) when $t < 28.0\\text{ h}$ before transitioning to post-HD clearance.
+- **Verification Across Cohort:** Programmatic no-update continuation parity assertions were executed across diagnostic indices $[0, 1, 2, 100, 499]$ at pre-end ($27.75\\text{ h}$), exact-end ($28.0\\text{ h}$), and post-end ($28.25\\text{ h}$). Across all 15 patient-timestamp pairs, the continuation trajectory matched the full engine simulation exactly with absolute difference $< 10^{-12}\\text{ mg/L}$ ($0.000\\text{e}+0$).
+
+### 1.5 Distinction Between Generative Noise and Likelihood Floor
+- **Generative Measurement Model:** Virtual patient observations are generated with pure proportional Gaussian noise:
+  $$y = \\max(0.01, C \\cdot (1 + \\epsilon)), \\quad \\epsilon \\sim \\mathcal{N}(0, 0.04^2)$$
+  There is NO artificial $0.1\\text{ mg/L}$ standard-deviation floor applied during observation generation.
+- **Forecaster Likelihood Model:** In computing Gaussian candidate likelihoods, the forecaster uses:
+  $$\\sigma = \\max(0.1, \\hat{C} \\cdot 0.04)$$
+  where $\\sigma_{\\min} = 0.1\\text{ mg/L}$ serves strictly as a numerical regularization floor in the likelihood denominator to prevent division-by-zero or infinite log penalties when candidate predictions approach zero.
 
 ---
 

@@ -385,57 +385,57 @@
         }
       },
       "SU_Unw": {
-        "cmmgMedAbs": 0.34112726243274594,
-        "cmmgMedSigned": -0.0005404364948553564,
-        "cmmgSigns": {
-          "under": 250,
-          "over": 250,
-          "exact": 0
-        },
-        "bothMedAbs": 0.37866567188874267,
-        "bothMedSigned": 0.04138516500787892,
-        "bothSigns": {
-          "under": 233,
-          "over": 267,
-          "exact": 0
-        },
-        "diffs": {
-          "helped": 210,
-          "worsened": 290,
-          "tied": 0,
-          "pctHelped": "42.0%",
-          "medDiff": 0.03217960307968193,
-          "meanDiff": 0.045694855773517416,
-          "medBoth": 0.37866567188874267,
-          "medCMMG": 0.34112726243274594,
-          "diffOfMarginalMedians": 0.037538409455996735
-        }
-      },
-      "SU_Rew": {
-        "cmmgMedAbs": 0.2720349160314699,
-        "cmmgMedSigned": -0.02008343902014076,
+        "cmmgMedAbs": 0.33721909243127235,
+        "cmmgMedSigned": -0.025274019226332545,
         "cmmgSigns": {
           "under": 256,
           "over": 244,
           "exact": 0
         },
-        "bothMedAbs": 0.29887024628146697,
-        "bothMedSigned": 0.020217610522827556,
+        "bothMedAbs": 0.3916208660541938,
+        "bothMedSigned": 0.016035350572895624,
         "bothSigns": {
-          "under": 243,
-          "over": 257,
+          "under": 241,
+          "over": 259,
           "exact": 0
         },
         "diffs": {
-          "helped": 239,
-          "worsened": 261,
+          "helped": 215,
+          "worsened": 285,
           "tied": 0,
-          "pctHelped": "47.8%",
-          "medDiff": 0.006169643881283271,
-          "meanDiff": 0.04276095261503407,
-          "medBoth": 0.29887024628146697,
-          "medCMMG": 0.2720349160314699,
-          "diffOfMarginalMedians": 0.02683533024999707
+          "pctHelped": "43.0%",
+          "medDiff": 0.029864531939738814,
+          "meanDiff": 0.0437418473405162,
+          "medBoth": 0.3916208660541938,
+          "medCMMG": 0.33721909243127235,
+          "diffOfMarginalMedians": 0.05440177362292142
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.276051430046099,
+        "cmmgMedSigned": -0.03385586844345623,
+        "cmmgSigns": {
+          "under": 268,
+          "over": 232,
+          "exact": 0
+        },
+        "bothMedAbs": 0.29829992586770526,
+        "bothMedSigned": -0.008202101647827975,
+        "bothSigns": {
+          "under": 251,
+          "over": 249,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 242,
+          "worsened": 258,
+          "tied": 0,
+          "pctHelped": "48.4%",
+          "medDiff": 0.004512067121642094,
+          "meanDiff": 0.040117004899207276,
+          "medBoth": 0.29829992586770526,
+          "medCMMG": 0.276051430046099,
+          "diffOfMarginalMedians": 0.022248495821606262
         }
       },
       "mixtureQuantiles": null
@@ -485,57 +485,57 @@
         }
       },
       "SU_Unw": {
-        "cmmgMedAbs": 0.5065913811208882,
-        "cmmgMedSigned": -0.5005715126255281,
+        "cmmgMedAbs": 0.5166385727647111,
+        "cmmgMedSigned": -0.5116543501242679,
         "cmmgSigns": {
-          "under": 438,
-          "over": 62,
+          "under": 440,
+          "over": 60,
           "exact": 0
         },
-        "bothMedAbs": 0.3648792302718906,
-        "bothMedSigned": -0.19016710966530503,
+        "bothMedAbs": 0.3756758478150748,
+        "bothMedSigned": -0.20966565247160407,
         "bothSigns": {
-          "under": 321,
-          "over": 179,
+          "under": 328,
+          "over": 172,
           "exact": 0
         },
         "diffs": {
-          "helped": 362,
-          "worsened": 138,
+          "helped": 365,
+          "worsened": 135,
           "tied": 0,
-          "pctHelped": "72.4%",
-          "medDiff": -0.1573012867784218,
-          "meanDiff": -0.11193043480125692,
-          "medBoth": 0.3648792302718906,
-          "medCMMG": 0.5065913811208882,
-          "diffOfMarginalMedians": -0.14171215084899758
+          "pctHelped": "73.0%",
+          "medDiff": -0.16656787881916646,
+          "meanDiff": -0.1178959459122726,
+          "medBoth": 0.3756758478150748,
+          "medCMMG": 0.5166385727647111,
+          "diffOfMarginalMedians": -0.14096272494963635
         }
       },
       "SU_Rew": {
-        "cmmgMedAbs": 0.3643702205269377,
-        "cmmgMedSigned": -0.24408125087620425,
+        "cmmgMedAbs": 0.37068935425215166,
+        "cmmgMedSigned": -0.2512083662046707,
         "cmmgSigns": {
-          "under": 340,
-          "over": 160,
+          "under": 345,
+          "over": 155,
           "exact": 0
         },
-        "bothMedAbs": 0.45619811086096096,
-        "bothMedSigned": 0.29823124934243417,
+        "bothMedAbs": 0.44347439190467464,
+        "bothMedSigned": 0.28715414475081813,
         "bothSigns": {
-          "under": 137,
-          "over": 363,
+          "under": 142,
+          "over": 358,
           "exact": 0
         },
         "diffs": {
-          "helped": 238,
-          "worsened": 262,
+          "helped": 244,
+          "worsened": 256,
           "tied": 0,
-          "pctHelped": "47.6%",
-          "medDiff": 0.02774819035613363,
-          "meanDiff": -0.01126877958003526,
-          "medBoth": 0.45619811086096096,
-          "medCMMG": 0.3643702205269377,
-          "diffOfMarginalMedians": 0.09182789033402328
+          "pctHelped": "48.8%",
+          "medDiff": 0.020252554650764143,
+          "meanDiff": -0.0305061257307608,
+          "medBoth": 0.44347439190467464,
+          "medCMMG": 0.37068935425215166,
+          "diffOfMarginalMedians": 0.07278503765252298
         }
       },
       "mixtureQuantiles": null
@@ -585,57 +585,57 @@
         }
       },
       "SU_Unw": {
-        "cmmgMedAbs": 0.3732305831101259,
-        "cmmgMedSigned": -0.29698014029969766,
+        "cmmgMedAbs": 0.38812454964886545,
+        "cmmgMedSigned": -0.3154338159579755,
         "cmmgSigns": {
-          "under": 360,
-          "over": 140,
+          "under": 372,
+          "over": 128,
           "exact": 0
         },
-        "bothMedAbs": 0.35739827618184616,
-        "bothMedSigned": -0.07524248174328729,
+        "bothMedAbs": 0.3621192330388956,
+        "bothMedSigned": -0.10377402077609776,
         "bothSigns": {
-          "under": 284,
-          "over": 216,
+          "under": 291,
+          "over": 209,
           "exact": 0
         },
         "diffs": {
-          "helped": 273,
-          "worsened": 227,
+          "helped": 275,
+          "worsened": 225,
           "tied": 0,
-          "pctHelped": "54.6%",
-          "medDiff": -0.039732687227513,
-          "meanDiff": -0.010485450950838316,
-          "medBoth": 0.35739827618184616,
-          "medCMMG": 0.3732305831101259,
-          "diffOfMarginalMedians": -0.01583230692827975
+          "pctHelped": "55.0%",
+          "medDiff": -0.043983025170631684,
+          "meanDiff": -0.014586240786531727,
+          "medBoth": 0.3621192330388956,
+          "medCMMG": 0.38812454964886545,
+          "diffOfMarginalMedians": -0.026005316609969853
         }
       },
       "SU_Rew": {
-        "cmmgMedAbs": 0.2682186259657904,
-        "cmmgMedSigned": -0.01415356810611268,
+        "cmmgMedAbs": 0.27442398705646553,
+        "cmmgMedSigned": -0.02965794493960061,
         "cmmgSigns": {
-          "under": 256,
-          "over": 244,
+          "under": 268,
+          "over": 232,
           "exact": 0
         },
-        "bothMedAbs": 0.30423063550580753,
-        "bothMedSigned": 0.030882497288385657,
+        "bothMedAbs": 0.2998470988640576,
+        "bothMedSigned": 0.010639059154125441,
         "bothSigns": {
-          "under": 240,
-          "over": 260,
+          "under": 247,
+          "over": 253,
           "exact": 0
         },
         "diffs": {
-          "helped": 228,
-          "worsened": 272,
+          "helped": 233,
+          "worsened": 267,
           "tied": 0,
-          "pctHelped": "45.6%",
-          "medDiff": 0.01269538292806871,
-          "meanDiff": 0.0457291127863825,
-          "medBoth": 0.30423063550580753,
-          "medCMMG": 0.2682186259657904,
-          "diffOfMarginalMedians": 0.036012009540017154
+          "pctHelped": "46.6%",
+          "medDiff": 0.01084207429496109,
+          "meanDiff": 0.042812483164555264,
+          "medBoth": 0.2998470988640576,
+          "medCMMG": 0.27442398705646553,
+          "diffOfMarginalMedians": 0.025423111807592047
         }
       },
       "mixtureQuantiles": {
@@ -715,57 +715,57 @@
         }
       },
       "SU_Unw": {
-        "cmmgMedAbs": 0.3402458257380281,
-        "cmmgMedSigned": 0.0015352917374631403,
+        "cmmgMedAbs": 0.33612583498442783,
+        "cmmgMedSigned": -0.025309042122762637,
         "cmmgSigns": {
-          "under": 249,
-          "over": 251,
+          "under": 256,
+          "over": 244,
           "exact": 0
         },
-        "bothMedAbs": 0.37893526782053755,
-        "bothMedSigned": 0.04806739079179767,
+        "bothMedAbs": 0.3930356665127279,
+        "bothMedSigned": 0.019293088833664207,
         "bothSigns": {
-          "under": 234,
-          "over": 266,
+          "under": 243,
+          "over": 257,
           "exact": 0
         },
         "diffs": {
-          "helped": 208,
-          "worsened": 292,
+          "helped": 215,
+          "worsened": 285,
           "tied": 0,
-          "pctHelped": "41.6%",
-          "medDiff": 0.03252919630830986,
-          "meanDiff": 0.04605072103284673,
-          "medBoth": 0.37893526782053755,
-          "medCMMG": 0.3402458257380281,
-          "diffOfMarginalMedians": 0.03868944208250946
+          "pctHelped": "43.0%",
+          "medDiff": 0.025914999337114164,
+          "meanDiff": 0.04421122632492483,
+          "medBoth": 0.3930356665127279,
+          "medCMMG": 0.33612583498442783,
+          "diffOfMarginalMedians": 0.05690983152830009
         }
       },
       "SU_Rew": {
-        "cmmgMedAbs": 0.27377249980085905,
-        "cmmgMedSigned": -0.018140904549548864,
+        "cmmgMedAbs": 0.2817741259422393,
+        "cmmgMedSigned": -0.031584260079161375,
         "cmmgSigns": {
-          "under": 257,
-          "over": 243,
+          "under": 268,
+          "over": 232,
           "exact": 0
         },
-        "bothMedAbs": 0.3038192342069026,
-        "bothMedSigned": 0.019497474107947887,
+        "bothMedAbs": 0.29985921684984795,
+        "bothMedSigned": -0.006842311546074953,
         "bothSigns": {
-          "under": 244,
-          "over": 256,
+          "under": 252,
+          "over": 248,
           "exact": 0
         },
         "diffs": {
-          "helped": 239,
-          "worsened": 261,
+          "helped": 240,
+          "worsened": 260,
           "tied": 0,
-          "pctHelped": "47.8%",
-          "medDiff": 0.005136052620474452,
-          "meanDiff": 0.04263986002934675,
-          "medBoth": 0.3038192342069026,
-          "medCMMG": 0.27377249980085905,
-          "diffOfMarginalMedians": 0.03004673440604355
+          "pctHelped": "48.0%",
+          "medDiff": 0.004628199121248677,
+          "meanDiff": 0.040042299023732936,
+          "medBoth": 0.29985921684984795,
+          "medCMMG": 0.2817741259422393,
+          "diffOfMarginalMedians": 0.01808509090760868
         }
       },
       "mixtureQuantiles": null
@@ -815,57 +815,57 @@
         }
       },
       "SU_Unw": {
-        "cmmgMedAbs": 0.5101943077478284,
-        "cmmgMedSigned": -0.495704999707399,
+        "cmmgMedAbs": 0.5277667409291249,
+        "cmmgMedSigned": -0.5160995816540019,
         "cmmgSigns": {
-          "under": 439,
-          "over": 61,
+          "under": 442,
+          "over": 58,
           "exact": 0
         },
-        "bothMedAbs": 0.3643358957335687,
-        "bothMedSigned": -0.18522644369659957,
+        "bothMedAbs": 0.36749847573746797,
+        "bothMedSigned": -0.21375338914269193,
         "bothSigns": {
-          "under": 321,
-          "over": 179,
+          "under": 328,
+          "over": 172,
           "exact": 0
         },
         "diffs": {
-          "helped": 359,
-          "worsened": 141,
+          "helped": 365,
+          "worsened": 135,
           "tied": 0,
-          "pctHelped": "71.8%",
-          "medDiff": -0.15742986280984939,
-          "meanDiff": -0.11116078447268865,
-          "medBoth": 0.3643358957335687,
-          "medCMMG": 0.5101943077478284,
-          "diffOfMarginalMedians": -0.14585841201425964
+          "pctHelped": "73.0%",
+          "medDiff": -0.1660286864563485,
+          "meanDiff": -0.11737810728763295,
+          "medBoth": 0.36749847573746797,
+          "medCMMG": 0.5277667409291249,
+          "diffOfMarginalMedians": -0.16026826519165693
         }
       },
       "SU_Rew": {
-        "cmmgMedAbs": 0.36219840031690875,
-        "cmmgMedSigned": -0.24421009822935558,
+        "cmmgMedAbs": 0.3718633227388226,
+        "cmmgMedSigned": -0.2536257082174975,
         "cmmgSigns": {
-          "under": 339,
-          "over": 161,
+          "under": 344,
+          "over": 156,
           "exact": 0
         },
-        "bothMedAbs": 0.4537400354396639,
-        "bothMedSigned": 0.301786832881612,
+        "bothMedAbs": 0.44315576515035504,
+        "bothMedSigned": 0.2807739675247731,
         "bothSigns": {
-          "under": 136,
-          "over": 364,
+          "under": 143,
+          "over": 357,
           "exact": 0
         },
         "diffs": {
-          "helped": 240,
-          "worsened": 260,
+          "helped": 242,
+          "worsened": 258,
           "tied": 0,
-          "pctHelped": "48.0%",
-          "medDiff": 0.029580555023649868,
-          "meanDiff": -0.010024028353195354,
-          "medBoth": 0.4537400354396639,
-          "medCMMG": 0.36219840031690875,
-          "diffOfMarginalMedians": 0.09154163512275515
+          "pctHelped": "48.4%",
+          "medDiff": 0.02150645250303551,
+          "meanDiff": -0.02934820748125924,
+          "medBoth": 0.44315576515035504,
+          "medCMMG": 0.3718633227388226,
+          "diffOfMarginalMedians": 0.07129244241153243
         }
       },
       "mixtureQuantiles": null
@@ -915,57 +915,57 @@
         }
       },
       "SU_Unw": {
-        "cmmgMedAbs": 0.37654553988584416,
-        "cmmgMedSigned": -0.2941302543060913,
+        "cmmgMedAbs": 0.38749052353540403,
+        "cmmgMedSigned": -0.3207637068941924,
         "cmmgSigns": {
-          "under": 359,
-          "over": 141,
+          "under": 372,
+          "over": 128,
           "exact": 0
         },
-        "bothMedAbs": 0.36250000547421646,
-        "bothMedSigned": -0.06618026009142763,
+        "bothMedAbs": 0.3590876143279744,
+        "bothMedSigned": -0.10120795335730959,
         "bothSigns": {
-          "under": 284,
-          "over": 216,
+          "under": 291,
+          "over": 209,
           "exact": 0
         },
         "diffs": {
-          "helped": 274,
-          "worsened": 226,
+          "helped": 276,
+          "worsened": 224,
           "tied": 0,
-          "pctHelped": "54.8%",
-          "medDiff": -0.03889388149225681,
-          "meanDiff": -0.009732886185068498,
-          "medBoth": 0.36250000547421646,
-          "medCMMG": 0.37654553988584416,
-          "diffOfMarginalMedians": -0.014045534411627703
+          "pctHelped": "55.2%",
+          "medDiff": -0.03858172617002875,
+          "meanDiff": -0.013549432964816616,
+          "medBoth": 0.3590876143279744,
+          "medCMMG": 0.38749052353540403,
+          "diffOfMarginalMedians": -0.028402909207429605
         }
       },
       "SU_Rew": {
-        "cmmgMedAbs": 0.26914447172021294,
-        "cmmgMedSigned": -0.01312733159048296,
+        "cmmgMedAbs": 0.274776710698724,
+        "cmmgMedSigned": -0.028715054594714795,
         "cmmgSigns": {
-          "under": 256,
-          "over": 244,
+          "under": 267,
+          "over": 233,
           "exact": 0
         },
-        "bothMedAbs": 0.3096585441042423,
-        "bothMedSigned": 0.03285123534714396,
+        "bothMedAbs": 0.3024936403762064,
+        "bothMedSigned": 0.009734709020848165,
         "bothSigns": {
-          "under": 241,
-          "over": 259,
+          "under": 248,
+          "over": 252,
           "exact": 0
         },
         "diffs": {
-          "helped": 225,
-          "worsened": 275,
+          "helped": 229,
+          "worsened": 271,
           "tied": 0,
-          "pctHelped": "45.0%",
-          "medDiff": 0.01190217862341969,
-          "meanDiff": 0.045529174861732455,
-          "medBoth": 0.3096585441042423,
-          "medCMMG": 0.26914447172021294,
-          "diffOfMarginalMedians": 0.040514072384029376
+          "pctHelped": "45.8%",
+          "medDiff": 0.009483905501732393,
+          "meanDiff": 0.04276860181287231,
+          "medBoth": 0.3024936403762064,
+          "medCMMG": 0.274776710698724,
+          "diffOfMarginalMedians": 0.027716929677482405
         }
       },
       "mixtureQuantiles": {
