@@ -346,6 +346,165 @@ function pairedDiffs(absBoth, absCMMG) {
   };
 }
 
+function generatePatientForecast(patientObservation, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV = 0.04) {
+  const { tMeas, targetTime, measACV, measCMMG } = patientObservation;
+  const M = fcCandidates.length;
+
+  const predCF = measCMMG;
+  let predER_CMMG, predER_Both, predSU_Unw_CMMG, predSU_Unw_Both, predSU_Rew_CMMG, predSU_Rew_Both;
+  let wCMMG, wBoth;
+  let wH1 = 0, wH2 = 0, ess = 0;
+
+  if (cfg.mode === 'complete' || cfg.mode === 'hidden') {
+    const fcSims = cfg.mode === 'complete' ? fcSimsComplete : fcSimsHidden;
+    wH1 = cfg.mode === 'hidden' ? 1.0 : 0.0;
+    wH2 = cfg.mode === 'complete' ? 1.0 : 0.0;
+
+    const logw_cmmg = [];
+    const logw_both = [];
+    const cmmgTargetVals = [];
+    const su_cmmg_pred = [];
+    const su_both_pred = [];
+
+    for (let j = 0; j < M; j++) {
+      const sim = fcSims[j];
+      const cand = fcCandidates[j];
+
+      const predState = getStateAt(sim, tMeas);
+      const predACV = predState.A / cand.vc;
+      const predCMMG = predState.M / cand.vm;
+
+      const sdCMMG = Math.max(0.1, predCMMG * assayCV);
+      const lCMMG = -0.5 * Math.pow((measCMMG - predCMMG) / sdCMMG, 2) - Math.log(sdCMMG);
+
+      const sdACV = Math.max(0.1, predACV * assayCV);
+      const lACV = -0.5 * Math.pow((measACV - predACV) / sdACV, 2) - Math.log(sdACV);
+
+      logw_cmmg.push(lCMMG);
+      logw_both.push(lCMMG + lACV);
+      cmmgTargetVals.push(interp(sim.t, sim.cols.cmmg, targetTime));
+
+      const suCMMGRes = stepInterval(cand, [predState.A, predState.B, measCMMG * cand.vm], tMeas, targetTime, 28.0);
+      su_cmmg_pred.push(suCMMGRes.cmmg);
+
+      const suBothRes = stepInterval(cand, [measACV * cand.vc, predState.B, measCMMG * cand.vm], tMeas, targetTime, 28.0);
+      su_both_pred.push(suBothRes.cmmg);
+    }
+
+    const maxLC = Math.max(...logw_cmmg);
+    const unnormC = logw_cmmg.map(l => Math.exp(l - maxLC));
+    const sumC = unnormC.reduce((a, b) => a + b, 0);
+    wCMMG = unnormC.map(w => w / sumC);
+
+    const maxLB = Math.max(...logw_both);
+    const unnormB = logw_both.map(l => Math.exp(l - maxLB));
+    const sumB = unnormB.reduce((a, b) => a + b, 0);
+    wBoth = unnormB.map(w => w / sumB);
+
+    ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
+
+    predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
+    predER_Both = weightedMedian(cmmgTargetVals, wBoth);
+    predSU_Unw_CMMG = median(su_cmmg_pred);
+    predSU_Unw_Both = median(su_both_pred);
+    predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
+    predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
+
+  } else if (cfg.mode === 'mixture') {
+    const logw_cmmg = [];
+    const logw_both = [];
+    const cmmgTargetVals = [];
+    const su_cmmg_pred = [];
+    const su_both_pred = [];
+
+    // H1 (1 dose)
+    for (let j = 0; j < M; j++) {
+      const sim = fcSimsHidden[j];
+      const cand = fcCandidates[j];
+      const predState = getStateAt(sim, tMeas);
+      const predACV = predState.A / cand.vc;
+      const predCMMG = predState.M / cand.vm;
+
+      const sdCMMG = Math.max(0.1, predCMMG * assayCV);
+      const lCMMG = -0.5 * Math.pow((measCMMG - predCMMG) / sdCMMG, 2) - Math.log(sdCMMG) + Math.log(0.5);
+
+      const sdACV = Math.max(0.1, predACV * assayCV);
+      const lACV = -0.5 * Math.pow((measACV - predACV) / sdACV, 2) - Math.log(sdACV);
+
+      logw_cmmg.push(lCMMG);
+      logw_both.push(lCMMG + lACV);
+      cmmgTargetVals.push(interp(sim.t, sim.cols.cmmg, targetTime));
+
+      const suCMMGRes = stepInterval(cand, [predState.A, predState.B, measCMMG * cand.vm], tMeas, targetTime, 28.0);
+      su_cmmg_pred.push(suCMMGRes.cmmg);
+
+      const suBothRes = stepInterval(cand, [measACV * cand.vc, predState.B, measCMMG * cand.vm], tMeas, targetTime, 28.0);
+      su_both_pred.push(suBothRes.cmmg);
+    }
+
+    // H2 (2 doses)
+    for (let j = 0; j < M; j++) {
+      const sim = fcSimsComplete[j];
+      const cand = fcCandidates[j];
+      const predState = getStateAt(sim, tMeas);
+      const predACV = predState.A / cand.vc;
+      const predCMMG = predState.M / cand.vm;
+
+      const sdCMMG = Math.max(0.1, predCMMG * assayCV);
+      const lCMMG = -0.5 * Math.pow((measCMMG - predCMMG) / sdCMMG, 2) - Math.log(sdCMMG) + Math.log(0.5);
+
+      const sdACV = Math.max(0.1, predACV * assayCV);
+      const lACV = -0.5 * Math.pow((measACV - predACV) / sdACV, 2) - Math.log(sdACV);
+
+      logw_cmmg.push(lCMMG);
+      logw_both.push(lCMMG + lACV);
+      cmmgTargetVals.push(interp(sim.t, sim.cols.cmmg, targetTime));
+
+      const suCMMGRes = stepInterval(cand, [predState.A, predState.B, measCMMG * cand.vm], tMeas, targetTime, 28.0);
+      su_cmmg_pred.push(suCMMGRes.cmmg);
+
+      const suBothRes = stepInterval(cand, [measACV * cand.vc, predState.B, measCMMG * cand.vm], tMeas, targetTime, 28.0);
+      su_both_pred.push(suBothRes.cmmg);
+    }
+
+    const maxLC = Math.max(...logw_cmmg);
+    const unnormC = logw_cmmg.map(l => Math.exp(l - maxLC));
+    const sumC = unnormC.reduce((a, b) => a + b, 0);
+    wCMMG = unnormC.map(w => w / sumC);
+
+    const maxLB = Math.max(...logw_both);
+    const unnormB = logw_both.map(l => Math.exp(l - maxLB));
+    const sumB = unnormB.reduce((a, b) => a + b, 0);
+    wBoth = unnormB.map(w => w / sumB);
+
+    wH1 = wBoth.slice(0, M).reduce((a, b) => a + b, 0);
+    wH2 = wBoth.slice(M).reduce((a, b) => a + b, 0);
+    ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
+
+    predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
+    predER_Both = weightedMedian(cmmgTargetVals, wBoth);
+    predSU_Unw_CMMG = median(su_cmmg_pred);
+    predSU_Unw_Both = median(su_both_pred);
+    predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
+    predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
+  }
+
+  return {
+    predCF,
+    predER_CMMG,
+    predER_Both,
+    predSU_Unw_CMMG,
+    predSU_Unw_Both,
+    predSU_Rew_CMMG,
+    predSU_Rew_Both,
+    wCMMG,
+    wBoth,
+    wH1,
+    wH2,
+    ess
+  };
+}
+
 function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbations, isZeroNoise) {
   const rng = createRng(44556677);
   const N = truePatients.length;
@@ -414,168 +573,39 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
       const p = patientData[k];
       const target = p.trueCMMGAtTarget;
 
-      // 1. Carry-Forward
-      const predCF = p.measCMMG;
-      const cfSigned = predCF - target;
+      // 1. Forecast generation strictly receives only information available at end-HD draw (zero future outcome)
+      const fc = generatePatientForecast({
+        tMeas: p.tMeas,
+        targetTime: p.targetTime,
+        measACV: p.measACV,
+        measCMMG: p.measCMMG
+      }, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+
+      const cfSigned = fc.predCF - target;
       const cfAbs = Math.abs(cfSigned);
       errs.CF.abs.push(cfAbs);
       errs.CF.signed.push(cfSigned);
 
-      let predER_CMMG, predER_Both, predSU_Unw_CMMG, predSU_Unw_Both, predSU_Rew_CMMG, predSU_Rew_Both;
-      let wH1 = 0, wH2 = 0, ess = 0;
+      errs.ER_CMMG.abs.push(Math.abs(fc.predER_CMMG - target));
+      errs.ER_CMMG.signed.push(fc.predER_CMMG - target);
+      errs.ER_Both.abs.push(Math.abs(fc.predER_Both - target));
+      errs.ER_Both.signed.push(fc.predER_Both - target);
 
-      if (cfg.mode === 'complete' || cfg.mode === 'hidden') {
-        const fcSims = cfg.mode === 'complete' ? fcSimsComplete : fcSimsHidden;
-        wH1 = cfg.mode === 'hidden' ? 1.0 : 0.0;
-        wH2 = cfg.mode === 'complete' ? 1.0 : 0.0;
+      errs.SU_Unw_CMMG.abs.push(Math.abs(fc.predSU_Unw_CMMG - target));
+      errs.SU_Unw_CMMG.signed.push(fc.predSU_Unw_CMMG - target);
+      errs.SU_Unw_Both.abs.push(Math.abs(fc.predSU_Unw_Both - target));
+      errs.SU_Unw_Both.signed.push(fc.predSU_Unw_Both - target);
 
-        const logw_cmmg = [];
-        const logw_both = [];
-        const cmmgTargetVals = [];
-        const su_cmmg_pred = [];
-        const su_both_pred = [];
+      errs.SU_Rew_CMMG.abs.push(Math.abs(fc.predSU_Rew_CMMG - target));
+      errs.SU_Rew_CMMG.signed.push(fc.predSU_Rew_CMMG - target);
+      errs.SU_Rew_Both.abs.push(Math.abs(fc.predSU_Rew_Both - target));
+      errs.SU_Rew_Both.signed.push(fc.predSU_Rew_Both - target);
 
-        for (let j = 0; j < M; j++) {
-          const sim = fcSims[j];
-          const cand = fcCandidates[j];
-
-          const predState = getStateAt(sim, p.tMeas);
-          const predACV = predState.A / cand.vc;
-          const predCMMG = predState.M / cand.vm;
-
-          const sdCMMG = Math.max(0.1, predCMMG * assayCV);
-          const lCMMG = -0.5 * Math.pow((p.measCMMG - predCMMG) / sdCMMG, 2) - Math.log(sdCMMG);
-
-          const sdACV = Math.max(0.1, predACV * assayCV);
-          const lACV = -0.5 * Math.pow((p.measACV - predACV) / sdACV, 2) - Math.log(sdACV);
-
-          logw_cmmg.push(lCMMG);
-          logw_both.push(lCMMG + lACV);
-          cmmgTargetVals.push(interp(sim.t, sim.cols.cmmg, p.targetTime));
-
-          const suCMMGRes = stepInterval(cand, [predState.A, predState.B, p.measCMMG * cand.vm], p.tMeas, p.targetTime, 28.0);
-          su_cmmg_pred.push(suCMMGRes.cmmg);
-
-          const suBothRes = stepInterval(cand, [p.measACV * cand.vc, predState.B, p.measCMMG * cand.vm], p.tMeas, p.targetTime, 28.0);
-          su_both_pred.push(suBothRes.cmmg);
-        }
-
-        const maxLC = Math.max(...logw_cmmg);
-        const unnormC = logw_cmmg.map(l => Math.exp(l - maxLC));
-        const sumC = unnormC.reduce((a, b) => a + b, 0);
-        const wCMMG = unnormC.map(w => w / sumC);
-
-        const maxLB = Math.max(...logw_both);
-        const unnormB = logw_both.map(l => Math.exp(l - maxLB));
-        const sumB = unnormB.reduce((a, b) => a + b, 0);
-        const wBoth = unnormB.map(w => w / sumB);
-
-        ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
-
-        predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
-        predER_Both = weightedMedian(cmmgTargetVals, wBoth);
-        predSU_Unw_CMMG = median(su_cmmg_pred);
-        predSU_Unw_Both = median(su_both_pred);
-        predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
-        predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
-
-      } else if (cfg.mode === 'mixture') {
-        const logw_cmmg = [];
-        const logw_both = [];
-        const cmmgTargetVals = [];
-        const su_cmmg_pred = [];
-        const su_both_pred = [];
-
-        // H1 (1 dose)
-        for (let j = 0; j < M; j++) {
-          const sim = fcSimsHidden[j];
-          const cand = fcCandidates[j];
-          const predState = getStateAt(sim, p.tMeas);
-          const predACV = predState.A / cand.vc;
-          const predCMMG = predState.M / cand.vm;
-
-          const sdCMMG = Math.max(0.1, predCMMG * assayCV);
-          const lCMMG = -0.5 * Math.pow((p.measCMMG - predCMMG) / sdCMMG, 2) - Math.log(sdCMMG) + Math.log(0.5);
-
-          const sdACV = Math.max(0.1, predACV * assayCV);
-          const lACV = -0.5 * Math.pow((p.measACV - predACV) / sdACV, 2) - Math.log(sdACV);
-
-          logw_cmmg.push(lCMMG);
-          logw_both.push(lCMMG + lACV);
-          cmmgTargetVals.push(interp(sim.t, sim.cols.cmmg, p.targetTime));
-
-          const suCMMGRes = stepInterval(cand, [predState.A, predState.B, p.measCMMG * cand.vm], p.tMeas, p.targetTime, 28.0);
-          su_cmmg_pred.push(suCMMGRes.cmmg);
-
-          const suBothRes = stepInterval(cand, [p.measACV * cand.vc, predState.B, p.measCMMG * cand.vm], p.tMeas, p.targetTime, 28.0);
-          su_both_pred.push(suBothRes.cmmg);
-        }
-
-        // H2 (2 doses)
-        for (let j = 0; j < M; j++) {
-          const sim = fcSimsComplete[j];
-          const cand = fcCandidates[j];
-          const predState = getStateAt(sim, p.tMeas);
-          const predACV = predState.A / cand.vc;
-          const predCMMG = predState.M / cand.vm;
-
-          const sdCMMG = Math.max(0.1, predCMMG * assayCV);
-          const lCMMG = -0.5 * Math.pow((p.measCMMG - predCMMG) / sdCMMG, 2) - Math.log(sdCMMG) + Math.log(0.5);
-
-          const sdACV = Math.max(0.1, predACV * assayCV);
-          const lACV = -0.5 * Math.pow((p.measACV - predACV) / sdACV, 2) - Math.log(sdACV);
-
-          logw_cmmg.push(lCMMG);
-          logw_both.push(lCMMG + lACV);
-          cmmgTargetVals.push(interp(sim.t, sim.cols.cmmg, p.targetTime));
-
-          const suCMMGRes = stepInterval(cand, [predState.A, predState.B, p.measCMMG * cand.vm], p.tMeas, p.targetTime, 28.0);
-          su_cmmg_pred.push(suCMMGRes.cmmg);
-
-          const suBothRes = stepInterval(cand, [p.measACV * cand.vc, predState.B, p.measCMMG * cand.vm], p.tMeas, p.targetTime, 28.0);
-          su_both_pred.push(suBothRes.cmmg);
-        }
-
-        const maxLC = Math.max(...logw_cmmg);
-        const unnormC = logw_cmmg.map(l => Math.exp(l - maxLC));
-        const sumC = unnormC.reduce((a, b) => a + b, 0);
-        const wCMMG = unnormC.map(w => w / sumC);
-
-        const maxLB = Math.max(...logw_both);
-        const unnormB = logw_both.map(l => Math.exp(l - maxLB));
-        const sumB = unnormB.reduce((a, b) => a + b, 0);
-        const wBoth = unnormB.map(w => w / sumB);
-
-        wH1 = wBoth.slice(0, M).reduce((a, b) => a + b, 0);
-        wH2 = wBoth.slice(M).reduce((a, b) => a + b, 0);
-        ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
-
-        wH1_arr.push(wH1);
-        wH2_arr.push(wH2);
-        ess_arr.push(ess);
-
-        predER_CMMG = weightedMedian(cmmgTargetVals, wCMMG);
-        predER_Both = weightedMedian(cmmgTargetVals, wBoth);
-        predSU_Unw_CMMG = median(su_cmmg_pred);
-        predSU_Unw_Both = median(su_both_pred);
-        predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
-        predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
+      if (cfg.mode === 'mixture') {
+        wH1_arr.push(fc.wH1);
+        wH2_arr.push(fc.wH2);
+        ess_arr.push(fc.ess);
       }
-
-      errs.ER_CMMG.abs.push(Math.abs(predER_CMMG - target));
-      errs.ER_CMMG.signed.push(predER_CMMG - target);
-      errs.ER_Both.abs.push(Math.abs(predER_Both - target));
-      errs.ER_Both.signed.push(predER_Both - target);
-
-      errs.SU_Unw_CMMG.abs.push(Math.abs(predSU_Unw_CMMG - target));
-      errs.SU_Unw_CMMG.signed.push(predSU_Unw_CMMG - target);
-      errs.SU_Unw_Both.abs.push(Math.abs(predSU_Unw_Both - target));
-      errs.SU_Unw_Both.signed.push(predSU_Unw_Both - target);
-
-      errs.SU_Rew_CMMG.abs.push(Math.abs(predSU_Rew_CMMG - target));
-      errs.SU_Rew_CMMG.signed.push(predSU_Rew_CMMG - target);
-      errs.SU_Rew_Both.abs.push(Math.abs(predSU_Rew_Both - target));
-      errs.SU_Rew_Both.signed.push(predSU_Rew_Both - target);
 
       patientRecords.push({
         param_draw_seed: 2026,
@@ -594,30 +624,30 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
         observed_acv_mg_L: p.measACV,
         observed_cmmg_mg_L: p.measCMMG,
         true_cmmg_target_mg_L: target,
-        pred_cf: predCF,
-        pred_er_cmmg: predER_CMMG,
-        pred_er_both: predER_Both,
-        pred_su_unw_cmmg: predSU_Unw_CMMG,
-        pred_su_unw_both: predSU_Unw_Both,
-        pred_su_rew_cmmg: predSU_Rew_CMMG,
-        pred_su_rew_both: predSU_Rew_Both,
-        err_signed_cf: predCF - target,
-        err_signed_er_cmmg: predER_CMMG - target,
-        err_signed_er_both: predER_Both - target,
-        err_signed_su_unw_cmmg: predSU_Unw_CMMG - target,
-        err_signed_su_unw_both: predSU_Unw_Both - target,
-        err_signed_su_rew_cmmg: predSU_Rew_CMMG - target,
-        err_signed_su_rew_both: predSU_Rew_Both - target,
-        err_abs_cf: Math.abs(predCF - target),
-        err_abs_er_cmmg: Math.abs(predER_CMMG - target),
-        err_abs_er_both: Math.abs(predER_Both - target),
-        err_abs_su_unw_cmmg: Math.abs(predSU_Unw_CMMG - target),
-        err_abs_su_unw_both: Math.abs(predSU_Unw_Both - target),
-        err_abs_su_rew_cmmg: Math.abs(predSU_Rew_CMMG - target),
-        err_abs_su_rew_both: Math.abs(predSU_Rew_Both - target),
-        w_H1: wH1,
-        w_H2: wH2,
-        ess: ess
+        pred_cf: fc.predCF,
+        pred_er_cmmg: fc.predER_CMMG,
+        pred_er_both: fc.predER_Both,
+        pred_su_unw_cmmg: fc.predSU_Unw_CMMG,
+        pred_su_unw_both: fc.predSU_Unw_Both,
+        pred_su_rew_cmmg: fc.predSU_Rew_CMMG,
+        pred_su_rew_both: fc.predSU_Rew_Both,
+        err_signed_cf: fc.predCF - target,
+        err_signed_er_cmmg: fc.predER_CMMG - target,
+        err_signed_er_both: fc.predER_Both - target,
+        err_signed_su_unw_cmmg: fc.predSU_Unw_CMMG - target,
+        err_signed_su_unw_both: fc.predSU_Unw_Both - target,
+        err_signed_su_rew_cmmg: fc.predSU_Rew_CMMG - target,
+        err_signed_su_rew_both: fc.predSU_Rew_Both - target,
+        err_abs_cf: Math.abs(fc.predCF - target),
+        err_abs_er_cmmg: Math.abs(fc.predER_CMMG - target),
+        err_abs_er_both: Math.abs(fc.predER_Both - target),
+        err_abs_su_unw_cmmg: Math.abs(fc.predSU_Unw_CMMG - target),
+        err_abs_su_unw_both: Math.abs(fc.predSU_Unw_Both - target),
+        err_abs_su_rew_cmmg: Math.abs(fc.predSU_Rew_CMMG - target),
+        err_abs_su_rew_both: Math.abs(fc.predSU_Rew_Both - target),
+        w_H1: fc.wH1,
+        w_H2: fc.wH2,
+        ess: fc.ess
       });
     }
 
@@ -1328,5 +1358,22 @@ module.exports = {
   eval3,
   eval4,
   verifyCsvReproduction,
-  verifyRecordsIntegrity
+  verifyRecordsIntegrity,
+  generatePatientForecast,
+  fcCandidates,
+  fcSimsComplete,
+  fcSimsHidden,
+  baseConfig,
+  truePatients,
+  trueSims,
+  interp,
+  stepInterval,
+  getStateAt,
+  weightedMedian,
+  median
 };
+
+if (require.main === module) {
+  const { runFullLeakageAudit } = require('./cmmg-forecast-leakage-audit.cjs');
+  runFullLeakageAudit();
+}
