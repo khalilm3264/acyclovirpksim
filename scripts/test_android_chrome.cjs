@@ -431,15 +431,28 @@ function checkUrlReachable(targetUrl) {
   });
 }
 
+function getCommitSha() {
+  if (process.env.GITHUB_SHA) {
+    return process.env.GITHUB_SHA.slice(0, 7);
+  }
+  try {
+    const { execSync } = require('node:child_process');
+    const sha = execSync('git rev-parse --short HEAD', { encoding: 'utf8', cwd: __dirname }).trim();
+    if (sha) return sha;
+  } catch (e) {}
+  return 'local';
+}
+
 async function main() {
   const localOnly = process.argv.includes('--local') || process.argv.includes('--local-only') || process.env.LOCAL_ONLY === 'true';
 
   const localServer = await createServer();
   const localBase = 'http://127.0.0.1:' + localServer.address().port;
+  const commitLabel = getCommitSha();
 
   try {
     // 1. Run on Local Exact Build
-    const localResults = await runTestSuite(localBase, 'LOCAL BUILD (commit 3c0c1cb)');
+    const localResults = await runTestSuite(localBase, `LOCAL BUILD (commit ${commitLabel})`);
 
     // 2. Run on Production Deployed Site
     let prodResults = [];
