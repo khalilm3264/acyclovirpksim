@@ -1,0 +1,822 @@
+{
+  "metadata": {
+    "run_date": "2026-11-15",
+    "generator_seed": 44556677,
+    "n_virtual_patients": 500,
+    "n_forecast_candidates": 400,
+    "parameter_overlap": 0,
+    "configured_hd_clearance_mL_min": 81.8,
+    "configured_hd_clearance_L_h": 4.908,
+    "notes": "In silico PK simulation only; not clinical decision support or validated external prediction."
+  },
+  "exact_4pct_cv": [
+    {
+      "config": "Complete History (Control)",
+      "condition": "exact_28h_4pct_cv",
+      "perturbations": "Exact (28.0h)",
+      "isZeroNoise": false,
+      "CF": {
+        "medAbs": 0.8146,
+        "medSigned": -0.8146,
+        "signs": {
+          "under": 489,
+          "over": 11,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.3145,
+        "cmmgMedSigned": 0.0201,
+        "cmmgSigns": {
+          "under": 244,
+          "over": 256,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3503,
+        "bothMedSigned": 0.043,
+        "bothSigns": {
+          "under": 240,
+          "over": 260,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 200,
+          "worsened": 268,
+          "tied": 32,
+          "pctHelped": "40.0%",
+          "medDiff": 0.0104,
+          "meanDiff": 0.0861
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.3517,
+        "cmmgMedSigned": 0.0193,
+        "cmmgSigns": {
+          "under": 242,
+          "over": 258,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4189,
+        "bothMedSigned": 0.0171,
+        "bothSigns": {
+          "under": 246,
+          "over": 254,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 193,
+          "worsened": 307,
+          "tied": 0,
+          "pctHelped": "38.6%",
+          "medDiff": 0.0563,
+          "meanDiff": 0.0587
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3057,
+        "cmmgMedSigned": -0.0148,
+        "cmmgSigns": {
+          "under": 255,
+          "over": 245,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3197,
+        "bothMedSigned": 0.0291,
+        "bothSigns": {
+          "under": 240,
+          "over": 260,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 241,
+          "worsened": 259,
+          "tied": 0,
+          "pctHelped": "48.2%",
+          "medDiff": 0.004,
+          "meanDiff": 0.0419
+        }
+      },
+      "mixtureStats": null
+    },
+    {
+      "config": "Hidden Dose (Fixed 1-Dose)",
+      "condition": "exact_28h_4pct_cv",
+      "perturbations": "Exact (28.0h)",
+      "isZeroNoise": false,
+      "CF": {
+        "medAbs": 0.8146,
+        "medSigned": -0.8146,
+        "signs": {
+          "under": 489,
+          "over": 11,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.4929,
+        "cmmgMedSigned": -0.4065,
+        "cmmgSigns": {
+          "under": 357,
+          "over": 143,
+          "exact": 0
+        },
+        "bothMedAbs": 1.5532,
+        "bothMedSigned": -1.5532,
+        "bothSigns": {
+          "under": 453,
+          "over": 47,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 89,
+          "worsened": 389,
+          "tied": 22,
+          "pctHelped": "17.8%",
+          "medDiff": 0.5689,
+          "meanDiff": 0.7475
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.4969,
+        "cmmgMedSigned": -0.4846,
+        "cmmgSigns": {
+          "under": 437,
+          "over": 63,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4045,
+        "bothMedSigned": -0.2202,
+        "bothSigns": {
+          "under": 311,
+          "over": 189,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 343,
+          "worsened": 157,
+          "tied": 0,
+          "pctHelped": "68.6%",
+          "medDiff": -0.1392,
+          "meanDiff": -0.0955
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3724,
+        "cmmgMedSigned": -0.2406,
+        "cmmgSigns": {
+          "under": 340,
+          "over": 160,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4459,
+        "bothMedSigned": 0.2985,
+        "bothSigns": {
+          "under": 137,
+          "over": 363,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 221,
+          "worsened": 279,
+          "tied": 0,
+          "pctHelped": "44.2%",
+          "medDiff": 0.0475,
+          "meanDiff": -0.007
+        }
+      },
+      "mixtureStats": null
+    },
+    {
+      "config": "Uncertain Dose (50/50 Mixture)",
+      "condition": "exact_28h_4pct_cv",
+      "perturbations": "Exact (28.0h)",
+      "isZeroNoise": false,
+      "CF": {
+        "medAbs": 0.8146,
+        "medSigned": -0.8146,
+        "signs": {
+          "under": 489,
+          "over": 11,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.3087,
+        "cmmgMedSigned": 0.0123,
+        "cmmgSigns": {
+          "under": 247,
+          "over": 253,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3415,
+        "bothMedSigned": 0.0328,
+        "bothSigns": {
+          "under": 242,
+          "over": 258,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 216,
+          "worsened": 261,
+          "tied": 23,
+          "pctHelped": "43.2%",
+          "medDiff": 0.008,
+          "meanDiff": 0.0617
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.3633,
+        "cmmgMedSigned": -0.2794,
+        "cmmgSigns": {
+          "under": 359,
+          "over": 141,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3873,
+        "bothMedSigned": -0.097,
+        "bothSigns": {
+          "under": 274,
+          "over": 226,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 259,
+          "worsened": 241,
+          "tied": 0,
+          "pctHelped": "51.8%",
+          "medDiff": -0.0153,
+          "meanDiff": 0.005
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3025,
+        "cmmgMedSigned": 0.0067,
+        "cmmgSigns": {
+          "under": 248,
+          "over": 252,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3144,
+        "bothMedSigned": 0.0323,
+        "bothSigns": {
+          "under": 239,
+          "over": 261,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 239,
+          "worsened": 261,
+          "tied": 0,
+          "pctHelped": "47.8%",
+          "medDiff": 0.0067,
+          "meanDiff": 0.0356
+        }
+      },
+      "mixtureStats": {
+        "meanW_H1": 0.0285,
+        "meanW_H2": 0.9715,
+        "meanESS": 7.1
+      }
+    }
+  ],
+  "perturbed_4pct_cv": [
+    {
+      "config": "Complete History (Control)",
+      "condition": "perturbed_15m_4pct_cv",
+      "perturbations": "+/- 15 min",
+      "isZeroNoise": false,
+      "CF": {
+        "medAbs": 0.7514,
+        "medSigned": -0.7509,
+        "signs": {
+          "under": 478,
+          "over": 22,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2727,
+        "cmmgMedSigned": -0.0034,
+        "cmmgSigns": {
+          "under": 253,
+          "over": 247,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3421,
+        "bothMedSigned": -0.0073,
+        "bothSigns": {
+          "under": 251,
+          "over": 249,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 188,
+          "worsened": 275,
+          "tied": 37,
+          "pctHelped": "37.6%",
+          "medDiff": 0.0165,
+          "meanDiff": 0.1031
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.353,
+        "cmmgMedSigned": 0.0837,
+        "cmmgSigns": {
+          "under": 220,
+          "over": 280,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4025,
+        "bothMedSigned": 0.1193,
+        "bothSigns": {
+          "under": 211,
+          "over": 289,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 207,
+          "worsened": 293,
+          "tied": 0,
+          "pctHelped": "41.4%",
+          "medDiff": 0.0383,
+          "meanDiff": 0.0467
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.2972,
+        "cmmgMedSigned": 0.0286,
+        "cmmgSigns": {
+          "under": 231,
+          "over": 269,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3347,
+        "bothMedSigned": 0.0679,
+        "bothSigns": {
+          "under": 225,
+          "over": 275,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 227,
+          "worsened": 273,
+          "tied": 0,
+          "pctHelped": "45.4%",
+          "medDiff": 0.0124,
+          "meanDiff": 0.054
+        }
+      },
+      "mixtureStats": null
+    },
+    {
+      "config": "Hidden Dose (Fixed 1-Dose)",
+      "condition": "perturbed_15m_4pct_cv",
+      "perturbations": "+/- 15 min",
+      "isZeroNoise": false,
+      "CF": {
+        "medAbs": 0.7514,
+        "medSigned": -0.7509,
+        "signs": {
+          "under": 478,
+          "over": 22,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.5093,
+        "cmmgMedSigned": -0.4141,
+        "cmmgSigns": {
+          "under": 372,
+          "over": 128,
+          "exact": 0
+        },
+        "bothMedAbs": 1.5702,
+        "bothMedSigned": -1.5702,
+        "bothSigns": {
+          "under": 460,
+          "over": 40,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 96,
+          "worsened": 381,
+          "tied": 23,
+          "pctHelped": "19.2%",
+          "medDiff": 0.5689,
+          "meanDiff": 0.7557
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.4483,
+        "cmmgMedSigned": -0.4206,
+        "cmmgSigns": {
+          "under": 421,
+          "over": 79,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3578,
+        "bothMedSigned": -0.1192,
+        "bothSigns": {
+          "under": 294,
+          "over": 206,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 346,
+          "worsened": 154,
+          "tied": 0,
+          "pctHelped": "69.2%",
+          "medDiff": -0.1385,
+          "meanDiff": -0.0868
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3683,
+        "cmmgMedSigned": -0.1747,
+        "cmmgSigns": {
+          "under": 317,
+          "over": 183,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4944,
+        "bothMedSigned": 0.3631,
+        "bothSigns": {
+          "under": 122,
+          "over": 378,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 221,
+          "worsened": 279,
+          "tied": 0,
+          "pctHelped": "44.2%",
+          "medDiff": 0.057,
+          "meanDiff": 0.055
+        }
+      },
+      "mixtureStats": null
+    },
+    {
+      "config": "Uncertain Dose (50/50 Mixture)",
+      "condition": "perturbed_15m_4pct_cv",
+      "perturbations": "+/- 15 min",
+      "isZeroNoise": false,
+      "CF": {
+        "medAbs": 0.7514,
+        "medSigned": -0.7509,
+        "signs": {
+          "under": 478,
+          "over": 22,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2545,
+        "cmmgMedSigned": -0.0256,
+        "cmmgSigns": {
+          "under": 264,
+          "over": 236,
+          "exact": 0
+        },
+        "bothMedAbs": 0.337,
+        "bothMedSigned": 0.0078,
+        "bothSigns": {
+          "under": 249,
+          "over": 251,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 193,
+          "worsened": 285,
+          "tied": 22,
+          "pctHelped": "38.6%",
+          "medDiff": 0.0279,
+          "meanDiff": 0.0944
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.3413,
+        "cmmgMedSigned": -0.2182,
+        "cmmgSigns": {
+          "under": 342,
+          "over": 158,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3779,
+        "bothMedSigned": 0.0004,
+        "bothSigns": {
+          "under": 250,
+          "over": 250,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 264,
+          "worsened": 236,
+          "tied": 0,
+          "pctHelped": "52.8%",
+          "medDiff": -0.0183,
+          "meanDiff": 0.0077
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.298,
+        "cmmgMedSigned": 0.0412,
+        "cmmgSigns": {
+          "under": 229,
+          "over": 271,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3396,
+        "bothMedSigned": 0.076,
+        "bothSigns": {
+          "under": 222,
+          "over": 278,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 224,
+          "worsened": 276,
+          "tied": 0,
+          "pctHelped": "44.8%",
+          "medDiff": 0.0214,
+          "meanDiff": 0.056
+        }
+      },
+      "mixtureStats": {
+        "meanW_H1": 0.0235,
+        "meanW_H2": 0.9765,
+        "meanESS": 7.2
+      }
+    }
+  ],
+  "zero_noise_sanity": [
+    {
+      "config": "Complete History (Control)",
+      "condition": "zero_noise_28h",
+      "perturbations": "Exact (28.0h)",
+      "isZeroNoise": true,
+      "CF": {
+        "medAbs": 0.7922,
+        "medSigned": -0.7922,
+        "signs": {
+          "under": 497,
+          "over": 3,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2208,
+        "cmmgMedSigned": 0.0323,
+        "cmmgSigns": {
+          "under": 235,
+          "over": 265,
+          "exact": 0
+        },
+        "bothMedAbs": 0.2833,
+        "bothMedSigned": 0.0578,
+        "bothSigns": {
+          "under": 219,
+          "over": 281,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 186,
+          "worsened": 281,
+          "tied": 33,
+          "pctHelped": "37.2%",
+          "medDiff": 0.0281,
+          "meanDiff": 0.0836
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.3002,
+        "cmmgMedSigned": 0.0218,
+        "cmmgSigns": {
+          "under": 243,
+          "over": 257,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3347,
+        "bothMedSigned": -0.0199,
+        "bothSigns": {
+          "under": 256,
+          "over": 244,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 203,
+          "worsened": 297,
+          "tied": 0,
+          "pctHelped": "40.6%",
+          "medDiff": 0.0438,
+          "meanDiff": 0.0521
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.1993,
+        "cmmgMedSigned": -0.0101,
+        "cmmgSigns": {
+          "under": 253,
+          "over": 247,
+          "exact": 0
+        },
+        "bothMedAbs": 0.226,
+        "bothMedSigned": 0.0231,
+        "bothSigns": {
+          "under": 234,
+          "over": 266,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 231,
+          "worsened": 269,
+          "tied": 0,
+          "pctHelped": "46.2%",
+          "medDiff": 0.0092,
+          "meanDiff": 0.0287
+        }
+      },
+      "mixtureStats": null
+    },
+    {
+      "config": "Hidden Dose (Fixed 1-Dose)",
+      "condition": "zero_noise_28h",
+      "perturbations": "Exact (28.0h)",
+      "isZeroNoise": true,
+      "CF": {
+        "medAbs": 0.7922,
+        "medSigned": -0.7922,
+        "signs": {
+          "under": 497,
+          "over": 3,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.4233,
+        "cmmgMedSigned": -0.3489,
+        "cmmgSigns": {
+          "under": 355,
+          "over": 145,
+          "exact": 0
+        },
+        "bothMedAbs": 1.4846,
+        "bothMedSigned": -1.4846,
+        "bothSigns": {
+          "under": 454,
+          "over": 46,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 89,
+          "worsened": 388,
+          "tied": 23,
+          "pctHelped": "17.8%",
+          "medDiff": 0.5656,
+          "meanDiff": 0.7555
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.485,
+        "cmmgMedSigned": -0.481,
+        "cmmgSigns": {
+          "under": 459,
+          "over": 41,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3526,
+        "bothMedSigned": -0.2541,
+        "bothSigns": {
+          "under": 334,
+          "over": 166,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 372,
+          "worsened": 128,
+          "tied": 0,
+          "pctHelped": "74.4%",
+          "medDiff": -0.1763,
+          "meanDiff": -0.1211
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3201,
+        "cmmgMedSigned": -0.2287,
+        "cmmgSigns": {
+          "under": 332,
+          "over": 168,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4338,
+        "bothMedSigned": 0.3197,
+        "bothSigns": {
+          "under": 119,
+          "over": 381,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 228,
+          "worsened": 272,
+          "tied": 0,
+          "pctHelped": "45.6%",
+          "medDiff": 0.0393,
+          "meanDiff": -0.0208
+        }
+      },
+      "mixtureStats": null
+    },
+    {
+      "config": "Uncertain Dose (50/50 Mixture)",
+      "condition": "zero_noise_28h",
+      "perturbations": "Exact (28.0h)",
+      "isZeroNoise": true,
+      "CF": {
+        "medAbs": 0.7922,
+        "medSigned": -0.7922,
+        "signs": {
+          "under": 497,
+          "over": 3,
+          "exact": 0
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2087,
+        "cmmgMedSigned": 0.0199,
+        "cmmgSigns": {
+          "under": 238,
+          "over": 262,
+          "exact": 0
+        },
+        "bothMedAbs": 0.278,
+        "bothMedSigned": 0.0581,
+        "bothSigns": {
+          "under": 217,
+          "over": 283,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 192,
+          "worsened": 284,
+          "tied": 24,
+          "pctHelped": "38.4%",
+          "medDiff": 0.0309,
+          "meanDiff": 0.0767
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.3296,
+        "cmmgMedSigned": -0.2782,
+        "cmmgSigns": {
+          "under": 394,
+          "over": 106,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3364,
+        "bothMedSigned": -0.1393,
+        "bothSigns": {
+          "under": 295,
+          "over": 205,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 268,
+          "worsened": 232,
+          "tied": 0,
+          "pctHelped": "53.6%",
+          "medDiff": -0.0321,
+          "meanDiff": -0.0057
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.2001,
+        "cmmgMedSigned": 0.0036,
+        "cmmgSigns": {
+          "under": 248,
+          "over": 252,
+          "exact": 0
+        },
+        "bothMedAbs": 0.2267,
+        "bothMedSigned": 0.0314,
+        "bothSigns": {
+          "under": 230,
+          "over": 270,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 223,
+          "worsened": 277,
+          "tied": 0,
+          "pctHelped": "44.6%",
+          "medDiff": 0.0105,
+          "meanDiff": 0.0333
+        }
+      },
+      "mixtureStats": {
+        "meanW_H1": 0.0234,
+        "meanW_H2": 0.9766,
+        "meanESS": 7.2
+      }
+    }
+  ]
+}

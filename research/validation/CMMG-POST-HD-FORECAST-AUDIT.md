@@ -1,103 +1,107 @@
 # Post-Hemodialysis 4-Hour CMMG Forecasting vs. Carry-Forward Audit
-## Resolution of Simulation Disagreements, Disjoint Parameter Partitioning, and Dosing Uncertainty
+## Disjoint Parameter Partitioning, Sign Distribution Counts, Zero-Noise Sanity Benchmarks, and Model-Bounded History Uncertainty
 
 **Audit Date:** November 15, 2026  
-**Base Commit:** `f5923fd3f54fa0e560d30b7b240cfb8726462d87` (`main`)  
+**Baseline Frozen Commit:** `e7655bb` on `research/cmmg-post-hd-forecast` (frozen for independent review)  
+**Data Export Branch:** `research/cmmg-forecast-data-export`  
 **Engine:** Frozen Adult AyFlux Engine (`17971df66e0a97b4d382572a582d35c444a3c83f`)  
 **Runner:** `research/validation/cmmg-forecast-post-hd.cjs`  
-**Branch:** `research/cmmg-post-hd-forecast`  
+**Export Files:** `research/validation/cmmg-forecast-patients.csv` (4,500 rows) & `research/validation/cmmg-forecast-results.json`  
 
 > [!IMPORTANT]
 > **Educational & Exploratory Research Notice:**  
-> All data and findings presented in this document are based entirely on mathematical simulations of the AyFlux pharmacokinetic model. They do NOT constitute clinical advice, diagnostic tools, or therapeutic recommendations.
+> All calculations, outputs, and conclusions presented in this document are strictly in silico mathematical simulations of the AyFlux pharmacokinetic model. They do NOT constitute clinical decision support, diagnostic tools, or therapeutic recommendations. Parameter-disjoint draws eliminate candidate overlap in simulation, but virtual patients and forecaster candidates are generated from the same underlying AyFlux PK model; this is not external clinical validation.
 
 ---
 
-## 1. Executive Summary & Resolution of the Simulation Disagreement
+## 1. Simulation Setup & Provenance
 
-In prior simulations, two forecaster implementations under incomplete prior dosing history appeared to disagree:
-* **Ensemble Reweighting (ER)**: Conditioning on end-hemodialysis (HD) parent acyclovir (ACV) worsened 4-hour CMMG forecasting accuracy (median absolute error degraded from $0.493\text{ mg/L}$ to $1.553\text{ mg/L}$, helping only $17.8\%$ of patients).
-* **Direct State Updating (SU)**: Setting the model's central state directly from measured ACV improved 4-hour CMMG forecasting accuracy (median absolute error improved from $0.497\text{ mg/L}$ to $0.405\text{ mg/L}$, helping $68.6\%$ of patients).
+### 1.1 Parameter-Disjoint Partitioning
+- **Draw Sequence:** A single deterministic random sequence (seed `44556677`) generated 900 parameter draws from the log-normal adult AyFlux population distribution.
+- **Partition:**
+  - Virtual Ground-Truth Patients: First $N = 500$ draws (IDs $0 \dots 499$).
+  - Candidate Forecaster Draws: Remaining $M = 400$ draws (IDs $500 \dots 899$).
+  - **Overlap Check:** Rigorous programmatic assertion (`assert.equal(overlap, 0)`) verified zero parameter-vector sharing across all 500 patients and 400 candidates ($V_c, V_p, CL_{\text{renal}}, CL_{\text{form}}$).
+- **Configured HD Clearance:** Effective plasma clearance $\text{hdCl} = 81.8\text{ mL/min}$ ($4.908\text{ L/h}$, $\text{CV} = 20\%$) in the engine, distinct from dialyzer hemodynamic flow settings ($Q_b, Q_d, K_oA$).
 
-This audit resolves why both simulations behave as observed, eliminates all parameter overlap, and evaluates a 50/50 mixture model of history uncertainty:
-1. **Disjoint Parameter Draws:** 900 parameter vectors were drawn in a single sequence from the log-normal population distribution and strictly partitioned into $N = 500$ ground-truth patients and $M = 400$ forecaster ensemble draws with **asserted zero parameter overlap**.
-2. **Why Ensemble Reweighting Worsened:** When an earlier dose ($t = 0\text{ h}$) is hidden, a rigid single-dose model cannot produce the observed high end-HD central ACV ($C_{\text{acv}} \approx 10\text{ mg/L}$) without selecting pathological parameter draws (near-zero distribution volume or clearance). These draws lack mass in the unmeasured peripheral tissue compartment $B$, so post-HD peripheral rebound ($B \to A$) collapses. This produces severe **systematic underprediction** (median signed error: **$-1.553\text{ mg/L}$**; every single patient under-forecasted).
-3. **Why Direct State Updating Improved:** In direct state updating, setting the central compartment state directly from measured ACV ($A(28) = y_{\text{acv}} \times V_c$) directly corrects the initial condition for post-HD CMMG formation ($\text{Rate} \propto A/V_c$). Even though peripheral stores remain underestimated, the immediate post-HD formation rate starts at the true level, cutting median signed error from $-0.485\text{ mg/L}$ to $-0.220\text{ mg/L}$.
-4. **Resolution via History Uncertainty (50/50 Mixture):** When the forecaster models uncertainty over the missing dose (a 50/50 prior mixture over 1-dose vs. 2-dose histories), measuring parent ACV at end-HD delivers decisive diagnostic evidence: **the posterior probability of the true 2-dose history jumps to $97.15\%$**. Both Ensemble Reweighting ($0.342\text{ mg/L}$) and State Updating ($0.314\text{ mg/L}$) achieve excellent, unbiased recovery.
+### 1.2 Regimen & Dialysis Scenario
+- **True Regimen:** Two $500\text{ mg}$ IV infusions (1-hour duration) at $t = 0\text{ h}$ and $t = 12\text{ h}$ in anuric adult ESRD ($70\text{ kg}$, constant $\text{CrCl} = 0\text{ mL/min}$).
+- **Hemodialysis Session:** 4-hour session from $t = 24\text{ h}$ to $t = 28\text{ h}$.
+- **Sampling & Forecast Window:** End-of-HD sample at $t \approx 28.0\text{ h}$; 4-hour post-dialysis forecast target for CMMG at $t = 32.0\text{ h}$ (dose-free, dialysis-free).
 
----
-
-## 2. Model Specifications & Dialytic Clearance Clarification
-
-### 2.1 Configured HD Clearance vs. Dialyzer Hemodynamic Settings
-* **Configured Parameter:** AyFlux configures hemodialysis as an effective plasma clearance:
-  $$\text{hdCl} = 81.8\text{ mL/min} \quad (4.908\text{ L/h})$$
-  with inter-individual log-normal variability ($\text{CV} = 20\%$, $p.\text{hd} = 4.908 \times \exp(\mathcal{N}(0, 0.2^2))$).
-* **Distinction from Hemodynamic Settings:** In clinical dialysis prescriptions, dialyzer clearance depends on blood flow rate ($Q_b \approx 300\text{–}400\text{ mL/min}$), dialysate flow rate ($Q_d \approx 500\text{–}800\text{ mL/min}$), hematocrit ($Hct$), and membrane mass transfer-area coefficient ($K_oA \approx 900\text{ mL/min}$). In AyFlux's adult kinetic engine, clearance is directly parameterized as effective clearance $\text{hdCl} = 81.8\text{ mL/min}$ and applied to plasma concentration ($J_{\text{hd}} = p.\text{hd} \times C_{\text{acv}}$), with metabolite dialytic clearance set to $75\%$ of parent clearance ($c.\text{metDial} = 0.75$).
-
-### 2.2 Simulation Protocol
-* **Patient Population:** Anuric adult ESRD ($70\text{ kg}$, constant $\text{CrCl} = 0\text{ mL/min}$).
-* **Regimen:**
-  * True regimen: $500\text{ mg}$ IV (1-h infusion) at $t = 0\text{ h}$ and $t = 12\text{ h}$.
-  * Hemodialysis: 4-hour session from $t = 24\text{ h}$ to $t = 28\text{ h}$.
-  * Sampling Time ($t_{\text{meas}}$): End-of-HD, $t = 28.0\text{ h}$ (exact) and $t = 28.0 \pm 0.25\text{ h}$ (perturbed).
-  * Forecast Target: CMMG concentration at $t = 32.0\text{ h}$ (4 hours post-HD, dose-free).
-* **Assay Noise:** $4\%$ assay coefficient of variation ($\text{CV} = 0.04$) with a $0.1\text{ mg/L}$ standard deviation floor as defined in the AyFlux Bayesian engine:
-  $$\sigma = \max(0.1, 0.04 \times C_{\text{pred}}), \quad y \sim \mathcal{N}(C_{\text{true}}, (0.04 \times C_{\text{true}})^2)$$
+### 1.3 Tested Conditions
+1. **Assumed 4% CV Measurement Noise, Exact Timestamps ($t_{\text{meas}} = 28.0\text{ h}$):** $4\%$ CV on observations ($y \sim \mathcal{N}(C, (0.04 C)^2)$) with $0.1\text{ mg/L}$ standard deviation floor; exact sampling time.
+2. **Assumed 4% CV Measurement Noise, Perturbed Timestamps ($t_{\text{meas}} = 28.0 \pm 0.25\text{ h}$):** Sampling timestamp jittered uniformly by $\pm 15\text{ min}$ while forecaster assumes $t_{\text{meas}} = 28.0\text{ h}$.
+3. **Zero-Noise Sanity Check (Exact $28.0\text{ h}$, 0% CV Observation Noise):** Noiseless measurements ($y_{\text{acv}} = C_{\text{acv}}(28)$, $y_{\text{cmmg}} = C_{\text{cmmg}}(28)$) evaluated against the forecaster's assumed $4\%$ CV / $0.1\text{ mg/L}$ floor likelihood model.
 
 ---
 
-## 3. Paired Results Table
+## 2. Benchmark Summaries & Paired Error Differences
 
-All methods were evaluated across identical virtual patients ($N = 500$), identical candidate parameters ($M = 400$, zero overlap), identical assay noise, and identical sampling times.
+### Table 1: Primary Metrics Across All Three Conditions
 
-### Table 1: Complete Benchmark (Exact Timestamps $t = 28.0\text{ h}$ vs. Perturbed $t = 28 \pm 15\text{ min}$)
-
-| History Condition & Timing | Method | CMMG-Only Med. Abs. Error | CMMG-Only Med. Signed Error | Paired (ACV+CMMG) Med. Abs. Error | Paired (ACV+CMMG) Med. Signed Error | % Patients Helped by Adding ACV | History Posterior Weight & ESS |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Complete History (Control)**<br>*(Exact $28.0\text{ h}$)* | **Carry-Forward (CF)**<br>**Ensemble Reweighting (ER)**<br>**SU (Unweighted)**<br>**SU (Reweighted)** | $0.8146\text{ mg/L}$<br>$0.3145\text{ mg/L}$<br>$0.3517\text{ mg/L}$<br>$0.3057\text{ mg/L}$ | $-0.8146\text{ mg/L}$<br>$+0.0201\text{ mg/L}$<br>$+0.0193\text{ mg/L}$<br>$-0.0148\text{ mg/L}$ | —<br>$0.3503\text{ mg/L}$<br>$0.4189\text{ mg/L}$<br>$0.3197\text{ mg/L}$ | —<br>$+0.0430\text{ mg/L}$<br>$+0.0171\text{ mg/L}$<br>$+0.0291\text{ mg/L}$ | —<br>40.0%<br>38.6%<br>48.2% | History known ($100\%$) |
-| **Hidden 0h Dose (Fixed 1-Dose)**<br>*(Exact $28.0\text{ h}$)* | **Carry-Forward (CF)**<br>**Ensemble Reweighting (ER)**<br>**SU (Unweighted)**<br>**SU (Reweighted)** | $0.8146\text{ mg/L}$<br>$0.4929\text{ mg/L}$<br>$0.4969\text{ mg/L}$<br>$0.3724\text{ mg/L}$ | $-0.8146\text{ mg/L}$<br>$-0.4065\text{ mg/L}$<br>$-0.4846\text{ mg/L}$<br>$-0.2406\text{ mg/L}$ | —<br>**$1.5532\text{ mg/L}$**<br>**$0.4045\text{ mg/L}$**<br>$0.4459\text{ mg/L}$ | —<br>**$-1.5532\text{ mg/L}$**<br>**$-0.2202\text{ mg/L}$**<br>$+0.2985\text{ mg/L}$ | —<br>**17.8%**<br>**68.6%**<br>44.2% | Single fixed history |
-| **Uncertain Dose (50/50 Mixture)**<br>*(Exact $28.0\text{ h}$)* | **Carry-Forward (CF)**<br>**Ensemble Reweighting (ER)**<br>**SU (Unweighted)**<br>**SU (Reweighted)** | $0.8146\text{ mg/L}$<br>$0.3087\text{ mg/L}$<br>$0.3633\text{ mg/L}$<br>$0.3025\text{ mg/L}$ | $-0.8146\text{ mg/L}$<br>$+0.0123\text{ mg/L}$<br>$-0.2794\text{ mg/L}$<br>$+0.0067\text{ mg/L}$ | —<br>$0.3415\text{ mg/L}$<br>$0.3873\text{ mg/L}$<br>$0.3144\text{ mg/L}$ | —<br>$+0.0328\text{ mg/L}$<br>$-0.0970\text{ mg/L}$<br>$+0.0323\text{ mg/L}$ | —<br>43.2%<br>51.8%<br>47.8% | $P(H_1) = 2.85\%$<br>$P(H_2) = 97.15\%$<br>$\text{ESS} = 7.1$ |
-| **Hidden 0h Dose (Fixed 1-Dose)**<br>*(Perturbed $\pm 15\text{ min}$)* | **Carry-Forward (CF)**<br>**Ensemble Reweighting (ER)**<br>**SU (Unweighted)**<br>**SU (Reweighted)** | $0.7514\text{ mg/L}$<br>$0.5093\text{ mg/L}$<br>$0.4483\text{ mg/L}$<br>$0.3683\text{ mg/L}$ | $-0.7509\text{ mg/L}$<br>$-0.4141\text{ mg/L}$<br>$-0.4206\text{ mg/L}$<br>$-0.1747\text{ mg/L}$ | —<br>**$1.5702\text{ mg/L}$**<br>**$0.3578\text{ mg/L}$**<br>$0.4944\text{ mg/L}$ | —<br>**$-1.5702\text{ mg/L}$**<br>**$-0.1192\text{ mg/L}$**<br>$+0.3631\text{ mg/L}$ | —<br>**19.2%**<br>**69.2%**<br>44.2% | Single fixed history |
-| **Uncertain Dose (50/50 Mixture)**<br>*(Perturbed $\pm 15\text{ min}$)* | **Carry-Forward (CF)**<br>**Ensemble Reweighting (ER)**<br>**SU (Unweighted)**<br>**SU (Reweighted)** | $0.7514\text{ mg/L}$<br>$0.2545\text{ mg/L}$<br>$0.3413\text{ mg/L}$<br>$0.2980\text{ mg/L}$ | $-0.7509\text{ mg/L}$<br>$-0.0256\text{ mg/L}$<br>$-0.2182\text{ mg/L}$<br>$+0.0412\text{ mg/L}$ | —<br>$0.3370\text{ mg/L}$<br>$0.3779\text{ mg/L}$<br>$0.3396\text{ mg/L}$ | —<br>$+0.0078\text{ mg/L}$<br>$+0.0004\text{ mg/L}$<br>$+0.0760\text{ mg/L}$ | —<br>38.6%<br>52.8%<br>44.8% | $P(H_1) = 2.35\%$<br>$P(H_2) = 97.65\%$<br>$\text{ESS} = 7.2$ |
+| Condition & Scenario | Method | Median Abs. Error (mg/L) | Median Signed Error (mg/L) | Under / Over / Exact Sign Counts ($N_{\text{under}} / N_{\text{over}} / N_{\text{exact}}$) | Paired Difference vs CMMG-Only ($\Delta |e| = |e_{\text{both}}| - |e_{\text{cmmg}}|$) | % Patients Helped by Adding ACV |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Exact 28.0h (4% CV)**<br>*Complete History* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.8146<br>0.3145<br>0.3503<br>0.3517<br>0.4189<br>0.3057<br>0.3197 | -0.8146<br>+0.0201<br>+0.0430<br>+0.0193<br>+0.0171<br>-0.0148<br>+0.0291 | 489 / 11 / 0<br>244 / 256 / 0<br>240 / 260 / 0<br>242 / 258 / 0<br>246 / 254 / 0<br>255 / 245 / 0<br>240 / 260 / 0 | —<br>—<br>Med: +0.0104, Mean: +0.0861<br>—<br>Med: +0.0563, Mean: +0.0587<br>—<br>Med: +0.0040, Mean: +0.0419 | —<br>—<br>40.0% (200 helped, 268 worse, 32 tie)<br>—<br>38.6% (193 helped, 307 worse, 0 tie)<br>—<br>48.2% (241 helped, 259 worse, 0 tie) |
+| **Exact 28.0h (4% CV)**<br>*Hidden 0h Dose (Fixed 1-Dose)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.8146<br>0.4929<br>**1.5532**<br>0.4969<br>**0.4045**<br>0.3724<br>0.4459 | -0.8146<br>-0.4065<br>**-1.5532**<br>-0.4846<br>**-0.2202**<br>-0.2406<br>+0.2985 | 489 / 11 / 0<br>357 / 143 / 0<br>453 / 47 / 0<br>437 / 63 / 0<br>311 / 189 / 0<br>340 / 160 / 0<br>137 / 363 / 0 | —<br>—<br>Med: +0.5689, Mean: +0.7475<br>—<br>**Med: -0.1392, Mean: -0.0955**<br>—<br>Med: +0.0475, Mean: -0.0070 | —<br>—<br>**17.8%** (89 helped, 389 worse, 22 tie)<br>—<br>**68.6%** (343 helped, 157 worse, 0 tie)<br>—<br>44.2% (221 helped, 279 worse, 0 tie) |
+| **Exact 28.0h (4% CV)**<br>*Uncertain (50/50 Mixture)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.8146<br>0.3087<br>0.3415<br>0.3633<br>0.3873<br>0.3025<br>0.3144 | -0.8146<br>+0.0123<br>+0.0328<br>-0.2794<br>-0.0970<br>+0.0067<br>+0.0323 | 489 / 11 / 0<br>247 / 253 / 0<br>242 / 258 / 0<br>359 / 141 / 0<br>274 / 226 / 0<br>244 / 256 / 0<br>238 / 262 / 0 | —<br>—<br>Med: +0.0080, Mean: +0.0617<br>—<br>Med: +0.0073, Mean: +0.0244<br>—<br>Med: +0.0019, Mean: +0.0396 | —<br>—<br>43.2% (216 helped, 261 worse, 23 tie)<br>—<br>51.8% (259 helped, 241 worse, 0 tie)<br>—<br>47.8% (239 helped, 261 worse, 0 tie) |
+| **Perturbed ±15m (4% CV)**<br>*Hidden 0h Dose (Fixed 1-Dose)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.5093<br>**1.5702**<br>0.4483<br>**0.3578**<br>0.3683<br>0.4944 | -0.7509<br>-0.4141<br>**-1.5702**<br>-0.4206<br>**-0.1192**<br>-0.1747<br>+0.3631 | 476 / 24 / 0<br>359 / 141 / 0<br>456 / 44 / 0<br>416 / 84 / 0<br>284 / 216 / 0<br>304 / 196 / 0<br>123 / 377 / 0 | —<br>—<br>Med: +0.5973, Mean: +0.7634<br>—<br>**Med: -0.1264, Mean: -0.0911**<br>—<br>Med: +0.0718, Mean: +0.0370 | —<br>—<br>**19.2%** (96 helped, 381 worse, 23 tie)<br>—<br>**69.2%** (346 helped, 154 worse, 0 tie)<br>—<br>44.2% (221 helped, 279 worse, 0 tie) |
+| **Perturbed ±15m (4% CV)**<br>*Uncertain (50/50 Mixture)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7514<br>0.2545<br>0.3370<br>0.3413<br>0.3779<br>0.2980<br>0.3396 | -0.7509<br>-0.0256<br>+0.0078<br>-0.2182<br>+0.0004<br>+0.0412<br>+0.0760 | 476 / 24 / 0<br>259 / 241 / 0<br>248 / 252 / 0<br>340 / 160 / 0<br>250 / 250 / 0<br>228 / 272 / 0<br>217 / 283 / 0 | —<br>—<br>Med: +0.0270, Mean: +0.0827<br>—<br>Med: +0.0163, Mean: +0.0345<br>—<br>Med: +0.0227, Mean: +0.0520 | —<br>—<br>38.6% (193 helped, 281 worse, 26 tie)<br>—<br>52.8% (264 helped, 236 worse, 0 tie)<br>—<br>44.8% (224 helped, 276 worse, 0 tie) |
+| **Zero-Noise Sanity (0% CV)**<br>*Complete History* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7922<br>0.2208<br>0.2833<br>0.3002<br>0.3347<br>0.1993<br>0.2260 | -0.7922<br>+0.0197<br>+0.0494<br>+0.0218<br>-0.0199<br>-0.0101<br>+0.0231 | 497 / 3 / 0<br>239 / 261 / 0<br>219 / 281 / 0<br>243 / 257 / 0<br>256 / 244 / 0<br>253 / 247 / 0<br>234 / 266 / 0 | —<br>—<br>Med: +0.0281, Mean: +0.0836<br>—<br>Med: +0.0438, Mean: +0.0521<br>—<br>Med: +0.0092, Mean: +0.0287 | —<br>—<br>37.2% (186 helped, 281 worse, 33 tie)<br>—<br>40.6% (203 helped, 297 worse, 0 tie)<br>—<br>46.2% (231 helped, 269 worse, 0 tie) |
+| **Zero-Noise Sanity (0% CV)**<br>*Hidden 0h Dose (Fixed 1-Dose)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7922<br>0.4233<br>**1.4846**<br>0.4850<br>**0.3526**<br>0.3201<br>0.4338 | -0.7922<br>-0.3489<br>**-1.4846**<br>-0.4810<br>**-0.2541**<br>-0.2287<br>+0.3197 | 497 / 3 / 0<br>355 / 145 / 0<br>454 / 46 / 0<br>459 / 41 / 0<br>334 / 166 / 0<br>332 / 168 / 0<br>119 / 381 / 0 | —<br>—<br>Med: +0.5656, Mean: +0.7555<br>—<br>**Med: -0.1763, Mean: -0.1211**<br>—<br>Med: +0.0393, Mean: -0.0208 | —<br>—<br>**17.8%** (89 helped, 388 worse, 23 tie)<br>—<br>**74.4%** (372 helped, 128 worse, 0 tie)<br>—<br>45.6% (228 helped, 272 worse, 0 tie) |
+| **Zero-Noise Sanity (0% CV)**<br>*Uncertain (50/50 Mixture)* | Carry-Forward (CF)<br>ER (CMMG-only)<br>ER (Both)<br>SU Unweighted (CMMG)<br>SU Unweighted (Both)<br>SU Reweighted (CMMG)<br>SU Reweighted (Both) | 0.7922<br>0.2087<br>0.2780<br>0.3296<br>0.3364<br>0.2001<br>0.2267 | -0.7922<br>+0.0199<br>+0.0581<br>-0.2782<br>-0.1393<br>+0.0036<br>+0.0314 | 497 / 3 / 0<br>238 / 262 / 0<br>217 / 283 / 0<br>394 / 106 / 0<br>295 / 205 / 0<br>248 / 252 / 0<br>230 / 270 / 0 | —<br>—<br>Med: +0.0309, Mean: +0.0767<br>—<br>Med: -0.0321, Mean: -0.0057<br>—<br>Med: +0.0105, Mean: +0.0333 | —<br>—<br>38.4% (192 helped, 284 worse, 24 tie)<br>—<br>53.6% (268 helped, 232 worse, 0 tie)<br>—<br>44.6% (223 helped, 277 worse, 0 tie) |
 
 ---
 
-## 4. Mechanism Analysis
+## 3. Detailed Mechanism & Sign Analysis
 
-### 4.1 Carry-Forward Systematic Underprediction
-Across every single condition and draw time, Carry-Forward exhibits a massive negative signed error ($-0.8146\text{ mg/L}$ exact, $-0.7509\text{ mg/L}$ perturbed). Because hemodialysis terminates abruptly at $t = 28\text{ h}$, parent acyclovir stored in peripheral tissues immediately redistributes into the central compartment ($B \to A$), driving continued post-dialysis metabolic generation of CMMG. Consequently, $C_{\text{cmmg}}(32) > C_{\text{cmmg}}(28)$ in virtually all patients, guaranteeing that carrying forward the end-HD measurement underpredicts the 4-hour rebound.
+### 3.1 Actual Sign Distribution of Carry-Forward
+Rather than assuming universal underprediction from median equality ($\text{med}(e) = -\text{med}(|e|)$), the actual patient counts reveal:
+- **Exact Timestamps (4% CV):** 489 underpredicted ($97.8\%$), 11 overpredicted ($2.2\%$), 0 exact.
+- **Perturbed Timestamps (4% CV):** 476 underpredicted ($95.2\%$), 24 overpredicted ($4.8\%$), 0 exact.
+- **Zero-Noise Sanity (0% CV):** 497 underpredicted ($99.4\%$), 3 overpredicted ($0.6\%$), 0 exact.
 
-### 4.2 Why Ensemble Reweighting Fails Under a Rigidly Misspecified History
-When the forecaster assumes only 1 dose was administered ($t = 12\text{ h}$):
-1. **Under CMMG alone:** The likelihood only penalizes metabolite predictions. A 1-dose trajectory can produce plausible CMMG levels through moderate formation clearance. The median signed error is $-0.407\text{ mg/L}$ with a median absolute error of $0.493\text{ mg/L}$.
-2. **Under Paired (ACV + CMMG):** Central parent ACV is measured at $\sim 10\text{ mg/L}$. In a 1-dose model (16 hours post-dose with 4 hours of HD), typical central ACV is only $2\text{–}4\text{ mg/L}$. The joint Gaussian likelihood:
-   $$\log \mathcal{L} = -\frac{1}{2} \left[ \left(\frac{y_{\text{acv}} - \hat{C}_{\text{acv}}}{\sigma_{\text{acv}}}\right)^2 + \left(\frac{y_{\text{cmmg}} - \hat{C}_{\text{cmmg}}}{\sigma_{\text{cmmg}}}\right)^2 \right]$$
-   severely penalizes physiologically normal candidates, placing virtually $100\%$ of posterior weight on extreme outlier parameter draws (e.g. tiny $V_c$ or near-zero systemic clearance).
-3. **The Redistribution Deficit:** These outlier candidates still have no mass in peripheral tissue $B$. Once dialysis stops, they have no peripheral drug to redistribute into the central compartment. Simulated ACV crashes immediately post-HD, halting CMMG formation. The forecast collapses into extreme systematic underprediction: **signed error $-1.553\text{ mg/L}$**, worse than carry-forward.
+**Pharmacokinetic Explanation:** In the AyFlux model, hemodialysis clears both parent acyclovir and CMMG from the central compartment during the 4-hour session. When HD ends at $28\text{ h}$, residual acyclovir in peripheral tissues redistributes back into the central compartment ($B \to A$), continually generating new CMMG via non-renal metabolic clearance ($CL_{\text{form}}$). Consequently, CMMG concentration rises over the subsequent 4 hours in the vast majority of patients ($C_{\text{cmmg}}(32) > C_{\text{cmmg}}(28)$). The rare virtual patients ($0.6\text{–}4.8\%$) who do not underpredict possess combination draws of very high non-renal CMMG elimination ($CL_{\text{mn}}$) and low metabolic formation ($CL_{\text{form}}$), wherein metabolic generation is outpaced by elimination.
 
-### 4.3 Why Direct State Updating Succeeds Under a Misspecified History
-In Direct State Updating (unweighted), the ODE is integrated from $t = 28\text{ h}$ to $t = 32\text{ h}$ starting from states reset to the measurements:
+### 3.2 Why Ensemble Reweighting Fails Under a Rigid 1-Dose Assumption
+When the forecaster rigidly assumes only 1 dose ($12\text{ h}$) was administered:
+1. **CMMG-Only Likelihood:** The forecaster matches a moderate CMMG level ($\sim 7\text{ mg/L}$). Plausible 1-dose draws can reach this level with moderate formation clearance, yielding a median absolute error of $0.4929\text{ mg/L}$ ($0.4233\text{ mg/L}$ zero-noise) and signed error of $-0.4065\text{ mg/L}$ ($357$ under / $143$ over).
+2. **Joint (ACV + CMMG) Likelihood:** The observed end-HD central ACV is $\sim 10\text{ mg/L}$. In a true 1-dose regimen, central ACV 16 hours post-dose with 4 hours of HD would typically be only $2\text{–}4\text{ mg/L}$. The joint Gaussian likelihood forces the ensemble to select extreme parameter draws (e.g., abnormally small $V_c$ or near-zero clearance).
+3. **Peripheral Mass Collapse:** These extreme 1-dose candidates contain almost zero drug mass in the unmeasured peripheral compartment $B$. Once HD terminates, there is no peripheral acyclovir to redistribute into the central compartment. Simulated ACV crashes immediately, halting CMMG formation.
+4. **Catastrophic Bias:** As a result, the forecast severely underpredicts: median absolute error jumps to **$1.5532\text{ mg/L}$** ($1.4846\text{ mg/L}$ zero-noise), signed error is **$-1.5532\text{ mg/L}$** ($453$ under / $47$ over), and adding parent ACV worsens the forecast in **$77.8\%$ of patients** (helped only $17.8\%$).
+
+### 3.3 Why Direct State Updating Resists History Misspecification
+In Direct State Updating (unweighted), the ODE is integrated from $t = 28\text{ h}$ to $t = 32\text{ h}$ starting from state variables updated from the observed values:
 $$\frac{dM}{dt} = CL_{\text{form}} \frac{A(t)}{V_c} \frac{MW_M}{MW_A} - CL_{\text{mn}} \frac{M(t)}{V_m}$$
-* **CMMG alone:** $M(28)$ is reset to $y_{\text{cmmg}} \cdot V_m$, but $A(28)$ remains at the simulated 1-dose value ($\sim 2\text{–}4\text{ mg/L}$, underestimating true central ACV). Consequently, post-HD formation of CMMG is under-driven, yielding signed error $-0.485\text{ mg/L}$ and absolute error $0.497\text{ mg/L}$.
-* **Paired (ACV + CMMG):** $A(28)$ is reset to $y_{\text{acv}} \cdot V_c$ directly from the measurement. Even though peripheral tissue $B(28)$ remains underestimated, starting with the true central ACV concentration ($10\text{ mg/L}$) immediately drives CMMG formation at the correct initial rate. The median signed error shrinks by more than half (to $-0.220\text{ mg/L}$), median absolute error drops to $0.405\text{ mg/L}$, and **$68.6\%$ of patients are helped by adding ACV**.
+- **CMMG-Only:** $M(28)$ is reset to $y_{\text{cmmg}} \cdot V_m$, while $A(28)$ is left at the simulated 1-dose value ($2\text{–}4\text{ mg/L}$). The initial rate of CMMG formation is under-driven, yielding median signed error of $-0.4846\text{ mg/L}$ ($437$ under / $63$ over).
+- **Paired (ACV + CMMG):** $A(28)$ is reset to $y_{\text{acv}} \cdot V_c$ directly from measured concentration ($10\text{ mg/L}$). Even though peripheral tissue $B(28)$ remains underestimated, starting with the true central ACV concentration immediately drives CMMG formation at the correct initial rate.
+- **Quantified Improvement:** Median absolute error drops from $0.4969$ to **$0.4045\text{ mg/L}$** ($0.4850$ to **$0.3526\text{ mg/L}$** zero-noise), signed bias shrinks from $-0.4846$ to **$-0.2202\text{ mg/L}$**, and adding parent ACV helps **$68.6\%$** ($74.4\%$ zero-noise) of virtual patients.
 
-### 4.4 The Design Choice: Representing History Uncertainty as a Mixture
-The fundamental insight is that a forecaster should not rigidly assume a single history when earlier dosing is uncertain. When history uncertainty is represented as a prior mixture:
-$$P(H_1) = 0.5 \quad (1\text{ dose}), \quad P(H_2) = 0.5 \quad (2\text{ doses})$$
-measuring parent ACV at end-HD delivers enormous diagnostic value:
-* Under $H_1$, the probability of observing $C_{\text{acv}} \approx 10\text{ mg/L}$ is $< 10^{-10}$.
-* Under $H_2$, the probability is high ($\approx 0.97$).
-* The Bayesian posterior weight on the true 2-dose history jumps to **$97.15\%$**.
-* This rescues Ensemble Reweighting completely, reducing error to **$0.342\text{ mg/L}$** with virtually zero bias ($+0.033\text{ mg/L}$).
+### 3.4 History Uncertainty Evaluated as a Two-Component Mixture
+When earlier dosing is treated as uncertain by placing prior mass on both plausible histories ($P(H_1) = 0.5$ for 1 dose, $P(H_2) = 0.5$ for 2 doses):
+- **Posterior Probability Shifts:**
+  - Exact 28.0h (4% CV): Mean $W(H_1) = 0.0285$, Mean $W(H_2) = 0.9715$, Mean $\text{ESS} = 7.1$
+  - Perturbed $\pm 15\text{m}$ (4% CV): Mean $W(H_1) = 0.0235$, Mean $W(H_2) = 0.9765$, Mean $\text{ESS} = 7.2$
+  - Zero-Noise Sanity (0% CV): Mean $W(H_1) = 0.0234$, Mean $W(H_2) = 0.9766$, Mean $\text{ESS} = 7.2$
+- **Performance:**
+  - Under Ensemble Reweighting with Both analytes, median absolute error drops to **$0.3415\text{ mg/L}$** ($0.2780\text{ mg/L}$ zero-noise) with signed error of $+0.0328\text{ mg/L}$ ($242$ under / $258$ over).
+  - Under SU Reweighted with Both analytes, median absolute error drops to **$0.3144\text{ mg/L}$** ($0.2267\text{ mg/L}$ zero-noise) with signed error of $+0.0323\text{ mg/L}$ ($238$ under / $262$ over).
 
 ---
 
-## 5. Decision for Pilot Study
+## 4. Scientifically Bounded Conclusions
 
-1. **The Disagreement is Fully Resolved:** The earlier divergence was not caused by parameter draw overlap or assay noise floors. It is a fundamental property of the update mathematics:
-   - **Ensemble Reweighting with a rigid wrong history breaks down** because forcing a 1-dose model to fit 2-dose central ACV causes severe parameter distortion and eliminates peripheral rebound.
-   - **Direct State Updating is robust to history misspecification** because it resets the central state directly, bypassing historical parameter distortion.
-2. **Clinical Forecaster Architecture Recommendation:**
-   - In clinical practice where earlier dosing records may be missing or unverified, a clinical forecaster **must either use Direct State Updating or model history uncertainty explicitly via a mixture ensemble**.
-   - If history uncertainty is modeled as a mixture, measuring parent ACV in the same end-of-HD tube is **highly beneficial**, resolving the hidden dose with $>97\%$ confidence.
+1. **Simulation Bounds & Non-Equivalence to Clinical Validation:**
+   - The reported $\sim 97\%$ posterior weight on the 2-dose history ($H_2$) is mathematically conditional on the evaluated discrete model space (exactly two candidate histories: $H_1$ vs $H_2$), the chosen equal prior probabilities ($P(H_1) = P(H_2) = 0.5$), and the assumed Gaussian likelihood function. It does NOT represent empirical clinical confidence or prove that a missing dose can be identified in clinical practice where unmodeled variables (variable infusion rates, residual urine output, inter-dialytic dose timing errors, assay cross-reactivity) occur.
+   - While parameter-disjoint partitioning ensures candidate forecasters do not share identical vectors with virtual patients, both cohorts are generated from the same underlying two-compartment kinetic model structure. This study evaluates mathematical properties of state-space reweighting versus state updating under controlled structural assumptions; it does NOT constitute external clinical validation.
+
+2. **When Parent Acyclovir Helps vs Worsens the Forecast:**
+   - **Where Adding ACV Makes the Forecast Worse:** When a forecaster rigidly imposes a single misspecified historical dosing regimen (e.g., 1 dose instead of 2), conditioning on end-HD parent ACV worsens Ensemble Reweighting in $77.8\text{–}82.2\%$ of simulated cases (median error degrades $0.493 \to 1.553\text{ mg/L}$) due to parameter distortion and loss of peripheral rebound.
+   - **Where Adding ACV Improves the Forecast:** When the forecaster either:
+     - Applies **Direct State Updating** to the central compartment ($A = y_{\text{acv}} \times V_c$), which bypasses historical parameter selection and improves accuracy in $68.6\text{–}74.4\%$ of cases; OR
+     - Represents dosing history as a **mixture model**, allowing the observed parent ACV to weight the candidate regimens, reducing median forecasting error to $0.227\text{–}0.342\text{ mg/L}$.
+
+3. **Status & Invariants:**
+   - Baseline commit `e7655bb` remains strictly frozen on `research/cmmg-post-hd-forecast` for Codex's independent code review.
+   - All data exports (`cmmg-forecast-patients.csv` and `cmmg-forecast-results.json`) reside on the follow-up branch `research/cmmg-forecast-data-export`.
+   - Core model parameters, defaults (`public/assets/pk-engine.js`), and production code remain 100% unmodified.

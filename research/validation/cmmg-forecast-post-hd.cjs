@@ -2,10 +2,17 @@
 /**
  * Computational Simulation: 4-Hour Post-Hemodialysis CMMG Forecasting vs. Carry-Forward
  * Evaluates Ensemble Reweighting vs. Direct State Updating under Complete, Hidden,
- * and Uncertain (50/50 Mixture) Dosing Histories with Exact and Perturbed Timestamps.
+ * and Uncertain (50/50 Mixture) Dosing Histories across:
+ *   1. Exact Timestamps (28.0h) with Assumed 4% CV Measurement Noise
+ *   2. Perturbed Timestamps (+/- 15 min) with Assumed 4% CV Measurement Noise
+ *   3. Zero-Noise Sanity Check (Exact 28.0h, 0% CV Observation Noise)
  *
  * Configured HD clearance: 81.8 mL/min (4.908 L/h effective plasma clearance in AyFlux engine,
  * distinct from dialyzer hemodynamic flow settings such as Qb=300 mL/min, Qd=500 mL/min, KoA=900 mL/min).
+ *
+ * Model Constraints & Guardrails:
+ * - Parameter-disjoint draws: 900 draws partitioned into 500 virtual patients and 400 candidate forecasters.
+ * - Educational & exploratory simulation only — never clinical decision support.
  */
 const fs = require('node:fs');
 const path = require('node:path');
@@ -54,6 +61,10 @@ function median(arr) {
   const s = arr.slice().sort((a, b) => a - b);
   const mid = Math.floor(s.length / 2);
   return s.length % 2 !== 0 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+function mean(arr) {
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
 // RK4 post-HD stepper from tStart to tEnd (anuric, no doses, no dialysis)
@@ -166,7 +177,7 @@ const baseConfig = {
   hdStart: 24,
   hdDuration: 4,
   hdRepeat: 48,
-  hdCl: 81.8, // Configured HD clearance: 81.8 mL/min (4.908 L/h)
+  hdCl: 81.8, // Configured HD clearance: 81.8 mL/min (4.908 L/h effective plasma clearance)
   horizon: 48,
   variability: 1,
   assayCV: 0.04
@@ -212,7 +223,37 @@ const trueSims = truePatients.map(p => simulateWithStates(baseConfig, p, hdRows,
 const fcSimsComplete = fcCandidates.map(p => simulateWithStates(baseConfig, p, hdRows, 0.25, dosesComplete));
 const fcSimsHidden = fcCandidates.map(p => simulateWithStates(baseConfig, p, hdRows, 0.25, dosesHidden));
 
-function runBenchmark(usePerturbations = false) {
+function signCounts(errs) {
+  let under = 0, over = 0, exact = 0;
+  for (const e of errs) {
+    if (Math.abs(e) < 1e-9) exact++;
+    else if (e < 0) under++;
+    else over++;
+  }
+  return { under, over, exact };
+}
+
+function pairedDiffs(absBoth, absCMMG) {
+  let helped = 0, worsened = 0, tied = 0;
+  const diffs = [];
+  for (let i = 0; i < absBoth.length; i++) {
+    const d = absBoth[i] - absCMMG[i];
+    diffs.push(d);
+    if (Math.abs(d) < 1e-9) tied++;
+    else if (d < 0) helped++;
+    else worsened++;
+  }
+  return {
+    helped,
+    worsened,
+    tied,
+    pctHelped: (100 * helped / absBoth.length).toFixed(1) + '%',
+    medDiff: Number(median(diffs).toFixed(4)),
+    meanDiff: Number(mean(diffs).toFixed(4))
+  };
+}
+
+function runBenchmark(conditionKey, usePerturbations = false, isZeroNoise = false) {
   const rng = createRng(44556677);
   const N = truePatients.length;
   const M = fcCandidates.length;
@@ -229,8 +270,8 @@ function runBenchmark(usePerturbations = false) {
     const trueCMMG28 = trueState28.M / truePatients[k].vm;
     const trueCMMG32 = interp(sim.t, sim.cols.cmmg, 32.0);
 
-    const noiseACV = rng.norm() * assayCV;
-    const noiseCMMG = rng.norm() * assayCV;
+    const noiseACV = isZeroNoise ? 0.0 : rng.norm() * assayCV;
+    const noiseCMMG = isZeroNoise ? 0.0 : rng.norm() * assayCV;
 
     const measACV = Math.max(0.01, trueACV28 * (1 + noiseACV));
     const measCMMG = Math.max(0.01, trueCMMG28 * (1 + noiseCMMG));
@@ -246,12 +287,13 @@ function runBenchmark(usePerturbations = false) {
   }
 
   const configurations = [
-    { name: 'Complete History (Control)', mode: 'complete' },
-    { name: 'Hidden Dose (Fixed 1-Dose)', mode: 'hidden' },
-    { name: 'Uncertain Dose (50/50 Mixture)', mode: 'mixture' }
+    { mode: 'complete', name: 'Complete History (Control)', assumedHist: '2 doses' },
+    { mode: 'hidden', name: 'Hidden Dose (Fixed 1-Dose)', assumedHist: '1 dose' },
+    { mode: 'mixture', name: 'Uncertain Dose (50/50 Mixture)', assumedHist: '50/50 mixture' }
   ];
 
-  const results = [];
+  const conditionSummaries = [];
+  const patientRecords = [];
 
   for (const cfg of configurations) {
     const errs = {
@@ -272,11 +314,19 @@ function runBenchmark(usePerturbations = false) {
 
       // 1. Carry-Forward
       const predCF = p.measCMMG;
-      errs.CF.abs.push(Math.abs(predCF - target));
-      errs.CF.signed.push(predCF - target);
+      const cfSigned = predCF - target;
+      const cfAbs = Math.abs(cfSigned);
+      errs.CF.abs.push(cfAbs);
+      errs.CF.signed.push(cfSigned);
+
+      let predER_CMMG, predER_Both, predSU_Unw_CMMG, predSU_Unw_Both, predSU_Rew_CMMG, predSU_Rew_Both;
+      let wH1 = 0, wH2 = 0, ess = 0;
 
       if (cfg.mode === 'complete' || cfg.mode === 'hidden') {
         const fcSims = cfg.mode === 'complete' ? fcSimsComplete : fcSimsHidden;
+        wH1 = cfg.mode === 'hidden' ? 1.0 : 0.0;
+        wH2 = cfg.mode === 'complete' ? 1.0 : 0.0;
+
         const logw_cmmg = [];
         const logw_both = [];
         const cmmg32Vals = [];
@@ -321,29 +371,14 @@ function runBenchmark(usePerturbations = false) {
         const sumB = unnormB.reduce((a, b) => a + b, 0);
         const wBoth = unnormB.map(w => w / sumB);
 
-        // ER
-        const predER_CMMG = weightedMedian(cmmg32Vals, wCMMG);
-        const predER_Both = weightedMedian(cmmg32Vals, wBoth);
-        errs.ER_CMMG.abs.push(Math.abs(predER_CMMG - target));
-        errs.ER_CMMG.signed.push(predER_CMMG - target);
-        errs.ER_Both.abs.push(Math.abs(predER_Both - target));
-        errs.ER_Both.signed.push(predER_Both - target);
+        ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
 
-        // SU Unweighted (Candidate ensemble median)
-        const predSU_Unw_CMMG = median(su_cmmg_pred);
-        const predSU_Unw_Both = median(su_both_pred);
-        errs.SU_Unw_CMMG.abs.push(Math.abs(predSU_Unw_CMMG - target));
-        errs.SU_Unw_CMMG.signed.push(predSU_Unw_CMMG - target);
-        errs.SU_Unw_Both.abs.push(Math.abs(predSU_Unw_Both - target));
-        errs.SU_Unw_Both.signed.push(predSU_Unw_Both - target);
-
-        // SU Reweighted (Posterior weighted median)
-        const predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
-        const predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
-        errs.SU_Rew_CMMG.abs.push(Math.abs(predSU_Rew_CMMG - target));
-        errs.SU_Rew_CMMG.signed.push(predSU_Rew_CMMG - target);
-        errs.SU_Rew_Both.abs.push(Math.abs(predSU_Rew_Both - target));
-        errs.SU_Rew_Both.signed.push(predSU_Rew_Both - target);
+        predER_CMMG = weightedMedian(cmmg32Vals, wCMMG);
+        predER_Both = weightedMedian(cmmg32Vals, wBoth);
+        predSU_Unw_CMMG = median(su_cmmg_pred);
+        predSU_Unw_Both = median(su_both_pred);
+        predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
+        predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
 
       } else if (cfg.mode === 'mixture') {
         const logw_cmmg = [];
@@ -412,83 +447,206 @@ function runBenchmark(usePerturbations = false) {
         const sumB = unnormB.reduce((a, b) => a + b, 0);
         const wBoth = unnormB.map(w => w / sumB);
 
-        const wH1_Both = wBoth.slice(0, M).reduce((a, b) => a + b, 0);
-        const wH2_Both = wBoth.slice(M).reduce((a, b) => a + b, 0);
-        const ess_Both = 1 / wBoth.reduce((a, b) => a + b * b, 0);
+        wH1 = wBoth.slice(0, M).reduce((a, b) => a + b, 0);
+        wH2 = wBoth.slice(M).reduce((a, b) => a + b, 0);
+        ess = 1 / wBoth.reduce((a, b) => a + b * b, 0);
 
-        sumW1 += wH1_Both;
-        sumW2 += wH2_Both;
-        sumESS += ess_Both;
+        sumW1 += wH1;
+        sumW2 += wH2;
+        sumESS += ess;
 
-        const predER_CMMG = weightedMedian(cmmg32Vals, wCMMG);
-        const predER_Both = weightedMedian(cmmg32Vals, wBoth);
-        errs.ER_CMMG.abs.push(Math.abs(predER_CMMG - target));
-        errs.ER_CMMG.signed.push(predER_CMMG - target);
-        errs.ER_Both.abs.push(Math.abs(predER_Both - target));
-        errs.ER_Both.signed.push(predER_Both - target);
-
-        const predSU_Unw_CMMG = median(su_cmmg_pred);
-        const predSU_Unw_Both = median(su_both_pred);
-        errs.SU_Unw_CMMG.abs.push(Math.abs(predSU_Unw_CMMG - target));
-        errs.SU_Unw_CMMG.signed.push(predSU_Unw_CMMG - target);
-        errs.SU_Unw_Both.abs.push(Math.abs(predSU_Unw_Both - target));
-        errs.SU_Unw_Both.signed.push(predSU_Unw_Both - target);
-
-        const predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
-        const predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
-        errs.SU_Rew_CMMG.abs.push(Math.abs(predSU_Rew_CMMG - target));
-        errs.SU_Rew_CMMG.signed.push(predSU_Rew_CMMG - target);
-        errs.SU_Rew_Both.abs.push(Math.abs(predSU_Rew_Both - target));
-        errs.SU_Rew_Both.signed.push(predSU_Rew_Both - target);
+        predER_CMMG = weightedMedian(cmmg32Vals, wCMMG);
+        predER_Both = weightedMedian(cmmg32Vals, wBoth);
+        predSU_Unw_CMMG = median(su_cmmg_pred);
+        predSU_Unw_Both = median(su_both_pred);
+        predSU_Rew_CMMG = weightedMedian(su_cmmg_pred, wCMMG);
+        predSU_Rew_Both = weightedMedian(su_both_pred, wBoth);
       }
+
+      errs.ER_CMMG.abs.push(Math.abs(predER_CMMG - target));
+      errs.ER_CMMG.signed.push(predER_CMMG - target);
+      errs.ER_Both.abs.push(Math.abs(predER_Both - target));
+      errs.ER_Both.signed.push(predER_Both - target);
+
+      errs.SU_Unw_CMMG.abs.push(Math.abs(predSU_Unw_CMMG - target));
+      errs.SU_Unw_CMMG.signed.push(predSU_Unw_CMMG - target);
+      errs.SU_Unw_Both.abs.push(Math.abs(predSU_Unw_Both - target));
+      errs.SU_Unw_Both.signed.push(predSU_Unw_Both - target);
+
+      errs.SU_Rew_CMMG.abs.push(Math.abs(predSU_Rew_CMMG - target));
+      errs.SU_Rew_CMMG.signed.push(predSU_Rew_CMMG - target);
+      errs.SU_Rew_Both.abs.push(Math.abs(predSU_Rew_Both - target));
+      errs.SU_Rew_Both.signed.push(predSU_Rew_Both - target);
+
+      patientRecords.push({
+        seed: 44556677,
+        patient_id: k,
+        condition: conditionKey,
+        scenario: cfg.mode,
+        scenario_name: cfg.name,
+        true_history: '2 doses (0h, 12h)',
+        assumed_history: cfg.assumedHist,
+        actual_draw_time_h: Number(p.tMeas.toFixed(4)),
+        assumed_draw_time_h: 28.0,
+        observed_acv_mg_L: Number(p.measACV.toFixed(4)),
+        observed_cmmg_mg_L: Number(p.measCMMG.toFixed(4)),
+        true_cmmg_32h_mg_L: Number(target.toFixed(4)),
+        pred_cf: Number(predCF.toFixed(4)),
+        pred_er_cmmg: Number(predER_CMMG.toFixed(4)),
+        pred_er_both: Number(predER_Both.toFixed(4)),
+        pred_su_unw_cmmg: Number(predSU_Unw_CMMG.toFixed(4)),
+        pred_su_unw_both: Number(predSU_Unw_Both.toFixed(4)),
+        pred_su_rew_cmmg: Number(predSU_Rew_CMMG.toFixed(4)),
+        pred_su_rew_both: Number(predSU_Rew_Both.toFixed(4)),
+        err_signed_cf: Number((predCF - target).toFixed(4)),
+        err_signed_er_cmmg: Number((predER_CMMG - target).toFixed(4)),
+        err_signed_er_both: Number((predER_Both - target).toFixed(4)),
+        err_signed_su_unw_cmmg: Number((predSU_Unw_CMMG - target).toFixed(4)),
+        err_signed_su_unw_both: Number((predSU_Unw_Both - target).toFixed(4)),
+        err_signed_su_rew_cmmg: Number((predSU_Rew_CMMG - target).toFixed(4)),
+        err_signed_su_rew_both: Number((predSU_Rew_Both - target).toFixed(4)),
+        err_abs_cf: Number(Math.abs(predCF - target).toFixed(4)),
+        err_abs_er_cmmg: Number(Math.abs(predER_CMMG - target).toFixed(4)),
+        err_abs_er_both: Number(Math.abs(predER_Both - target).toFixed(4)),
+        err_abs_su_unw_cmmg: Number(Math.abs(predSU_Unw_CMMG - target).toFixed(4)),
+        err_abs_su_unw_both: Number(Math.abs(predSU_Unw_Both - target).toFixed(4)),
+        err_abs_su_rew_cmmg: Number(Math.abs(predSU_Rew_CMMG - target).toFixed(4)),
+        err_abs_su_rew_both: Number(Math.abs(predSU_Rew_Both - target).toFixed(4)),
+        w_H1: Number(wH1.toFixed(4)),
+        w_H2: Number(wH2.toFixed(4)),
+        ess: Number(ess.toFixed(1))
+      });
     }
 
-    results.push({
+    conditionSummaries.push({
       config: cfg.name,
+      condition: conditionKey,
       perturbations: usePerturbations ? '+/- 15 min' : 'Exact (28.0h)',
+      isZeroNoise,
       CF: {
-        medAbs: median(errs.CF.abs).toFixed(4),
-        medSigned: median(errs.CF.signed).toFixed(4)
+        medAbs: Number(median(errs.CF.abs).toFixed(4)),
+        medSigned: Number(median(errs.CF.signed).toFixed(4)),
+        signs: signCounts(errs.CF.signed)
       },
       ER: {
-        cmmgMedAbs: median(errs.ER_CMMG.abs).toFixed(4),
-        cmmgMedSigned: median(errs.ER_CMMG.signed).toFixed(4),
-        bothMedAbs: median(errs.ER_Both.abs).toFixed(4),
-        bothMedSigned: median(errs.ER_Both.signed).toFixed(4),
-        pctHelped: (100 * errs.ER_Both.abs.filter((e, idx) => e < errs.ER_CMMG.abs[idx]).length / N).toFixed(1) + '%'
+        cmmgMedAbs: Number(median(errs.ER_CMMG.abs).toFixed(4)),
+        cmmgMedSigned: Number(median(errs.ER_CMMG.signed).toFixed(4)),
+        cmmgSigns: signCounts(errs.ER_CMMG.signed),
+        bothMedAbs: Number(median(errs.ER_Both.abs).toFixed(4)),
+        bothMedSigned: Number(median(errs.ER_Both.signed).toFixed(4)),
+        bothSigns: signCounts(errs.ER_Both.signed),
+        diffs: pairedDiffs(errs.ER_Both.abs, errs.ER_CMMG.abs)
       },
       SU_Unw: {
-        cmmgMedAbs: median(errs.SU_Unw_CMMG.abs).toFixed(4),
-        cmmgMedSigned: median(errs.SU_Unw_CMMG.signed).toFixed(4),
-        bothMedAbs: median(errs.SU_Unw_Both.abs).toFixed(4),
-        bothMedSigned: median(errs.SU_Unw_Both.signed).toFixed(4),
-        pctHelped: (100 * errs.SU_Unw_Both.abs.filter((e, idx) => e < errs.SU_Unw_CMMG.abs[idx]).length / N).toFixed(1) + '%'
+        cmmgMedAbs: Number(median(errs.SU_Unw_CMMG.abs).toFixed(4)),
+        cmmgMedSigned: Number(median(errs.SU_Unw_CMMG.signed).toFixed(4)),
+        cmmgSigns: signCounts(errs.SU_Unw_CMMG.signed),
+        bothMedAbs: Number(median(errs.SU_Unw_Both.abs).toFixed(4)),
+        bothMedSigned: Number(median(errs.SU_Unw_Both.signed).toFixed(4)),
+        bothSigns: signCounts(errs.SU_Unw_Both.signed),
+        diffs: pairedDiffs(errs.SU_Unw_Both.abs, errs.SU_Unw_CMMG.abs)
       },
       SU_Rew: {
-        cmmgMedAbs: median(errs.SU_Rew_CMMG.abs).toFixed(4),
-        cmmgMedSigned: median(errs.SU_Rew_CMMG.signed).toFixed(4),
-        bothMedAbs: median(errs.SU_Rew_Both.abs).toFixed(4),
-        bothMedSigned: median(errs.SU_Rew_Both.signed).toFixed(4),
-        pctHelped: (100 * errs.SU_Rew_Both.abs.filter((e, idx) => e < errs.SU_Rew_CMMG.abs[idx]).length / N).toFixed(1) + '%'
+        cmmgMedAbs: Number(median(errs.SU_Rew_CMMG.abs).toFixed(4)),
+        cmmgMedSigned: Number(median(errs.SU_Rew_CMMG.signed).toFixed(4)),
+        cmmgSigns: signCounts(errs.SU_Rew_CMMG.signed),
+        bothMedAbs: Number(median(errs.SU_Rew_Both.abs).toFixed(4)),
+        bothMedSigned: Number(median(errs.SU_Rew_Both.signed).toFixed(4)),
+        bothSigns: signCounts(errs.SU_Rew_Both.signed),
+        diffs: pairedDiffs(errs.SU_Rew_Both.abs, errs.SU_Rew_CMMG.abs)
       },
       mixtureStats: cfg.mode === 'mixture' ? {
-        meanW_H1: (sumW1 / N).toFixed(4),
-        meanW_H2: (sumW2 / N).toFixed(4),
-        meanESS: (sumESS / N).toFixed(1)
+        meanW_H1: Number((sumW1 / N).toFixed(4)),
+        meanW_H2: Number((sumW2 / N).toFixed(4)),
+        meanESS: Number((sumESS / N).toFixed(1))
       } : null
     });
   }
 
-  return results;
+  return { conditionSummaries, patientRecords };
 }
 
-const exactResults = runBenchmark(false);
-const perturbedResults = runBenchmark(true);
+console.log('Running Condition 1: Exact 28.0h, 4% CV...');
+const exactRun = runBenchmark('exact_28h_4pct_cv', false, false);
 
-console.log('\n=== EXACT TIMESTAMPS (28.0h) ===');
-console.table(exactResults);
+console.log('Running Condition 2: Perturbed +/-15min, 4% CV...');
+const perturbedRun = runBenchmark('perturbed_15m_4pct_cv', true, false);
 
-console.log('\n=== PERTURBED TIMESTAMPS (+/- 15 min) ===');
-console.table(perturbedResults);
+console.log('Running Condition 3: Zero-Noise Sanity (0% CV, Exact 28.0h)...');
+const zeroNoiseRun = runBenchmark('zero_noise_28h', false, true);
 
-module.exports = { exactResults, perturbedResults };
+const allSummaries = {
+  metadata: {
+    run_date: '2026-11-15',
+    generator_seed: 44556677,
+    n_virtual_patients: truePatients.length,
+    n_forecast_candidates: fcCandidates.length,
+    parameter_overlap: 0,
+    configured_hd_clearance_mL_min: 81.8,
+    configured_hd_clearance_L_h: 4.908,
+    notes: 'In silico PK simulation only; not clinical decision support or validated external prediction.'
+  },
+  exact_4pct_cv: exactRun.conditionSummaries,
+  perturbed_4pct_cv: perturbedRun.conditionSummaries,
+  zero_noise_sanity: zeroNoiseRun.conditionSummaries
+};
+
+// Export JSON
+const jsonPath = path.resolve(__dirname, 'cmmg-forecast-results.json');
+fs.writeFileSync(jsonPath, JSON.stringify(allSummaries, null, 2), 'utf8');
+console.log(`Saved JSON summary to ${jsonPath}`);
+
+// Export CSV
+const allPatientRecords = [
+  ...exactRun.patientRecords,
+  ...perturbedRun.patientRecords,
+  ...zeroNoiseRun.patientRecords
+];
+
+const csvHeaders = Object.keys(allPatientRecords[0]);
+const csvRows = [csvHeaders.join(',')];
+for (const rec of allPatientRecords) {
+  csvRows.push(csvHeaders.map(h => rec[h]).join(','));
+}
+const csvPath = path.resolve(__dirname, 'cmmg-forecast-patients.csv');
+fs.writeFileSync(csvPath, csvRows.join('\n'), 'utf8');
+console.log(`Saved per-patient CSV (${allPatientRecords.length} rows) to ${csvPath}`);
+
+console.log('\n=== EXACT (4% CV) SUMMARIES ===');
+console.table(exactRun.conditionSummaries.map(s => ({
+  config: s.config,
+  CF_medAbs: s.CF.medAbs,
+  CF_under: s.CF.signs.under,
+  ER_cmmg_medAbs: s.ER.cmmgMedAbs,
+  ER_both_medAbs: s.ER.bothMedAbs,
+  ER_pctHelped: s.ER.diffs.pctHelped,
+  SU_Unw_cmmg: s.SU_Unw.cmmgMedAbs,
+  SU_Unw_both: s.SU_Unw.bothMedAbs,
+  SU_Unw_pctHelped: s.SU_Unw.diffs.pctHelped,
+  SU_Rew_cmmg: s.SU_Rew.cmmgMedAbs,
+  SU_Rew_both: s.SU_Rew.bothMedAbs,
+  SU_Rew_pctHelped: s.SU_Rew.diffs.pctHelped
+})));
+
+console.log('\n=== ZERO-NOISE SANITY SUMMARIES ===');
+console.table(zeroNoiseRun.conditionSummaries.map(s => ({
+  config: s.config,
+  CF_medAbs: s.CF.medAbs,
+  CF_under: s.CF.signs.under,
+  ER_cmmg_medAbs: s.ER.cmmgMedAbs,
+  ER_both_medAbs: s.ER.bothMedAbs,
+  ER_pctHelped: s.ER.diffs.pctHelped,
+  SU_Unw_cmmg: s.SU_Unw.cmmgMedAbs,
+  SU_Unw_both: s.SU_Unw.bothMedAbs,
+  SU_Unw_pctHelped: s.SU_Unw.diffs.pctHelped,
+  SU_Rew_cmmg: s.SU_Rew.cmmgMedAbs,
+  SU_Rew_both: s.SU_Rew.bothMedAbs,
+  SU_Rew_pctHelped: s.SU_Rew.diffs.pctHelped
+})));
+
+module.exports = {
+  allSummaries,
+  exactResults: exactRun.conditionSummaries,
+  perturbedResults: perturbedRun.conditionSummaries,
+  zeroNoiseResults: zeroNoiseRun.conditionSummaries
+};
