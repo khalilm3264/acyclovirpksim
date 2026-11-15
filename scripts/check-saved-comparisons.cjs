@@ -36,14 +36,33 @@ async function main(){
   await page.fill('#regimenName','Frozen 500 mg');await page.click('#saveRegimen');
   await page.click('#saveBaseline');
   await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
-  const comparisonCurves=()=>page.evaluate(()=>Object.fromEntries(window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().series.filter(s=>s.name==='Frozen 500 mg'||s.name?.startsWith('Baseline:')).map(s=>[s.name,s.data])));
-  const waitComparisons=()=>page.waitForFunction(()=>{const chart=window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'));const s=chart?.getOption().series||[];return s.some(s=>s.name==='Frozen 500 mg')&&s.some(s=>s.name?.startsWith('Baseline:'));});
-  await waitComparisons();const frozen=await comparisonCurves();
+  const concentrationCharts=[['plasmaChart','plasma'],['csfChart','csf'],['cmmgChart','cmmg'],['csfCmmgChart','csfCmmg']];
+  const comparisonCurves=async()=>{
+   const captured={};
+   for(const [id,key] of concentrationCharts){
+    await page.locator('#'+id).scrollIntoViewIfNeeded();
+    // Presence of saved series alone could be an old chart. Require the selected
+    // series to match the accepted run before inspecting the saved overlays.
+    await page.waitForFunction(({id,key})=>{
+     const s=window.AyFluxResearchBridge.snapshot();if(!s.updated)return false;
+     const series=window.echarts?.getInstanceByDom(document.getElementById(id))?.getOption().series;
+     const current=series?.find(r=>r.name===s.primary+' (selected)'),d=s.results[s.primary];
+     return current&&JSON.stringify(current.data)===JSON.stringify(d.time.map((t,i)=>[t,d[key].median[i]]));
+    },{id,key},{timeout:60000});
+    captured[id]=await page.evaluate(id=>Object.fromEntries(window.echarts.getInstanceByDom(document.getElementById(id)).getOption().series.filter(s=>s.name==='Frozen 500 mg'||s.name?.startsWith('Baseline:')).map(s=>[s.name,s.data])),id);
+   }
+   return captured;
+  };
+  const frozen=await comparisonCurves();
+  for(const [id,key] of concentrationCharts){
+   assert.ok(frozen[id]['Baseline: No dialysis'],id+' shows the saved baseline');
+   if(key==='plasma'||key==='cmmg')assert.ok(frozen[id]['Frozen 500 mg'],id+' shows the named regimen');
+  }
   const savedLabel=await page.locator('#regimenRows tr').first().locator('td').nth(1).textContent();
   assert.match(savedLabel,/500 mg/);
   const verify=async expected=>{
    await page.waitForFunction(expected=>{const s=window.AyFluxResearchBridge.snapshot();return s.updated&&Object.entries(expected).every(([key,value])=>JSON.stringify(s.config[key])===JSON.stringify(value));},expected,{timeout:60000});
-   await ready();await page.click('[data-tab="concentration"]');await page.locator('#plasmaChart').scrollIntoViewIfNeeded();await waitComparisons();
+   await ready();await page.click('[data-tab="concentration"]');await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
    assert.deepEqual(await comparisonCurves(),frozen);
    assert.equal(await page.locator('#regimenRows tr').first().locator('td').nth(1).textContent(),savedLabel);
   };
@@ -73,8 +92,23 @@ async function main(){
   await page.evaluate(()=>window.heldWorker.onmessage({data:window.heldResult}));await ready();
   await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>{const series=window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().series;return !series.some(s=>s.name==='Frozen 500 mg'||s.name?.startsWith('Baseline:'));});
-  assert.deepEqual(await comparisonCurves(),{});
+  for(const curves of Object.values(await comparisonCurves()))assert.deepEqual(curves,{});
   assert.equal(await page.locator('[data-remove-regimen]').count(),0);
+  // The same revision guard must accept the dynamic renal chart's producer.
+  await page.evaluate(()=>{window.holdComparisonResults=false;});
+  await page.selectOption('#renalMode','profile');await ready();
+  await page.click('[data-tab="clearance"]');await page.locator('#kidneyClearChart').scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>{
+   const option=window.echarts?.getInstanceByDom(document.querySelector('#kidneyClearChart'))?.getOption();
+   return option?.yAxis.length===2&&option.series.some(s=>s.name==='User-entered CrCl'&&s.yAxisIndex===1);
+  });
+  assert.equal(await page.locator('#kidneyClearChart .chart-status').count(),0);
+  const renal=await page.evaluate(()=>{
+   const snapshot=window.AyFluxResearchBridge.snapshot(),d=snapshot.results[snapshot.primary];
+   const series=window.echarts.getInstanceByDom(document.querySelector('#kidneyClearChart')).getOption().series;
+   return {actual:series.find(s=>s.name==='Modeled renal acyclovir clearance').data,expected:d.time.map((t,i)=>[t,d.kidneyClear.median[i]])};
+  });
+  assert.deepEqual(renal.actual,renal.expected);
   assert.deepEqual(errors,[]);
   console.log('Saved baseline and regimen curves/labels survive Reset, Undo, JSON import, guided/study presets; rapid changes disable saves, and delayed Worker completion preserves clear/remove.');
  }finally{try{await browser?.close();}finally{server.close();}}

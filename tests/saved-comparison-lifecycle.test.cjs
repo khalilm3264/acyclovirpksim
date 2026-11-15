@@ -42,3 +42,19 @@ test('saved regimen comparison window only includes a current run when its row i
  state.predicting=()=>true;assert.equal(window(),96,'prediction shows saved rows only');
  state.savedRegimens=[];assert.equal(Number.isFinite(window()),true,'no infinite window with no rows');
 });
+test('dynamic renal chart producer draws current jobs and rejects superseded results',async()=>{
+ const drawn=[],errors=[],target={getBoundingClientRect:()=>({width:600,height:300})};
+ const state={c:{renalMode:'profile',horizon:24},primary:'No dialysis',results:{'No dialysis':{time:[0,12,24],kidneyClear:{median:[100,50,20]}}},resultsRevision:1,baselineRevision:0,concUnit:'mg',modes:['No dialysis'],visible:new Set(['No dialysis']),paletteMode:'standard',dataIsCurrent:true,pendingPlots:new Map(),chartStates:new Map(),plotFrame:0,plotRunning:false,activePlot:null,plasmaRestoreCharts:new WeakSet(),$:()=>target,chartNearViewport:()=>true,requestPlotFrame(){},chartMessage(){},alertMessage:message=>errors.push(message),E:{renalCrClAt:(_,t)=>95-t},layout:(_,horizon,series)=>({yAxis:{},grid:{},series}),document:{documentElement:{dataset:{ayfluxReady:'true'}}},window:{AyFluxCharts:{line:(name,time,values)=>({name,data:time.map((t,i)=>[t,values[i]])}),draw:(_,option)=>{drawn.push(option);return {};}}}};
+ vm.createContext(state);
+ vm.runInContext(section('function chartSignature(', 'let chartWait')+section('function renderRenalProfileChart(', 'function renderInputs(')+section('function drawNextPlot(', 'function resizeVisibleCharts('),state);
+ const run=code=>vm.runInContext(code,state),flush=()=>new Promise(resolve=>setImmediate(resolve));
+ run('renderRenalProfileChart();drawNextPlot()');await flush();
+ assert.equal(drawn.length,1,'the actual renal producer must survive the shared signature guard');
+ assert.deepEqual(JSON.parse(JSON.stringify(drawn[0].series.map(s=>s.data))),[[[0,100],[12,50],[24,20]],[[0,95],[12,83],[24,71]]]);
+ run('renderRenalProfileChart()');assert.equal(state.pendingPlots.size,0,'unchanged chart is cached');
+ run('resultsRevision++;renderRenalProfileChart();resultsRevision++;drawNextPlot()');await flush();
+ assert.equal(drawn.length,1,'obsolete renal job is rejected');
+ run('renderRenalProfileChart();drawNextPlot()');await flush();
+ assert.equal(drawn.length,2,'latest renal results can draw after rejecting an older job');
+ assert.deepEqual(errors,[]);
+});

@@ -360,7 +360,7 @@ function applyRenalDraft(){
 function renderRenalProfileChart(){
  if(!results||!dataIsCurrent||c.renalMode!=='profile')return;
  if(!chartNearViewport($('kidneyClearChart')))return;
- const signature=chartSignature('kidneyClear')+':dynamic';
+ const signature=chartSignature('kidneyClear');
  if(pendingPlots.get('kidneyClearChart')?.signature===signature||chartStates.get('kidneyClearChart')?.signature===signature)return;
  const d=results[primary],charts=window.AyFluxCharts;
  const series=[charts.line('Modeled renal acyclovir clearance',d.time,d.kidneyClear.median,'#0054e9',3),
