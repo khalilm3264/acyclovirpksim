@@ -106,7 +106,7 @@
   if(lo>0&&Math.abs(time[lo-1]-hour)<Math.abs(time[lo]-hour))return lo-1;
   return lo;
  }
- function draw(canvas,scenarios,key,horizon,highlight,shown,hoverHour=null,layout=null){
+ function draw(canvas,scenarios,key,horizon,highlight,shown,hoverHour=null,layout=null,view=null){
   if(!canvas||typeof canvas.getContext!=="function")return;
   const ctx=canvas.getContext("2d");if(!ctx)return;
   const rect=layout||canvas.getBoundingClientRect(),width=Math.max(280,rect.width||700);
@@ -120,7 +120,8 @@
   const selected=scenarios.filter(s=>shown.has(s.id));
   const observed=selected.reduce((max,s)=>Math.max(max,...s[key].filter(Number.isFinite)),0);
   const y=ticks(observed*1.06);
-  const px=t=>left+plotW*t/horizon,py=v=>top+plotH-plotH*v/y.max;
+  const start=view?.[0]??0,end=view?.[1]??horizon,span=end-start;
+  const px=t=>left+plotW*(t-start)/span,py=v=>top+plotH-plotH*v/y.max;
   ctx.font='11px system-ui,"Segoe UI",sans-serif';
   ctx.strokeStyle="#dce6eb";ctx.lineWidth=1;ctx.setLineDash([]);
   const steps=Math.round(y.max/y.step);
@@ -129,13 +130,14 @@
    ctx.beginPath();ctx.moveTo(left,py(value));ctx.lineTo(left+plotW,py(value));ctx.stroke();
    ctx.textAlign="right";ctx.textBaseline="middle";ctx.fillStyle="#526f7c";ctx.fillText(tickLabel(value),left-7,py(value));
   }
-  const every=horizon<=48?12:horizon<=96?24:48;
-  for(let t=0;t<=horizon;t+=every){
+  const every=ticks(span).step;
+  for(let t=Math.ceil(start/every)*every;t<=end;t+=every){
    const x=px(t);ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,top+plotH);ctx.stroke();
    ctx.textAlign="center";ctx.textBaseline="top";ctx.fillText(String(t),x,top+plotH+8);
   }
-  if(horizon%every!==0){
-   ctx.textAlign="right";ctx.fillText(String(horizon),left+plotW,top+plotH+8);
+  if(start%every!==0){ctx.textAlign="left";ctx.fillText(tickLabel(start),left,top+plotH+8);}
+  if(end%every!==0){
+   ctx.textAlign="right";ctx.fillText(tickLabel(end),left+plotW,top+plotH+8);
   }
   ctx.textAlign="center";ctx.textBaseline="alphabetic";
   ctx.fillStyle="#3e6276";ctx.fillText("Time (hours)",left+plotW/2,height-6);
@@ -253,22 +255,37 @@
    }
   }
   const charts=window.AyFluxCharts, rendered=new Map();
-  let interactive=false;
+  let interactive=false,timeWindow=[0,100];
+  function timeRange(){return timeWindow.map(p=>p/100*config.horizon);}
+  function updateTimeControls(){
+   const range=timeRange();
+   $("liteTimeWindow").textContent="Time: "+range.map(v=>formatNumber(v,1)).join("–")+" h";
+   $("liteTimeIn").disabled=range[1]-range[0]<=1.001;
+   $("liteTimeOut").disabled=$("liteTimeReset").disabled=timeWindow[0]===0&&timeWindow[1]===100;
+  }
   charts.ensure().then(()=>{interactive=true;requestPaint();}).catch(()=>{/* Use native canvas offline. */});
   function paintChart(key){
    const el=plots[key];
-   if(!interactive){draw(el.querySelector('canvas'),scenarios,key,config.horizon,active,visibility,hoverHour);return;}
+   if(!interactive){draw(el.querySelector('canvas'),scenarios,key,config.horizon,active,visibility,hoverHour,null,timeRange());return;}
    const selected=scenarios.filter(s=>visibility.has(s.id)), selection=active+' '+selected.map(s=>s.id).join(' ');
    const prior=rendered.get(key);
    if(prior?.scenarios!==scenarios||prior.selection!==selection){
     el.querySelector(':scope > canvas')?.remove();
     const series=selected.map(s=>charts.line(s.label,s.time,s[key],s.color,s.id===active?3.2:2.1,s.dash.length?s.dash:'solid'));
     const option=charts.options(series,'Time (hours)',SERIES[key].unit);
-    option.legend.show=false;option.toolbox.show=false;option.tooltip.showContent=false;
+    option.legend.show=false;option.toolbox={show:false,feature:{}};option.tooltip.showContent=false;
+    option.dataZoom=[{id:"ayNavX",type:"inside",xAxisIndex:0,filterMode:"none",start:timeWindow[0],end:timeWindow[1],zoomOnMouseWheel:false,moveOnMouseMove:false,moveOnMouseWheel:false,zoomOnTouchPinch:false,preventDefaultMouseMove:false}];
     option.grid={left:53,right:15,top:14,bottom:48};option.xAxis.max=config.horizon;
-    charts.draw(el,option);rendered.set(key,{scenarios,selection});
+    const instance=charts.draw(el,option);
+    if(!prior)instance.on("restore",()=>{timeWindow=[0,100];updateTimeControls();requestPaint();});
+    rendered.set(key,{scenarios,selection,window:timeWindow.slice()});
    }
    const chart=window.echarts.getInstanceByDom(el);
+   const painted=rendered.get(key);
+   if(painted.window.some((v,i)=>v!==timeWindow[i])){
+    chart.dispatchAction({type:"dataZoom",dataZoomId:"ayNavX",start:timeWindow[0],end:timeWindow[1]});
+    painted.window=timeWindow.slice();
+   }
    if(Number.isFinite(hoverHour))chart.dispatchAction({type:'showTip',seriesIndex:0,dataIndex:closest(selected[0].time,hoverHour)});
    else chart.dispatchAction({type:'hideTip'});
   }
@@ -293,7 +310,7 @@
     const values=readValues(),start=performance.now();
     const nextConfig=fixedConfiguration(engine,values);
     const next=compute(engine,values);
-    scenarios=next;config=nextConfig;
+    scenarios=next;config=nextConfig;timeWindow=[0,100];hoverHour=null;updateTimeControls();
     updateStats();updateTable();requestPaint();
     const label=$("liteDosingNote");
     if(label)label.textContent=nextConfig.doseCount+" illustrative "+(nextConfig.route==="Acyclovir IV"?"IV":"oral")+" administrations within "+nextConfig.horizon+" hours.";
@@ -332,7 +349,8 @@
   function trackHover(event,canvas,key){
    const r=canvas.getBoundingClientRect(),left=53,right=15;
    const x=event.clientX-r.left,available=Math.max(1,r.width-left-right);
-   hoverHour=Math.min(config.horizon,Math.max(0,(x-left)/available*config.horizon));
+   const [start,end]=timeRange();
+   hoverHour=start+Math.min(1,Math.max(0,(x-left)/available))*(end-start);
    hoverKey=key;
    requestPaint();
   }
@@ -340,6 +358,14 @@
    if(!canvas)continue;
    canvas.addEventListener("pointermove",event=>{if(config)trackHover(event,canvas,key);});
    canvas.addEventListener("pointerleave",()=>{hoverHour=null;requestPaint();});
+  }
+  for(const [id,factor] of [["liteTimeIn",.5],["liteTimeOut",2],["liteTimeReset",null]]){
+   $(id)?.addEventListener("click",()=>{
+    if(!config)return;
+    if(factor===null)timeWindow=[0,100];
+    else {const middle=(timeWindow[0]+timeWindow[1])/2,half=Math.min(50,Math.max(50/config.horizon,(timeWindow[1]-timeWindow[0])*factor/2));timeWindow=[middle-half,middle+half];}
+    hoverHour=null;updateTimeControls();requestPaint();
+   });
   }
   $("clearanceDetails")?.addEventListener("toggle",requestPaint);
   $("liteReset")?.addEventListener("click",()=>{
