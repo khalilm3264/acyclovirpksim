@@ -63,9 +63,10 @@ const server=http.createServer((req,res)=>{
    const text=chart.getZr().storage.getDisplayList().find(el=>el.style?.text==='Threshold 0 mg/L');
    if(!text)return null;
    const rect=text.getBoundingRect().clone();rect.applyTransform(text.getComputedTransform());
-   return {x:rect.x,y:rect.y,width:rect.width,height:rect.height,chartWidth:chart.getWidth(),chartHeight:chart.getHeight()};
+   return {x:rect.x,y:rect.y,width:rect.width,height:rect.height,chartWidth:chart.getWidth(),chartHeight:chart.getHeight(),font:text.style.font};
   });
   assert.ok(paintedLabel,'Zero threshold label is actually painted');
+  assert.ok(Number(paintedLabel.font.match(/([0-9.]+)px/)[1])>=12,'Threshold label uses at least12px text');
   assert.ok(paintedLabel.x>=0&&paintedLabel.y>=0&&paintedLabel.x+paintedLabel.width<=paintedLabel.chartWidth&&paintedLabel.y+paintedLabel.height<=paintedLabel.chartHeight,'Threshold label fits the mobile/desktop chart');
 
   await field.fill('');s=await waitLine(null);assert.ok(!s.legend.some(n=>n.startsWith('Entered plasma ACV threshold')));assert.deepEqual(s.x,zoomed);assert.ok((await smallState(null)).every(p=>!p.legend.some(n=>n.startsWith('Entered plasma ACV threshold'))));

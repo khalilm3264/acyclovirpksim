@@ -25,7 +25,7 @@
   const result=line('Entered plasma ACV threshold, '+text,[0,horizon],[value,value],'#6b3b91',2.4,'dashed');
   result.id='entered-plasma-threshold';result.silent=true;result.z=8;result.tooltip={show:false};
   result.markLine={symbol:'none',silent:true,lineStyle:{opacity:0},
-   label:{show:true,position:'insideEndTop',formatter:'Threshold '+text,color:'#603183',fontSize:11,backgroundColor:'rgba(255,255,255,.92)',padding:[2,3]},data:[{yAxis:value}]};
+   label:{show:true,position:'insideEndTop',formatter:'Threshold '+text,color:'#603183',fontSize:12,backgroundColor:'rgba(255,255,255,.92)',padding:[2,3]},data:[{yAxis:value}]};
   return result;
  }
  // Keep an explicitly zoomed value window; full axes remain free to autoscale.
