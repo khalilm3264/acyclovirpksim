@@ -31,8 +31,10 @@ async function main(){
    await workerGate;await route.continue();
   });
   const rendererRequested=page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
-  await page.goto('http://127.0.0.1:'+server.address().port);
   try{
+   // Firefox can include the deliberately held Worker in the page load event.
+   // The DOM is sufficient to scroll to the graph and inspect request order.
+   await page.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'domcontentloaded'});
    assert.equal(await page.locator('#plasmaChart canvas').count(),0);
    await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
    await rendererRequested;
