@@ -253,7 +253,7 @@ const dosesHidden = [
   { time: 12, route: 'Acyclovir IV', amount: 500, infusion: 1 }
 ];
 
-console.log('Generating 900 disjoint parameter draws (seed 44556677)...');
+console.log('Generating 900 disjoint parameter draws (engine param_draw_seed 123456789)...');
 const allParams = pk.drawParams({ ...baseConfig, draws: 900 });
 const truePatients = allParams.slice(0, 500);
 const fcCandidates = allParams.slice(500, 900);
@@ -578,7 +578,8 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
       errs.SU_Rew_Both.signed.push(predSU_Rew_Both - target);
 
       patientRecords.push({
-        seed: 44556677,
+        param_draw_seed: 123456789,
+        eval_noise_seed: 44556677,
         patient_id: k,
         condition: conditionKey,
         target_mode: targetMode,
@@ -586,37 +587,37 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
         scenario_name: cfg.name,
         true_history: '2_doses_0h_12h',
         assumed_history: cfg.assumedHist,
-        actual_draw_time_h: Number(p.tMeas.toFixed(4)),
-        target_time_h: Number(p.targetTime.toFixed(4)),
-        actual_horizon_h: Number(p.actualHorizon.toFixed(4)),
+        actual_draw_time_h: p.tMeas,
+        target_time_h: p.targetTime,
+        actual_horizon_h: p.actualHorizon,
         is_during_hd: p.isDuringHD,
-        observed_acv_mg_L: Number(p.measACV.toFixed(4)),
-        observed_cmmg_mg_L: Number(p.measCMMG.toFixed(4)),
-        true_cmmg_target_mg_L: Number(target.toFixed(4)),
-        pred_cf: Number(predCF.toFixed(4)),
-        pred_er_cmmg: Number(predER_CMMG.toFixed(4)),
-        pred_er_both: Number(predER_Both.toFixed(4)),
-        pred_su_unw_cmmg: Number(predSU_Unw_CMMG.toFixed(4)),
-        pred_su_unw_both: Number(predSU_Unw_Both.toFixed(4)),
-        pred_su_rew_cmmg: Number(predSU_Rew_CMMG.toFixed(4)),
-        pred_su_rew_both: Number(predSU_Rew_Both.toFixed(4)),
-        err_signed_cf: Number((predCF - target).toFixed(4)),
-        err_signed_er_cmmg: Number((predER_CMMG - target).toFixed(4)),
-        err_signed_er_both: Number((predER_Both - target).toFixed(4)),
-        err_signed_su_unw_cmmg: Number((predSU_Unw_CMMG - target).toFixed(4)),
-        err_signed_su_unw_both: Number((predSU_Unw_Both - target).toFixed(4)),
-        err_signed_su_rew_cmmg: Number((predSU_Rew_CMMG - target).toFixed(4)),
-        err_signed_su_rew_both: Number((predSU_Rew_Both - target).toFixed(4)),
-        err_abs_cf: Number(Math.abs(predCF - target).toFixed(4)),
-        err_abs_er_cmmg: Number(Math.abs(predER_CMMG - target).toFixed(4)),
-        err_abs_er_both: Number(Math.abs(predER_Both - target).toFixed(4)),
-        err_abs_su_unw_cmmg: Number(Math.abs(predSU_Unw_CMMG - target).toFixed(4)),
-        err_abs_su_unw_both: Number(Math.abs(predSU_Unw_Both - target).toFixed(4)),
-        err_abs_su_rew_cmmg: Number(Math.abs(predSU_Rew_CMMG - target).toFixed(4)),
-        err_abs_su_rew_both: Number(Math.abs(predSU_Rew_Both - target).toFixed(4)),
-        w_H1: Number(wH1.toFixed(4)),
-        w_H2: Number(wH2.toFixed(4)),
-        ess: Number(ess.toFixed(1))
+        observed_acv_mg_L: p.measACV,
+        observed_cmmg_mg_L: p.measCMMG,
+        true_cmmg_target_mg_L: target,
+        pred_cf: predCF,
+        pred_er_cmmg: predER_CMMG,
+        pred_er_both: predER_Both,
+        pred_su_unw_cmmg: predSU_Unw_CMMG,
+        pred_su_unw_both: predSU_Unw_Both,
+        pred_su_rew_cmmg: predSU_Rew_CMMG,
+        pred_su_rew_both: predSU_Rew_Both,
+        err_signed_cf: predCF - target,
+        err_signed_er_cmmg: predER_CMMG - target,
+        err_signed_er_both: predER_Both - target,
+        err_signed_su_unw_cmmg: predSU_Unw_CMMG - target,
+        err_signed_su_unw_both: predSU_Unw_Both - target,
+        err_signed_su_rew_cmmg: predSU_Rew_CMMG - target,
+        err_signed_su_rew_both: predSU_Rew_Both - target,
+        err_abs_cf: Math.abs(predCF - target),
+        err_abs_er_cmmg: Math.abs(predER_CMMG - target),
+        err_abs_er_both: Math.abs(predER_Both - target),
+        err_abs_su_unw_cmmg: Math.abs(predSU_Unw_CMMG - target),
+        err_abs_su_unw_both: Math.abs(predSU_Unw_Both - target),
+        err_abs_su_rew_cmmg: Math.abs(predSU_Rew_CMMG - target),
+        err_abs_su_rew_both: Math.abs(predSU_Rew_Both - target),
+        w_H1: wH1,
+        w_H2: wH2,
+        ess: ess
       });
     }
 
@@ -715,7 +716,7 @@ function generateMarkdownReport(evals) {
 ## 1. Simulation Setup & Provenance
 
 ### 1.1 Parameter-Disjoint Partitioning
-- **Draw Sequence:** A single deterministic random sequence (seed \`44556677\`) generated 900 parameter draws from the log-normal adult AyFlux population distribution.
+- **Draw Sequence:** A single deterministic random sequence (engine param_draw_seed \`123456789\`) generated 900 parameter draws from the log-normal adult AyFlux population distribution.
 - **Partition:**
   - Virtual Ground-Truth Patients: First $N = 500$ draws (IDs $0 \\dots 499$).
   - Candidate Forecaster Draws: Remaining $M = 400$ draws (IDs $500 \\dots 899$).
@@ -735,10 +736,11 @@ function generateMarkdownReport(evals) {
 
 ### 1.4 Event-Aware Continuation Parity Audit (Codex Review Resolution)
 - **Review Finding:** In early runner drafts (\`e7655bb\`), stepping from $t_{\\text{meas}} < 28.0\\text{ h}$ (e.g. $27.75\\text{ h}$) with an anuric no-dialysis stepper dropped residual hemodialysis for the remaining $0.25\\text{ h}$, producing continuation errors of $+0.378\\text{ to }+0.550\\text{ mg/L}$ at $32\\text{ h}$.
-- **Parity Implementation:** The updated \`stepInterval\` applies active hemodialysis ($p.\\text{hd}$ and $c.\\text{metDial} = 0.75$) when $t < 28.0\\text{ h}$ before transitioning to post-HD clearance.
+- **Parity Implementation:** The updated \`stepInterval\` applies active hemodialysis ($p.\\text{hd}$ and $c.\\text{metDial} = 1.0$) when $t < 28.0\\text{ h}$ before transitioning to post-HD clearance.
 - **Verification Across Cohort:** Programmatic no-update continuation parity assertions were executed across diagnostic indices $[0, 1, 2, 100, 499]$ at pre-end ($27.75\\text{ h}$), exact-end ($28.0\\text{ h}$), and post-end ($28.25\\text{ h}$). Across all 15 patient-timestamp pairs, the continuation trajectory matched the full engine simulation exactly with absolute difference $< 10^{-12}\\text{ mg/L}$ ($0.000\\text{e}+0$).
 
 ### 1.5 Distinction Between Generative Noise and Likelihood Floor
+- **RNG Seeds:** Parameter draws used engine seed \`123456789\`; evaluation draw-time perturbation ($\\pm 15\\text{ min}$) and measurement noise ($4\\%\\text{ CV}$) used independent seed \`44556677\`.
 - **Generative Measurement Model:** Virtual patient observations are generated with pure proportional Gaussian noise:
   $$y = \\max(0.01, C \\cdot (1 + \\epsilon)), \\quad \\epsilon \\sim \\mathcal{N}(0, 0.04^2)$$
   There is NO artificial $0.1\\text{ mg/L}$ standard-deviation floor applied during observation generation.
@@ -823,11 +825,11 @@ function generateMarkdownReport(evals) {
       const helped = [
         '—',
         '—',
-        `${s.ER.diffs.pctHelped} (${s.ER.diffs.helped} helped, ${s.ER.diffs.worsened} worse, ${s.ER.diffs.tied} tie)`,
+        `${s.ER.diffs.pctHelped} (${s.ER.diffs.helped} helped, ${s.ER.diffs.worsened} worsened, ${s.ER.diffs.tied} tied)`,
         '—',
-        s.scenario === 'hidden' ? `**${s.SU_Unw.diffs.pctHelped}** (${s.SU_Unw.diffs.helped} helped, ${s.SU_Unw.diffs.worsened} worse, ${s.SU_Unw.diffs.tied} tie)` : `${s.SU_Unw.diffs.pctHelped} (${s.SU_Unw.diffs.helped} helped, ${s.SU_Unw.diffs.worsened} worse, ${s.SU_Unw.diffs.tied} tie)`,
+        s.scenario === 'hidden' ? `**${s.SU_Unw.diffs.pctHelped}** (${s.SU_Unw.diffs.helped} helped, ${s.SU_Unw.diffs.worsened} worsened, ${s.SU_Unw.diffs.tied} tied)` : `${s.SU_Unw.diffs.pctHelped} (${s.SU_Unw.diffs.helped} helped, ${s.SU_Unw.diffs.worsened} worsened, ${s.SU_Unw.diffs.tied} tied)`,
         '—',
-        `${s.SU_Rew.diffs.pctHelped} (${s.SU_Rew.diffs.helped} helped, ${s.SU_Rew.diffs.worsened} worse, ${s.SU_Rew.diffs.tied} tie)`
+        `${s.SU_Rew.diffs.pctHelped} (${s.SU_Rew.diffs.helped} helped, ${s.SU_Rew.diffs.worsened} worsened, ${s.SU_Rew.diffs.tied} tied)`
       ].join('<br>');
 
       md += `| ${condLabel} | ${methods} | ${medAbs} | ${medSigned} | ${signs} | ${pairedMedDiff} | ${diffMarginal} | ${helped} |\n`;
@@ -853,11 +855,11 @@ Evaluates the effect of sampling timestamp jitter ($t_{\\text{meas}} \\in [27.75
     md += `| **${s2.config}** | | | |\n`;
     md += `| Carry-Forward Median Abs Error | ${fmtNum(s2.CF.medAbs)} mg/L | ${fmtNum(s3.CF.medAbs)} mg/L | ${fmtNum(Math.abs(s2.CF.medAbs - s3.CF.medAbs))} mg/L |\n`;
     md += `| ER (Both) Median Abs Error | ${fmtNum(s2.ER.bothMedAbs)} mg/L | ${fmtNum(s3.ER.bothMedAbs)} mg/L | ${fmtNum(Math.abs(s2.ER.bothMedAbs - s3.ER.bothMedAbs))} mg/L |\n`;
-    md += `| ER (Both) % Patients Helped | ${s2.ER.diffs.pctHelped} | ${s3.ER.diffs.pctHelped} | ${fmtNum(Math.abs(parseFloat(s2.ER.diffs.pctHelped) - parseFloat(s3.ER.diffs.pctHelped)), 1)}% |\n`;
+    md += `| ER (Both) Patients Helped vs Worsened vs Tied | ${s2.ER.diffs.pctHelped} (${s2.ER.diffs.helped} helped / ${s2.ER.diffs.worsened} worsened / ${s2.ER.diffs.tied} tied) | ${s3.ER.diffs.pctHelped} (${s3.ER.diffs.helped} helped / ${s3.ER.diffs.worsened} worsened / ${s3.ER.diffs.tied} tied) | ${fmtNum(Math.abs(parseFloat(s2.ER.diffs.pctHelped) - parseFloat(s3.ER.diffs.pctHelped)), 1)}% |\n`;
     md += `| SU Unweighted (Both) Median Abs Error | ${fmtNum(s2.SU_Unw.bothMedAbs)} mg/L | ${fmtNum(s3.SU_Unw.bothMedAbs)} mg/L | ${fmtNum(Math.abs(s2.SU_Unw.bothMedAbs - s3.SU_Unw.bothMedAbs))} mg/L |\n`;
-    md += `| SU Unweighted (Both) % Patients Helped | ${s2.SU_Unw.diffs.pctHelped} | ${s3.SU_Unw.diffs.pctHelped} | ${fmtNum(Math.abs(parseFloat(s2.SU_Unw.diffs.pctHelped) - parseFloat(s3.SU_Unw.diffs.pctHelped)), 1)}% |\n`;
+    md += `| SU Unweighted (Both) Patients Helped vs Worsened vs Tied | ${s2.SU_Unw.diffs.pctHelped} (${s2.SU_Unw.diffs.helped} helped / ${s2.SU_Unw.diffs.worsened} worsened / ${s2.SU_Unw.diffs.tied} tied) | ${s3.SU_Unw.diffs.pctHelped} (${s3.SU_Unw.diffs.helped} helped / ${s3.SU_Unw.diffs.worsened} worsened / ${s3.SU_Unw.diffs.tied} tied) | ${fmtNum(Math.abs(parseFloat(s2.SU_Unw.diffs.pctHelped) - parseFloat(s3.SU_Unw.diffs.pctHelped)), 1)}% |\n`;
     md += `| SU Reweighted (Both) Median Abs Error | ${fmtNum(s2.SU_Rew.bothMedAbs)} mg/L | ${fmtNum(s3.SU_Rew.bothMedAbs)} mg/L | ${fmtNum(Math.abs(s2.SU_Rew.bothMedAbs - s3.SU_Rew.bothMedAbs))} mg/L |\n`;
-    md += `| SU Reweighted (Both) % Patients Helped | ${s2.SU_Rew.diffs.pctHelped} | ${s3.SU_Rew.diffs.pctHelped} | ${fmtNum(Math.abs(parseFloat(s2.SU_Rew.diffs.pctHelped) - parseFloat(s3.SU_Rew.diffs.pctHelped)), 1)}% |\n`;
+    md += `| SU Reweighted (Both) Patients Helped vs Worsened vs Tied | ${s2.SU_Rew.diffs.pctHelped} (${s2.SU_Rew.diffs.helped} helped / ${s2.SU_Rew.diffs.worsened} worsened / ${s2.SU_Rew.diffs.tied} tied) | ${s3.SU_Rew.diffs.pctHelped} (${s3.SU_Rew.diffs.helped} helped / ${s3.SU_Rew.diffs.worsened} worsened / ${s3.SU_Rew.diffs.tied} tied) | ${fmtNum(Math.abs(parseFloat(s2.SU_Rew.diffs.pctHelped) - parseFloat(s3.SU_Rew.diffs.pctHelped)), 1)}% |\n`;
   }
 
   md += `
@@ -888,6 +890,66 @@ Distribution statistics for posterior weight assigned to the true 2-dose history
     }
   }
 
+  const N = e1.conditionSummaries[0].CF.signs.under + e1.conditionSummaries[0].CF.signs.over + e1.conditionSummaries[0].CF.signs.exact; // 500
+
+  const e1_CF = e1.conditionSummaries[0].CF;
+  const e2_CF = e2.conditionSummaries[0].CF;
+  const e4_CF = e4.conditionSummaries[0].CF;
+
+  const e1_hidden = e1.conditionSummaries.find(s => s.scenario === 'hidden');
+  const e4_hidden = e4.conditionSummaries.find(s => s.scenario === 'hidden');
+
+  const e1_mix = e1.conditionSummaries.find(s => s.scenario === 'mixture');
+  const suDiffs = e1_mix.SU_Unw.diffs;
+
+  const erHiddenWorsePcts = [e1, e2, e4].map(ev => {
+    const sm = ev.conditionSummaries.find(x => x.scenario === 'hidden');
+    return (100 * sm.ER.diffs.worsened / N);
+  });
+  const minErWorsePct = fmtNum(Math.min(...erHiddenWorsePcts), 1);
+  const maxErWorsePct = fmtNum(Math.max(...erHiddenWorsePcts), 1);
+
+  const erHiddenWorsened = [e1, e2, e4].map(ev => ev.conditionSummaries.find(x => x.scenario === 'hidden').ER.diffs.worsened);
+  const erHiddenHelped = [e1, e2, e4].map(ev => ev.conditionSummaries.find(x => x.scenario === 'hidden').ER.diffs.helped);
+  const erHiddenTied = [e1, e2, e4].map(ev => ev.conditionSummaries.find(x => x.scenario === 'hidden').ER.diffs.tied);
+  const minErWorseN = Math.min(...erHiddenWorsened);
+  const maxErWorseN = Math.max(...erHiddenWorsened);
+  const minErHelpedN = Math.min(...erHiddenHelped);
+  const maxErHelpedN = Math.max(...erHiddenHelped);
+  const minErTiedN = Math.min(...erHiddenTied);
+  const maxErTiedN = Math.max(...erHiddenTied);
+
+  const suUnwHelpedPcts = [e1, e2, e4].map(ev => {
+    const sm = ev.conditionSummaries.find(x => x.scenario === 'hidden');
+    return (100 * sm.SU_Unw.diffs.helped / N);
+  });
+  const minSuHelpedPct = fmtNum(Math.min(...suUnwHelpedPcts), 1);
+  const maxSuHelpedPct = fmtNum(Math.max(...suUnwHelpedPcts), 1);
+
+  const suUnwHelped = [e1, e2, e4].map(ev => ev.conditionSummaries.find(x => x.scenario === 'hidden').SU_Unw.diffs.helped);
+  const suUnwWorsened = [e1, e2, e4].map(ev => ev.conditionSummaries.find(x => x.scenario === 'hidden').SU_Unw.diffs.worsened);
+  const suUnwTied = [e1, e2, e4].map(ev => ev.conditionSummaries.find(x => x.scenario === 'hidden').SU_Unw.diffs.tied);
+  const minSuHelpedN = Math.min(...suUnwHelped);
+  const maxSuHelpedN = Math.max(...suUnwHelped);
+  const minSuWorseN = Math.min(...suUnwWorsened);
+  const maxSuWorseN = Math.max(...suUnwWorsened);
+  const minSuTiedN = Math.min(...suUnwTied);
+  const maxSuTiedN = Math.max(...suUnwTied);
+
+  const mixtureMedErrors = [e1, e2, e4].map(ev => {
+    const sm = ev.conditionSummaries.find(x => x.scenario === 'mixture');
+    return sm.ER.bothMedAbs;
+  });
+  const minMixMed = fmtNum(Math.min(...mixtureMedErrors), 3);
+  const maxMixMed = fmtNum(Math.max(...mixtureMedErrors), 3);
+
+  const w2Means = [e1, e2, e3, e4].map(ev => {
+    const sm = ev.conditionSummaries.find(x => x.scenario === 'mixture');
+    return sm.mixtureQuantiles.w_H2.mean;
+  });
+  const minW2Mean = fmtNum(Math.min(...w2Means) * 100, 2);
+  const maxW2Mean = fmtNum(Math.max(...w2Means) * 100, 2);
+
   md += `
 ---
 
@@ -904,66 +966,66 @@ In the previous audit draft, the exact-time uncertain-history SU-unweighted row 
    - $d_i < 0 \\implies$ adding parent ACV reduced error (patient was helped).
    - $d_i > 0 \\implies$ adding parent ACV increased error (patient was worsened).
    - $d_i = 0 \\implies$ tied error.
-3. In this cohort of $N = 500$ patients:
-   - Count helped: $N_{\\text{helped}} = 259$ ($51.8\\%$)
-   - Count worsened: $N_{\\text{worsened}} = 241$ ($48.2\\%$)
-   - Count tied: $N_{\\text{tied}} = 0$ ($0.0\\%$)
-   - Sum check: $N_{\\text{helped}} + N_{\\text{worsened}} + N_{\\text{tied}} = 259 + 241 + 0 = 500 = N$.
-4. **Order Statistics Proof:** Sorting the 500 paired differences in non-decreasing order:
-   $$d_{(1)} \\le d_{(2)} \\le \\dots \\le d_{(259)} < 0 < d_{(260)} \\le \\dots \\le d_{(500)}$$
-   Because $259 > 250$, the 250th and 251st sorted elements are both strictly negative ($d_{(250)} < 0$ and $d_{(251)} < 0$).
+3. In this cohort of $N = ${N}$ patients:
+   - Count helped: $N_{\\text{helped}} = ${suDiffs.helped}$ (${suDiffs.pctHelped})
+   - Count worsened: $N_{\\text{worsened}} = ${suDiffs.worsened}$ (${fmtNum(100 * suDiffs.worsened / N, 1)}\\%)
+   - Count tied: $N_{\\text{tied}} = ${suDiffs.tied}$ (${fmtNum(100 * suDiffs.tied / N, 1)}\\%)
+   - Sum check: $N_{\\text{helped}} + N_{\\text{worsened}} + N_{\\text{tied}} = ${suDiffs.helped} + ${suDiffs.worsened} + ${suDiffs.tied} = ${N} = N$.
+4. **Order Statistics Proof:** Sorting the ${N} paired differences in non-decreasing order:
+   $$d_{(1)} \\le d_{(2)} \\le \\dots \\le d_{(${suDiffs.helped})} < 0 < d_{(${suDiffs.helped + 1})} \\le \\dots \\le d_{(${N})}$$
+   Because ${suDiffs.helped} > ${N / 2}, the ${N / 2}th and ${N / 2 + 1}st sorted elements are both strictly negative ($d_{(${N / 2})} < 0$ and $d_{(${N / 2 + 1})} < 0$).
    Therefore, the sample median of paired differences:
-   $$\\text{median}(d) = \\frac{d_{(250)} + d_{(251)}}{2} = \\mathbf{-0.0153\\text{ mg/L}} < 0$$
+   $$\\text{median}(d) = \\frac{d_{(${N / 2})} + d_{(${N / 2 + 1})}}{2} = \\mathbf{${fmtSign(suDiffs.medDiff)}\\text{ mg/L}} < 0$$
    It is mathematically impossible for $\\text{median}(d)$ to be positive when more than half the values are negative with zero ties.
 5. **Origin of the Discrepancy:**
-   - Marginal median of $|e_{\\text{both}}|$: $0.3873\\text{ mg/L}$.
-   - Marginal median of $|e_{\\text{cmmg}}|$: $0.3633\\text{ mg/L}$.
+   - Marginal median of $|e_{\\text{both}}|$: $${fmtNum(suDiffs.medBoth)}\\text{ mg/L}$.
+   - Marginal median of $|e_{\\text{cmmg}}|$: $${fmtNum(suDiffs.medCMMG)}\\text{ mg/L}$.
    - Difference of marginal medians:
-     $$\\Delta_{\\text{marginal}} = \\text{median}(|e_{\\text{both}}|) - \\text{median}(|e_{\\text{cmmg}}|) = 0.3873 - 0.3633 = \\mathbf{+0.0240\\text{ mg/L}} > 0$$
+     $$\\Delta_{\\text{marginal}} = \\text{median}(|e_{\\text{both}}|) - \\text{median}(|e_{\\text{cmmg}}|) = ${fmtNum(suDiffs.medBoth)} - ${fmtNum(suDiffs.medCMMG)} = \\mathbf{${fmtSign(suDiffs.diffOfMarginalMedians)}\\text{ mg/L}} > 0$$
    - In non-Gaussian, asymmetric error distributions, **the median of paired differences does NOT equal the difference of marginal medians** (i.e. $\\text{median}(X - Y) \\ne \\text{median}(X) - \\text{median}(Y)$).
    - The obsolete value $+0.0073$ in the previous text arose from an unverified manual transcription draft that conflated marginal and paired metrics.
    - In this updated audit, all tables are generated directly by \`cmmg-forecast-post-hd.cjs\` from in-memory objects, and programmatic assertions verify that $\\text{helped} > N/2 \\implies \\text{median}(d) < 0$.
 
 ### 3.2 Actual Sign Distribution of Carry-Forward
 Rather than assuming universal underprediction from median equality ($\\text{med}(e) = -\\text{med}(|e|)$), the actual patient counts reveal:
-- **Exact Timestamps (4% CV):** 489 underpredicted ($97.8\\%$), 11 overpredicted ($2.2\\%$), 0 exact.
-- **Perturbed Timestamps (4% CV):** 476 underpredicted ($95.2\\%$), 24 overpredicted ($4.8\\%$), 0 exact.
-- **Zero-Noise Sanity (0% CV):** 497 underpredicted ($99.4\\%$), 3 overpredicted ($0.6\\%$), 0 exact.
+- **Exact Timestamps (4% CV):** ${e1_CF.signs.under} underpredicted (${fmtNum(100 * e1_CF.signs.under / N, 1)}\\%), ${e1_CF.signs.over} overpredicted (${fmtNum(100 * e1_CF.signs.over / N, 1)}\\%), ${e1_CF.signs.exact} exact.
+- **Perturbed Timestamps (4% CV):** ${e2_CF.signs.under} underpredicted (${fmtNum(100 * e2_CF.signs.under / N, 1)}\\%), ${e2_CF.signs.over} overpredicted (${fmtNum(100 * e2_CF.signs.over / N, 1)}\\%), ${e2_CF.signs.exact} exact.
+- **Zero-Noise Sanity (0% CV):** ${e4_CF.signs.under} underpredicted (${fmtNum(100 * e4_CF.signs.under / N, 1)}\\%), ${e4_CF.signs.over} overpredicted (${fmtNum(100 * e4_CF.signs.over / N, 1)}\\%), ${e4_CF.signs.exact} exact.
 
-**Pharmacokinetic Redistribution Explanation:** In the AyFlux model, hemodialysis clears both parent acyclovir and CMMG from the central compartment during the 4-hour session. When HD terminates at $28\\text{ h}$, residual acyclovir in peripheral tissues redistributes back into the central compartment ($B \\to A$), continually generating new CMMG via non-renal metabolic clearance ($CL_{\\text{form}}$). Consequently, central CMMG rises over the subsequent 4 hours in the vast majority of patients ($C_{\\text{cmmg}}(32) > C_{\\text{cmmg}}(28)$). The rare virtual patients ($0.6\\text{–}4.8\\%$) who do not underpredict possess combination draws of very high non-renal CMMG elimination ($CL_{\\text{mn}}$) and low metabolic formation ($CL_{\\text{form}}$), wherein metabolic elimination outpaces post-dialysis peripheral rebound.
+**Pharmacokinetic Redistribution Explanation:** In the AyFlux model, hemodialysis clears both parent acyclovir and CMMG from the central compartment during the 4-hour session. When HD terminates at $28\\text{ h}$, residual acyclovir in peripheral tissues redistributes back into the central compartment ($B \\to A$), continually generating new CMMG via non-renal metabolic clearance ($CL_{\\text{form}}$). Consequently, central CMMG rises over the subsequent 4 hours in the vast majority of patients ($C_{\\text{cmmg}}(32) > C_{\\text{cmmg}}(28)$). The rare virtual patients (${fmtNum(100 * e4_CF.signs.over / N, 1)}%–${fmtNum(100 * e2_CF.signs.over / N, 1)}%) who do not underpredict possess combination draws of very high non-renal CMMG elimination ($CL_{\\text{mn}}$) and low metabolic formation ($CL_{\\text{form}}$), wherein metabolic elimination outpaces post-dialysis peripheral rebound.
 
 ### 3.3 Why Ensemble Reweighting Fails Under a Rigid 1-Dose Assumption
 When the forecaster rigidly assumes only 1 dose ($12\\text{ h}$) was administered:
-1. **CMMG-Only Likelihood:** The forecaster matches a moderate CMMG level ($\sim 7\\text{ mg/L}$). Plausible 1-dose draws can reach this level with moderate formation clearance, yielding a median absolute error of $0.4929\\text{ mg/L}$ ($0.4233\\text{ mg/L}$ zero-noise) and signed error of $-0.4065\\text{ mg/L}$ ($357$ under / $143$ over).
-2. **Joint (ACV + CMMG) Likelihood:** The observed end-HD central ACV is $\sim 10\\text{ mg/L}$. In a true 1-dose regimen, central ACV 16 hours post-dose with 4 hours of HD would typically be only $2\\text{–}4\\text{ mg/L}$. The joint Gaussian likelihood forces the ensemble to select extreme parameter draws (e.g., abnormally small $V_c$ or near-zero clearance).
+1. **CMMG-Only Likelihood:** The forecaster matches a moderate CMMG level ($\\sim 7\\text{ mg/L}$). Plausible 1-dose draws can reach this level with moderate formation clearance, yielding a median absolute error of $${fmtNum(e1_hidden.ER.cmmgMedAbs)}\\text{ mg/L}$ ($${fmtNum(e4_hidden.ER.cmmgMedAbs)}\\text{ mg/L}$ zero-noise) and signed error of $${fmtSign(e1_hidden.ER.cmmgMedSigned)}\\text{ mg/L}$ ($${e1_hidden.ER.cmmgSigns.under}$ under / $${e1_hidden.ER.cmmgSigns.over}$ over / $${e1_hidden.ER.cmmgSigns.exact}$ exact).
+2. **Joint (ACV + CMMG) Likelihood:** The observed end-HD central ACV is $\\sim 10\\text{ mg/L}$. In a true 1-dose regimen, central ACV 16 hours post-dose with 4 hours of HD would typically be only $2\\text{–}4\\text{ mg/L}$. The joint Gaussian likelihood forces the ensemble to select extreme parameter draws (e.g., abnormally small $V_c$ or near-zero clearance).
 3. **Peripheral Mass Collapse:** These extreme 1-dose candidates contain almost zero drug mass in the unmeasured peripheral compartment $B$. Once HD terminates, there is no peripheral acyclovir to redistribute into the central compartment. Simulated ACV crashes immediately, halting CMMG formation.
-4. **Catastrophic Bias:** As a result, the forecast severely underpredicts: median absolute error jumps to **$1.5532\\text{ mg/L}$** ($1.4846\\text{ mg/L}$ zero-noise), signed error is **$-1.5532\\text{ mg/L}$** ($453$ under / $47$ over), and adding parent ACV worsens the forecast in **$82.2\\%$ of patients** (helped only $17.8\\%$).
+4. **Catastrophic Bias:** As a result, the forecast severely underpredicts: median absolute error jumps to **$${fmtNum(e1_hidden.ER.bothMedAbs)}\\text{ mg/L}$** ($${fmtNum(e4_hidden.ER.bothMedAbs)}\\text{ mg/L}$ zero-noise), signed error is **$${fmtSign(e1_hidden.ER.bothMedSigned)}\\text{ mg/L}$** ($${e1_hidden.ER.bothSigns.under}$ under / $${e1_hidden.ER.bothSigns.over}$ over / $${e1_hidden.ER.bothSigns.exact}$ exact), and adding parent ACV worsens the forecast in **${fmtNum(100 * e1_hidden.ER.diffs.worsened / N, 1)}\\% of patients** (${e1_hidden.ER.diffs.worsened} worsened, ${e1_hidden.ER.diffs.helped} helped, ${e1_hidden.ER.diffs.tied} tied).
 
 ### 3.4 Why Direct State Updating Resists History Misspecification
 In Direct State Updating (unweighted), the ODE is integrated from $t = 28\\text{ h}$ to $t = 32\\text{ h}$ starting from state variables updated from the observed values:
 $$\\frac{dM}{dt} = CL_{\\text{form}} \\frac{A(t)}{V_c} \\frac{MW_M}{MW_A} - CL_{\\text{mn}} \\frac{M(t)}{V_m}$$
-- **CMMG-Only:** $M(28)$ is reset to $y_{\\text{cmmg}} \\cdot V_m$, while $A(28)$ is left at the simulated 1-dose value ($2\\text{–}4\\text{ mg/L}$). The initial rate of CMMG formation is under-driven, yielding median signed error of $-0.4846\\text{ mg/L}$ ($437$ under / $63$ over).
+- **CMMG-Only:** $M(28)$ is reset to $y_{\\text{cmmg}} \\cdot V_m$, while $A(28)$ is left at the simulated 1-dose value ($2\\text{–}4\\text{ mg/L}$). The initial rate of CMMG formation is under-driven, yielding median signed error of $${fmtSign(e1_hidden.SU_Unw.cmmgMedSigned)}\\text{ mg/L}$ ($${e1_hidden.SU_Unw.cmmgSigns.under}$ under / $${e1_hidden.SU_Unw.cmmgSigns.over}$ over / $${e1_hidden.SU_Unw.cmmgSigns.exact}$ exact).
 - **Paired (ACV + CMMG):** $A(28)$ is reset to $y_{\\text{acv}} \\cdot V_c$ directly from measured concentration ($10\\text{ mg/L}$). Even though peripheral tissue $B(28)$ remains underestimated, starting with the true central ACV concentration immediately drives CMMG formation at the correct initial rate.
-- **Quantified Improvement:** Median absolute error drops from $0.4969$ to **$0.4045\\text{ mg/L}$** ($0.4850$ to **$0.3526\\text{ mg/L}$** zero-noise), signed bias shrinks from $-0.4846$ to **$-0.2202\\text{ mg/L}$**, and adding parent ACV helps **$68.6\\%$** ($74.4\\%$ zero-noise) of virtual patients.
+- **Quantified Improvement:** Median absolute error drops from $${fmtNum(e1_hidden.SU_Unw.cmmgMedAbs)}$ to **$${fmtNum(e1_hidden.SU_Unw.bothMedAbs)}\\text{ mg/L}$** ($${fmtNum(e4_hidden.SU_Unw.cmmgMedAbs)}$ to **$${fmtNum(e4_hidden.SU_Unw.bothMedAbs)}\\text{ mg/L}$** zero-noise), signed bias shrinks from $${fmtSign(e1_hidden.SU_Unw.cmmgMedSigned)}$ to **$${fmtSign(e1_hidden.SU_Unw.bothMedSigned)}\\text{ mg/L}$**, and adding parent ACV helps **${e1_hidden.SU_Unw.diffs.pctHelped}** (${e4_hidden.SU_Unw.diffs.pctHelped} zero-noise) of virtual patients (${e1_hidden.SU_Unw.diffs.helped} helped, ${e1_hidden.SU_Unw.diffs.worsened} worsened, ${e1_hidden.SU_Unw.diffs.tied} tied).
 
 ### 3.5 Clock Horizon and Intra-Dialytic Sampling Analysis
 1. **Clock Horizon:** Perturbing the blood draw time ($t_{\\text{meas}} \\in [27.75\\text{ h}, 28.25\\text{ h}]$) while scoring at fixed clock hour $32.0\\text{ h}$ introduces variable elapsed forecasting horizons ranging from $3.75\\text{ h}$ (when drawn late at $28.25\\text{ h}$) to $4.25\\text{ h}$ (when drawn early at $27.75\\text{ h}$).
 2. **Fixed Horizon Comparison:** When scored at exactly $t_{\\text{meas}} + 4.0\\text{ h}$ (Table 2), median errors differ by less than $0.008\\text{ mg/L}$ across all methods and percentage helped changes by $< 0.8\\%$. The qualitative conclusions are completely robust to whether the clinical target is a fixed clock appointment or an elapsed post-draw interval.
-3. **Intra-Dialytic Sampling:** When a sample is drawn 15 minutes before scheduled dialysis end ($t_{\\text{meas}} = 27.75\\text{ h}$), the dialyzer remains actively clearing acyclovir ($p.\\text{hd}$) and CMMG ($p.\\text{hd} \\times 0.75$) for the remaining $0.25\\text{ h}$. Our \`stepInterval\` ODE integrator explicitly applies dialytic clearance up to $28.0\\text{ h}$ before transitioning to post-HD clearance, preventing artificial accumulation during active dialysis.
+3. **Intra-Dialytic Sampling:** When a sample is drawn 15 minutes before scheduled dialysis end ($t_{\\text{meas}} = 27.75\\text{ h}$), the dialyzer remains actively clearing acyclovir ($p.\\text{hd}$) and CMMG ($p.\\text{hd} \\times c.\\text{metDial} = p.\\text{hd} \\times 1.0$) for the remaining $0.25\\text{ h}$. Our \`stepInterval\` ODE integrator explicitly applies dialytic clearance up to $28.0\\text{ h}$ before transitioning to post-HD clearance, preventing artificial accumulation during active dialysis.
 
 ---
 
 ## 4. Scientifically Bounded Conclusions
 
 1. **Simulation Bounds & Non-Equivalence to Clinical Validation:**
-   - The reported $\\sim 97\\%$ posterior weight on the 2-dose history ($H_2$) is mathematically conditional on the evaluated discrete model space (exactly two candidate histories: $H_1$ vs $H_2$), the chosen equal prior probabilities ($P(H_1) = P(H_2) = 0.5$), and the assumed Gaussian likelihood function. It does NOT represent empirical clinical confidence or prove that a missing dose can be identified in clinical practice where unmodeled variables (variable infusion rates, residual urine output, inter-dialytic dose timing errors, assay cross-reactivity) occur.
+   - The reported mean posterior weight of $${minW2Mean}\\%\\text{–}${maxW2Mean}\\%$ (median $100.0\\%$, IQR $[1.0000, 1.0000]$) on the 2-dose history ($H_2$) is mathematically conditional on the evaluated discrete model space (exactly two candidate histories: $H_1$ vs $H_2$), the chosen equal prior probabilities ($P(H_1) = P(H_2) = 0.5$), and the assumed Gaussian likelihood function. It does NOT represent empirical clinical confidence or prove that a missing dose can be identified in clinical practice where unmodeled variables (variable infusion rates, residual urine output, inter-dialytic dose timing errors, assay cross-reactivity) occur.
    - While parameter-disjoint partitioning ensures candidate forecasters do not share identical vectors with virtual patients, both cohorts are generated from the same underlying two-compartment kinetic model structure. This study evaluates mathematical properties of state-space reweighting versus state updating under controlled structural assumptions; it does NOT constitute external clinical validation.
 
 2. **When Parent Acyclovir Helps vs Worsens the Forecast:**
-   - **Where Adding ACV Makes the Forecast Worse:** When a forecaster rigidly imposes a single misspecified historical dosing regimen (e.g., 1 dose instead of 2), conditioning on end-HD parent ACV worsens Ensemble Reweighting in $80.8\\text{–}82.2\\%$ of simulated cases (median error degrades $0.493 \\to 1.553\\text{ mg/L}$) due to parameter distortion and loss of peripheral rebound.
+   - **Where Adding ACV Makes the Forecast Worse:** When a forecaster rigidly imposes a single misspecified historical dosing regimen (e.g., 1 dose instead of 2), conditioning on end-HD parent ACV worsens Ensemble Reweighting in $${minErWorsePct}\\%\\text{–}${maxErWorsePct}\\%$ of simulated cases (${minErWorseN}–${maxErWorseN} worsened, ${minErHelpedN}–${maxErHelpedN} helped, ${minErTiedN}–${maxErTiedN} tied; median error degrades $${fmtNum(e1_hidden.ER.cmmgMedAbs, 3)} \\to ${fmtNum(e1_hidden.ER.bothMedAbs, 3)}\\text{ mg/L}$) due to parameter distortion and loss of peripheral rebound.
    - **Where Adding ACV Improves the Forecast:** When the forecaster either:
-     - Applies **Direct State Updating** to the central compartment ($A = y_{\\text{acv}} \\times V_c$), which bypasses historical parameter selection and improves accuracy in $68.6\\text{–}74.4\\%$ of cases; OR
-     - Represents dosing history as a **mixture model**, allowing the observed parent ACV to weight the candidate regimens, reducing median forecasting error to $0.227\\text{–}0.342\\text{ mg/L}$.
+     - Applies **Direct State Updating** to the central compartment ($A = y_{\\text{acv}} \\times V_c$), which bypasses historical parameter selection and improves accuracy in $${minSuHelpedPct}\\%\\text{–}${maxSuHelpedPct}\\%$ of cases (${minSuHelpedN}–${maxSuHelpedN} helped, ${minSuWorseN}–${maxSuWorseN} worsened, ${minSuTiedN} tied); OR
+     - Represents dosing history as a **mixture model**, allowing the observed parent ACV to weight the candidate regimens, reducing median forecasting error to $${minMixMed}\\text{–}${maxMixMed}\\text{ mg/L}$.
 
 3. **Status & Invariants:**
    - Baseline commit \`e7655bb\` remains strictly frozen on \`research/cmmg-post-hd-forecast\` for independent code review.
@@ -998,7 +1060,8 @@ Automated headless verification was executed using \`scripts/check-numeric-feedb
 const allSummaries = {
   metadata: {
     run_date: '2026-11-15',
-    generator_seed: 44556677,
+    param_draw_seed: 123456789,
+    eval_noise_seed: 44556677,
     n_virtual_patients: truePatients.length,
     n_forecast_candidates: fcCandidates.length,
     parameter_overlap: 0,
@@ -1011,6 +1074,141 @@ const allSummaries = {
   perturbed_elapsed4h_4pct_cv: eval3.conditionSummaries,
   zero_noise_sanity: eval4.conditionSummaries
 };
+
+function verifyCsvReproduction(csvFilePath, allSummariesObj) {
+  console.log('Verifying exact reproduction of all summaries from unrounded CSV...');
+  const content = fs.readFileSync(csvFilePath, 'utf8').trim();
+  const lines = content.split('\n');
+  const headers = lines[0].split(',');
+  const records = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    const cells = [];
+    let inQuotes = false;
+    let curCell = '';
+    for (let c = 0; c < line.length; c++) {
+      const ch = line[c];
+      if (ch === '"') {
+        if (inQuotes && line[c + 1] === '"') {
+          curCell += '"';
+          c++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === ',' && !inQuotes) {
+        cells.push(curCell);
+        curCell = '';
+      } else {
+        curCell += ch;
+      }
+    }
+    cells.push(curCell);
+    const row = {};
+    for (let h = 0; h < headers.length; h++) {
+      row[headers[h]] = cells[h];
+    }
+    records.push(row);
+  }
+  assert.equal(records.length, 6000, 'CSV must contain exactly 6000 records');
+
+  const evalKeys = [
+    { key: 'exact_4pct_cv', cond: 'exact_28h_4pct_cv' },
+    { key: 'perturbed_fixed32h_4pct_cv', cond: 'perturbed_15m_fixed32h_4pct_cv' },
+    { key: 'perturbed_elapsed4h_4pct_cv', cond: 'perturbed_15m_elapsed4h_4pct_cv' },
+    { key: 'zero_noise_sanity', cond: 'zero_noise_28h' }
+  ];
+
+  for (const { key, cond } of evalKeys) {
+    const expSummaries = allSummariesObj[key];
+    for (const expS of expSummaries) {
+      const group = records.filter(r => r.condition === cond && r.scenario === expS.scenario);
+      assert.equal(group.length, 500, `Condition ${cond} scenario ${expS.scenario} must have 500 records`);
+
+      // Check seeds
+      assert.equal(Number(group[0].param_draw_seed), 123456789, 'param_draw_seed in CSV must be 123456789');
+      assert.equal(Number(group[0].eval_noise_seed), 44556677, 'eval_noise_seed in CSV must be 44556677');
+
+      // Check CF
+      const cfAbs = group.map(r => parseFloat(r.err_abs_cf));
+      const cfSigned = group.map(r => parseFloat(r.err_signed_cf));
+      assert.ok(Math.abs(median(cfAbs) - expS.CF.medAbs) < 1e-12, `CF medAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(cfSigned) - expS.CF.medSigned) < 1e-12, `CF medSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(cfSigned), expS.CF.signs, `CF signs mismatch in ${cond} ${expS.scenario}`);
+
+      // Check ER
+      const erCmmgAbs = group.map(r => parseFloat(r.err_abs_er_cmmg));
+      const erCmmgSigned = group.map(r => parseFloat(r.err_signed_er_cmmg));
+      const erBothAbs = group.map(r => parseFloat(r.err_abs_er_both));
+      const erBothSigned = group.map(r => parseFloat(r.err_signed_er_both));
+      assert.ok(Math.abs(median(erCmmgAbs) - expS.ER.cmmgMedAbs) < 1e-12, `ER cmmgMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(erCmmgSigned) - expS.ER.cmmgMedSigned) < 1e-12, `ER cmmgMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(erCmmgSigned), expS.ER.cmmgSigns, `ER cmmgSigns mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(erBothAbs) - expS.ER.bothMedAbs) < 1e-12, `ER bothMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(erBothSigned) - expS.ER.bothMedSigned) < 1e-12, `ER bothMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(erBothSigned), expS.ER.bothSigns, `ER bothSigns mismatch in ${cond} ${expS.scenario}`);
+      const recomputedErDiffs = pairedDiffs(erBothAbs, erCmmgAbs);
+      assert.equal(recomputedErDiffs.helped, expS.ER.diffs.helped, `ER helped mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedErDiffs.worsened, expS.ER.diffs.worsened, `ER worsened mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedErDiffs.tied, expS.ER.diffs.tied, `ER tied mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedErDiffs.medDiff - expS.ER.diffs.medDiff) < 1e-12, `ER medDiff mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedErDiffs.meanDiff - expS.ER.diffs.meanDiff) < 1e-12, `ER meanDiff mismatch in ${cond} ${expS.scenario}`);
+
+      // Check SU_Unw
+      const suUnwBothAbs = group.map(r => parseFloat(r.err_abs_su_unw_both));
+      const suUnwBothSigned = group.map(r => parseFloat(r.err_signed_su_unw_both));
+      const suUnwCmmgAbs = group.map(r => parseFloat(r.err_abs_su_unw_cmmg));
+      const suUnwCmmgSigned = group.map(r => parseFloat(r.err_signed_su_unw_cmmg));
+      assert.ok(Math.abs(median(suUnwCmmgAbs) - expS.SU_Unw.cmmgMedAbs) < 1e-12);
+      assert.ok(Math.abs(median(suUnwCmmgSigned) - expS.SU_Unw.cmmgMedSigned) < 1e-12);
+      assert.deepEqual(signCounts(suUnwCmmgSigned), expS.SU_Unw.cmmgSigns);
+      assert.ok(Math.abs(median(suUnwBothAbs) - expS.SU_Unw.bothMedAbs) < 1e-12);
+      assert.ok(Math.abs(median(suUnwBothSigned) - expS.SU_Unw.bothMedSigned) < 1e-12);
+      assert.deepEqual(signCounts(suUnwBothSigned), expS.SU_Unw.bothSigns);
+      const recomputedSuUnwDiffs = pairedDiffs(suUnwBothAbs, suUnwCmmgAbs);
+      assert.equal(recomputedSuUnwDiffs.helped, expS.SU_Unw.diffs.helped);
+      assert.equal(recomputedSuUnwDiffs.worsened, expS.SU_Unw.diffs.worsened);
+      assert.equal(recomputedSuUnwDiffs.tied, expS.SU_Unw.diffs.tied);
+      assert.ok(Math.abs(recomputedSuUnwDiffs.medDiff - expS.SU_Unw.diffs.medDiff) < 1e-12);
+      assert.ok(Math.abs(recomputedSuUnwDiffs.meanDiff - expS.SU_Unw.diffs.meanDiff) < 1e-12);
+
+      // Check SU_Rew
+      const suRewBothAbs = group.map(r => parseFloat(r.err_abs_su_rew_both));
+      const suRewBothSigned = group.map(r => parseFloat(r.err_signed_su_rew_both));
+      const suRewCmmgAbs = group.map(r => parseFloat(r.err_abs_su_rew_cmmg));
+      const suRewCmmgSigned = group.map(r => parseFloat(r.err_signed_su_rew_cmmg));
+      assert.ok(Math.abs(median(suRewCmmgAbs) - expS.SU_Rew.cmmgMedAbs) < 1e-12);
+      assert.ok(Math.abs(median(suRewCmmgSigned) - expS.SU_Rew.cmmgMedSigned) < 1e-12);
+      assert.deepEqual(signCounts(suRewCmmgSigned), expS.SU_Rew.cmmgSigns);
+      assert.ok(Math.abs(median(suRewBothAbs) - expS.SU_Rew.bothMedAbs) < 1e-12);
+      assert.ok(Math.abs(median(suRewBothSigned) - expS.SU_Rew.bothMedSigned) < 1e-12);
+      assert.deepEqual(signCounts(suRewBothSigned), expS.SU_Rew.bothSigns);
+      const recomputedSuRewDiffs = pairedDiffs(suRewBothAbs, suRewCmmgAbs);
+      assert.equal(recomputedSuRewDiffs.helped, expS.SU_Rew.diffs.helped);
+      assert.equal(recomputedSuRewDiffs.worsened, expS.SU_Rew.diffs.worsened);
+      assert.equal(recomputedSuRewDiffs.tied, expS.SU_Rew.diffs.tied);
+      assert.ok(Math.abs(recomputedSuRewDiffs.medDiff - expS.SU_Rew.diffs.medDiff) < 1e-12);
+      assert.ok(Math.abs(recomputedSuRewDiffs.meanDiff - expS.SU_Rew.diffs.meanDiff) < 1e-12);
+
+      // Check mixture quantiles if applicable
+      if (expS.scenario === 'mixture') {
+        const w1Vals = group.map(r => parseFloat(r.w_H1));
+        const w2Vals = group.map(r => parseFloat(r.w_H2));
+        const essVals = group.map(r => parseFloat(r.ess));
+        const qW1 = quantiles(w1Vals);
+        const qW2 = quantiles(w2Vals);
+        const qESS = quantiles(essVals);
+        assert.ok(Math.abs(qW1.mean - expS.mixtureQuantiles.w_H1.mean) < 1e-12);
+        assert.ok(Math.abs(qW1.median - expS.mixtureQuantiles.w_H1.median) < 1e-12);
+        assert.ok(Math.abs(qW2.mean - expS.mixtureQuantiles.w_H2.mean) < 1e-12);
+        assert.ok(Math.abs(qW2.median - expS.mixtureQuantiles.w_H2.median) < 1e-12);
+        assert.ok(Math.abs(qESS.mean - expS.mixtureQuantiles.ess.mean) < 1e-12);
+        assert.ok(Math.abs(qESS.median - expS.mixtureQuantiles.ess.median) < 1e-12);
+      }
+    }
+  }
+  console.log('  PASSED: All summary metrics and sign distributions reproduced identically from unrounded CSV.');
+}
 
 // Export JSON
 const jsonPath = path.resolve(__dirname, 'cmmg-forecast-results.json');
@@ -1040,6 +1238,9 @@ for (const rec of allPatientRecords) {
 const csvPath = path.resolve(__dirname, 'cmmg-forecast-patients.csv');
 fs.writeFileSync(csvPath, csvRows.join('\n'), 'utf8');
 console.log(`Saved per-patient CSV (${allPatientRecords.length} rows) to ${csvPath}`);
+
+// Verify that all summary statistics, sign counts, and quantiles reproduce identically from the unrounded CSV
+verifyCsvReproduction(csvPath, allSummaries);
 
 // Generate and write Markdown Audit Report
 const mdPath = path.resolve(__dirname, 'CMMG-POST-HD-FORECAST-AUDIT.md');

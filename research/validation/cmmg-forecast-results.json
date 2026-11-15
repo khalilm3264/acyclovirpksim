@@ -1,7 +1,8 @@
 {
   "metadata": {
     "run_date": "2026-11-15",
-    "generator_seed": 44556677,
+    "param_draw_seed": 123456789,
+    "eval_noise_seed": 44556677,
     "n_virtual_patients": 500,
     "n_forecast_candidates": 400,
     "parameter_overlap": 0,
