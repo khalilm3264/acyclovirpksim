@@ -200,6 +200,7 @@ function setBusy(busy){
  if(!dataIsCurrent){$('teachingFallback').hidden=true;$('teachingStatus').textContent='';}
  $('saveBaseline').disabled=busy||!dataIsCurrent;
  if(typeof refreshLabelAdjust==='function')refreshLabelAdjust();
+ if(typeof renderBaseline==='function')renderBaseline();
  if(typeof renderRegimens==='function'){renderRegimens();renderPostHd();}
  if(busy)$('status').textContent='Updating simulation';
 }
@@ -486,7 +487,11 @@ $('differenceFrom').addEventListener('change',renderScenarioDifference);
 $('differenceTo').addEventListener('change',renderScenarioDifference);
 // ---------- Prediction exercise: hide results, predict, then reveal ----------
 const PREDICT_METRICS={trough:'trough acyclovir',peak:'peak acyclovir',auc:'plasma acyclovir AUC',cmmgAuc:'plasma CMMG AUC'};
-function regimenWindow(){return Math.min(c.horizon,...savedRegimens.map(r=>r.config.horizon));}
+function regimenWindow(){
+ const horizons=savedRegimens.map(r=>r.config.horizon);
+ if(dataIsCurrent&&results?.[primary]&&!predicting())horizons.push(c.horizon);
+ return horizons.length?Math.min(...horizons):c.horizon;
+}
 function predicting(){return !!$('predictMode')?.checked;}
 function renderPredictControls(){
  const enough=savedRegimens.length>=2,choice=$('predictChoice'),keep=choice.value;
@@ -621,7 +626,7 @@ function drawNextPlot(){
  const entry=pendingPlots.entries().next();if(entry.done)return;
  const [where,job]=entry.value;pendingPlots.delete(where);
  const target=$(where);
- if(!dataIsCurrent||!chartNearViewport(target)){requestPlotFrame();return;}
+ if(!dataIsCurrent||job.signature!==chartSignature(job.key)||!chartNearViewport(target)){requestPlotFrame();return;}
  plotRunning=true;activePlot={where,signature:job.signature};
  // Restore the live view after drawing, so Reset axes still returns to full axes.
  const factor=job.unitFactor/(chartStates.get(where)?.unitFactor||job.unitFactor);
@@ -741,6 +746,7 @@ function renderBaseline(){
  $('baselineStatus').textContent='Frozen baseline: '+baseline.primary+'. Dark dash-dot lines show saved medians on the four concentration charts; shading, dose markers and uncertainty bands describe the current settings only.';
  const changes=baselineChanges(baseline,c,primary);
  for(const text of changes.length?changes:['No input settings changed.']){const li=document.createElement('li');li.textContent=text;$('baselineChanges').append(li);}
+ if(!dataIsCurrent||!results?.[primary])return;
  const rows=[['Peak plasma acyclovir','peak','mg/L',2,'acyclovir'],['Plasma acyclovir AUC','auc','mg·h/L',0,'acyclovir'],['Peak CSF acyclovir','csfPeak','mg/L',2,'acyclovir'],['Peak plasma CMMG','mPeak','mg/L',2,'cmmg'],['Removed by dialysis','mass','mg',0]];
  const parts=rows.map(([label,key,unit,digits,analyte])=>{
   const before=shown(baseline.data.summary[key].median,analyte),after=shown(results[primary].summary[key].median,analyte);
@@ -755,7 +761,7 @@ $('saveBaseline').addEventListener('click',()=>{
  $('saveBaseline').textContent='Replace baseline with selected curve';render();
 });
 $('clearBaseline').addEventListener('click',()=>{
- baseline=null;baselineRevision++;$('saveBaseline').textContent='Save selected curve as baseline';render();
+ baseline=null;baselineRevision++;$('saveBaseline').textContent='Save selected curve as baseline';renderBaseline();render();
 });
 function showStats(){let d=results[primary].summary;
  // Plasma acyclovir first: it is the level with published reference values. The trough comes from the median curve.
@@ -1597,8 +1603,9 @@ $('studyExploreRun').addEventListener('click',()=>{
   const errors=E.validate(config,study.mode);if(errors.length)throw new Error(errors[0]);
   let kept=false;
   if(savedRegimens.length<REG.MAX_SAVED&&!savedRegimens.some(r=>r.name===('Original: '+study.short).slice(0,40))){
-   const d=E.simulateMany({...original,variability:0,draws:1,requestedModes:[study.mode]})[study.mode];
-   savedRegimens.push({name:('Original: '+study.short).slice(0,40),primary:study.mode,config:structuredClone(original),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
+   const savedConfig={...original,variability:0,draws:1};
+   const d=E.simulateMany({...savedConfig,requestedModes:[study.mode]})[study.mode];
+   savedRegimens.push({name:('Original: '+study.short).slice(0,40),primary:study.mode,config:structuredClone(savedConfig),data:{time:d.time.slice(),plasma:{median:d.plasma.median.slice()},cmmg:{median:d.cmmg.median.slice()}}});
    savedRevision++;kept=true;
   }
   rememberVersion('Before exploring an assumption: '+study.short);

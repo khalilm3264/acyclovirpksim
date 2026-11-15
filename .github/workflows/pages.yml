@@ -73,6 +73,7 @@ jobs:
           node scripts/check-plasma-threshold.cjs
           node scripts/check-usability.cjs
           node scripts/check-regimens.cjs
+          node scripts/check-saved-comparisons.cjs
           node scripts/check-literature.cjs
           node scripts/check-exchanges.cjs
           node scripts/check-export-downloads.cjs
