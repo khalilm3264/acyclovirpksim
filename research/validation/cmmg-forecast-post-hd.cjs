@@ -23,7 +23,7 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 const pk = require('../../public/assets/pk-engine.js');
 
-function createRng(seed = 123456789) {
+function createRng(seed = 44556677) {
   let s = seed;
   const rand = () => {
     s = (s * 1664525 + 1013904223) % 4294967296;
@@ -253,7 +253,7 @@ const dosesHidden = [
   { time: 12, route: 'Acyclovir IV', amount: 500, infusion: 1 }
 ];
 
-console.log('Generating 900 disjoint parameter draws (engine param_draw_seed 123456789)...');
+console.log('Generating 900 disjoint parameter draws (engine param_draw_seed 2026)...');
 const allParams = pk.drawParams({ ...baseConfig, draws: 900 });
 const truePatients = allParams.slice(0, 500);
 const fcCandidates = allParams.slice(500, 900);
@@ -578,7 +578,7 @@ function runEvaluation(conditionKey, conditionLabel, targetMode, usePerturbation
       errs.SU_Rew_Both.signed.push(predSU_Rew_Both - target);
 
       patientRecords.push({
-        param_draw_seed: 123456789,
+        param_draw_seed: 2026,
         eval_noise_seed: 44556677,
         patient_id: k,
         condition: conditionKey,
@@ -716,7 +716,7 @@ function generateMarkdownReport(evals) {
 ## 1. Simulation Setup & Provenance
 
 ### 1.1 Parameter-Disjoint Partitioning
-- **Draw Sequence:** A single deterministic random sequence (engine param_draw_seed \`123456789\`) generated 900 parameter draws from the log-normal adult AyFlux population distribution.
+- **Draw Sequence:** A single deterministic random sequence (engine param_draw_seed \`2026\`) generated 900 parameter draws from the log-normal adult AyFlux population distribution.
 - **Partition:**
   - Virtual Ground-Truth Patients: First $N = 500$ draws (IDs $0 \\dots 499$).
   - Candidate Forecaster Draws: Remaining $M = 400$ draws (IDs $500 \\dots 899$).
@@ -740,7 +740,7 @@ function generateMarkdownReport(evals) {
 - **Verification Across Cohort:** Programmatic no-update continuation parity assertions were executed across diagnostic indices $[0, 1, 2, 100, 499]$ at pre-end ($27.75\\text{ h}$), exact-end ($28.0\\text{ h}$), and post-end ($28.25\\text{ h}$). Across all 15 patient-timestamp pairs, the continuation trajectory matched the full engine simulation exactly with absolute difference $< 10^{-12}\\text{ mg/L}$ ($0.000\\text{e}+0$).
 
 ### 1.5 Distinction Between Generative Noise and Likelihood Floor
-- **RNG Seeds:** Parameter draws used engine seed \`123456789\`; evaluation draw-time perturbation ($\\pm 15\\text{ min}$) and measurement noise ($4\\%\\text{ CV}$) used independent seed \`44556677\`.
+- **RNG Seeds:** Parameter draws used engine seed \`2026\`; evaluation draw-time perturbation ($\\pm 15\\text{ min}$) and measurement noise ($4\\%\\text{ CV}$) used independent seed \`44556677\`.
 - **Generative Measurement Model:** Virtual patient observations are generated with pure proportional Gaussian noise:
   $$y = \\max(0.01, C \\cdot (1 + \\epsilon)), \\quad \\epsilon \\sim \\mathcal{N}(0, 0.04^2)$$
   There is NO artificial $0.1\\text{ mg/L}$ standard-deviation floor applied during observation generation.
@@ -1060,7 +1060,7 @@ Automated headless verification was executed using \`scripts/check-numeric-feedb
 const allSummaries = {
   metadata: {
     run_date: '2026-11-15',
-    param_draw_seed: 123456789,
+    param_draw_seed: 2026,
     eval_noise_seed: 44556677,
     n_virtual_patients: truePatients.length,
     n_forecast_candidates: fcCandidates.length,
@@ -1074,6 +1074,143 @@ const allSummaries = {
   perturbed_elapsed4h_4pct_cv: eval3.conditionSummaries,
   zero_noise_sanity: eval4.conditionSummaries
 };
+
+function verifyRecordsIntegrity(records, allSummariesObj) {
+  assert.equal(records.length, 6000, 'CSV must contain exactly 6000 records');
+
+  // 1. Per-row arithmetic consistency across all 6000 records
+  for (let i = 0; i < records.length; i++) {
+    const r = records[i];
+    const target = parseFloat(r.true_cmmg_target_mg_L);
+    assert.ok(!Number.isNaN(target), `Row ${i} true_cmmg_target_mg_L must be a valid number`);
+
+    const methods = [
+      { name: 'cf', pred: parseFloat(r.pred_cf), signed: parseFloat(r.err_signed_cf), abs: parseFloat(r.err_abs_cf) },
+      { name: 'er_cmmg', pred: parseFloat(r.pred_er_cmmg), signed: parseFloat(r.err_signed_er_cmmg), abs: parseFloat(r.err_abs_er_cmmg) },
+      { name: 'er_both', pred: parseFloat(r.pred_er_both), signed: parseFloat(r.err_signed_er_both), abs: parseFloat(r.err_abs_er_both) },
+      { name: 'su_unw_cmmg', pred: parseFloat(r.pred_su_unw_cmmg), signed: parseFloat(r.err_signed_su_unw_cmmg), abs: parseFloat(r.err_abs_su_unw_cmmg) },
+      { name: 'su_unw_both', pred: parseFloat(r.pred_su_unw_both), signed: parseFloat(r.err_signed_su_unw_both), abs: parseFloat(r.err_abs_su_unw_both) },
+      { name: 'su_rew_cmmg', pred: parseFloat(r.pred_su_rew_cmmg), signed: parseFloat(r.err_signed_su_rew_cmmg), abs: parseFloat(r.err_abs_su_rew_cmmg) },
+      { name: 'su_rew_both', pred: parseFloat(r.pred_su_rew_both), signed: parseFloat(r.err_signed_su_rew_both), abs: parseFloat(r.err_abs_su_rew_both) }
+    ];
+
+    for (const m of methods) {
+      assert.ok(!Number.isNaN(m.pred), `Row ${i} ${m.name} prediction must be a valid number`);
+      assert.ok(!Number.isNaN(m.signed), `Row ${i} ${m.name} signed error must be a valid number`);
+      assert.ok(!Number.isNaN(m.abs), `Row ${i} ${m.name} abs error must be a valid number`);
+
+      const expectedSigned = m.pred - target;
+      if (Math.abs(m.signed - expectedSigned) > 1e-12) {
+        throw new assert.AssertionError({
+          message: `Row ${i} ${m.name} signed error mismatch: stored ${m.signed} vs expected (pred - target) ${expectedSigned}`
+        });
+      }
+      const expectedAbs = Math.abs(m.signed);
+      if (Math.abs(m.abs - expectedAbs) > 1e-12) {
+        throw new assert.AssertionError({
+          message: `Row ${i} ${m.name} abs error mismatch: stored ${m.abs} vs expected |signed| ${expectedAbs}`
+        });
+      }
+    }
+  }
+
+  // 2. Summary-level exact reproduction for all 4 conditions x 3 scenarios
+  const evalKeys = [
+    { key: 'exact_4pct_cv', cond: 'exact_28h_4pct_cv' },
+    { key: 'perturbed_fixed32h_4pct_cv', cond: 'perturbed_15m_fixed32h_4pct_cv' },
+    { key: 'perturbed_elapsed4h_4pct_cv', cond: 'perturbed_15m_elapsed4h_4pct_cv' },
+    { key: 'zero_noise_sanity', cond: 'zero_noise_28h' }
+  ];
+
+  for (const { key, cond } of evalKeys) {
+    const expSummaries = allSummariesObj[key];
+    for (const expS of expSummaries) {
+      const group = records.filter(r => r.condition === cond && r.scenario === expS.scenario);
+      assert.equal(group.length, 500, `Condition ${cond} scenario ${expS.scenario} must have 500 records`);
+
+      // Check seeds
+      assert.equal(Number(group[0].param_draw_seed), 2026, 'param_draw_seed in CSV must be 2026');
+      assert.equal(Number(group[0].eval_noise_seed), 44556677, 'eval_noise_seed in CSV must be 44556677');
+
+      // Check CF
+      const cfAbs = group.map(r => parseFloat(r.err_abs_cf));
+      const cfSigned = group.map(r => parseFloat(r.err_signed_cf));
+      assert.ok(Math.abs(median(cfAbs) - expS.CF.medAbs) < 1e-12, `CF medAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(cfSigned) - expS.CF.medSigned) < 1e-12, `CF medSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(cfSigned), expS.CF.signs, `CF signs mismatch in ${cond} ${expS.scenario}`);
+
+      // Check ER
+      const erCmmgAbs = group.map(r => parseFloat(r.err_abs_er_cmmg));
+      const erCmmgSigned = group.map(r => parseFloat(r.err_signed_er_cmmg));
+      const erBothAbs = group.map(r => parseFloat(r.err_abs_er_both));
+      const erBothSigned = group.map(r => parseFloat(r.err_signed_er_both));
+      assert.ok(Math.abs(median(erCmmgAbs) - expS.ER.cmmgMedAbs) < 1e-12, `ER cmmgMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(erCmmgSigned) - expS.ER.cmmgMedSigned) < 1e-12, `ER cmmgMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(erCmmgSigned), expS.ER.cmmgSigns, `ER cmmgSigns mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(erBothAbs) - expS.ER.bothMedAbs) < 1e-12, `ER bothMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(erBothSigned) - expS.ER.bothMedSigned) < 1e-12, `ER bothMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(erBothSigned), expS.ER.bothSigns, `ER bothSigns mismatch in ${cond} ${expS.scenario}`);
+      const recomputedErDiffs = pairedDiffs(erBothAbs, erCmmgAbs);
+      assert.equal(recomputedErDiffs.helped, expS.ER.diffs.helped, `ER helped mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedErDiffs.worsened, expS.ER.diffs.worsened, `ER worsened mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedErDiffs.tied, expS.ER.diffs.tied, `ER tied mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedErDiffs.medDiff - expS.ER.diffs.medDiff) < 1e-12, `ER medDiff mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedErDiffs.meanDiff - expS.ER.diffs.meanDiff) < 1e-12, `ER meanDiff mismatch in ${cond} ${expS.scenario}`);
+
+      // Check SU_Unw
+      const suUnwBothAbs = group.map(r => parseFloat(r.err_abs_su_unw_both));
+      const suUnwBothSigned = group.map(r => parseFloat(r.err_signed_su_unw_both));
+      const suUnwCmmgAbs = group.map(r => parseFloat(r.err_abs_su_unw_cmmg));
+      const suUnwCmmgSigned = group.map(r => parseFloat(r.err_signed_su_unw_cmmg));
+      assert.ok(Math.abs(median(suUnwCmmgAbs) - expS.SU_Unw.cmmgMedAbs) < 1e-12, `SU_Unw cmmgMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(suUnwCmmgSigned) - expS.SU_Unw.cmmgMedSigned) < 1e-12, `SU_Unw cmmgMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(suUnwCmmgSigned), expS.SU_Unw.cmmgSigns, `SU_Unw cmmgSigns mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(suUnwBothAbs) - expS.SU_Unw.bothMedAbs) < 1e-12, `SU_Unw bothMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(suUnwBothSigned) - expS.SU_Unw.bothMedSigned) < 1e-12, `SU_Unw bothMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(suUnwBothSigned), expS.SU_Unw.bothSigns, `SU_Unw bothSigns mismatch in ${cond} ${expS.scenario}`);
+      const recomputedSuUnwDiffs = pairedDiffs(suUnwBothAbs, suUnwCmmgAbs);
+      assert.equal(recomputedSuUnwDiffs.helped, expS.SU_Unw.diffs.helped, `SU_Unw helped mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedSuUnwDiffs.worsened, expS.SU_Unw.diffs.worsened, `SU_Unw worsened mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedSuUnwDiffs.tied, expS.SU_Unw.diffs.tied, `SU_Unw tied mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedSuUnwDiffs.medDiff - expS.SU_Unw.diffs.medDiff) < 1e-12, `SU_Unw medDiff mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedSuUnwDiffs.meanDiff - expS.SU_Unw.diffs.meanDiff) < 1e-12, `SU_Unw meanDiff mismatch in ${cond} ${expS.scenario}`);
+
+      // Check SU_Rew
+      const suRewBothAbs = group.map(r => parseFloat(r.err_abs_su_rew_both));
+      const suRewBothSigned = group.map(r => parseFloat(r.err_signed_su_rew_both));
+      const suRewCmmgAbs = group.map(r => parseFloat(r.err_abs_su_rew_cmmg));
+      const suRewCmmgSigned = group.map(r => parseFloat(r.err_signed_su_rew_cmmg));
+      assert.ok(Math.abs(median(suRewCmmgAbs) - expS.SU_Rew.cmmgMedAbs) < 1e-12, `SU_Rew cmmgMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(suRewCmmgSigned) - expS.SU_Rew.cmmgMedSigned) < 1e-12, `SU_Rew cmmgMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(suRewCmmgSigned), expS.SU_Rew.cmmgSigns, `SU_Rew cmmgSigns mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(suRewBothAbs) - expS.SU_Rew.bothMedAbs) < 1e-12, `SU_Rew bothMedAbs mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(median(suRewBothSigned) - expS.SU_Rew.bothMedSigned) < 1e-12, `SU_Rew bothMedSigned mismatch in ${cond} ${expS.scenario}`);
+      assert.deepEqual(signCounts(suRewBothSigned), expS.SU_Rew.bothSigns, `SU_Rew bothSigns mismatch in ${cond} ${expS.scenario}`);
+      const recomputedSuRewDiffs = pairedDiffs(suRewBothAbs, suRewCmmgAbs);
+      assert.equal(recomputedSuRewDiffs.helped, expS.SU_Rew.diffs.helped, `SU_Rew helped mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedSuRewDiffs.worsened, expS.SU_Rew.diffs.worsened, `SU_Rew worsened mismatch in ${cond} ${expS.scenario}`);
+      assert.equal(recomputedSuRewDiffs.tied, expS.SU_Rew.diffs.tied, `SU_Rew tied mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedSuRewDiffs.medDiff - expS.SU_Rew.diffs.medDiff) < 1e-12, `SU_Rew medDiff mismatch in ${cond} ${expS.scenario}`);
+      assert.ok(Math.abs(recomputedSuRewDiffs.meanDiff - expS.SU_Rew.diffs.meanDiff) < 1e-12, `SU_Rew meanDiff mismatch in ${cond} ${expS.scenario}`);
+
+      // Check mixture quantiles if applicable
+      if (expS.scenario === 'mixture') {
+        const w1Vals = group.map(r => parseFloat(r.w_H1));
+        const w2Vals = group.map(r => parseFloat(r.w_H2));
+        const essVals = group.map(r => parseFloat(r.ess));
+        const qW1 = quantiles(w1Vals);
+        const qW2 = quantiles(w2Vals);
+        const qESS = quantiles(essVals);
+        assert.ok(Math.abs(qW1.mean - expS.mixtureQuantiles.w_H1.mean) < 1e-12);
+        assert.ok(Math.abs(qW1.median - expS.mixtureQuantiles.w_H1.median) < 1e-12);
+        assert.ok(Math.abs(qW2.mean - expS.mixtureQuantiles.w_H2.mean) < 1e-12);
+        assert.ok(Math.abs(qW2.median - expS.mixtureQuantiles.w_H2.median) < 1e-12);
+        assert.ok(Math.abs(qESS.mean - expS.mixtureQuantiles.ess.mean) < 1e-12);
+        assert.ok(Math.abs(qESS.median - expS.mixtureQuantiles.ess.median) < 1e-12);
+      }
+    }
+  }
+}
 
 function verifyCsvReproduction(csvFilePath, allSummariesObj) {
   console.log('Verifying exact reproduction of all summaries from unrounded CSV...');
@@ -1110,104 +1247,38 @@ function verifyCsvReproduction(csvFilePath, allSummariesObj) {
     }
     records.push(row);
   }
-  assert.equal(records.length, 6000, 'CSV must contain exactly 6000 records');
 
-  const evalKeys = [
-    { key: 'exact_4pct_cv', cond: 'exact_28h_4pct_cv' },
-    { key: 'perturbed_fixed32h_4pct_cv', cond: 'perturbed_15m_fixed32h_4pct_cv' },
-    { key: 'perturbed_elapsed4h_4pct_cv', cond: 'perturbed_15m_elapsed4h_4pct_cv' },
-    { key: 'zero_noise_sanity', cond: 'zero_noise_28h' }
-  ];
+  // 1. Positive Control Check
+  verifyRecordsIntegrity(records, allSummariesObj);
+  console.log('  [PASS] Positive control: All 6,000 CSV rows and summary statistics reproduced identically.');
 
-  for (const { key, cond } of evalKeys) {
-    const expSummaries = allSummariesObj[key];
-    for (const expS of expSummaries) {
-      const group = records.filter(r => r.condition === cond && r.scenario === expS.scenario);
-      assert.equal(group.length, 500, `Condition ${cond} scenario ${expS.scenario} must have 500 records`);
-
-      // Check seeds
-      assert.equal(Number(group[0].param_draw_seed), 123456789, 'param_draw_seed in CSV must be 123456789');
-      assert.equal(Number(group[0].eval_noise_seed), 44556677, 'eval_noise_seed in CSV must be 44556677');
-
-      // Check CF
-      const cfAbs = group.map(r => parseFloat(r.err_abs_cf));
-      const cfSigned = group.map(r => parseFloat(r.err_signed_cf));
-      assert.ok(Math.abs(median(cfAbs) - expS.CF.medAbs) < 1e-12, `CF medAbs mismatch in ${cond} ${expS.scenario}`);
-      assert.ok(Math.abs(median(cfSigned) - expS.CF.medSigned) < 1e-12, `CF medSigned mismatch in ${cond} ${expS.scenario}`);
-      assert.deepEqual(signCounts(cfSigned), expS.CF.signs, `CF signs mismatch in ${cond} ${expS.scenario}`);
-
-      // Check ER
-      const erCmmgAbs = group.map(r => parseFloat(r.err_abs_er_cmmg));
-      const erCmmgSigned = group.map(r => parseFloat(r.err_signed_er_cmmg));
-      const erBothAbs = group.map(r => parseFloat(r.err_abs_er_both));
-      const erBothSigned = group.map(r => parseFloat(r.err_signed_er_both));
-      assert.ok(Math.abs(median(erCmmgAbs) - expS.ER.cmmgMedAbs) < 1e-12, `ER cmmgMedAbs mismatch in ${cond} ${expS.scenario}`);
-      assert.ok(Math.abs(median(erCmmgSigned) - expS.ER.cmmgMedSigned) < 1e-12, `ER cmmgMedSigned mismatch in ${cond} ${expS.scenario}`);
-      assert.deepEqual(signCounts(erCmmgSigned), expS.ER.cmmgSigns, `ER cmmgSigns mismatch in ${cond} ${expS.scenario}`);
-      assert.ok(Math.abs(median(erBothAbs) - expS.ER.bothMedAbs) < 1e-12, `ER bothMedAbs mismatch in ${cond} ${expS.scenario}`);
-      assert.ok(Math.abs(median(erBothSigned) - expS.ER.bothMedSigned) < 1e-12, `ER bothMedSigned mismatch in ${cond} ${expS.scenario}`);
-      assert.deepEqual(signCounts(erBothSigned), expS.ER.bothSigns, `ER bothSigns mismatch in ${cond} ${expS.scenario}`);
-      const recomputedErDiffs = pairedDiffs(erBothAbs, erCmmgAbs);
-      assert.equal(recomputedErDiffs.helped, expS.ER.diffs.helped, `ER helped mismatch in ${cond} ${expS.scenario}`);
-      assert.equal(recomputedErDiffs.worsened, expS.ER.diffs.worsened, `ER worsened mismatch in ${cond} ${expS.scenario}`);
-      assert.equal(recomputedErDiffs.tied, expS.ER.diffs.tied, `ER tied mismatch in ${cond} ${expS.scenario}`);
-      assert.ok(Math.abs(recomputedErDiffs.medDiff - expS.ER.diffs.medDiff) < 1e-12, `ER medDiff mismatch in ${cond} ${expS.scenario}`);
-      assert.ok(Math.abs(recomputedErDiffs.meanDiff - expS.ER.diffs.meanDiff) < 1e-12, `ER meanDiff mismatch in ${cond} ${expS.scenario}`);
-
-      // Check SU_Unw
-      const suUnwBothAbs = group.map(r => parseFloat(r.err_abs_su_unw_both));
-      const suUnwBothSigned = group.map(r => parseFloat(r.err_signed_su_unw_both));
-      const suUnwCmmgAbs = group.map(r => parseFloat(r.err_abs_su_unw_cmmg));
-      const suUnwCmmgSigned = group.map(r => parseFloat(r.err_signed_su_unw_cmmg));
-      assert.ok(Math.abs(median(suUnwCmmgAbs) - expS.SU_Unw.cmmgMedAbs) < 1e-12);
-      assert.ok(Math.abs(median(suUnwCmmgSigned) - expS.SU_Unw.cmmgMedSigned) < 1e-12);
-      assert.deepEqual(signCounts(suUnwCmmgSigned), expS.SU_Unw.cmmgSigns);
-      assert.ok(Math.abs(median(suUnwBothAbs) - expS.SU_Unw.bothMedAbs) < 1e-12);
-      assert.ok(Math.abs(median(suUnwBothSigned) - expS.SU_Unw.bothMedSigned) < 1e-12);
-      assert.deepEqual(signCounts(suUnwBothSigned), expS.SU_Unw.bothSigns);
-      const recomputedSuUnwDiffs = pairedDiffs(suUnwBothAbs, suUnwCmmgAbs);
-      assert.equal(recomputedSuUnwDiffs.helped, expS.SU_Unw.diffs.helped);
-      assert.equal(recomputedSuUnwDiffs.worsened, expS.SU_Unw.diffs.worsened);
-      assert.equal(recomputedSuUnwDiffs.tied, expS.SU_Unw.diffs.tied);
-      assert.ok(Math.abs(recomputedSuUnwDiffs.medDiff - expS.SU_Unw.diffs.medDiff) < 1e-12);
-      assert.ok(Math.abs(recomputedSuUnwDiffs.meanDiff - expS.SU_Unw.diffs.meanDiff) < 1e-12);
-
-      // Check SU_Rew
-      const suRewBothAbs = group.map(r => parseFloat(r.err_abs_su_rew_both));
-      const suRewBothSigned = group.map(r => parseFloat(r.err_signed_su_rew_both));
-      const suRewCmmgAbs = group.map(r => parseFloat(r.err_abs_su_rew_cmmg));
-      const suRewCmmgSigned = group.map(r => parseFloat(r.err_signed_su_rew_cmmg));
-      assert.ok(Math.abs(median(suRewCmmgAbs) - expS.SU_Rew.cmmgMedAbs) < 1e-12);
-      assert.ok(Math.abs(median(suRewCmmgSigned) - expS.SU_Rew.cmmgMedSigned) < 1e-12);
-      assert.deepEqual(signCounts(suRewCmmgSigned), expS.SU_Rew.cmmgSigns);
-      assert.ok(Math.abs(median(suRewBothAbs) - expS.SU_Rew.bothMedAbs) < 1e-12);
-      assert.ok(Math.abs(median(suRewBothSigned) - expS.SU_Rew.bothMedSigned) < 1e-12);
-      assert.deepEqual(signCounts(suRewBothSigned), expS.SU_Rew.bothSigns);
-      const recomputedSuRewDiffs = pairedDiffs(suRewBothAbs, suRewCmmgAbs);
-      assert.equal(recomputedSuRewDiffs.helped, expS.SU_Rew.diffs.helped);
-      assert.equal(recomputedSuRewDiffs.worsened, expS.SU_Rew.diffs.worsened);
-      assert.equal(recomputedSuRewDiffs.tied, expS.SU_Rew.diffs.tied);
-      assert.ok(Math.abs(recomputedSuRewDiffs.medDiff - expS.SU_Rew.diffs.medDiff) < 1e-12);
-      assert.ok(Math.abs(recomputedSuRewDiffs.meanDiff - expS.SU_Rew.diffs.meanDiff) < 1e-12);
-
-      // Check mixture quantiles if applicable
-      if (expS.scenario === 'mixture') {
-        const w1Vals = group.map(r => parseFloat(r.w_H1));
-        const w2Vals = group.map(r => parseFloat(r.w_H2));
-        const essVals = group.map(r => parseFloat(r.ess));
-        const qW1 = quantiles(w1Vals);
-        const qW2 = quantiles(w2Vals);
-        const qESS = quantiles(essVals);
-        assert.ok(Math.abs(qW1.mean - expS.mixtureQuantiles.w_H1.mean) < 1e-12);
-        assert.ok(Math.abs(qW1.median - expS.mixtureQuantiles.w_H1.median) < 1e-12);
-        assert.ok(Math.abs(qW2.mean - expS.mixtureQuantiles.w_H2.mean) < 1e-12);
-        assert.ok(Math.abs(qW2.median - expS.mixtureQuantiles.w_H2.median) < 1e-12);
-        assert.ok(Math.abs(qESS.mean - expS.mixtureQuantiles.ess.mean) < 1e-12);
-        assert.ok(Math.abs(qESS.median - expS.mixtureQuantiles.ess.median) < 1e-12);
-      }
-    }
+  // 2. Negative Control 1: Deliberately alter a prediction in patient 42
+  const negRecords1 = records.map(r => ({ ...r }));
+  negRecords1[42].pred_cf = String(parseFloat(negRecords1[42].pred_cf) + 1.25);
+  let neg1Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords1, allSummariesObj);
+  } catch (err) {
+    neg1Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 1 error must be AssertionError, got: ${err.message}`);
   }
-  console.log('  PASSED: All summary metrics and sign distributions reproduced identically from unrounded CSV.');
+  assert.ok(neg1Failed, 'Negative control 1 failed: altering a prediction must throw AssertionError');
+  console.log('  [PASS] Negative control 1: Deliberately altered prediction successfully caught by assertion.');
+
+  // 3. Negative Control 2: Deliberately alter a signed error in patient 105
+  const negRecords2 = records.map(r => ({ ...r }));
+  negRecords2[105].err_signed_er_both = String(parseFloat(negRecords2[105].err_signed_er_both) + 0.5);
+  let neg2Failed = false;
+  try {
+    verifyRecordsIntegrity(negRecords2, allSummariesObj);
+  } catch (err) {
+    neg2Failed = true;
+    assert.ok(err instanceof assert.AssertionError, `Negative control 2 error must be AssertionError, got: ${err.message}`);
+  }
+  assert.ok(neg2Failed, 'Negative control 2 failed: altering a signed error must throw AssertionError');
+  console.log('  [PASS] Negative control 2: Deliberately altered signed error successfully caught by assertion.');
+
+  console.log('  ALL ASSERTIONS & NEGATIVE CONTROLS PASSED.');
 }
 
 // Export JSON
@@ -1255,5 +1326,7 @@ module.exports = {
   eval1,
   eval2,
   eval3,
-  eval4
+  eval4,
+  verifyCsvReproduction,
+  verifyRecordsIntegrity
 };

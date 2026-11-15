@@ -17,7 +17,7 @@
 ## 1. Simulation Setup & Provenance
 
 ### 1.1 Parameter-Disjoint Partitioning
-- **Draw Sequence:** A single deterministic random sequence (engine param_draw_seed `123456789`) generated 900 parameter draws from the log-normal adult AyFlux population distribution.
+- **Draw Sequence:** A single deterministic random sequence (engine param_draw_seed `2026`) generated 900 parameter draws from the log-normal adult AyFlux population distribution.
 - **Partition:**
   - Virtual Ground-Truth Patients: First $N = 500$ draws (IDs $0 \dots 499$).
   - Candidate Forecaster Draws: Remaining $M = 400$ draws (IDs $500 \dots 899$).
@@ -41,7 +41,7 @@
 - **Verification Across Cohort:** Programmatic no-update continuation parity assertions were executed across diagnostic indices $[0, 1, 2, 100, 499]$ at pre-end ($27.75\text{ h}$), exact-end ($28.0\text{ h}$), and post-end ($28.25\text{ h}$). Across all 15 patient-timestamp pairs, the continuation trajectory matched the full engine simulation exactly with absolute difference $< 10^{-12}\text{ mg/L}$ ($0.000\text{e}+0$).
 
 ### 1.5 Distinction Between Generative Noise and Likelihood Floor
-- **RNG Seeds:** Parameter draws used engine seed `123456789`; evaluation draw-time perturbation ($\pm 15\text{ min}$) and measurement noise ($4\%\text{ CV}$) used independent seed `44556677`.
+- **RNG Seeds:** Parameter draws used engine seed `2026`; evaluation draw-time perturbation ($\pm 15\text{ min}$) and measurement noise ($4\%\text{ CV}$) used independent seed `44556677`.
 - **Generative Measurement Model:** Virtual patient observations are generated with pure proportional Gaussian noise:
   $$y = \max(0.01, C \cdot (1 + \epsilon)), \quad \epsilon \sim \mathcal{N}(0, 0.04^2)$$
   There is NO artificial $0.1\text{ mg/L}$ standard-deviation floor applied during observation generation.
