@@ -1475,7 +1475,9 @@ const EXISTING_7_METHODS_AND_WEIGHTS = [
   'ess'
 ];
 
-function loadBaselineFrom5826d04(customRef = '5826d04') {
+const FULL_BASELINE_SHA = '5826d041b53555e7fd199b123872175185c90458';
+
+function loadBaselineFrom5826d04(customRef = FULL_BASELINE_SHA) {
   const repoRoot = path.resolve(__dirname, '../..');
   if (typeof customRef === 'string' && fs.existsSync(customRef) && fs.statSync(customRef).isFile()) {
     const content = fs.readFileSync(customRef, 'utf8');
@@ -1490,9 +1492,32 @@ function loadBaselineFrom5826d04(customRef = '5826d04') {
       throw new Error(`Git returned empty or invalid CSV for ref '${customRef}'`);
     }
     return parseCsvRecords(rawCsv);
-  } catch (err) {
+  } catch (initialErr) {
+    // In a shallow clone, 5826d041b53555e7fd199b123872175185c90458 may not be in local history.
+    // If customRef is the baseline commit SHA, automate fetching the commit object from origin:
+    if (customRef === FULL_BASELINE_SHA) {
+      try {
+        console.warn(`[NOTICE] Baseline commit ${FULL_BASELINE_SHA} not present in local history (shallow clone detected). Fetching baseline object...`);
+        execSync(`git fetch --depth 1 origin ${FULL_BASELINE_SHA}`, {
+          cwd: repoRoot,
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe']
+        });
+        const rawCsvRetry = execSync(
+          `git show ${FULL_BASELINE_SHA}:research/validation/cmmg-forecast-patients.csv`,
+          { cwd: repoRoot, maxBuffer: 25 * 1024 * 1024, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+        );
+        if (rawCsvRetry && rawCsvRetry.includes('param_draw_seed')) {
+          console.log(`[PASS] Successfully retrieved baseline ${FULL_BASELINE_SHA} via automated fetch.`);
+          return parseCsvRecords(rawCsvRetry);
+        }
+      } catch (fetchErr) {
+        // Fall through to throw descriptive error below
+      }
+    }
     throw new Error(
-      `Baseline verification failed: required 5826d04 baseline data is unavailable from ref '${customRef}' (${err.message ? err.message.split('\n')[0] : 'unknown error'}).`
+      `Baseline verification failed: required ${FULL_BASELINE_SHA} baseline data is unavailable from ref '${customRef}' (${initialErr.message ? initialErr.message.split('\n')[0] : 'unknown error'}). ` +
+      `If using a shallow clone, fetch the baseline object using: git fetch --depth 1 origin ${FULL_BASELINE_SHA}`
     );
   }
 }
@@ -1503,6 +1528,11 @@ function compareRecordsAgainstBaseline(currentRecords, baselineRecords, fieldsTo
     baselineRecords.length,
     `Record count mismatch vs baseline: current=${currentRecords.length}, baseline=${baselineRecords.length}`
   );
+
+  let totalComparisons = 0;
+  let bitForBitMatches = 0;
+  let toleranceMatches = 0;
+  let maxAbsDiff = 0.0;
 
   for (let i = 0; i < currentRecords.length; i++) {
     const c = currentRecords[i];
@@ -1515,30 +1545,55 @@ function compareRecordsAgainstBaseline(currentRecords, baselineRecords, fieldsTo
     }
 
     for (const f of fieldsToCompare) {
-      const vc = parseFloat(c[f]);
-      const vb = parseFloat(b[f]);
+      totalComparisons++;
+      const sC = String(c[f]);
+      const sB = String(b[f]);
+
+      if (sC === sB) {
+        bitForBitMatches++;
+      }
+
+      const vc = parseFloat(sC);
+      const vb = parseFloat(sB);
       assert.ok(!Number.isNaN(vc), `Current row ${i} field ${f} is NaN`);
       assert.ok(!Number.isNaN(vb), `Baseline row ${i} field ${f} is NaN`);
 
       const diff = Math.abs(vc - vb);
-      if (diff > 1e-12) {
+      if (diff > maxAbsDiff) {
+        maxAbsDiff = diff;
+      }
+
+      if (diff <= 1e-12) {
+        toleranceMatches++;
+      } else {
         throw new assert.AssertionError({
-          message: `Row ${i} (${c.condition}/${c.scenario}/pt${c.patient_id}) ${f} mismatch vs 5826d04 baseline: current=${vc}, baseline=${vb} (diff=${diff})`
+          message: `Row ${i} (${c.condition}/${c.scenario}/pt${c.patient_id}) ${f} mismatch vs ${FULL_BASELINE_SHA} baseline: current=${vc}, baseline=${vb} (diff=${diff})`
         });
       }
     }
   }
 
-  return currentRecords.length;
+  return {
+    totalRows: currentRecords.length,
+    totalFields: fieldsToCompare.length,
+    totalComparisons,
+    bitForBitMatches,
+    bitForBitRate: totalComparisons > 0 ? bitForBitMatches / totalComparisons : 1.0,
+    toleranceMatches,
+    toleranceRate: totalComparisons > 0 ? toleranceMatches / totalComparisons : 1.0,
+    maxAbsDiff
+  };
 }
 
-function runBaselineVerification(currentRecords, gitRef = '5826d04') {
-  console.log('Verifying row-by-row numerical identity of all 7 existing methods against frozen 5826d04 baseline...');
+function runBaselineVerification(currentRecords, gitRef = FULL_BASELINE_SHA) {
+  console.log(`Verifying row-by-row numerical identity of all 7 existing methods against frozen ${FULL_BASELINE_SHA} baseline...`);
 
   // 1. Positive Control: row-by-row identity across all 6,000 records
   const baselineRecords = loadBaselineFrom5826d04(gitRef);
-  const nVerified = compareRecordsAgainstBaseline(currentRecords, baselineRecords);
-  console.log(`  [PASS] Positive control: All ${nVerified} rows x ${EXISTING_7_METHODS_AND_WEIGHTS.length} fields matched 5826d04 baseline identically (< 1e-12 mg/L).`);
+  const comparison = compareRecordsAgainstBaseline(currentRecords, baselineRecords);
+  console.log(`  [PASS] Positive control: All ${comparison.totalRows} rows x ${comparison.totalFields} fields verified:`);
+  console.log(`    - Bit-for-bit string equality: ${comparison.bitForBitMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.bitForBitRate * 100).toFixed(3)}%)`);
+  console.log(`    - Tolerance-based equality (< 1e-12 mg/L): ${comparison.toleranceMatches.toLocaleString()} / ${comparison.totalComparisons.toLocaleString()} (${(comparison.toleranceRate * 100).toFixed(3)}%), max diff = ${comparison.maxAbsDiff.toExponential(3)}`);
 
   // 2. Negative Control 1: Missing Baseline throws explicit Error
   let missingBaselineFailed = false;
@@ -1548,7 +1603,7 @@ function runBaselineVerification(currentRecords, gitRef = '5826d04') {
     missingBaselineFailed = true;
     assert.match(
       err.message,
-      /Baseline verification failed: required 5826d04 baseline data is unavailable/,
+      new RegExp(`Baseline verification failed: required ${FULL_BASELINE_SHA} baseline data is unavailable`),
       `Error message must indicate missing baseline, got: ${err.message}`
     );
   }
@@ -1564,7 +1619,7 @@ function runBaselineVerification(currentRecords, gitRef = '5826d04') {
   } catch (err) {
     alteredPredFailed = true;
     assert.ok(err instanceof assert.AssertionError, `Expected AssertionError, got: ${err.message}`);
-    assert.match(err.message, /mismatch vs 5826d04 baseline/);
+    assert.match(err.message, new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`));
   }
   assert.ok(alteredPredFailed, 'Negative control failed: altered prediction must throw AssertionError');
   console.log('  [PASS] Negative control (altered prediction): Deliberately altered prediction caught by row-by-row assertion.');
@@ -1578,7 +1633,7 @@ function runBaselineVerification(currentRecords, gitRef = '5826d04') {
   } catch (err) {
     alteredWeightFailed = true;
     assert.ok(err instanceof assert.AssertionError, `Expected AssertionError, got: ${err.message}`);
-    assert.match(err.message, /mismatch vs 5826d04 baseline/);
+    assert.match(err.message, new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`));
   }
   assert.ok(alteredWeightFailed, 'Negative control failed: altered weight must throw AssertionError');
   console.log('  [PASS] Negative control (altered weight): Deliberately altered exported weight caught by row-by-row assertion.');
@@ -1587,8 +1642,8 @@ function runBaselineVerification(currentRecords, gitRef = '5826d04') {
 // Verify that all summary statistics, sign counts, and quantiles reproduce identically from the unrounded CSV
 verifyCsvReproduction(csvPath, allSummaries);
 
-// Verify numerical identity of all 7 existing methods vs frozen 5826d04 baseline row by row with negative controls
-runBaselineVerification(allPatientRecords, '5826d04');
+// Verify numerical identity of all 7 existing methods vs frozen 5826d041b53555e7fd199b123872175185c90458 baseline row by row with negative controls
+runBaselineVerification(allPatientRecords, FULL_BASELINE_SHA);
 
 // Generate and write Markdown Audit Report
 const mdPath = path.resolve(__dirname, 'CMMG-POST-HD-FORECAST-AUDIT.md');
@@ -1599,6 +1654,7 @@ console.log(`Saved programmatically generated Markdown Audit Report to ${mdPath}
 console.log('\n=== RUN COMPLETED SUCCESSFULLY WITH ALL INVARIANTS VERIFIED ===');
 
 module.exports = {
+  FULL_BASELINE_SHA,
   allSummaries,
   eval1,
   eval2,

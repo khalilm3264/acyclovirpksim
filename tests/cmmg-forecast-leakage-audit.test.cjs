@@ -13,7 +13,8 @@ const {
   generatePatientForecast,
   allPatientRecords,
   loadBaselineFrom5826d04,
-  compareRecordsAgainstBaseline
+  compareRecordsAgainstBaseline,
+  FULL_BASELINE_SHA
 } = require('../research/validation/cmmg-forecast-post-hd.cjs');
 
 test('CMMG forecast pipeline exhibits no future-data leakage detected by target perturbation checks', () => {
@@ -79,16 +80,19 @@ test('Deliberate-failure negative controls catch target leakage, input leakage, 
 });
 
 test('Baseline verification against frozen 5826d04 asserts row-by-row numerical identity and catches missing/altered baseline', () => {
-  // 1. Positive control: loads from frozen 5826d04 and asserts all 6000 rows match row by row
-  const baselineRecords = loadBaselineFrom5826d04('5826d04');
+  // 1. Positive control: loads from frozen 5826d041b53555e7fd199b123872175185c90458 and asserts all 6000 rows match row by row
+  const baselineRecords = loadBaselineFrom5826d04(FULL_BASELINE_SHA);
   assert.equal(baselineRecords.length, 6000, 'Baseline must contain exactly 6000 records');
-  const nChecked = compareRecordsAgainstBaseline(allPatientRecords, baselineRecords);
-  assert.equal(nChecked, 6000, 'All 6000 records must match row by row');
+  const comparison = compareRecordsAgainstBaseline(allPatientRecords, baselineRecords);
+  assert.equal(comparison.totalRows, 6000, 'All 6000 records must match row by row');
+  assert.equal(comparison.bitForBitMatches, 144000, 'All 144,000 comparisons must be bit-for-bit identical');
+  assert.equal(comparison.toleranceMatches, 144000, 'All 144,000 comparisons must match within tolerance (< 1e-12)');
+  assert.ok(comparison.maxAbsDiff <= 1e-12, 'Max absolute difference must be <= 1e-12');
 
   // 2. Negative control: missing baseline fails explicitly with Error
   assert.throws(
     () => loadBaselineFrom5826d04('nonexistent_ref_missing_404'),
-    /Baseline verification failed: required 5826d04 baseline data is unavailable/
+    new RegExp(`Baseline verification failed: required ${FULL_BASELINE_SHA} baseline data is unavailable`)
   );
 
   // 3. Negative control: altered prediction fails row-by-row check
@@ -96,7 +100,7 @@ test('Baseline verification against frozen 5826d04 asserts row-by-row numerical 
   alteredPred[42].pred_su_unw_both = String(parseFloat(alteredPred[42].pred_su_unw_both) + 0.4);
   assert.throws(
     () => compareRecordsAgainstBaseline(alteredPred, baselineRecords),
-    /mismatch vs 5826d04 baseline/
+    new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`)
   );
 
   // 4. Negative control: altered weight fails row-by-row check
@@ -104,6 +108,6 @@ test('Baseline verification against frozen 5826d04 asserts row-by-row numerical 
   alteredWeight[500].w_H1 = String(parseFloat(alteredWeight[500].w_H1) + 0.2);
   assert.throws(
     () => compareRecordsAgainstBaseline(alteredWeight, baselineRecords),
-    /mismatch vs 5826d04 baseline/
+    new RegExp(`mismatch vs ${FULL_BASELINE_SHA} baseline`)
   );
 });
