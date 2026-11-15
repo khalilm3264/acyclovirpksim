@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
+const { execFileSync } = require('node:child_process');
 const { webkit, devices } = require('playwright');
 
 const PROFILES = {
@@ -23,6 +24,28 @@ const PROFILES = {
 const SCREENSHOT_DIR = path.resolve(__dirname, '../research/validation/results/screenshots');
 if (!fs.existsSync(SCREENSHOT_DIR)) {
   fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+}
+
+async function assertStatus(page, expected, busy) {
+  const state = await page.locator('#plasmaChart .chart-status').evaluate(el => {
+    const box = el.getBoundingClientRect(), range = document.createRange();
+    range.selectNodeContents(el);
+    const rects = Array.from(range.getClientRects());
+    const style = getComputedStyle(el);
+    return {
+      text: el.textContent, color: style.color, background: style.backgroundColor,
+      busy: el.parentElement.getAttribute('aria-busy'),
+      unclipped: rects.length > 0 && rects.every(r => r.left >= box.left - 1 && r.right <= box.right + 1 && r.top >= box.top - 1 && r.bottom <= box.bottom + 1),
+      centered: Math.abs((range.getBoundingClientRect().left + range.getBoundingClientRect().right - box.left - box.right) / 2) <= 2,
+      overflow: document.documentElement.scrollWidth > innerWidth + 2
+    };
+  });
+  assert.equal(state.text, expected);
+  assert.equal(state.color, 'rgb(40, 79, 107)');
+  assert.equal(state.background, 'rgba(244, 248, 251, 0.96)');
+  assert.equal(state.busy, String(busy));
+  assert.ok(state.unclipped && state.centered, 'Status text must fit and be centered');
+  assert.equal(state.overflow, false, 'Page must not overflow horizontally');
 }
 
 async function createServer() {
@@ -52,10 +75,14 @@ async function runLoadingStatesAudit() {
   console.log(`MOBILE LOADING STATES AUDIT ON WEBKIT (${baseUrl})`);
   console.log(`========================================================================\n`);
 
-  const browser = await webkit.launch({ headless: true });
+  let revision = 'unavailable (source archive)';
+  try { revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: path.resolve(__dirname, '..'), encoding: 'utf8' }).trim(); } catch {}
+  console.log('Checkout SHA:', revision, '| WebKit executable:', webkit.executablePath());
+  let browser;
   const report = [];
 
   try {
+    browser = await webkit.launch({ headless: true });
     for (const [key, profile] of Object.entries(PROFILES)) {
       console.log(`>>> Testing Device: ${profile.label} [${key.toUpperCase()}] <<<`);
 
@@ -67,6 +94,8 @@ async function runLoadingStatesAudit() {
         hasTouch: profile.hasTouch,
         serviceWorkers: 'block'
       });
+      const errors = [];
+      context.on('page', page => page.on('pageerror', error => errors.push(error.message)));
 
       // 1. Slow Calculation & Slow Chart Download & Clean Render
       console.log(`--- [1] Slow Calculation, Slow Chart Download & Clean Render ---`);
@@ -99,6 +128,7 @@ async function runLoadingStatesAudit() {
       assert.equal(calcMsgPortrait, 'Calculating simulation…');
       assert.equal(calcColorPortrait, 'rgb(40, 79, 107)');
       assert.ok(calcRectPortrait.width > 0 && calcRectPortrait.height > 0);
+      await assertStatus(page, 'Calculating simulation…', true);
 
       await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-calc-portrait.png`) });
 
@@ -112,6 +142,7 @@ async function runLoadingStatesAudit() {
       console.log(`     Calculating (Landscape): Text="${calcMsgLandscape}", Width=${calcRectLandscape.width}px, Height=${calcRectLandscape.height}px`);
       assert.equal(calcMsgLandscape, 'Calculating simulation…');
       assert.ok(calcRectLandscape.width > 0);
+      await assertStatus(page, 'Calculating simulation…', true);
 
       await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-calc-landscape.png`) });
 
@@ -129,6 +160,7 @@ async function runLoadingStatesAudit() {
       console.log(`     Loading (Portrait): Text="${loadMsgPortrait}", Color="${loadColorPortrait}"`);
       assert.equal(loadMsgPortrait, 'Loading chart…');
       assert.equal(loadColorPortrait, 'rgb(40, 79, 107)');
+      await assertStatus(page, 'Loading chart…', true);
 
       await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-loading-portrait.png`) });
 
@@ -140,6 +172,7 @@ async function runLoadingStatesAudit() {
       const loadMsgLandscape = await page.locator('#plasmaChart .chart-status').textContent();
       console.log(`     Loading (Landscape): Text="${loadMsgLandscape}"`);
       assert.equal(loadMsgLandscape, 'Loading chart…');
+      await assertStatus(page, 'Loading chart…', true);
 
       await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-loading-landscape.png`) });
 
@@ -157,6 +190,7 @@ async function runLoadingStatesAudit() {
       console.log(`     ✓ Chart rendered: .chart-status count=${statusCountRendered}, canvas visible=${canvasVisible}`);
       assert.equal(statusCountRendered, 0, 'Chart status message must be removed after draw');
       assert.ok(canvasVisible, 'Canvas must be visible');
+      assert.equal(await page.locator('#plasmaChart').getAttribute('aria-busy'), 'false');
 
       await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-rendered-clean.png`) });
       await page.close();
@@ -167,10 +201,12 @@ async function runLoadingStatesAudit() {
       let heldRenderer;
       const heldRequest = new Promise(resolve => { heldRenderer = resolve; });
       await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js', route => heldRenderer(route));
+      const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
 
       await failedPage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
 
+      await failedRendererRequested;
       const route = await heldRequest;
       await failedPage.waitForFunction(() => !document.querySelector('#csv').disabled);
       await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Loading chart…');
@@ -188,12 +224,14 @@ async function runLoadingStatesAudit() {
       assert.equal(failMsg, 'Chart unavailable. Check your connection.');
       assert.equal(ariaBusy, 'false');
       assert.ok(alertsHtml.includes('open AyFlux Lite'));
+      await assertStatus(failedPage, 'Chart unavailable. Check your connection.', false);
 
       await failedPage.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-failed-portrait.png`) });
 
       await failedPage.setViewportSize(profile.landscape);
       await failedPage.waitForTimeout(200);
       assert.equal(await failedPage.locator('#plasmaChart .chart-status').textContent(), 'Chart unavailable. Check your connection.');
+      await assertStatus(failedPage, 'Chart unavailable. Check your connection.', false);
 
       await failedPage.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-failed-landscape.png`) });
 
@@ -213,11 +251,22 @@ async function runLoadingStatesAudit() {
       console.log(`     ✓ Recovered: .chart-status count=${statusCountRecovered}, canvas visible=${canvasRecoveredVisible}`);
       assert.equal(statusCountRecovered, 0);
       assert.ok(canvasRecoveredVisible);
+      assert.equal(await failedPage.locator('#plasmaChart').getAttribute('aria-busy'), 'false');
+      const recovered = await failedPage.evaluate(() => window.AyFluxResearchBridge.snapshot());
+      assert.equal(recovered.updated, true);
+      assert.equal(recovered.config.dose, 725);
+      assert.equal(await failedPage.evaluate(() => {
+        const snapshot = window.AyFluxResearchBridge.snapshot();
+        const run = snapshot.results[snapshot.primary];
+        const series = window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().series.find(s => s.name === snapshot.primary + ' (selected)');
+        return series?.data.length === run.time.length && series.data.every(([t, value], i) => t === run.time[i] && value === run.plasma.median[i]);
+      }), true, 'Recovered curve must match the current model points');
 
       await failedPage.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-recovered.png`) });
 
       await failedPage.close();
       await context.close();
+      assert.deepEqual(errors, [], 'No uncaught page errors');
 
       report.push({
         device: profile.label,
@@ -243,7 +292,7 @@ async function runLoadingStatesAudit() {
 
     return report;
   } finally {
-    await browser.close();
+    await browser?.close();
     server.close();
   }
 }

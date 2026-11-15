@@ -1,14 +1,14 @@
 # Mobile Loading-State Usability Audit (iPhone & iPad WebKit Emulation)
 
 Audit date: November 14, 2026.  
-Base commit: `4db47d96a5cffb462da2c8b82ff631c897f1f0a2` (`main`, including merged PR #217).  
+Original audit base commit: `4db47d9821ec7e0df71a5ee8929a37e934e28183` (`main`, including merged PR #217).
 Target branch: `test/mobile-loading-states`.  
 
 ---
 
 ## 1. Overview & Emulation Scope
 
-This audit evaluates the mobile loading, failure, and recovery feedback states introduced in PR #217 across iPhone and iPad mobile viewports using WebKit engine emulation.
+This audit evaluates the mobile loading, failure, and recovery feedback states introduced in PR #217 across iPhone and iPad mobile viewports using WebKit engine emulation. Device-profile iOS version labels describe user-agent presets, not the OS version of the test host.
 
 > [!NOTE]
 > **Hardware Status & Simulation Methodology Disclosure:**
@@ -25,7 +25,7 @@ This audit evaluates the mobile loading, failure, and recovery feedback states i
 | **1** | **Slow Calculation** (Worker held) | `#plasmaChart .chart-status` | `"Calculating simulation…"`<br>`color: #284f6b`<br>`bg: rgba(244,248,251,.96)`<br>`aria-busy="true"` | **PASSED**<br>Centered & readable in portrait & landscape | **PASSED**<br>Centered & readable in portrait & landscape |
 | **2** | **Slow Chart Download** (Worker released, ECharts held) | `#plasmaChart .chart-status` | `"Loading chart…"`<br>`color: #284f6b`<br>`bg: rgba(244,248,251,.96)`<br>`aria-busy="true"` | **PASSED**<br>Immediate transition upon simulation accept | **PASSED**<br>Immediate transition upon simulation accept |
 | **3** | **Clean Chart Render** (ECharts released) | `#plasmaChart` | Canvas renders;<br>`.chart-status` removed (`count === 0`);<br>`aria-busy="false"` | **PASSED**<br>Overlay completely cleared; interactive curves visible | **PASSED**<br>Overlay completely cleared; interactive curves visible |
-| **4** | **Failed Download** (ECharts request aborted) | `#plasmaChart .chart-status`<br>& `#alerts` | `"Chart unavailable. Check your connection."`<br>`aria-busy="false"`<br>Alert banner with `<a href="/lite/">open AyFlux Lite</a>` | **PASSED**<br>Non-busy error message visible; fallback link operable | **PASSED**<br>Non-busy error message visible; fallback link operable |
+| **4** | **Failed Download** (ECharts request aborted) | `#plasmaChart .chart-status`<br>& `#alerts` | `"Chart unavailable. Check your connection."`<br>`aria-busy="false"`<br>Alert banner with `<a href="/lite/">open AyFlux Lite</a>` | **PASSED**<br>Non-busy error message visible; fallback link present | **PASSED**<br>Non-busy error message visible; fallback link present |
 | **5** | **Recovery & Retry** (Unrouted, dose updated to 725 mg) | `#plasmaChart` | Triggers recalculation,<br>downloads ECharts,<br>renders canvas, removes overlay | **PASSED**<br>Recalculated & rendered cleanly with updated curve | **PASSED**<br>Recalculated & rendered cleanly with updated curve |
 
 ---
@@ -52,7 +52,7 @@ This audit evaluates the mobile loading, failure, and recovery feedback states i
 - **Verification:**
   - `#plasmaChart .chart-status` count dropped to 0 (`status?.remove()`).
   - Container `aria-busy` attribute toggled to `"false"`.
-  - Canvas element was fully rendered and interactive.
+  - Canvas was present and visible; this runner does not test touch gestures.
 
 ### Phase 4: Failed Chart Download Feedback
 - **Mechanism:** Aborted network request for `echarts-6.1.0.min.js`.
@@ -77,22 +77,22 @@ All screenshots captured during automated test execution on WebKit are catalogue
 
 | Device | State | Orientation | Screenshot File |
 | :--- | :--- | :---: | :--- |
-| **iPhone 14** | Calculating simulation… | Portrait | `iphone-calc-portrait.png` |
-| **iPhone 14** | Calculating simulation… | Landscape | `iphone-calc-landscape.png` |
-| **iPhone 14** | Loading chart… | Portrait | `iphone-loading-portrait.png` |
-| **iPhone 14** | Loading chart… | Landscape | `iphone-loading-landscape.png` |
-| **iPhone 14** | Chart rendered (clean) | Portrait | `iphone-rendered-clean.png` |
-| **iPhone 14** | Chart unavailable (failed) | Portrait | `iphone-failed-portrait.png` |
-| **iPhone 14** | Chart unavailable (failed) | Landscape | `iphone-failed-landscape.png` |
-| **iPhone 14** | Chart recovered (725 mg) | Portrait | `iphone-recovered.png` |
-| **iPad Pro 11** | Calculating simulation… | Portrait | `ipad-calc-portrait.png` |
-| **iPad Pro 11** | Calculating simulation… | Landscape | `ipad-calc-landscape.png` |
-| **iPad Pro 11** | Loading chart… | Portrait | `ipad-loading-portrait.png` |
-| **iPad Pro 11** | Loading chart… | Landscape | `ipad-loading-landscape.png` |
-| **iPad Pro 11** | Chart rendered (clean) | Portrait | `ipad-rendered-clean.png` |
-| **iPad Pro 11** | Chart unavailable (failed) | Portrait | `ipad-failed-portrait.png` |
-| **iPad Pro 11** | Chart unavailable (failed) | Landscape | `ipad-failed-landscape.png` |
-| **iPad Pro 11** | Chart recovered (725 mg) | Portrait | `ipad-recovered.png` |
+| **iPhone 14** | Calculating simulation… | Portrait | `phone-calc-portrait.png` |
+| **iPhone 14** | Calculating simulation… | Landscape | `phone-calc-landscape.png` |
+| **iPhone 14** | Loading chart… | Portrait | `phone-loading-portrait.png` |
+| **iPhone 14** | Loading chart… | Landscape | `phone-loading-landscape.png` |
+| **iPhone 14** | Chart rendered (clean) | Portrait | `phone-rendered-clean.png` |
+| **iPhone 14** | Chart unavailable (failed) | Portrait | `phone-failed-portrait.png` |
+| **iPhone 14** | Chart unavailable (failed) | Landscape | `phone-failed-landscape.png` |
+| **iPhone 14** | Chart recovered (725 mg) | Portrait | `phone-recovered.png` |
+| **iPad Pro 11** | Calculating simulation… | Portrait | `tablet-calc-portrait.png` |
+| **iPad Pro 11** | Calculating simulation… | Landscape | `tablet-calc-landscape.png` |
+| **iPad Pro 11** | Loading chart… | Portrait | `tablet-loading-portrait.png` |
+| **iPad Pro 11** | Loading chart… | Landscape | `tablet-loading-landscape.png` |
+| **iPad Pro 11** | Chart rendered (clean) | Portrait | `tablet-rendered-clean.png` |
+| **iPad Pro 11** | Chart unavailable (failed) | Portrait | `tablet-failed-portrait.png` |
+| **iPad Pro 11** | Chart unavailable (failed) | Landscape | `tablet-failed-landscape.png` |
+| **iPad Pro 11** | Chart recovered (725 mg) | Portrait | `tablet-recovered.png` |
 
 ---
 
@@ -105,3 +105,9 @@ node scripts/check-mobile-loading-states.cjs
 # Run full project regression suite
 npm test
 ```
+
+## Independent review and automated verification
+
+The original audit was supplied by Antigravity in commit `12d3916`. Review corrected the full base SHA and screenshot filename prefixes. The runner now asserts text and background colors, busy state, text bounds/centering, horizontal page overflow and updated-dose recovery, including equality of every plotted plasma point with the current model. It rejects uncaught page errors and prints the actual checkout SHA and WebKit executable for each run.
+
+The `Mobile loading states` workflow independently executes these checks on Linux WebKit and uploads the generated screenshots. Screenshots are generated artifacts, not committed source files. A successful workflow establishes these emulated loading-state checks; it does not establish physical Safari behavior, screen-reader usability, native page zoom or clinical validity.
