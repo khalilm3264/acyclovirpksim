@@ -571,6 +571,9 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
  html body #timeline .intervals {grid-template-columns:repeat(2,minmax(0,1fr));}
  html body #timeline .intervals>div:first-child {grid-column:1/-1;}
  html body #timeline .intervals>button {grid-column:1/-1;}
+}
+/* Touch targets are independent of the narrow-screen timeline layout. */
+@media(max-width:650px), (pointer:coarse) {
  html body #timeline .intervals input,
  html body #timeline .intervals select,
  html body #timeline .dose-row input,
@@ -581,9 +584,11 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
  html body #timeline .dose-row button,
  html body #timeline button {min-height:40px;}
  html body #timeline .rx-table button {min-width:40px;}
- html body #timeline .timeline-actions>.btn {flex:1 1 100%;}
  html body #timeline #pdRxEnable {width:20px;height:20px;flex-shrink:0;}
  html body #timeline #pdRxPanel>.check {min-height:40px;}
+}
+@media(max-width:650px) {
+ html body #timeline .timeline-actions>.btn {flex:1 1 100%;}
 }
 
 .site-subtitle, .refs, #concentration .scenario {overflow-wrap:anywhere}

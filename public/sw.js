@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.27.0-chart-startup-20261115";
+const CACHE = "ayflux-static-v0.27.0-tablet-targets-v2-20261115";
 const CORE = [
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
