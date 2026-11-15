@@ -2,7 +2,7 @@
 
 ## Primary observations and units
 
-Mahad D, Jarvis J, Chinnery PF, Mitra D, Gholkar A, Helldén A. *Aciclovir induced posterior leucoencephalopathy*. J Neurol Neurosurg Psychiatry. 2005;76:1308–1309. [DOI10.1136/jnnp.2004.059824](https://doi.org/10.1136/jnnp.2004.059824), [primary report](https://pmc.ncbi.nlm.nih.gov/articles/PMC1739775/). The printed right column on p.1308 was visually checked: concentrations are **μmol/L**, despite extraction losing the μ glyph. Source PDF SHA-256 `dcb5b84a17e426f1321c11aa6e8bbd2d40a8ea346c5a24cc245df84d45e8d32a`.
+Mahad DJ, et al. *Aciclovir induced posterior leucoencephalopathy*. J Neurol Neurosurg Psychiatry. 2005;76:1308–1309. [DOI10.1136/jnnp.2004.059824](https://doi.org/10.1136/jnnp.2004.059824), [PMID16107379](https://pubmed.ncbi.nlm.nih.gov/16107379/), [PMC1739775 primary report](https://pmc.ncbi.nlm.nih.gov/articles/PMC1739775/). The printed right column on p.1308 was visually checked: concentrations are **μmol/L**, despite extraction losing the μ glyph. Source PDF SHA-256 `dcb5b84a17e426f1321c11aa6e8bbd2d40a8ea346c5a24cc245df84d45e8d32a`.
 
 A 47-year-old woman with end-stage renal failure on CAPD received IV ACV **250 mg three times daily** for zoster. ACV was discontinued after eight days; CAPD continued. No rescue intermittent HD is reported. Weight, measured residual renal clearance, infusion durations, exact administrations and draw clocks, exchange volumes/times, delivered UF and dialysate concentrations are not supplied. Serum creatinine is not a measured CrCl.
 
@@ -14,6 +14,10 @@ A 47-year-old woman with end-stage renal failure on CAPD received IV ACV **250 m
 | 7 | Serum | 17.2 | 141 | 3.8736 | 33.7258 | 8.1977 |
 
 Conversions use ACV225.21 and CMMG239.19 g/mol. These are paired analytes in each reported specimen; they are not four contemporaneous serum/CSF pairs. **No simultaneous CSF:serum ratio can be calculated.** The prose labels days6/7 “post-aciclovir” after explicitly identifying day5 as post-initiation; the eight-day course supports a treatment-day reading, not days after withdrawal. No exact last-dose offset is recovered.
+
+## Provenance and duplicate check
+
+Current research files and PR identifiers were checked before adding this comparison. The Newcastle Mahad case is treated separately from [Helldén2006, DOI10.1093/jac/dkl067](https://doi.org/10.1093/jac/dkl067): its Table1 symptomatic subjects13–21 include women aged63 and59; the47-year-old is male receiving oral ACV, unlike this47-year-old woman receiving IV ACV on CAPD. That report describes Swedish/Israeli sites. [Helldén2003, PMID12748346](https://pubmed.ncbi.nlm.nih.gov/12748346/) concerns Swedish hospital referrals during1991–mid1999. The2006 methods identify previously reported serum results apart from subjects20/21; those reused observations must not be counted as new independent serum evidence. Shared authors or an assay laboratory alone do not establish that the Newcastle case belongs to either cohort. No pooled cohort count is changed here.
 
 ## Frozen-engine comparison
 
@@ -51,4 +55,4 @@ The best common serum-course scenario in this selected grid is50kg, CrCl5, four 
 
 ## What the engine supports
 
-The frozen model supports a reproducible comparison of ongoing IV parent/metabolite trajectories with day-labeled paired observations, retaining timing ambiguity and a separate CSF assessment. It does **not** reproduce all these paired values within the selected assumptions. Unknown dose/exchange delivery, distribution, residual clearance, metabolite kinetics and CSF transport prevent identifying a causal parameter from the mismatch. No CAPD extraction fraction, individual circuit clearance, rebound fraction, toxicity threshold or clinical accuracy claim is inferred. No cohort/endpoint is added to the pooled scorecard, and no model parameter is tuned. Treat overlap with other Helldén reports as unresolved unless patient-level source mapping establishes it.
+The frozen model supports a reproducible comparison of ongoing IV parent/metabolite trajectories with day-labeled paired observations, retaining timing ambiguity and a separate CSF assessment. It does **not** reproduce all these paired values within the selected assumptions. Unknown dose/exchange delivery, distribution, residual clearance, metabolite kinetics and CSF transport prevent identifying a causal parameter from the mismatch. No CAPD extraction fraction, individual circuit clearance, rebound fraction, toxicity threshold or clinical accuracy claim is inferred. No cohort/endpoint is added to the pooled scorecard, and no model parameter is tuned. The source-level duplicate check above keeps this Newcastle case separate while preserving the documented reuse within the Helldén reports.
