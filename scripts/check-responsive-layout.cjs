@@ -16,12 +16,43 @@ async function fits(page, label) {
   }
 }
 
+// Coarse-pointer tablets keep the wide timeline layout while gaining touch targets.
+async function checkTabletTargets(browser, base) {
+  for (const hasTouch of [true, false]) {
+    const page = await browser.newPage({ hasTouch, serviceWorkers: 'block' });
+    try {
+      await page.goto(base + '/');
+      await page.waitForFunction(() => !document.querySelector('#saveBaseline').disabled);
+      await page.locator('#tab-timeline').click();
+      await page.locator('#addDose').click();
+      assert.ok(await page.locator('#timeline .dose-row input').count() > 0, 'Dynamic medication controls are populated');
+      for (const [width, height] of [[800, 1280], [1280, 800]]) {
+        await page.setViewportSize({ width, height });
+        assert.equal(await page.evaluate(() => matchMedia('(pointer:coarse)').matches), hasTouch);
+        const targets = await page.locator('#timeline .intervals input, #timeline .intervals select, #timeline .dose-row input, #timeline .dose-row select, #timeline .rx-table input, #timeline .rx-table select, #timeline button').evaluateAll(nodes => nodes.filter(n => n.getBoundingClientRect().height).map(n => ({id: n.id || n.className, height: n.getBoundingClientRect().height})));
+        assert.ok(targets.length > 10, 'Populated timeline targets are measured');
+        if (hasTouch) {
+          for (const target of targets) assert.ok(target.height >= 39.9, `${width} touch target ${JSON.stringify(target)}`);
+          assert.ok(await page.locator('#timeline .rx-table button').first().evaluate(n => n.getBoundingClientRect().width >= 40));
+          assert.ok(await page.locator('#pdRxPanel>.check').evaluate(n => n.getBoundingClientRect().height >= 40));
+        } else {
+          assert.ok(await page.locator('#applyFullTimeline').evaluate(n => n.getBoundingClientRect().height < 40), 'Fine-pointer desktop sizing is preserved');
+        }
+        assert.equal(await page.locator('#timeline .intervals').first().evaluate(n => getComputedStyle(n).gridTemplateColumns.split(' ').length), 4, 'Tablet retains four-column session layout');
+        assert.equal(await page.locator('#addRow').evaluate(n => getComputedStyle(n).flexBasis), 'auto', 'Tablet actions retain natural width');
+        await fits(page, `tablet ${width} touch=${hasTouch}`);
+      }
+    } finally { await page.close(); }
+  }
+}
+
 async function checkResponsiveLayout(base) {
   const sizes = [[320,568], [568,320], [390,844], [844,390], [768,1024], [1024,768], [820,1180], [1180,820]];
   for (const engine of [chromium, firefox]) {
     const isChromium = engine === chromium;
     const browser = await engine.launch(isChromium ? {} : { firefoxUserPrefs: { 'font.minimum-size.x-western': 20 } });
     try {
+      if (isChromium) await checkTabletTargets(browser, base);
       const page = await browser.newPage({ hasTouch: true, isMobile: isChromium, serviceWorkers: 'block' });
       await page.goto(base + '/');
       await page.waitForFunction(() => !document.querySelector('#saveBaseline').disabled);
