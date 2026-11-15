@@ -124,7 +124,7 @@ test('summary readouts never show values from stale results',()=>{
  for(const id of ['timeAboveResult','timeAboveLevel','timeAboveUnit','scenarioWords','accumulationResult','calculationState','csv','saveBaseline','status','copyTeaching','printTeaching','teachingFallback','teachingStatus'])elements[id]={textContent:'',value:'',disabled:false,classList:{toggle(){}}};
  const run=E.simulateMany({...E.DEFAULTS,draws:1,requestedModes:['No dialysis']});
  const context={E,results:run,primary:'No dialysis',c:{...E.DEFAULTS},dataIsCurrent:true,$:id=>elements[id],
-  document:{activeElement:null,getElementById:id=>elements[id]||null,querySelector:()=>({setAttribute(){}})}};
+  document:{activeElement:null,getElementById:id=>elements[id]||null,querySelector:()=>({setAttribute(){}}),querySelectorAll:()=>[]}};
  const a=ui.indexOf('const MOLAR_MASS='),b=ui.indexOf('function tableOpen(',a),s1=ui.indexOf('function setBusy('),s2=ui.indexOf('function calculationError(',s1);
  vm.runInNewContext(ui.slice(a,b)+ui.slice(s1,s2)+';aboveLevelMg=2;this.render=renderTimeAbove;this.busy=setBusy;',context);
  const shown=()=>[elements.timeAboveResult.textContent,elements.accumulationResult.textContent,elements.scenarioWords.textContent];
