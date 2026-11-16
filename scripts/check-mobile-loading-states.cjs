@@ -108,18 +108,18 @@ async function runLoadingStatesAudit() {
         await workerGate;
         await route.continue();
       });
-      await page.route('**/assets/vendor/echarts-6.1.0.min.js', async route => {
+      await page.route('**/assets/vendor/echarts-6.1.0.min.js*', async route => {
         await rendererGate;
         await route.continue();
       });
 
-      const rendererRequested = page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
+      const rendererRequested = page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
       await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
       await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
       await rendererRequested;
 
       // Check Calculating State in Portrait
-      await page.waitForFunction(() => document.querySelector('#plasmaChart .chart-status') !== null);
+      await page.waitForFunction(() => document.querySelector('#plasmaChart .chart-status') !== null, undefined, { timeout: 15000 });
       const calcMsgPortrait = await page.locator('#plasmaChart .chart-status').textContent();
       const calcColorPortrait = await page.locator('#plasmaChart .chart-status').evaluate(el => getComputedStyle(el).color);
       const calcBgPortrait = await page.locator('#plasmaChart .chart-status').evaluate(el => getComputedStyle(el).backgroundColor);
@@ -153,7 +153,7 @@ async function runLoadingStatesAudit() {
       // Release worker -> enters Loading Chart state
       console.log(`  3. Releasing Worker gate -> entering Loading Chart state...`);
       releaseWorker();
-      await page.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Loading chart…');
+      await page.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Loading chart…', undefined, { timeout: 15000 });
 
       const loadMsgPortrait = await page.locator('#plasmaChart .chart-status').textContent();
       const loadColorPortrait = await page.locator('#plasmaChart .chart-status').evaluate(el => getComputedStyle(el).color);
@@ -184,7 +184,7 @@ async function runLoadingStatesAudit() {
       releaseRenderer();
 
       // Wait for chart canvas to render and .chart-status to disappear
-      await page.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'));
+      await page.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'), undefined, { timeout: 15000 });
       const statusCountRendered = await page.locator('#plasmaChart .chart-status').count();
       const canvasVisible = await page.locator('#plasmaChart canvas').isVisible();
       console.log(`     ✓ Chart rendered: .chart-status count=${statusCountRendered}, canvas visible=${canvasVisible}`);
@@ -195,27 +195,42 @@ async function runLoadingStatesAudit() {
       await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-rendered-clean.png`) });
       await page.close();
 
-      // 2. Failed Chart Download & Recovery
-      console.log(`\n--- [2] Failed Download & Recovery ---`);
+      // 2. Failed Chart Download, Cleared-Threshold & Recovery
+      console.log(`\n--- [2] Failed Download, Cleared-Threshold & Recovery ---`);
       const failedPage = await context.newPage();
       let heldRenderer;
       const heldRequest = new Promise(resolve => { heldRenderer = resolve; });
-      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js', route => heldRenderer(route));
-      const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
+      let failedRendererAttempts = 0;
+      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js*', route => {
+        // Only the initial request is gated. Input changes and intersection
+        // observers may retry while offline; those requests must fail rather
+        // than remain held after the test restores the connection.
+        failedRendererAttempts++;
+        console.log('     Offline renderer attempt ' + failedRendererAttempts + ': ' + route.request().url());
+        return failedRendererAttempts === 1 ? heldRenderer(route) : route.abort();
+      });
+      const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
 
       await failedPage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
 
       await failedRendererRequested;
       const route = await heldRequest;
-      await failedPage.waitForFunction(() => !document.querySelector('#csv').disabled);
-      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Loading chart…');
+      await failedPage.waitForFunction(() => !document.querySelector('#csv').disabled, undefined, { timeout: 15000 });
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Loading chart…', undefined, { timeout: 15000 });
       await failedPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 
-      console.log('  1. Aborting ECharts download to simulate network failure...');
+      // 1. Enter a threshold while download is pending
+      console.log('  1. Entering threshold (10 mg/L) while chart download is pending...');
+      await failedPage.locator('#summaryMore summary').click();
+      const thresholdField = failedPage.getByLabel('Plasma acyclovir threshold', { exact: true });
+      await thresholdField.fill('10');
+
+      // 2. Abort ECharts download to simulate network failure after threshold entered (gated order)
+      console.log('  2. Aborting ECharts download to simulate network failure after entering threshold...');
       await route.abort();
 
-      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Chart unavailable. Check your connection.');
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Chart unavailable. Check your connection.', undefined, { timeout: 15000 });
       const failMsg = await failedPage.locator('#plasmaChart .chart-status').textContent();
       const ariaBusy = await failedPage.locator('#plasmaChart').getAttribute('aria-busy');
       const alertsHtml = await failedPage.locator('#alerts').innerHTML();
@@ -239,28 +254,57 @@ async function runLoadingStatesAudit() {
       await failedPage.setViewportSize(profile.portrait);
       await failedPage.waitForTimeout(200);
 
-      // Recovery: unroute so subsequent download succeeds
-      console.log('  2. Unrouting ECharts download and modifying dose to trigger recalculation & recovery...');
-      await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js');
+      // 3. Clear threshold while download is in failed state
+      console.log('  3. Clearing threshold field while in failed state...');
+      await thresholdField.fill('');
+      await failedPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Chart unavailable. Check your connection.');
+
+      // 4. Retry the renderer without changing or recalculating the simulation.
+      console.log('  4. Restoring the connection and retrying charts without changing inputs...');
+      const resultsBeforeRetry = await failedPage.evaluate(() => JSON.stringify(window.AyFluxResearchBridge.snapshot().results));
+      await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js*');
+      await failedPage.getByRole('button', { name: 'Retry charts', exact: true }).click();
+      await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'));
+      assert.equal(await failedPage.evaluate(() => JSON.stringify(window.AyFluxResearchBridge.snapshot().results)), resultsBeforeRetry, 'Retry must preserve computed results');
+      assert.equal(await failedPage.getByRole('button', { name: 'Retry charts', exact: true }).count(), 0);
+      // Input changes must still redraw correctly after recovery.
       await failedPage.fill('#num_dose', '725');
+      await failedPage.waitForFunction(() => window.AyFluxResearchBridge.snapshot().updated && window.AyFluxResearchBridge.snapshot().config.dose === 725);
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
 
-      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'));
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'), undefined, { timeout: 15000 });
       const statusCountRecovered = await failedPage.locator('#plasmaChart .chart-status').count();
       const canvasRecoveredVisible = await failedPage.locator('#plasmaChart canvas').isVisible();
       console.log(`     ✓ Recovered: .chart-status count=${statusCountRecovered}, canvas visible=${canvasRecoveredVisible}`);
-      assert.equal(statusCountRecovered, 0);
-      assert.ok(canvasRecoveredVisible);
+      assert.equal(statusCountRecovered, 0, 'Status overlay must be removed after successful retry');
+      assert.ok(canvasRecoveredVisible, 'Canvas must be visible');
       assert.equal(await failedPage.locator('#plasmaChart').getAttribute('aria-busy'), 'false');
+
       const recovered = await failedPage.evaluate(() => window.AyFluxResearchBridge.snapshot());
       assert.equal(recovered.updated, true);
-      assert.equal(recovered.config.dose, 725);
-      assert.equal(await failedPage.evaluate(() => {
+      assert.equal(recovered.config.dose, 725, 'New dose must reach the simulator');
+
+      const chartVerification = await failedPage.evaluate(() => {
         const snapshot = window.AyFluxResearchBridge.snapshot();
         const run = snapshot.results[snapshot.primary];
-        const series = window.echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().series.find(s => s.name === snapshot.primary + ' (selected)');
-        return series?.data.length === run.time.length && series.data.every(([t, value], i) => t === run.time[i] && value === run.plasma.median[i]);
-      }), true, 'Recovered curve must match the current model points');
+        const chart = window.echarts.getInstanceByDom(document.querySelector('#plasmaChart'));
+        const opt = chart.getOption();
+        const series = opt.series.find(s => s.name === snapshot.primary + ' (selected)');
+        const thresholdLine = opt.series.find(s => s.id === 'entered-plasma-threshold');
+        const legendHasThreshold = opt.legend?.[0]?.data?.some(n => typeof n === 'string' && n.includes('Entered plasma ACV threshold'));
+        const matchesCurve = series?.data.length === run.time.length && series.data.every(([t, value], i) => t === run.time[i] && value === run.plasma.median[i]);
+        return {
+          matchesCurve,
+          hasThresholdLine: !!thresholdLine,
+          legendHasThreshold: !!legendHasThreshold
+        };
+      });
+
+      assert.equal(chartVerification.matchesCurve, true, 'Recovered curve must match current model points');
+      assert.equal(chartVerification.hasThresholdLine, false, 'Cleared threshold line must not be present on chart');
+      assert.equal(chartVerification.legendHasThreshold, false, 'Cleared threshold legend entry must not be present');
 
       await failedPage.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-recovered.png`) });
 
@@ -274,7 +318,7 @@ async function runLoadingStatesAudit() {
         slowDownload: 'PASSED ("Loading chart…", rgb(40, 79, 107), readable in portrait & landscape)',
         cleanRender: 'PASSED (.chart-status overlay completely removed on render)',
         failedDownload: 'PASSED ("Chart unavailable. Check your connection.", aria-busy="false", Lite fallback link present)',
-        recovery: 'PASSED (re-triggered calculation downloads ECharts, renders canvas, and clears overlay)'
+        recovery: 'PASSED (cleared threshold, new dose committed, ECharts downloaded, curve rendered, line/legend/overlay gone)'
       });
     }
 
@@ -292,8 +336,11 @@ async function runLoadingStatesAudit() {
 
     return report;
   } finally {
-    await browser?.close();
-    server.close();
+    try {
+      await browser?.close();
+    } finally {
+      server.close();
+    }
   }
 }
 

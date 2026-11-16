@@ -14,6 +14,22 @@
  // The simulator also opens sections through scenario, dosing and reference links.
  new MutationObserver(syncSelection).observe(tabs, {subtree:true, attributes:true, attributeFilter:['class']});
  syncSelection();
+ // Native fragment scrolling cannot reveal a reference inside a hidden section.
+ function revealReference() {
+  if (!/^#ref\d+$/.test(location.hash)) return;
+  const target = document.getElementById(location.hash.slice(1));
+  if (!target) return;
+  const method = buttons.find(button => button.dataset.tab === 'method');
+  if (!method) return;
+  if (!method.classList.contains('active')) method.click();
+  requestAnimationFrame(() => {
+   target.tabIndex = -1;
+   target.focus({preventScroll:true});
+   target.scrollIntoView({block:'start'});
+  });
+ }
+ window.addEventListener('hashchange', revealReference);
+ revealReference();
  // Manual activation lets keyboard users browse labels without running analyses.
  tabs.addEventListener('keydown', function (event) {
   const current = event.target.closest('[role="tab"]');

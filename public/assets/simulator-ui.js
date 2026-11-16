@@ -256,7 +256,7 @@ const VIRUSES={
  'VZV':{min:0.12,max:10.8,name:'VZV'}
 };
 function fieldDef(id){let d=[...DEFS[id]];if(id==='dose')d[3]=E.MAX_DOSE_MG[c.route];return d;}
-function numericField(id){let [lab,unit,min,max,step]=fieldDef(id);if(id==='dose')lab=c.route==='Valacyclovir oral'?'Valacyclovir oral dose':'Acyclovir IV dose';return `<div class="inputrow"><label for="num_${id}">${lab}</label><div class="entry"><input aria-label="${lab} slider" data-k="${id}" data-role="range" type="range" min="${min}" max="${max}" step="${step}" value="${c[id]}"><input aria-label="${lab} exact value" data-k="${id}" data-role="number" id="num_${id}" type="number" min="${min}" max="${max}" step="any" value="${c[id]}"></div><div class="unit">${unit}</div></div>`;}
+function numericField(id){let [lab,unit,min,max,step]=fieldDef(id);if(id==='dose')lab=c.route==='Valacyclovir oral'?'Valacyclovir oral dose':'Acyclovir IV dose';return `<div class="inputrow"><label for="num_${id}">${lab}</label><div class="entry"><input aria-label="${lab} slider" data-k="${id}" data-role="range" type="range" min="${min}" max="${max}" step="${step}" value="${c[id]}"><input aria-label="${lab} exact value" data-k="${id}" data-role="number" aria-describedby="inputError_${id}" id="num_${id}" type="number" min="${min}" max="${max}" step="any" value="${c[id]}"></div><div class="unit">${unit}</div><div id="inputError_${id}" class="warning hidden" role="status"></div></div>`;}
 function group(title,items,description=''){return `<h2>${title}</h2>${items.map(numericField).join('')}${description?`<p class="tip">${description}</p>`:''}`;}
 function pdGroup(){
  const fields=['pdCl','pdVolume','pdGlucose','pdTransport','pdUfBase','pdAbsorb'];
@@ -614,7 +614,8 @@ function requestPlotFrame(){
     chartWait=null;
     for(const where of pendingPlots.keys())chartMessage($(where),'Chart unavailable. Check your connection.',false);
     pendingPlots.clear();
-    alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'.');
+    alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'. ');
+    const retry=document.createElement('button');retry.type='button';retry.className='btn secondary';retry.textContent='Retry charts';retry.addEventListener('click',()=>{alertMessage('');render();});$('alerts').append(retry);
    });
   }
   return;
@@ -802,7 +803,7 @@ function renderNow(){if(!results||!dataIsCurrent)return;
 }
 function alertMessage(msg){$('alerts').textContent=msg;$('alerts').classList.toggle('hidden',!msg);}
 function calculate(forceAll=false){
- clearTimeout(timer);const id=++calculationVersion;dataIsCurrent=false;queuedJob=null;
+ clearTimeout(timer);timer=null;const id=++calculationVersion;dataIsCurrent=false;queuedJob=null;
  try{
   if(c.crclSource==='estimated'){c.crcl=calculatedCrCl();if(!Number.isFinite(c.crcl))throw Error('Enter valid Cockcroft–Gault inputs');}
   c.fitMode=primary;const v=E.validate(c,primary);if(v.length)throw Error(v.join('\n'));
@@ -818,12 +819,31 @@ function calculate(forceAll=false){
  }catch(error){calculationError(error);}
 }
 function defer(){refreshLabelAdjust();pendingCsvExport=false;++calculationVersion;queuedJob=null;dataIsCurrent=false;setBusy(true);clearTimeout(timer);timer=setTimeout(calculate,180);}
-function updateParam(target){let id=target.dataset.k;if(!id)return;let value=Number(target.value);if(target.value.trim()===''||!Number.isFinite(value))return;
- const def=fieldDef(id);if(value<def[2]||value>def[3]){if(target.dataset.role==='number')target.setCustomValidity(`Use ${def[2]}–${def[3]}`);return;}target.setCustomValidity?.('');if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
+function updateParam(target){let id=target.dataset.k;if(!id)return;const def=fieldDef(id),value=Number(target.value);
+ const invalid=target.value.trim()===''||!Number.isFinite(value)||value<def[2]||value>def[3];
+ numericFeedback(id,invalid?`Enter a number from ${def[2]} to ${def[3]} ${def[1]}. This entry is not applied; the simulation uses ${c[id]} ${def[1]}.`:'');
+ if(invalid)return;
  const same=document.querySelectorAll(`[data-k="${id}"]`);for(const el of same)if(el!==target)el.value=value;
+ if(c[id]===value)return;c[id]=value;if(id==='dose')updateDrugCaution();if(id==='weight'&&c.crclSource==='estimated'){c.crcl=calculatedCrCl();const out=$('cgOutput');if(out)out.textContent=c.crcl.toFixed(1)+' mL/min';}
  if((id==='weight'||id==='dose')&&typeof refreshBodySize==='function')refreshBodySize();
  if((id==='csfRatio'||id==='csfMetRatio')&&$('csfBarrier'))$('csfBarrier').closest('.inputrow').outerHTML=csfBarrierControl();
  defer();}
+// Commit the pending edit immediately on blur or slider release. While the
+// control is being edited, input events still share the normal debounce.
+function commitParam(target){
+ const id=target.dataset.k;if(!id)return;
+ const value=Number(target.value),def=fieldDef(id);
+ if(target.value.trim()===''||!Number.isFinite(value)||value<def[2]||value>def[3]){updateParam(target);return;}
+ updateParam(target);
+ if(timer!==null)calculate();
+}
+function numericFeedback(id,message){
+ const input=document.getElementById('num_'+id),note=document.getElementById('inputError_'+id);
+ if(!input||!note)return;
+ input.setCustomValidity(message);
+ if(message)input.setAttribute('aria-invalid','true');else input.removeAttribute('aria-invalid');
+ note.textContent=message;note.classList.toggle('hidden',!message);
+}
 function renderSchedule(){const rows=draft;
  $('scheduleRows').innerHTML=rows.map((r,i)=>`<div class="intervals" data-row="${i}"><div><label>Mode</label><select data-index="${i}" data-field="type">${E.TYPES.map(m=>`<option ${m===r.type?'selected':''}>${m}</option>`).join('')}</select></div><div><label>Start (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="start" value="${r.start}"></div><div><label>End (h)</label><input type="number" step="0.25" min="0" data-index="${i}" data-field="end" value="${r.end}"></div><button class="btn secondary small" data-delete="${i}" aria-label="Delete session ${i+1}">✕</button></div>`).join('');
  paintSchedule(draft);renderPdRxRows();}
@@ -1135,7 +1155,7 @@ $('primary').addEventListener('change',e=>{primary=e.target.value;renderInputs()
 // Start-here strip: dismissal is remembered per browser when storage is available.
 {const strip=$('startHere');if(strip){let seen=false;try{seen=localStorage.getItem('ayflux-start-here')==='dismissed';}catch{}if(seen)strip.classList.add('hidden');$('startHereClose').addEventListener('click',()=>{strip.classList.add('hidden');try{localStorage.setItem('ayflux-start-here','dismissed');}catch{}});}}
 document.querySelector('aside').addEventListener('input',e=>{if(e.target.dataset.k)updateParam(e.target);});
-document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='colorPalette'){setPalette(e.target.value);renderInputs();if(results)render();}else if(e.target.id==='virus'){c.virus=e.target.value;renderInputs();if(results)render();}else if(e.target.id==='pdMethod'){c.pdMethod=e.target.value;renderInputs();researchRenderedPrimary='';defer();}else if(e.target.id==='draws'){c.draws=+e.target.value;defer();}else if(e.target.id==='coverage'){c.coverage=+e.target.value;defer();}else if(e.target.dataset.toggle){c[e.target.dataset.toggle]=e.target.checked;if(results)render();}else if(e.target.dataset.k)updateParam(e.target);});
+document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='colorPalette'){setPalette(e.target.value);renderInputs();if(results)render();}else if(e.target.id==='virus'){c.virus=e.target.value;renderInputs();if(results)render();}else if(e.target.id==='pdMethod'){c.pdMethod=e.target.value;renderInputs();researchRenderedPrimary='';defer();}else if(e.target.id==='draws'){c.draws=+e.target.value;defer();}else if(e.target.id==='coverage'){c.coverage=+e.target.value;defer();}else if(e.target.dataset.toggle){c[e.target.dataset.toggle]=e.target.checked;if(results)render();}else if(e.target.dataset.k)commitParam(e.target);});
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});

@@ -6,7 +6,16 @@ for (const [name,version] of [['echarts','6.1.0'],['echarts-gl','2.1.0']]) {
   const directory=path.join(root,'node_modules',name);
   const target=path.join(root,'public/assets/vendor');
   if (require(path.join(directory,'package.json')).version !== version) throw Error('Unexpected '+name+' version');
-  fs.copyFileSync(path.join(directory,'dist',name+'.min.js'),path.join(target,name+'-'+version+'.min.js'));
+  if (name === 'echarts') {
+    require('esbuild').buildSync({
+      entryPoints:[path.join(root,'scripts/echarts-entry.mjs')],
+      outfile:path.join(target,name+'-'+version+'.min.js'),
+      bundle:true,minify:true,format:'iife',globalName:'echarts',
+      platform:'browser',target:['es2019'],legalComments:'eof'
+    });
+  } else {
+    fs.copyFileSync(path.join(directory,'dist',name+'.min.js'),path.join(target,name+'-'+version+'.min.js'));
+  }
   for (const file of fs.readdirSync(directory).filter(file=>/^(license|notice)(\.|$)/i.test(file))) {
     fs.copyFileSync(path.join(directory,file),path.join(target,name+'-'+file));
   }

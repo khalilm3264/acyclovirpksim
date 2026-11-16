@@ -53,5 +53,6 @@ test('AyFlux wordmark stays self-hosted and GitHub cat icon has an accessible li
  assert.ok(html.includes('aria-label="AyFlux source code on GitHub"'));
  assert.ok(css.includes('poppins-latin-300-normal.woff2'));
  assert.ok(css.includes('poppins-latin-800-normal.woff2'));
- assert.ok(workflow.includes('@fontsource/poppins@5.3.0'));
+ assert.ok(workflow.includes('npm ci --ignore-scripts'));
+ assert.equal(JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8')).packages['node_modules/@fontsource/poppins'].version,'5.3.0');
 });

@@ -29,7 +29,7 @@ test('new inputs cancel obsolete Worker work; same-settings requests keep the Wo
 });
 test('numeric change after input does not schedule the same simulation twice',()=>{
  let calls=0;const c={dose:700},target={dataset:{k:'dose',role:'number'},value:'725',setCustomValidity(){}};
- const update=new Function('c','fieldDef','document','defer','updateDrugCaution',section('function updateParam(', 'function renderSchedule(')+'return updateParam;')(c,()=>['Dose','mg',0,2000],{querySelectorAll:()=>[]},()=>calls++,()=>{});
+ const update=new Function('c','fieldDef','document','defer','updateDrugCaution',section('function updateParam(', 'function renderSchedule(')+'return updateParam;')(c,()=>['Dose','mg',0,2000],{querySelectorAll:()=>[],getElementById:()=>null},()=>calls++,()=>{});
  update(target);update(target);assert.equal(calls,1);assert.equal(c.dose,725);
 });
 function curveHarness(){
@@ -63,4 +63,22 @@ test('browsers without IntersectionObserver still render visible charts',()=>{
  const {state,elements,run}=curveHarness();state.IntersectionObserver=undefined;
  run("curve('cmmg','mg/L','cmmgChart')");assert.equal(state.pendingPlots.size,1);
  elements.csfCmmgChart.getClientRects=()=>[];run("curve('csfCmmg','mg/L','csfCmmgChart')");assert.equal(state.pendingPlots.size,1);
+});
+
+test('committed numeric edits flush one pending calculation; repeated commits and invalid drafts do not calculate',()=>{
+ const calls={deferred:0,calculated:0},c={dose:700};
+ const h=new Function('c','calls','fieldDef','document','updateDrugCaution',`
+ let timer=null;
+ function defer(){calls.deferred++;timer=1;}
+ function calculate(){calls.calculated++;timer=null;}
+ ${section('function updateParam(', 'function renderSchedule(')}
+ return {updateParam,commitParam};
+ `)(c,calls,()=>['Dose','mg',0,2000],{querySelectorAll:()=>[],getElementById:()=>null},()=>{});
+ const target={dataset:{k:'dose'},value:'725'};
+ h.updateParam(target);h.commitParam(target);h.commitParam(target);
+ assert.deepEqual(calls,{deferred:1,calculated:1});
+ target.value='750';h.commitParam(target);
+ assert.deepEqual(calls,{deferred:2,calculated:2});assert.equal(c.dose,750);
+ for(const invalid of ['', '2500','NaN']){target.value=invalid;h.commitParam(target);}
+ assert.equal(calls.calculated,2);assert.equal(c.dose,750);
 });

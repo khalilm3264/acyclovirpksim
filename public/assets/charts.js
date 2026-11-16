@@ -1,13 +1,16 @@
 // Shared chart options and lazy, same-origin renderer loading.
 (function(root){
  'use strict';
- let pending;
+ let pending,attempts=0;
  function ensure(){
   if(root.echarts?.init)return Promise.resolve(root.echarts);
   if(!pending)pending=new Promise((resolve,reject)=>{
    const script=document.createElement('script');
    script.async=true;
-   script.src='/assets/vendor/echarts-6.1.0.min.js';
+   // A failed preload can remain in a browser's preload cache. A retry
+   // needs a fresh request URL, while the first load shares the preload.
+   const attempt=attempts++;
+   script.src='/assets/vendor/echarts-6.1.0.min.js'+(attempt?'?retry='+attempt:'');
    script.onload=()=>root.echarts?.init?resolve(root.echarts):reject(Error('Chart library unavailable.'));
    script.onerror=()=>{script.remove?.();reject(Error('Chart library could not be loaded.'));};
    document.head.appendChild(script);
