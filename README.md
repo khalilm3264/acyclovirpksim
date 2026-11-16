@@ -2,7 +2,7 @@
 
 AyFlux simulates blood concentrations of acyclovir after intravenous acyclovir or oral valacyclovir. Enter a dose history, body weight, kidney function and a dialysis schedule to see how the predicted concentration changes over time. It also estimates exposure to the metabolite CMMG.
 
-**[Open the simulator](https://ayflux.org/)** · [User guide](https://ayflux.org/learn/) · [Scientific sources](https://ayflux.org/references/)
+**[Open the simulator](https://ayflux.org/)** · [Lite version](https://ayflux.org/lite/) · [User guide](https://ayflux.org/learn/) · [Scientific sources](https://ayflux.org/references/)
 
 ### Start with a published case
 
