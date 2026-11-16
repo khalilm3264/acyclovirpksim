@@ -193,6 +193,40 @@ async function runLoadingStatesAudit() {
       assert.equal(await page.locator('#plasmaChart').getAttribute('aria-busy'), 'false');
 
       await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-rendered-clean.png`) });
+      // Hold the next Worker calculation to inspect the retained chart.
+      const previousCurve = await page.evaluate(() => JSON.stringify(echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().series));
+      await page.evaluate(() => {
+        const post = Worker.prototype.postMessage;
+        Worker.prototype.postMessage = function(...args) {
+          const worker = this;
+          window.resumeChartUpdate = () => { Worker.prototype.postMessage = post; post.apply(worker, args); };
+        };
+      });
+      await page.fill('#num_dose', '725');
+      await page.locator('#num_dose').dispatchEvent('change');
+      await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
+      await page.waitForFunction(() => typeof window.resumeChartUpdate === 'function');
+      for (const viewport of [profile.portrait, profile.landscape]) {
+        await page.setViewportSize(viewport);
+        const overlay = page.locator('#plasmaChart .chart-status--previous');
+        await overlay.waitFor();
+        assert.equal(await overlay.textContent(), 'Updating… Previous results shown.');
+        assert.equal(await overlay.evaluate(el => getComputedStyle(el).backgroundColor), 'rgba(244, 248, 251, 0.12)');
+        assert.equal(await page.locator('#plasmaChart').getAttribute('aria-busy'), 'true');
+        assert.equal(await page.locator('#csv').isDisabled(), true);
+        assert.equal(await page.locator('#plasmaChart canvas').isVisible(), true);
+        assert.equal(await page.evaluate(() => JSON.stringify(echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().series)), previousCurve);
+        const fits = await overlay.evaluate(el => {
+          const label = el.firstElementChild.getBoundingClientRect(), plot = el.getBoundingClientRect();
+          return label.left >= plot.left && label.right <= plot.right && label.top >= plot.top && label.bottom <= plot.bottom;
+        });
+        assert.ok(fits, 'Previous-results label fits within the graph');
+        await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-previous-${viewport.width}.png`) });
+      }
+      await page.evaluate(() => window.resumeChartUpdate());
+      await page.waitForFunction(() => !document.querySelector('#plasmaChart .chart-status') && window.AyFluxResearchBridge.snapshot().updated);
+      assert.equal(await page.locator('#csv').isDisabled(), false);
+      console.log('     ✓ Previous chart remains visible and labeled during update; exports resume after completion');
       await page.close();
 
       // 2. Failed Chart Download, Cleared-Threshold & Recovery

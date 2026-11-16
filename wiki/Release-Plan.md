@@ -2,7 +2,12 @@
 
 ## Release identity
 
-The current application metadata identifies **v0.27.0 preview** (released 2026-11-13, [#55](https://github.com/khalilm3264/acyclovirpksim/issues/55)). Configuration schema 2 and AGPL-3.0-only are tracked separately.
+The current application metadata identifies **v0.28.0 preview** (released 2026-11-16). Configuration schema 2 and AGPL-3.0-only are tracked separately.
+
+### Daily development versions
+
+Use a new minor version on the first development release of each new day (America/New_York): v0.28.0 on November 16, then v0.29.0 on the next day with development work. Keep same-day work under that day's minor version; use a patch number when publishing a subsequent same-day release. Days without development do not require an empty release. Record the date and changes in CHANGELOG.md, synchronize package/app/citation metadata, and publish the corresponding tag only after checks pass. Numerical model changes must still be identified explicitly; a new application version alone does not establish validation.
+
 
 ## Combined candidate checks
 
@@ -25,7 +30,7 @@ The `release/combined-review` branch is a review candidate, not a new model free
 - [ ] Update user guidance, source notes and bibliography where behavior or evidence changes.
 - [ ] Check mobile layout, keyboard access, exports, share links and offline behavior when affected.
 
-## Before issuing v0.27.0
+## Historical v0.27.0 checklist
 
 - [ ] Resolve or explicitly defer release blockers and record remaining scientific limitations.
 - [ ] Freeze the manuscript commit and archive the corresponding settings, scripts and outputs ([#48](https://github.com/khalilm3264/acyclovirpksim/issues/48)).

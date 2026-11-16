@@ -185,7 +185,11 @@ function chartMessage(target,message,busy=true){
  let status=target.querySelector('.chart-status');
  if(message){
   if(!status){status=document.createElement('span');status.className='chart-status';status.setAttribute('aria-hidden','true');target.append(status);}
-  status.textContent=message;
+  const previous=busy&&chartStates.has(target.id);
+  status.classList.toggle('chart-status--previous',previous);
+  if(previous){
+   const label=document.createElement('span');label.textContent='Updating… Previous results shown.';status.replaceChildren(label);
+  }else status.textContent=message;
  }else status?.remove();
  target.setAttribute('aria-busy',String(!!message&&busy));
 }

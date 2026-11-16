@@ -25,7 +25,7 @@ const server=http.createServer((req,res)=>{
    // Denial must expose a current local note for manual copying.
    await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>Promise.reject(Error('denied for test'))}}));
    await page.click('#copyTeaching');await page.locator('#teachingFallback').waitFor({state:'visible'});
-   assert.match(await page.inputValue('#teachingFallback'),/AyFlux v0.27.0/);
+   assert.ok((await page.inputValue('#teachingFallback')).includes('AyFlux v'+require('../package.json').version));
    assert.match(await page.inputValue('#teachingFallback'),/For research and teaching only/);
    const pending=page.waitForEvent('download');await page.selectOption('#csv','events');const file=await pending;
    assert.equal(file.suggestedFilename(),'ayflux_events.csv');const csv=fs.readFileSync(await file.path(),'utf8');
