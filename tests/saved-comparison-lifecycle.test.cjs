@@ -70,3 +70,13 @@ test('discarded chart jobs do not delay the next visible chart by extra animatio
  vm.runInContext('drawNextPlot()',state);await new Promise(resolve=>setImmediate(resolve));
  assert.deepEqual(drawn,['visibleA','visibleB']);assert.equal(state.pendingPlots.size,0);assert.deepEqual(errors,[]);
 });
+test('visible charts take priority over preloading-margin charts without losing deferred work',async()=>{
+ const drawn=[],errors=[],bounds={above:{top:-380,bottom:-40},onscreen:{top:100,bottom:440},below:{top:650,bottom:990}};
+ const state={plotFrame:1,plotRunning:false,activePlot:null,pendingPlots:new Map(Object.keys(bounds).map(id=>[id,{key:'csf',signature:'current',option:{id}}])),chartStates:new Map(),dataIsCurrent:true,chartSignature:()=> 'current',IntersectionObserver:function(){},$:id=>({getClientRects:()=>[{}],getBoundingClientRect:()=>({...bounds[id],width:600,height:340})}),requestPlotFrame(){},window:{innerHeight:600,AyFluxCharts:{draw(_,option){drawn.push(option.id);return {};}}},document:{documentElement:{dataset:{ayfluxReady:'true'}}},chartMessage(){},alertMessage:message=>errors.push(message)};
+ vm.createContext(state);vm.runInContext(section('function chartNearViewport(',"\nif(typeof IntersectionObserver")+section('function drawNextPlot(', 'function resizeVisibleCharts('),state);
+ const frame=async()=>{vm.runInContext('drawNextPlot()',state);await new Promise(resolve=>setImmediate(resolve));};
+ await frame();assert.deepEqual(drawn,['onscreen']);assert.equal(state.pendingPlots.size,2,'keep preloading work');
+ bounds.below={top:200,bottom:540};await frame();assert.deepEqual(drawn,['onscreen','below'],'recheck the viewport on each frame');
+ await frame();assert.deepEqual(drawn,['onscreen','below','above'],'preload after visible charts are ready');
+ assert.equal(state.pendingPlots.size,0);assert.deepEqual(errors,[]);
+});
