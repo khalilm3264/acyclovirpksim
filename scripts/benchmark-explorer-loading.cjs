@@ -1,0 +1,9 @@
+/* Controlled browser fixture: 600 ms each for worker-script and renderer delivery. */
+'use strict';
+const {chromium}=require('playwright');
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'../public');
+const previous=process.argv[2];
+if(!previous)throw Error('Usage: node scripts/benchmark-explorer-loading.cjs /path/to/previous-view.js');
+const server=http.createServer((req,res)=>{let file=path.join(root,new URL(req.url,'http://localhost').pathname);if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');if(!fs.existsSync(file)){res.writeHead(404);return res.end();}res.setHeader('Content-Type',({'.js':'application/javascript','.css':'text/css','.html':'text/html'})[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);});
+(async()=>{let browser;try{await new Promise(r=>server.listen(0,'127.0.0.1',r));browser=await chromium.launch({args:['--no-sandbox']});for(const version of ['before','after']){const page=await browser.newPage({serviceWorkers:'block'});if(version==='before')await page.route('**/explore/view.js',r=>r.fulfill({contentType:'application/javascript',body:fs.readFileSync(previous,'utf8')}));await page.route('**/explore/worker.js',async r=>{await new Promise(resolve=>setTimeout(resolve,600));await r.continue();});await page.route('**/assets/vendor/echarts-6.1.0.min.js',async r=>{await new Promise(resolve=>setTimeout(resolve,600));await r.continue();});const start=performance.now();await page.goto('http://127.0.0.1:'+server.address().port+'/explore/');await page.waitForFunction(()=>document.getElementById('curveStatus').textContent.includes('Nominal simulation'));console.log(version+': '+Math.round(performance.now()-start)+' ms');await page.close();}}finally{await browser?.close();server.close();}})();

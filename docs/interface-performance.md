@@ -24,3 +24,27 @@ node --test tests/baseline-performance.test.cjs
 The regression suite covers invalidation after dose/coverage/observation/scenario changes, scenario retention, bounded eviction, obsolete results, duplicate input events, frozen baseline data, scroll-triggered plots and browsers without IntersectionObserver. `scripts/check-visualizations.cjs` additionally checks baseline capture/clear, cached-setting reuse, deferred charts and desktop/mobile page width in Chromium.
 
 Local browser launch was blocked by the executor's socket restriction. GitHub Actions runs the browser suite with the staged chart assets. No cold page-load or real input-to-paint timing is claimed by these local measurements.
+
+## Explorer renderer/calculation overlap
+
+The visual explorer now starts its shared renderer download alongside the selected
+scenario worker, instead of starting the download after calculation finishes. It
+still checks the request version before drawing, and an obsolete renderer failure
+cannot overwrite the status of a newer scenario or cancellation. Optional 3D is
+still loaded only when requested.
+
+A controlled local Chromium fixture delayed both the worker script and renderer
+responses by 600 ms. One before/after run reached the selected scenario's rendered
+status in **1,552 ms before / 867 ms after**. These are artificial network delays,
+not a claim about typical live-site load time. The change removes a dependency
+waterfall; gains depend on network and computation time, and warm-cache gains may
+be negligible. No pharmacokinetic equations or numerical output changed.
+
+To repeat with Playwright installed and its Chromium browser available:
+
+```sh
+git show 561688e:public/explore/view.js > /tmp/previous-explorer-view.js
+node scripts/benchmark-explorer-loading.cjs /tmp/previous-explorer-view.js
+node --test tests/explorer-chart-loading.test.cjs
+node scripts/check-visualizations.cjs
+```

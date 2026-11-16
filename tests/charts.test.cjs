@@ -13,7 +13,7 @@ test('ECharts loader executes on demand, and concurrent calls share one load',as
   createElement(tag){assert.equal(tag,'script');return {src:'',async:false,onload:null,onerror:null};},
   head:{appendChild(node){scripts.push(node);}}
  };
- vm.runInNewContext(read('public/assets/charts.js'),{window,document});
+ vm.runInNewContext(read('public/assets/charts.js'),{window,document,setTimeout,clearTimeout});
  assert.equal(scripts.length,0,'loader initialization must not insert a script');
  const first=window.AyFluxCharts.ensure();
  const second=window.AyFluxCharts.ensure();
@@ -32,7 +32,7 @@ test('ECharts loader executes on demand, and concurrent calls share one load',as
 test('a failed dynamic ECharts load can be retried without blocking Lite',async()=>{
  const scripts=[],window={};
  const document={createElement(){return {src:'',onload:null,onerror:null};},head:{appendChild(node){scripts.push(node);}}};
- vm.runInNewContext(read('public/assets/charts.js'),{window,document});
+ vm.runInNewContext(read('public/assets/charts.js'),{window,document,setTimeout,clearTimeout});
  const first=window.AyFluxCharts.ensure();
  scripts[0].onerror();
  await assert.rejects(first,/could not be loaded/);

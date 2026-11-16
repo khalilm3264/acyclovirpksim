@@ -1,9 +1,9 @@
 // Shared chart options and lazy, same-origin renderer loading.
 (function(root){
  'use strict';
- let pending,attempts=0;
+ let pending,renderer,attempts=0;
  function ensure(){
-  if(root.echarts?.init)return Promise.resolve(root.echarts);
+  if(root.echarts?.init){renderer=renderer||root.echarts;root.echarts=renderer;return Promise.resolve(renderer);}
   if(!pending)pending=new Promise((resolve,reject)=>{
    const script=document.createElement('script');
    script.async=true;
@@ -11,8 +11,27 @@
    // needs a fresh request URL, while the first load shares the preload.
    const attempt=attempts++;
    script.src='/assets/vendor/echarts-6.1.0.min.js'+(attempt?'?retry='+attempt:'');
-   script.onload=()=>root.echarts?.init?resolve(root.echarts):reject(Error('Chart library unavailable.'));
-   script.onerror=()=>{script.remove?.();reject(Error('Chart library could not be loaded.'));};
+   // A stalled connection need not fire load or error. Release every caller
+   // so the simulator's existing Retry charts control can recover.
+   let settled=false;
+   const finish=(error,waitingForLateLoad=false)=>{
+    if(settled)return;
+    settled=true;clearTimeout(timeout);
+    if(!waitingForLateLoad)script.onload=null;
+    script.onerror=null;
+    if(error){script.remove?.();reject(error);}else resolve(root.echarts);
+   };
+   const timeout=setTimeout(()=>finish(Error('Chart library loading timed out. Please retry.'),true),30000);
+   script.onload=()=>{
+    // Removing a timed-out script does not cancel its execution in every browser.
+    // Keep the first accepted module and its chart registry if an older request
+    // (or its retry) later evaluates another copy of the bundle.
+    if(renderer)root.echarts=renderer;
+    else if(root.echarts?.init)renderer=root.echarts;
+    finish(renderer?null:Error('Chart library unavailable.'));
+    script.onload=null;
+   };
+   script.onerror=()=>finish(Error('Chart library could not be loaded.'));
    document.head.appendChild(script);
   }).catch(error=>{pending=null;throw error;});
   return pending;

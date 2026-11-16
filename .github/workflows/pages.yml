@@ -65,6 +65,7 @@ jobs:
           node scripts/check-offline-upgrade.cjs
           node scripts/check-scenario-summary.cjs
           node scripts/check-visualizations.cjs
+          node scripts/check-chart-loader-timeout.cjs
 
           node scripts/check-pediatric.cjs
           node scripts/check-concentrations.cjs

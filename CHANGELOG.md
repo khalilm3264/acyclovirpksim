@@ -14,6 +14,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ### Chart and workflow fixes
 
+- **Explorer graph startup:** Fetch the shared renderer while the selected scenario calculates instead of waiting for calculation to finish first. Obsolete loading errors cannot replace a newer scenario’s status. No model equations, parameters, defaults or configuration schema change.
+
+- **Stalled graph loading:** Release a renderer request after 30 seconds without a load/error event, so existing retry controls can recover instead of leaving graphs loading indefinitely. Concurrent chart requests still share one download; successful and failed loads clear their deadline. Late timed-out responses cannot replace the renderer registry used by live charts. No model equations, parameters, defaults or configuration schema change.
+
 - **Chart startup and feedback** ([#210](https://github.com/khalilm3264/acyclovirpksim/pull/210), [#217](https://github.com/khalilm3264/acyclovirpksim/pull/217)). Load the renderer while the model is calculating when a graph approaches the viewport. Show calculating, loading and recoverable error messages inside graph areas using the existing blue palette.
 - **Entered plasma threshold line** ([#216](https://github.com/khalilm3264/acyclovirpksim/pull/216)). Show the descriptive level on the plasma graph and scenario small multiples. Zero is valid; clearing removes the line. Main-chart units convert with the display selector, small multiples retain mg/L, and threshold edits preserve explicit zoom without recalculating predictions.
 - **Keyboard chart navigation** ([#218](https://github.com/khalilm3264/acyclovirpksim/pull/218)). Tab into a chart, use + or − to zoom, arrow keys to pan and Home to reset. Tab moves onward; a blue outline marks focus.
