@@ -38,6 +38,7 @@ test('a failed dynamic ECharts load can be retried without blocking Lite',async(
  await assert.rejects(first,/could not be loaded/);
  const next=window.AyFluxCharts.ensure();
  assert.equal(scripts.length,2);
+ assert.equal(scripts[1].src,'/assets/vendor/echarts-6.1.0.min.js?retry=1','retry must bypass a cached failed preload');
  window.echarts={init:()=>{}};
  scripts[1].onload();
  await next;

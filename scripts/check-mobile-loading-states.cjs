@@ -108,12 +108,12 @@ async function runLoadingStatesAudit() {
         await workerGate;
         await route.continue();
       });
-      await page.route('**/assets/vendor/echarts-6.1.0.min.js', async route => {
+      await page.route('**/assets/vendor/echarts-6.1.0.min.js*', async route => {
         await rendererGate;
         await route.continue();
       });
 
-      const rendererRequested = page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
+      const rendererRequested = page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
       await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
       await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
       await rendererRequested;
@@ -201,14 +201,15 @@ async function runLoadingStatesAudit() {
       let heldRenderer;
       const heldRequest = new Promise(resolve => { heldRenderer = resolve; });
       let failedRendererAttempts = 0;
-      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js', route => {
+      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js*', route => {
         // Only the initial request is gated. Input changes and intersection
         // observers may retry while offline; those requests must fail rather
         // than remain held after the test restores the connection.
         failedRendererAttempts++;
+        console.log('     Offline renderer attempt ' + failedRendererAttempts + ': ' + route.request().url());
         return failedRendererAttempts === 1 ? heldRenderer(route) : route.abort();
       });
-      const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
+      const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
 
       await failedPage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
@@ -262,7 +263,7 @@ async function runLoadingStatesAudit() {
       // 4. Retry the renderer without changing or recalculating the simulation.
       console.log('  4. Restoring the connection and retrying charts without changing inputs...');
       const resultsBeforeRetry = await failedPage.evaluate(() => JSON.stringify(window.AyFluxResearchBridge.snapshot().results));
-      await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js');
+      await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js*');
       await failedPage.getByRole('button', { name: 'Retry charts', exact: true }).click();
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
       await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'));
