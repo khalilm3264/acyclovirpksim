@@ -6,7 +6,7 @@ AyFlux simulates blood concentrations of acyclovir after intravenous acyclovir o
 
 ### Start with a published case
 
-Open **Model validation** and select a published study. Compare the reported blood concentrations with the model curve. In the Boelaert peritoneal dialysis study, look at the concentration just before the next dose. That is where the model and the published estimate can differ even when dialysate recovery appears similar.
+On the **Plasma acyclovir** graph, use **Compare with a published study**. Compare the reported blood concentrations with the model curve. In the Boelaert peritoneal dialysis study, look at the concentration just before the next dose. That is where the model and the published estimate can differ even when dialysate recovery appears similar.
 
 AyFlux is for education and pharmacokinetic research. Individual predictions have not been validated for prescribing, dialysis decisions or diagnosis of neurotoxicity.
 
