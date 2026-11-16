@@ -14,7 +14,12 @@
    script.onload=()=>root.echarts?.init?resolve(root.echarts):reject(Error('Chart library unavailable.'));
    script.onerror=()=>{script.remove?.();reject(Error('Chart library could not be loaded.'));};
    document.head.appendChild(script);
-  }).catch(error=>{pending=null;throw error;});
+  }).catch(error=>{
+   pending=null;
+   // A late earlier download can make a failed duplicate attempt unnecessary.
+   if(root.echarts?.init)return root.echarts;
+   throw error;
+  });
   return pending;
  }
  function line(name,time,values,color,width=2,type='solid'){
