@@ -797,7 +797,7 @@ function renderNow(){if(!results||!dataIsCurrent)return;
 }
 function alertMessage(msg){$('alerts').textContent=msg;$('alerts').classList.toggle('hidden',!msg);}
 function calculate(forceAll=false){
- clearTimeout(timer);const id=++calculationVersion;dataIsCurrent=false;queuedJob=null;
+ clearTimeout(timer);timer=null;const id=++calculationVersion;dataIsCurrent=false;queuedJob=null;
  try{
   if(c.crclSource==='estimated'){c.crcl=calculatedCrCl();if(!Number.isFinite(c.crcl))throw Error('Enter valid Cockcroft–Gault inputs');}
   c.fitMode=primary;const v=E.validate(c,primary);if(v.length)throw Error(v.join('\n'));
@@ -822,6 +822,15 @@ function updateParam(target){let id=target.dataset.k;if(!id)return;const def=fie
  if((id==='weight'||id==='dose')&&typeof refreshBodySize==='function')refreshBodySize();
  if((id==='csfRatio'||id==='csfMetRatio')&&$('csfBarrier'))$('csfBarrier').closest('.inputrow').outerHTML=csfBarrierControl();
  defer();}
+// Commit the pending edit immediately on blur or slider release. While the
+// control is being edited, input events still share the normal debounce.
+function commitParam(target){
+ const id=target.dataset.k;if(!id)return;
+ const value=Number(target.value),def=fieldDef(id);
+ if(target.value.trim()===''||!Number.isFinite(value)||value<def[2]||value>def[3]){updateParam(target);return;}
+ updateParam(target);
+ if(timer!==null)calculate();
+}
 function numericFeedback(id,message){
  const input=document.getElementById('num_'+id),note=document.getElementById('inputError_'+id);
  if(!input||!note)return;
@@ -1140,7 +1149,7 @@ $('primary').addEventListener('change',e=>{primary=e.target.value;renderInputs()
 // Start-here strip: dismissal is remembered per browser when storage is available.
 {const strip=$('startHere');if(strip){let seen=false;try{seen=localStorage.getItem('ayflux-start-here')==='dismissed';}catch{}if(seen)strip.classList.add('hidden');$('startHereClose').addEventListener('click',()=>{strip.classList.add('hidden');try{localStorage.setItem('ayflux-start-here','dismissed');}catch{}});}}
 document.querySelector('aside').addEventListener('input',e=>{if(e.target.dataset.k)updateParam(e.target);});
-document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='colorPalette'){setPalette(e.target.value);renderInputs();if(results)render();}else if(e.target.id==='virus'){c.virus=e.target.value;renderInputs();if(results)render();}else if(e.target.id==='pdMethod'){c.pdMethod=e.target.value;renderInputs();researchRenderedPrimary='';defer();}else if(e.target.id==='draws'){c.draws=+e.target.value;defer();}else if(e.target.id==='coverage'){c.coverage=+e.target.value;defer();}else if(e.target.dataset.toggle){c[e.target.dataset.toggle]=e.target.checked;if(results)render();}else if(e.target.dataset.k)updateParam(e.target);});
+document.querySelector('aside').addEventListener('change',e=>{if(e.target.id==='colorPalette'){setPalette(e.target.value);renderInputs();if(results)render();}else if(e.target.id==='virus'){c.virus=e.target.value;renderInputs();if(results)render();}else if(e.target.id==='pdMethod'){c.pdMethod=e.target.value;renderInputs();researchRenderedPrimary='';defer();}else if(e.target.id==='draws'){c.draws=+e.target.value;defer();}else if(e.target.id==='coverage'){c.coverage=+e.target.value;defer();}else if(e.target.dataset.toggle){c[e.target.dataset.toggle]=e.target.checked;if(results)render();}else if(e.target.dataset.k)commitParam(e.target);});
 $('scenarioChecks').addEventListener('change',e=>{let m=e.target.dataset.mode;if(!m)return;e.target.checked?visible.add(m):visible.delete(m);if(e.target.checked&&(!results||!dataIsCurrent||!results[m]))calculate();else if(results)render();});
 document.addEventListener('click',e=>{const ref=e.target.closest('a[href^="#ref"]');if(!ref)return;if(!document.querySelector(ref.getAttribute('href')))return;switchTab('method');setTimeout(()=>document.querySelector(ref.getAttribute('href'))?.scrollIntoView({block:'center',behavior:'smooth'}),90);});
 $('tabs').addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b)switchTab(b.dataset.tab);});
