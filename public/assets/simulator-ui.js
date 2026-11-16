@@ -609,7 +609,8 @@ function requestPlotFrame(){
     chartWait=null;
     for(const where of pendingPlots.keys())chartMessage($(where),'Chart unavailable. Check your connection.',false);
     pendingPlots.clear();
-    alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'.');
+    alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'. ');
+    const retry=document.createElement('button');retry.type='button';retry.className='btn secondary';retry.textContent='Retry charts';retry.addEventListener('click',()=>{alertMessage('');render();});$('alerts').append(retry);
    });
   }
   return;

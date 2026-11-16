@@ -108,12 +108,12 @@ async function runLoadingStatesAudit() {
         await workerGate;
         await route.continue();
       });
-      await page.route('**/assets/vendor/echarts-6.1.0.min.js', async route => {
+      await page.route('**/assets/vendor/echarts-6.1.0.min.js*', async route => {
         await rendererGate;
         await route.continue();
       });
 
-      const rendererRequested = page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
+      const rendererRequested = page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
       await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
       await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
       await rendererRequested;
@@ -200,8 +200,16 @@ async function runLoadingStatesAudit() {
       const failedPage = await context.newPage();
       let heldRenderer;
       const heldRequest = new Promise(resolve => { heldRenderer = resolve; });
-      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js', route => heldRenderer(route));
-      const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
+      let failedRendererAttempts = 0;
+      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js*', route => {
+        // Only the initial request is gated. Input changes and intersection
+        // observers may retry while offline; those requests must fail rather
+        // than remain held after the test restores the connection.
+        failedRendererAttempts++;
+        console.log('     Offline renderer attempt ' + failedRendererAttempts + ': ' + route.request().url());
+        return failedRendererAttempts === 1 ? heldRenderer(route) : route.abort();
+      });
+      const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
 
       await failedPage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
@@ -249,11 +257,21 @@ async function runLoadingStatesAudit() {
       // 3. Clear threshold while download is in failed state
       console.log('  3. Clearing threshold field while in failed state...');
       await thresholdField.fill('');
+      await failedPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Chart unavailable. Check your connection.');
 
-      // 4. Recovery: unroute so subsequent download succeeds and update dose
-      console.log('  4. Unrouting ECharts download and modifying dose to 725 mg to trigger recalculation & recovery...');
-      await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js');
+      // 4. Retry the renderer without changing or recalculating the simulation.
+      console.log('  4. Restoring the connection and retrying charts without changing inputs...');
+      const resultsBeforeRetry = await failedPage.evaluate(() => JSON.stringify(window.AyFluxResearchBridge.snapshot().results));
+      await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js*');
+      await failedPage.getByRole('button', { name: 'Retry charts', exact: true }).click();
+      await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'));
+      assert.equal(await failedPage.evaluate(() => JSON.stringify(window.AyFluxResearchBridge.snapshot().results)), resultsBeforeRetry, 'Retry must preserve computed results');
+      assert.equal(await failedPage.getByRole('button', { name: 'Retry charts', exact: true }).count(), 0);
+      // Input changes must still redraw correctly after recovery.
       await failedPage.fill('#num_dose', '725');
+      await failedPage.waitForFunction(() => window.AyFluxResearchBridge.snapshot().updated && window.AyFluxResearchBridge.snapshot().config.dose === 725);
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
 
       await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'), undefined, { timeout: 15000 });
