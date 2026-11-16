@@ -111,7 +111,7 @@ Completed results for up to three configurations are reused in memory; new numer
 ```bash
 git clone https://github.com/khalilm3264/acyclovirpksim.git
 cd acyclovirpksim
-npm install --no-save --ignore-scripts --no-audit --no-fund echarts@6.1.0 echarts-gl@2.1.0 @fontsource/poppins@5.3.0 parse5@7.3.0
+npm ci --ignore-scripts --no-audit --no-fund
 node scripts/stage-visualizations.cjs
 node scripts/stage-poppins.cjs
 npx --yes http-server@14.1.1 public -a 127.0.0.1 -p 8000
@@ -123,7 +123,7 @@ Open http://localhost:8000. The numerical heatmap table remains an accessible al
 node --test tests/*.test.cjs
 ```
 
-Charts share a self-hosted ECharts library. The explorer requests ECharts GL when a 3D surface is selected. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
+Charts share a self-hosted ECharts library, bundled from the modules registered in `scripts/echarts-entry.mjs`. Register any new chart family or component there and run `npm run stage`. The simulator preloads this bundle to overlap its download with model calculation; execution remains asynchronous. The explorer requests ECharts GL when a 3D surface is selected. Simulation calculations are performed in a Web Worker when available. A main-thread fallback exists where Workers are restricted.
 
 ## A guide to the interface
 

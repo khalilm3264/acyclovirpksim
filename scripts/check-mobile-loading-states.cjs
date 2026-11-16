@@ -250,10 +250,18 @@ async function runLoadingStatesAudit() {
       console.log('  3. Clearing threshold field while in failed state...');
       await thresholdField.fill('');
 
-      // 4. Recovery: unroute so subsequent download succeeds and update dose
-      console.log('  4. Unrouting ECharts download and modifying dose to 725 mg to trigger recalculation & recovery...');
+      // 4. Retry the renderer without changing or recalculating the simulation.
+      console.log('  4. Restoring the connection and retrying charts without changing inputs...');
+      const resultsBeforeRetry = await failedPage.evaluate(() => JSON.stringify(window.AyFluxResearchBridge.snapshot().results));
       await failedPage.unroute('**/assets/vendor/echarts-6.1.0.min.js');
+      await failedPage.getByRole('button', { name: 'Retry charts', exact: true }).click();
+      await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'));
+      assert.equal(await failedPage.evaluate(() => JSON.stringify(window.AyFluxResearchBridge.snapshot().results)), resultsBeforeRetry, 'Retry must preserve computed results');
+      assert.equal(await failedPage.getByRole('button', { name: 'Retry charts', exact: true }).count(), 0);
+      // Input changes must still redraw correctly after recovery.
       await failedPage.fill('#num_dose', '725');
+      await failedPage.waitForFunction(() => window.AyFluxResearchBridge.snapshot().updated && window.AyFluxResearchBridge.snapshot().config.dose === 725);
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
 
       await failedPage.waitForFunction(() => document.querySelector('#plasmaChart canvas') && !document.querySelector('#plasmaChart .chart-status'), undefined, { timeout: 15000 });

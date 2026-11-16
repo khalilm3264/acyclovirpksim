@@ -65,7 +65,8 @@ test('deploys add <lastmod> from full git history; the committed sitemap stays U
  for(const job of ['deploy-pages','deploy-cloudflare']){
   const start=yml.indexOf('\n  '+job+':'),next=yml.indexOf('\n  deploy-',start+5),block=yml.slice(start,next<0?undefined:next);
   assert.match(block,/fetch-depth: 0/,job+' checks out full history');
-  assert.match(block,/parse5@/,job+' installs parse5 for the sitemap script');
+  assert.match(block,/npm ci --ignore-scripts/,job+' installs locked dependencies for the sitemap script');
+  assert.equal(JSON.parse(read('package-lock.json')).packages['node_modules/parse5'].version,'7.3.0');
   const step=block.indexOf('node scripts/sitemap.cjs --write --lastmod');
   assert.ok(step>0,job+' adds lastmod');
   const publish=Math.max(block.indexOf('upload-pages-artifact'),block.indexOf('wrangler-action'));

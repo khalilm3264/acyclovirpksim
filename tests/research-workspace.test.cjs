@@ -82,7 +82,8 @@ test('research heatmap is interactive when ECharts is staged and still has numer
  assert.match(source,/window\.AyFluxCharts\.ensure/);
  assert.match(source,/type:'heatmap'/);
  assert.match(source,/Interactive plot unavailable; numeric table shown/);
- assert.ok(workflow.includes('echarts@6.1.0'));
+ assert.ok(workflow.includes('npm ci --ignore-scripts'));
+ assert.equal(JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8')).packages['node_modules/echarts'].version,'6.1.0');
 });
 test('research report protects PNG charts from printing across pages',()=>{
  const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
