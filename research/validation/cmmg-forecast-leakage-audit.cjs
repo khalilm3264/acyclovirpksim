@@ -40,10 +40,25 @@ const {
   median
 } = require('./cmmg-forecast-post-hd.cjs');
 
-function assertValidWeightArray(wArr, name, context = '') {
+function assertValidWeightArray(wArr, name, expectedLenOrContext, maybeContext = '') {
+  let expectedLen = undefined;
+  let context = '';
+  if (typeof expectedLenOrContext === 'number') {
+    expectedLen = expectedLenOrContext;
+    context = maybeContext || '';
+  } else if (typeof expectedLenOrContext === 'string') {
+    context = expectedLenOrContext;
+  }
+
   if (!Array.isArray(wArr) || wArr.length === 0) {
     throw new assert.AssertionError({
       message: `Malformed weight array '${name}' in ${context}: must be a non-empty Array, got ${Array.isArray(wArr) ? 'empty array' : typeof wArr}`
+    });
+  }
+
+  if (typeof expectedLen === 'number' && wArr.length !== expectedLen) {
+    throw new assert.AssertionError({
+      message: `Malformed weight array '${name}' in ${context}: expected length ${expectedLen}, got ${wArr.length}`
     });
   }
 
@@ -76,7 +91,16 @@ function assertValidWeightArray(wArr, name, context = '') {
   }
 }
 
-function assertValidForecastResult(fc, context = '') {
+function assertValidForecastResult(fc, cfgOrContext = '', maybeContext = '') {
+  let cfg = undefined;
+  let context = '';
+  if (typeof cfgOrContext === 'object' && cfgOrContext !== null) {
+    cfg = cfgOrContext;
+    context = maybeContext || '';
+  } else if (typeof cfgOrContext === 'string') {
+    context = cfgOrContext;
+  }
+
   if (!fc || typeof fc !== 'object') {
     throw new assert.AssertionError({
       message: `Invalid forecast result in ${context}: expected object, got ${typeof fc}`
@@ -123,8 +147,20 @@ function assertValidForecastResult(fc, context = '') {
     }
   }
 
-  assertValidWeightArray(fc.wCMMG, 'wCMMG', context);
-  assertValidWeightArray(fc.wBoth, 'wBoth', context);
+  const M = fcCandidates.length; // 400
+  let expectedLen;
+  if (cfg && cfg.mode === 'mixture') {
+    expectedLen = 2 * M;
+  } else if (cfg && (cfg.mode === 'complete' || cfg.mode === 'hidden')) {
+    expectedLen = M;
+  } else if (fc.wH1 > 0 && fc.wH2 > 0) {
+    expectedLen = 2 * M;
+  } else {
+    expectedLen = M;
+  }
+
+  assertValidWeightArray(fc.wCMMG, 'wCMMG', expectedLen, context);
+  assertValidWeightArray(fc.wBoth, 'wBoth', expectedLen, context);
 }
 
 function runTargetPerturbationCheck(generatorFn) {
@@ -157,7 +193,7 @@ function runTargetPerturbationCheck(generatorFn) {
         };
 
         const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-        assertValidForecastResult(fcBase, 'target perturbation check (baseline)');
+        assertValidForecastResult(fcBase, cfg, 'target perturbation check (baseline)');
 
         // Perturb future target by significant delta (+5.0 or -3.0 mg/L)
         const targetShift = (pid % 2 === 0 ? 5.0 : -3.0) * (1 + 0.05 * (pid % 7));
@@ -167,7 +203,7 @@ function runTargetPerturbationCheck(generatorFn) {
         };
 
         const fcPerturbed = generatorFn(perturbedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-        assertValidForecastResult(fcPerturbed, 'target perturbation check (perturbed)');
+        assertValidForecastResult(fcPerturbed, cfg, 'target perturbation check (perturbed)');
 
         // Assert forecasts and weights must remain identical
         const checks = [
@@ -248,7 +284,7 @@ function runOutcomeRemovalCheck(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcBase, 'outcome removal check (baseline)');
+    assertValidForecastResult(fcBase, cfg, 'outcome removal check (baseline)');
 
     // Completely remove trueCMMGAtTarget
     const strippedObs = {
@@ -259,7 +295,7 @@ function runOutcomeRemovalCheck(generatorFn) {
     };
 
     const fcStripped = generatorFn(strippedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcStripped, 'outcome removal check (stripped)');
+    assertValidForecastResult(fcStripped, cfg, 'outcome removal check (stripped)');
 
     const keys = [
       'predCF',
@@ -316,7 +352,7 @@ function runMaskedArmAudit(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcBase, 'masked arm audit (baseline)');
+    assertValidForecastResult(fcBase, cfg, 'masked arm audit (baseline)');
 
     // Heavily corrupt end-HD ACV
     const corruptedObs = {
@@ -325,7 +361,7 @@ function runMaskedArmAudit(generatorFn) {
     };
 
     const fcCorrupted = generatorFn(corruptedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcCorrupted, 'masked arm audit (corrupted)');
+    assertValidForecastResult(fcCorrupted, cfg, 'masked arm audit (corrupted)');
 
     // Assert masked arm predictions and weights must NOT change
     const maskedChecks = [
@@ -373,7 +409,7 @@ function runRevealedArmSensitivityAudit(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcBase, 'revealed arm audit (baseline)');
+    assertValidForecastResult(fcBase, cfg, 'revealed arm audit (baseline)');
 
     // Heavily corrupt end-HD ACV
     const corruptedObs = {
@@ -382,7 +418,7 @@ function runRevealedArmSensitivityAudit(generatorFn) {
     };
 
     const fcCorrupted = generatorFn(corruptedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcCorrupted, 'revealed arm audit (corrupted)');
+    assertValidForecastResult(fcCorrupted, cfg, 'revealed arm audit (corrupted)');
 
     // Assert revealed arm MUST change in response to altered ACV
     const diffER = Math.abs(fcCorrupted.predER_Both - fcBase.predER_Both);
@@ -426,7 +462,7 @@ function runChartObservationIndependenceAudit(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcBase, 'chart observation independence audit (baseline)');
+    assertValidForecastResult(fcBase, cfg, 'chart observation independence audit (baseline)');
 
     // Corrupt BOTH end-HD ACV and CMMG observations significantly
     const corruptedObs = {
@@ -436,7 +472,7 @@ function runChartObservationIndependenceAudit(generatorFn) {
     };
 
     const fcCorrupted = generatorFn(corruptedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
-    assertValidForecastResult(fcCorrupted, 'chart observation independence audit (corrupted)');
+    assertValidForecastResult(fcCorrupted, cfg, 'chart observation independence audit (corrupted)');
 
     if (!Number.isFinite(fcCorrupted.predCH) || !Number.isFinite(fcBase.predCH) || Math.abs(fcCorrupted.predCH - fcBase.predCH) > 1e-12) {
       throw new assert.AssertionError({
@@ -624,7 +660,79 @@ function runFullLeakageAudit() {
     assert.match(err.message, /Malformed weight array 'wBoth'/);
   }
   assert.ok(caughtMalformedWeights, 'Deliberate-failure control 5H failed: malformed weight array was not caught');
-  console.log('   [PASS] Control 5H: Injected malformed weight array caught by validation guard.\n');
+  console.log('   [PASS] Control 5H: Injected malformed weight array caught by validation guard.');
+
+  // 5I. Negative Control: Injected Appended-Zero Weight Array (wCMMG & wBoth)
+  let caughtAppendedZeroCMMG = false;
+  const appendedZeroCMMGGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    res.wCMMG = [...res.wCMMG, 0];
+    return res;
+  };
+  try {
+    runTargetPerturbationCheck(appendedZeroCMMGGenerator);
+  } catch (err) {
+    caughtAppendedZeroCMMG = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Malformed weight array 'wCMMG'/);
+    assert.match(err.message, /expected length/);
+  }
+  assert.ok(caughtAppendedZeroCMMG, 'Deliberate-failure control 5I (wCMMG) failed: appended-zero array was not caught');
+
+  let caughtAppendedZeroBoth = false;
+  const appendedZeroBothGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    res.wBoth = [...res.wBoth, 0];
+    return res;
+  };
+  try {
+    runOutcomeRemovalCheck(appendedZeroBothGenerator);
+  } catch (err) {
+    caughtAppendedZeroBoth = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Malformed weight array 'wBoth'/);
+    assert.match(err.message, /expected length/);
+  }
+  assert.ok(caughtAppendedZeroBoth, 'Deliberate-failure control 5I (wBoth) failed: appended-zero array was not caught');
+  console.log('   [PASS] Control 5I: Injected appended-zero weight arrays (wCMMG & wBoth) caught by length validation.');
+
+  // 5J. Negative Control: Injected Truncated-but-Renormalized Weight Array (wCMMG & wBoth)
+  let caughtTruncRenormCMMG = false;
+  const truncRenormCMMGGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    const trunc = res.wCMMG.slice(0, -1);
+    const sum = trunc.reduce((a, b) => a + b, 0);
+    res.wCMMG = trunc.map(w => w / sum);
+    return res;
+  };
+  try {
+    runMaskedArmAudit(truncRenormCMMGGenerator);
+  } catch (err) {
+    caughtTruncRenormCMMG = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Malformed weight array 'wCMMG'/);
+    assert.match(err.message, /expected length/);
+  }
+  assert.ok(caughtTruncRenormCMMG, 'Deliberate-failure control 5J (wCMMG) failed: truncated-but-renormalized array was not caught');
+
+  let caughtTruncRenormBoth = false;
+  const truncRenormBothGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    const trunc = res.wBoth.slice(0, -1);
+    const sum = trunc.reduce((a, b) => a + b, 0);
+    res.wBoth = trunc.map(w => w / sum);
+    return res;
+  };
+  try {
+    runRevealedArmSensitivityAudit(truncRenormBothGenerator);
+  } catch (err) {
+    caughtTruncRenormBoth = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Malformed weight array 'wBoth'/);
+    assert.match(err.message, /expected length/);
+  }
+  assert.ok(caughtTruncRenormBoth, 'Deliberate-failure control 5J (wBoth) failed: truncated-but-renormalized array was not caught');
+  console.log('   [PASS] Control 5J: Injected truncated-but-renormalized weight arrays (wCMMG & wBoth) caught by length validation.\n');
 
   console.log('========================================================================');
   console.log('AUDIT COMPLETED: NO LEAKAGE DETECTED BY THESE CHECKS');

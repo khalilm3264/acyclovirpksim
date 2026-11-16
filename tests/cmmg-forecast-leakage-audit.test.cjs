@@ -7,10 +7,13 @@ const {
   runOutcomeRemovalCheck,
   runMaskedArmAudit,
   runRevealedArmSensitivityAudit,
-  runChartObservationIndependenceAudit
+  runChartObservationIndependenceAudit,
+  assertValidForecastResult,
+  assertValidWeightArray
 } = require('../research/validation/cmmg-forecast-leakage-audit.cjs');
 const {
   generatePatientForecast,
+  fcCandidates,
   allPatientRecords,
   loadBaselineFrom5826d04,
   compareRecordsAgainstBaseline,
@@ -151,7 +154,167 @@ test('Every leakage audit rejects non-finite or missing forecast values and malf
       return res;
     };
     assert.throws(() => fn(genUnnormWeights), /weights must sum to 1.0/, `${name} must reject unnormalized weights`);
+
+    // 8. Injected appended-zero weight array on wCMMG
+    const genAppendedZeroCMMG = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.wCMMG = [...res.wCMMG, 0];
+      return res;
+    };
+    assert.throws(() => fn(genAppendedZeroCMMG), /expected length/, `${name} must reject appended-zero wCMMG array`);
+
+    // 9. Injected appended-zero weight array on wBoth
+    const genAppendedZeroBoth = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.wBoth = [...res.wBoth, 0];
+      return res;
+    };
+    assert.throws(() => fn(genAppendedZeroBoth), /expected length/, `${name} must reject appended-zero wBoth array`);
+
+    // 10. Injected truncated-but-renormalized weight array on wCMMG
+    const genTruncRenormCMMG = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      const trunc = res.wCMMG.slice(0, -1);
+      const sum = trunc.reduce((acc, v) => acc + v, 0);
+      res.wCMMG = trunc.map(v => v / sum);
+      return res;
+    };
+    assert.throws(() => fn(genTruncRenormCMMG), /expected length/, `${name} must reject truncated-but-renormalized wCMMG array`);
+
+    // 11. Injected truncated-but-renormalized weight array on wBoth
+    const genTruncRenormBoth = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      const trunc = res.wBoth.slice(0, -1);
+      const sum = trunc.reduce((acc, v) => acc + v, 0);
+      res.wBoth = trunc.map(v => v / sum);
+      return res;
+    };
+    assert.throws(() => fn(genTruncRenormBoth), /expected length/, `${name} must reject truncated-but-renormalized wBoth array`);
   }
+});
+
+test('Weight array length validator strictly enforces M=400 for complete/hidden and 2M=800 for mixture on wCMMG and wBoth', () => {
+  const M = fcCandidates.length; // 400
+  const validM = new Array(M).fill(1 / M);
+  const valid2M = new Array(2 * M).fill(1 / (2 * M));
+
+  const validFC = {
+    predCF: 2.0,
+    predCH: 2.5,
+    predER_CMMG: 2.2,
+    predER_Both: 2.3,
+    predSU_Unw_CMMG: 2.1,
+    predSU_Unw_Both: 2.4,
+    predSU_Rew_CMMG: 2.2,
+    predSU_Rew_Both: 2.3,
+    wH1: 1.0,
+    wH2: 0.0,
+    ess: 100,
+    wCMMG: validM,
+    wBoth: validM
+  };
+
+  // 1. Complete scenario: expects M=400
+  assert.doesNotThrow(() => assertValidForecastResult(validFC, { mode: 'complete' }));
+
+  // Appended-zero (M+1) on wCMMG
+  const fcAppZeroCMMG_complete = { ...validFC, wCMMG: [...validM, 0] };
+  assert.throws(
+    () => assertValidForecastResult(fcAppZeroCMMG_complete, { mode: 'complete' }),
+    /expected length 400, got 401/
+  );
+
+  // Appended-zero (M+1) on wBoth
+  const fcAppZeroBoth_complete = { ...validFC, wBoth: [...validM, 0] };
+  assert.throws(
+    () => assertValidForecastResult(fcAppZeroBoth_complete, { mode: 'complete' }),
+    /expected length 400, got 401/
+  );
+
+  // Truncated-but-renormalized (M-1) on wCMMG
+  const truncCMMG_M = validM.slice(0, -1);
+  const sumTruncCMMG_M = truncCMMG_M.reduce((a, b) => a + b, 0);
+  const fcTruncCMMG_complete = { ...validFC, wCMMG: truncCMMG_M.map(w => w / sumTruncCMMG_M) };
+  assert.throws(
+    () => assertValidForecastResult(fcTruncCMMG_complete, { mode: 'complete' }),
+    /expected length 400, got 399/
+  );
+
+  // Truncated-but-renormalized (M-1) on wBoth
+  const truncBoth_M = validM.slice(0, -1);
+  const sumTruncBoth_M = truncBoth_M.reduce((a, b) => a + b, 0);
+  const fcTruncBoth_complete = { ...validFC, wBoth: truncBoth_M.map(w => w / sumTruncBoth_M) };
+  assert.throws(
+    () => assertValidForecastResult(fcTruncBoth_complete, { mode: 'complete' }),
+    /expected length 400, got 399/
+  );
+
+  // Mixture-length (2M) passed to complete: must throw
+  const fcMixtureLenInComplete = { ...validFC, wCMMG: valid2M, wBoth: valid2M };
+  assert.throws(
+    () => assertValidForecastResult(fcMixtureLenInComplete, { mode: 'complete' }),
+    /expected length 400, got 800/
+  );
+
+  // 2. Hidden scenario: expects M=400
+  assert.doesNotThrow(() => assertValidForecastResult(validFC, { mode: 'hidden' }));
+  assert.throws(
+    () => assertValidForecastResult(fcAppZeroCMMG_complete, { mode: 'hidden' }),
+    /expected length 400, got 401/
+  );
+  assert.throws(
+    () => assertValidForecastResult(fcTruncBoth_complete, { mode: 'hidden' }),
+    /expected length 400, got 399/
+  );
+
+  // 3. Mixture scenario: expects 2M=800
+  const validMixtureFC = {
+    ...validFC,
+    wH1: 0.5,
+    wH2: 0.5,
+    wCMMG: valid2M,
+    wBoth: valid2M
+  };
+  assert.doesNotThrow(() => assertValidForecastResult(validMixtureFC, { mode: 'mixture' }));
+
+  // Appended-zero (2M+1) on wCMMG
+  const fcAppZeroCMMG_mixture = { ...validMixtureFC, wCMMG: [...valid2M, 0] };
+  assert.throws(
+    () => assertValidForecastResult(fcAppZeroCMMG_mixture, { mode: 'mixture' }),
+    /expected length 800, got 801/
+  );
+
+  // Appended-zero (2M+1) on wBoth
+  const fcAppZeroBoth_mixture = { ...validMixtureFC, wBoth: [...valid2M, 0] };
+  assert.throws(
+    () => assertValidForecastResult(fcAppZeroBoth_mixture, { mode: 'mixture' }),
+    /expected length 800, got 801/
+  );
+
+  // Truncated-but-renormalized (2M-1) on wCMMG
+  const truncCMMG_2M = valid2M.slice(0, -1);
+  const sumTruncCMMG_2M = truncCMMG_2M.reduce((a, b) => a + b, 0);
+  const fcTruncCMMG_mixture = { ...validMixtureFC, wCMMG: truncCMMG_2M.map(w => w / sumTruncCMMG_2M) };
+  assert.throws(
+    () => assertValidForecastResult(fcTruncCMMG_mixture, { mode: 'mixture' }),
+    /expected length 800, got 799/
+  );
+
+  // Truncated-but-renormalized (2M-1) on wBoth
+  const truncBoth_2M = valid2M.slice(0, -1);
+  const sumTruncBoth_2M = truncBoth_2M.reduce((a, b) => a + b, 0);
+  const fcTruncBoth_mixture = { ...validMixtureFC, wBoth: truncBoth_2M.map(w => w / sumTruncBoth_2M) };
+  assert.throws(
+    () => assertValidForecastResult(fcTruncBoth_mixture, { mode: 'mixture' }),
+    /expected length 800, got 799/
+  );
+
+  // Complete-length (M) passed to mixture: must throw
+  const fcCompleteLenInMixture = { ...validMixtureFC, wCMMG: validM, wBoth: validM };
+  assert.throws(
+    () => assertValidForecastResult(fcCompleteLenInMixture, { mode: 'mixture' }),
+    /expected length 800, got 400/
+  );
 });
 
 test('Baseline verification against frozen 5826d04 asserts row-by-row numerical identity and catches missing/altered baseline', () => {
