@@ -2,7 +2,7 @@
 
 AyFlux is a browser-based acyclovir and valacyclovir pharmacokinetics simulator for teaching and exploratory research across kidney function, HD, PD and CRRT.
 
-**Current release identity: v0.27.0 preview** (released 2026-11-13). Cite the release tag, or an exact commit for later work from main.
+**Current release identity: v0.28.0 preview** (released 2026-11-16). Cite the release tag, or an exact commit for later work from main.
 
 ## Start here
 

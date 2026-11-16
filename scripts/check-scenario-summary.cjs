@@ -22,7 +22,7 @@ const server=http.createServer((req,res)=>{
   await page.waitForSelector('#ayfluxScenarioSummary[open]');
   assert.equal(await page.locator('#ayfluxScenarioSummary svg').count(),2);
   assert.ok((await page.textContent('#ayfluxScenarioSummary')).includes('Removed by dialysis'));
-  assert.ok((await page.textContent('#ayfluxScenarioSummary')).includes('AyFlux 0.27.0'));
+  assert.ok((await page.textContent('#ayfluxScenarioSummary')).includes('AyFlux '+require('../package.json').version));
   async function onePage(name){
    await page.emulateMedia({media:'print'});
    console.log(name, 'print layout', await page.evaluate(()=>Object.fromEntries(['body','dialog.ay-summary','.ay-summary-sheet'].map(sel=>{const e=document.querySelector(sel),r=e.getBoundingClientRect(),s=getComputedStyle(e);return [sel,{width:r.width,height:r.height,display:s.display,page:s.page,position:s.position}];}))));

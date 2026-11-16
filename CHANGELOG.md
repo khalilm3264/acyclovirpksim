@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to AyFlux are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) with a `preview` label while the project is pre-1.0.
+All notable changes to AyFlux are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions use a new minor number on each new day of development with a `preview` label while the project is pre-1.0.
 
 Three things are versioned separately:
 
@@ -11,6 +11,21 @@ Three things are versioned separately:
 Every entry states whether pharmacokinetic equations, parameters or defaults changed. If an entry does not say so, they did not.
 
 ## [Unreleased]
+
+No changes recorded yet.
+
+## [0.28.0] - 2026-11-16 (preview)
+
+This release collects the work since v0.27.0, including the model changes recorded below. The graph performance and overlay changes themselves do not alter model calculations.
+
+### Graph performance and presentation
+
+- Build a smaller shared ECharts renderer, preload it on the simulator, and keep 3D loading optional (#228).
+- Start committed numeric edits immediately while retaining debounce during typing (#229).
+- Keep prior curves visible during recalculation with an explicit previous-results label; retain full first-load and error overlays (#231).
+- Simplify the GitHub landing page and move unpublished website drafts into the archive (#230).
+- Synchronize the app, citation, export and release metadata at v0.28.0.
+
 
 ### Chart and workflow fixes
 
@@ -258,7 +273,8 @@ Everything merged to `main` since 0.26.0 ([full comparison](https://github.com/k
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
-[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.27.0...main
+[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.28.0...main
+[0.28.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/khalilm3264/acyclovirpksim/compare/b928978...v0.27.0
 [0.26.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0260---2026-11-09-preview
 [0.25.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0250---2026-11-08-preview
