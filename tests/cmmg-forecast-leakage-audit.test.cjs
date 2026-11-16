@@ -54,7 +54,7 @@ test('Deliberate-failure negative controls catch target leakage, input leakage, 
     if (obs.trueCMMGAtTarget !== undefined) res.predER_CMMG += 0.05 * obs.trueCMMGAtTarget;
     return res;
   };
-  assert.throws(() => runTargetPerturbationCheck(leakyFuture), /Future-data leakage detected/);
+  assert.throws(() => runTargetPerturbationCheck(leakyFuture), /Future-data leakage/);
 
   // 2. Leaked ACV into masked arm must throw
   const leakyMasked = (obs, ...args) => {
@@ -62,7 +62,7 @@ test('Deliberate-failure negative controls catch target leakage, input leakage, 
     res.predER_CMMG += 0.05 * obs.measACV;
     return res;
   };
-  assert.throws(() => runMaskedArmAudit(leakyMasked), /Masked arm leakage detected/);
+  assert.throws(() => runMaskedArmAudit(leakyMasked), /Masked arm leakage/);
 
   // 3. Blind revealed arm must throw
   const blindRevealed = (obs, ...args) => {
@@ -73,7 +73,7 @@ test('Deliberate-failure negative controls catch target leakage, input leakage, 
     res.predSU_Rew_Both = res.predSU_Rew_CMMG;
     return res;
   };
-  assert.throws(() => runRevealedArmSensitivityAudit(blindRevealed), /Revealed arm blindness detected/);
+  assert.throws(() => runRevealedArmSensitivityAudit(blindRevealed), /Revealed arm blindness/);
 
   // 4. Leaked observation into chart history must throw
   const leakyChart = (obs, ...args) => {
@@ -81,7 +81,77 @@ test('Deliberate-failure negative controls catch target leakage, input leakage, 
     res.predCH += 0.05 * obs.measCMMG;
     return res;
   };
-  assert.throws(() => runChartObservationIndependenceAudit(leakyChart), /Chart history observation leak detected/);
+  assert.throws(() => runChartObservationIndependenceAudit(leakyChart), /Chart history observation leak/);
+});
+
+test('Every leakage audit rejects non-finite or missing forecast values and malformed weight arrays injected via generator', () => {
+  const auditFns = [
+    { name: 'TargetPerturbationCheck', fn: runTargetPerturbationCheck },
+    { name: 'OutcomeRemovalCheck', fn: runOutcomeRemovalCheck },
+    { name: 'MaskedArmAudit', fn: runMaskedArmAudit },
+    { name: 'RevealedArmSensitivityAudit', fn: runRevealedArmSensitivityAudit },
+    { name: 'ChartObservationIndependenceAudit', fn: runChartObservationIndependenceAudit }
+  ];
+
+  for (const { name, fn } of auditFns) {
+    // 1. Injected NaN forecast
+    const genNaN = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.predER_Both = NaN;
+      return res;
+    };
+    assert.throws(() => fn(genNaN), /Non-finite forecast value/, `${name} must reject NaN forecast`);
+
+    // 2. Injected Infinity forecast
+    const genInf = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.predCF = Infinity;
+      return res;
+    };
+    assert.throws(() => fn(genInf), /Non-finite forecast value/, `${name} must reject Infinity forecast`);
+
+    // 3. Injected missing forecast
+    const genMissing = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      delete res.predCH;
+      return res;
+    };
+    assert.throws(() => fn(genMissing), /Missing forecast value/, `${name} must reject missing forecast`);
+
+    // 4. Injected malformed weight array (non-array)
+    const genNonArrWeights = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.wCMMG = 'not-an-array';
+      return res;
+    };
+    assert.throws(() => fn(genNonArrWeights), /Malformed weight array/, `${name} must reject non-array weights`);
+
+    // 5. Injected malformed weight array (NaN element)
+    const genNaNWeights = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.wBoth = res.wBoth.slice();
+      res.wBoth[0] = NaN;
+      return res;
+    };
+    assert.throws(() => fn(genNaNWeights), /Malformed weight array/, `${name} must reject NaN weight elements`);
+
+    // 6. Injected malformed weight array (negative weight)
+    const genNegWeights = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.wCMMG = res.wCMMG.slice();
+      res.wCMMG[0] = -0.1;
+      return res;
+    };
+    assert.throws(() => fn(genNegWeights), /Malformed weight array/, `${name} must reject negative weights`);
+
+    // 7. Injected malformed weight array (not summing to 1.0)
+    const genUnnormWeights = (obs, ...args) => {
+      const res = generatePatientForecast(obs, ...args);
+      res.wBoth = res.wBoth.map(w => w * 2.0);
+      return res;
+    };
+    assert.throws(() => fn(genUnnormWeights), /weights must sum to 1.0/, `${name} must reject unnormalized weights`);
+  }
 });
 
 test('Baseline verification against frozen 5826d04 asserts row-by-row numerical identity and catches missing/altered baseline', () => {

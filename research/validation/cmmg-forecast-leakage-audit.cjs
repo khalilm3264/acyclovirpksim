@@ -40,6 +40,93 @@ const {
   median
 } = require('./cmmg-forecast-post-hd.cjs');
 
+function assertValidWeightArray(wArr, name, context = '') {
+  if (!Array.isArray(wArr) || wArr.length === 0) {
+    throw new assert.AssertionError({
+      message: `Malformed weight array '${name}' in ${context}: must be a non-empty Array, got ${Array.isArray(wArr) ? 'empty array' : typeof wArr}`
+    });
+  }
+
+  let sum = 0;
+  for (let j = 0; j < wArr.length; j++) {
+    const w = wArr[j];
+    if (w === undefined || w === null || w === '') {
+      throw new assert.AssertionError({
+        message: `Malformed weight array '${name}' in ${context}: missing element at index ${j}`
+      });
+    }
+    const num = Number(w);
+    if (!Number.isFinite(num)) {
+      throw new assert.AssertionError({
+        message: `Malformed weight array '${name}' in ${context}: non-finite element at index ${j} (${w})`
+      });
+    }
+    if (num < 0) {
+      throw new assert.AssertionError({
+        message: `Malformed weight array '${name}' in ${context}: negative weight at index ${j} (${w})`
+      });
+    }
+    sum += num;
+  }
+
+  if (!Number.isFinite(sum) || sum <= 0 || Math.abs(sum - 1.0) > 1e-4) {
+    throw new assert.AssertionError({
+      message: `Malformed weight array '${name}' in ${context}: weights must sum to 1.0 (got sum=${sum})`
+    });
+  }
+}
+
+function assertValidForecastResult(fc, context = '') {
+  if (!fc || typeof fc !== 'object') {
+    throw new assert.AssertionError({
+      message: `Invalid forecast result in ${context}: expected object, got ${typeof fc}`
+    });
+  }
+
+  const requiredForecastKeys = [
+    'predCF',
+    'predCH',
+    'predER_CMMG',
+    'predER_Both',
+    'predSU_Unw_CMMG',
+    'predSU_Unw_Both',
+    'predSU_Rew_CMMG',
+    'predSU_Rew_Both'
+  ];
+
+  for (const k of requiredForecastKeys) {
+    if (fc[k] === undefined || fc[k] === null || fc[k] === '') {
+      throw new assert.AssertionError({
+        message: `Missing forecast value '${k}' in ${context}`
+      });
+    }
+    const v = Number(fc[k]);
+    if (!Number.isFinite(v)) {
+      throw new assert.AssertionError({
+        message: `Non-finite forecast value '${k}' (${fc[k]}) in ${context}`
+      });
+    }
+  }
+
+  const requiredScalars = ['wH1', 'wH2', 'ess'];
+  for (const k of requiredScalars) {
+    if (fc[k] === undefined || fc[k] === null || fc[k] === '') {
+      throw new assert.AssertionError({
+        message: `Missing scalar output '${k}' in ${context}`
+      });
+    }
+    const v = Number(fc[k]);
+    if (!Number.isFinite(v)) {
+      throw new assert.AssertionError({
+        message: `Non-finite scalar output '${k}' (${fc[k]}) in ${context}`
+      });
+    }
+  }
+
+  assertValidWeightArray(fc.wCMMG, 'wCMMG', context);
+  assertValidWeightArray(fc.wBoth, 'wBoth', context);
+}
+
 function runTargetPerturbationCheck(generatorFn) {
   const evals = [
     { name: 'Exact 28.0h (4% CV)', evalObj: eval1 },
@@ -70,6 +157,7 @@ function runTargetPerturbationCheck(generatorFn) {
         };
 
         const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+        assertValidForecastResult(fcBase, 'target perturbation check (baseline)');
 
         // Perturb future target by significant delta (+5.0 or -3.0 mg/L)
         const targetShift = (pid % 2 === 0 ? 5.0 : -3.0) * (1 + 0.05 * (pid % 7));
@@ -79,6 +167,7 @@ function runTargetPerturbationCheck(generatorFn) {
         };
 
         const fcPerturbed = generatorFn(perturbedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+        assertValidForecastResult(fcPerturbed, 'target perturbation check (perturbed)');
 
         // Assert forecasts and weights must remain identical
         const checks = [
@@ -96,7 +185,7 @@ function runTargetPerturbationCheck(generatorFn) {
         ];
 
         for (const [key, valPerturbed, valBase] of checks) {
-          if (Math.abs(valPerturbed - valBase) > 1e-12) {
+          if (!Number.isFinite(valPerturbed) || !Number.isFinite(valBase) || Math.abs(valPerturbed - valBase) > 1e-12) {
             throw new assert.AssertionError({
               message: `Future-data leakage detected in ${key}: baseline=${valBase}, perturbed=${valPerturbed} (diff=${valPerturbed - valBase})`
             });
@@ -105,14 +194,14 @@ function runTargetPerturbationCheck(generatorFn) {
 
         // Verify fitting weights array identity
         for (let j = 0; j < fcBase.wCMMG.length; j++) {
-          if (Math.abs(fcPerturbed.wCMMG[j] - fcBase.wCMMG[j]) > 1e-12) {
+          if (!Number.isFinite(fcPerturbed.wCMMG[j]) || !Number.isFinite(fcBase.wCMMG[j]) || Math.abs(fcPerturbed.wCMMG[j] - fcBase.wCMMG[j]) > 1e-12) {
             throw new assert.AssertionError({
               message: `Future-data leakage detected in wCMMG[${j}]`
             });
           }
         }
         for (let j = 0; j < fcBase.wBoth.length; j++) {
-          if (Math.abs(fcPerturbed.wBoth[j] - fcBase.wBoth[j]) > 1e-12) {
+          if (!Number.isFinite(fcPerturbed.wBoth[j]) || !Number.isFinite(fcBase.wBoth[j]) || Math.abs(fcPerturbed.wBoth[j] - fcBase.wBoth[j]) > 1e-12) {
             throw new assert.AssertionError({
               message: `Future-data leakage detected in wBoth[${j}]`
             });
@@ -159,6 +248,7 @@ function runOutcomeRemovalCheck(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcBase, 'outcome removal check (baseline)');
 
     // Completely remove trueCMMGAtTarget
     const strippedObs = {
@@ -169,18 +259,40 @@ function runOutcomeRemovalCheck(generatorFn) {
     };
 
     const fcStripped = generatorFn(strippedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcStripped, 'outcome removal check (stripped)');
 
-    assert.equal(fcStripped.predCF, fcBase.predCF);
-    assert.equal(fcStripped.predCH, fcBase.predCH);
-    assert.equal(fcStripped.predER_CMMG, fcBase.predER_CMMG);
-    assert.equal(fcStripped.predER_Both, fcBase.predER_Both);
-    assert.equal(fcStripped.predSU_Unw_CMMG, fcBase.predSU_Unw_CMMG);
-    assert.equal(fcStripped.predSU_Unw_Both, fcBase.predSU_Unw_Both);
-    assert.equal(fcStripped.predSU_Rew_CMMG, fcBase.predSU_Rew_CMMG);
-    assert.equal(fcStripped.predSU_Rew_Both, fcBase.predSU_Rew_Both);
-    assert.equal(fcStripped.wH1, fcBase.wH1);
-    assert.equal(fcStripped.wH2, fcBase.wH2);
-    assert.equal(fcStripped.ess, fcBase.ess);
+    const keys = [
+      'predCF',
+      'predCH',
+      'predER_CMMG',
+      'predER_Both',
+      'predSU_Unw_CMMG',
+      'predSU_Unw_Both',
+      'predSU_Rew_CMMG',
+      'predSU_Rew_Both',
+      'wH1',
+      'wH2',
+      'ess'
+    ];
+
+    for (const k of keys) {
+      if (!Number.isFinite(fcStripped[k]) || !Number.isFinite(fcBase[k]) || Math.abs(fcStripped[k] - fcBase[k]) > 1e-12) {
+        throw new assert.AssertionError({
+          message: `Outcome removal mismatch or non-finite value in ${k}: base=${fcBase[k]}, stripped=${fcStripped[k]}`
+        });
+      }
+    }
+
+    for (let j = 0; j < fcBase.wCMMG.length; j++) {
+      if (!Number.isFinite(fcStripped.wCMMG[j]) || !Number.isFinite(fcBase.wCMMG[j]) || Math.abs(fcStripped.wCMMG[j] - fcBase.wCMMG[j]) > 1e-12) {
+        throw new assert.AssertionError({ message: `Outcome removal mismatch in wCMMG[${j}]` });
+      }
+    }
+    for (let j = 0; j < fcBase.wBoth.length; j++) {
+      if (!Number.isFinite(fcStripped.wBoth[j]) || !Number.isFinite(fcBase.wBoth[j]) || Math.abs(fcStripped.wBoth[j] - fcBase.wBoth[j]) > 1e-12) {
+        throw new assert.AssertionError({ message: `Outcome removal mismatch in wBoth[${j}]` });
+      }
+    }
 
     totalChecked++;
   }
@@ -204,6 +316,7 @@ function runMaskedArmAudit(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcBase, 'masked arm audit (baseline)');
 
     // Heavily corrupt end-HD ACV
     const corruptedObs = {
@@ -212,6 +325,7 @@ function runMaskedArmAudit(generatorFn) {
     };
 
     const fcCorrupted = generatorFn(corruptedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcCorrupted, 'masked arm audit (corrupted)');
 
     // Assert masked arm predictions and weights must NOT change
     const maskedChecks = [
@@ -222,7 +336,7 @@ function runMaskedArmAudit(generatorFn) {
     ];
 
     for (const [key, valCorrupted, valBase] of maskedChecks) {
-      if (Math.abs(valCorrupted - valBase) > 1e-12) {
+      if (!Number.isFinite(valCorrupted) || !Number.isFinite(valBase) || Math.abs(valCorrupted - valBase) > 1e-12) {
         throw new assert.AssertionError({
           message: `Masked arm leakage detected in ${key}: baseline=${valBase}, corrupted=${valCorrupted} (diff=${valCorrupted - valBase})`
         });
@@ -230,7 +344,7 @@ function runMaskedArmAudit(generatorFn) {
     }
 
     for (let j = 0; j < fcBase.wCMMG.length; j++) {
-      if (Math.abs(fcCorrupted.wCMMG[j] - fcBase.wCMMG[j]) > 1e-12) {
+      if (!Number.isFinite(fcCorrupted.wCMMG[j]) || !Number.isFinite(fcBase.wCMMG[j]) || Math.abs(fcCorrupted.wCMMG[j] - fcBase.wCMMG[j]) > 1e-12) {
         throw new assert.AssertionError({
           message: `Masked arm leakage detected in wCMMG[${j}]`
         });
@@ -259,6 +373,7 @@ function runRevealedArmSensitivityAudit(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcBase, 'revealed arm audit (baseline)');
 
     // Heavily corrupt end-HD ACV
     const corruptedObs = {
@@ -267,6 +382,7 @@ function runRevealedArmSensitivityAudit(generatorFn) {
     };
 
     const fcCorrupted = generatorFn(corruptedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcCorrupted, 'revealed arm audit (corrupted)');
 
     // Assert revealed arm MUST change in response to altered ACV
     const diffER = Math.abs(fcCorrupted.predER_Both - fcBase.predER_Both);
@@ -275,7 +391,11 @@ function runRevealedArmSensitivityAudit(generatorFn) {
 
     let maxWeightDiff = 0;
     for (let j = 0; j < fcBase.wBoth.length; j++) {
-      maxWeightDiff = Math.max(maxWeightDiff, Math.abs(fcCorrupted.wBoth[j] - fcBase.wBoth[j]));
+      const wd = Math.abs(fcCorrupted.wBoth[j] - fcBase.wBoth[j]);
+      if (!Number.isFinite(wd)) {
+        throw new assert.AssertionError({ message: `Non-finite weight difference in wBoth[${j}]` });
+      }
+      maxWeightDiff = Math.max(maxWeightDiff, wd);
     }
 
     if (diffER < 1e-6 && diffSU_Unw < 1e-6 && diffSU_Rew < 1e-6 && maxWeightDiff < 1e-6) {
@@ -306,6 +426,7 @@ function runChartObservationIndependenceAudit(generatorFn) {
     };
 
     const fcBase = generatorFn(baseObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcBase, 'chart observation independence audit (baseline)');
 
     // Corrupt BOTH end-HD ACV and CMMG observations significantly
     const corruptedObs = {
@@ -315,8 +436,9 @@ function runChartObservationIndependenceAudit(generatorFn) {
     };
 
     const fcCorrupted = generatorFn(corruptedObs, fcCandidates, fcSimsComplete, fcSimsHidden, cfg, assayCV);
+    assertValidForecastResult(fcCorrupted, 'chart observation independence audit (corrupted)');
 
-    if (Math.abs(fcCorrupted.predCH - fcBase.predCH) > 1e-12) {
+    if (!Number.isFinite(fcCorrupted.predCH) || !Number.isFinite(fcBase.predCH) || Math.abs(fcCorrupted.predCH - fcBase.predCH) > 1e-12) {
       throw new assert.AssertionError({
         message: `Chart history observation leak detected: baseline=${fcBase.predCH}, corrupted=${fcCorrupted.predCH} (diff=${fcCorrupted.predCH - fcBase.predCH})`
       });
@@ -431,10 +553,78 @@ function runFullLeakageAudit() {
   } catch (err) {
     caughtChartLeak = true;
     assert.ok(err instanceof assert.AssertionError, 'Must throw AssertionError');
-    assert.match(err.message, /Chart history observation leak detected/);
+    assert.match(err.message, /Chart history observation leak/);
   }
   assert.ok(caughtChartLeak, 'Deliberate-failure control 5D failed: observation leak into predCH was not caught');
-  console.log('   [PASS] Control 5D: Artificial observation leak into chart-history caught by assertion.\n');
+  console.log('   [PASS] Control 5D: Artificial observation leak into chart-history caught by assertion.');
+
+  // 5E. Negative Control: Injected NaN Forecast Value
+  let caughtNanForecast = false;
+  const nanForecastGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    res.predER_Both = NaN;
+    return res;
+  };
+  try {
+    runTargetPerturbationCheck(nanForecastGenerator);
+  } catch (err) {
+    caughtNanForecast = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Non-finite forecast value 'predER_Both'/);
+  }
+  assert.ok(caughtNanForecast, 'Deliberate-failure control 5E failed: NaN forecast was not caught');
+  console.log('   [PASS] Control 5E: Injected NaN forecast caught by validation guard.');
+
+  // 5F. Negative Control: Injected Infinity Forecast Value
+  let caughtInfForecast = false;
+  const infForecastGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    res.predCH = Infinity;
+    return res;
+  };
+  try {
+    runChartObservationIndependenceAudit(infForecastGenerator);
+  } catch (err) {
+    caughtInfForecast = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Non-finite forecast value 'predCH'/);
+  }
+  assert.ok(caughtInfForecast, 'Deliberate-failure control 5F failed: Infinity forecast was not caught');
+  console.log('   [PASS] Control 5F: Injected Infinity forecast caught by validation guard.');
+
+  // 5G. Negative Control: Injected Missing Forecast Field
+  let caughtMissingForecast = false;
+  const missingForecastGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    delete res.predSU_Rew_Both;
+    return res;
+  };
+  try {
+    runOutcomeRemovalCheck(missingForecastGenerator);
+  } catch (err) {
+    caughtMissingForecast = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Missing forecast value 'predSU_Rew_Both'/);
+  }
+  assert.ok(caughtMissingForecast, 'Deliberate-failure control 5G failed: missing forecast field was not caught');
+  console.log('   [PASS] Control 5G: Injected missing forecast value caught by validation guard.');
+
+  // 5H. Negative Control: Injected Malformed Weight Array
+  let caughtMalformedWeights = false;
+  const malformedWeightGenerator = (obs, ...args) => {
+    const res = generatePatientForecast(obs, ...args);
+    res.wBoth = [NaN, 0.5];
+    return res;
+  };
+  try {
+    runMaskedArmAudit(malformedWeightGenerator);
+  } catch (err) {
+    caughtMalformedWeights = true;
+    assert.ok(err instanceof assert.AssertionError);
+    assert.match(err.message, /Malformed weight array 'wBoth'/);
+  }
+  assert.ok(caughtMalformedWeights, 'Deliberate-failure control 5H failed: malformed weight array was not caught');
+  console.log('   [PASS] Control 5H: Injected malformed weight array caught by validation guard.\n');
 
   console.log('========================================================================');
   console.log('AUDIT COMPLETED: NO LEAKAGE DETECTED BY THESE CHECKS');
@@ -446,6 +636,8 @@ if (require.main === module) {
 }
 
 module.exports = {
+  assertValidForecastResult,
+  assertValidWeightArray,
   runFullLeakageAudit,
   runTargetPerturbationCheck,
   runOutcomeRemovalCheck,
