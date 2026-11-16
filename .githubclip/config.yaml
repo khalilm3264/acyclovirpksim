@@ -1,0 +1,100 @@
+# githubclip Configuration
+# Created by /githubclip-init – customize for your repo
+version: 2
+
+provider: github
+
+# GitHub configuration (used when provider: github)
+github:
+  owner: "khalilm3264"                    # Repository owner (user or org)
+  repo: "acyclovirpksim"                      # Repository name
+  user_name: "khalilm3264"            # GitHub login for heartbeat identity
+  
+  # GitHub Project settings
+  project:
+    owner_type: "user" # "user" or "org"
+    owner_login: "khalilm3264"     # Owner login (may differ from repo owner)
+    project_number: null                 # Resolved during init
+    project_id: null                     # Stable GraphQL ID (resolved during init)
+  
+  # Required custom fields (IDs resolved during init)
+  fields:
+    status:
+      field_id: null                     # GraphQL ID of Status field
+      name: "Status"                     # Display name (for documentation)
+      option_ids:
+        todo: null                       # ID for "Todo" option
+        in_progress: null                # ID for "In Progress" option
+        in_review: null                  # ID for "In Review" option
+        done: null                       # ID for "Done" option
+        canceled: null                   # ID for "Canceled" option
+    priority:
+      field_id: null                     # GraphQL ID of Priority field
+      name: "Priority"                   # Display name (for documentation)
+      option_ids:
+        urgent: null                     # ID for "Urgent" option
+        high: null                       # ID for "High" option
+        medium: null                     # ID for "Medium" option
+        low: null                        # ID for "Low" option
+        none: null                       # ID for "None" option
+  
+  # API mode: mcp_only (GitHub MCP) or mcp_then_gh (fallback to `gh api graphql`)
+  api_mode: "mcp_only"
+  
+  # Behavior flags
+  strict_mode: true                     # Enforce deterministic behavior
+  queue_source: "project_items"         # Fixed to project items only
+  close_on_done: false                  # Close issue when Status set to Done
+
+# Heartbeat behavior (cross-provider)
+heartbeat:
+  max_issues_per_heartbeat: 2           # Max issues to work per heartbeat cycle
+  stale_lock_hours: 4                   # Hours before a lockfile is considered stale
+  max_consecutive_failures: 3           # Pause schedule after N failures
+  backoff_multiplier: 2                 # Double interval on consecutive failures
+
+  # Quiet hours – skip or limit heartbeats during off-hours
+  quiet_hours:
+    enabled: false
+    timezone: "America/New_York"
+    start: "22:00"
+    end: "07:00"
+    behavior: "skip"                    # "skip" = no heartbeat; "triage-only" = orchestrator triage only
+
+# Label configuration (GitHub labels)
+labels:
+  group: "githubclip"                    # Label group prefix (auto-created by init)
+  working: "agent-working"              # Applied while agent is working an issue
+  blocked: "agent-blocked"              # Applied when agent is blocked
+
+# Persona routing: GitHub label → persona directory
+# The Orchestrator (is_default: true) handles issues with no persona label
+personas:
+  orchestrator:
+    path: "personas/orchestrator"
+    label: null
+    is_default: true
+  ceo:
+    path: "personas/ceo"
+    label: "ceo"
+  backend:
+    path: "personas/backend"
+    label: "backend"
+  frontend:
+    path: "personas/frontend"
+    label: "frontend"
+  infra:
+    path: "personas/infra"
+    label: "infra"
+  qa:
+    path: "personas/qa"
+    label: "qa"
+
+# Anti-fragile mode settings
+antifragile:
+  degradation_enabled: true             # Allow progressive degradation on write failures
+  circuit_breaker_threshold: 3          # Consecutive failures before circuit break
+  canary_check_enabled: true            # Test first mutation before full run
+  reconciliation_pass_enabled: false    # Optional cleanup pass at end of heartbeat
+  recovery_journal_enabled: true        # Record action steps for crash recovery
+
