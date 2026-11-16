@@ -603,24 +603,26 @@ let plotFrame=0,renderFrame=0,resizeFrame=0,plotRunning=false,activePlot=null;
 function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()?.id||null:null,key==='plasma'||key==='cmmg'?savedRevision:0,concUnit,resultsRevision,baselineRevision,primary,modes.filter(m=>visible.has(m)),paletteMode,c.coverage,c.showBands,c.showShades,key==='csf'&&c.showIC50,key==='csf'&&c.showIC50?c.virus:null,key==='plasma'?aboveLevelMg:null]);}
 let chartWait=null;
 const plasmaRestoreCharts=new WeakSet();
-function requestPlotFrame(){
- if(!pendingPlots.size||plotFrame||plotRunning)return;
+// Explicit retry must also work when the selected tab has no visible charts.
+function requestPlotFrame(loadWithoutPlots=false){
+ if((!pendingPlots.size&&!loadWithoutPlots)||plotFrame||plotRunning)return;
  if(!window.echarts?.init){
   if(!chartWait){
    chartWait=window.AyFluxCharts.ensure().then(()=>{
     chartWait=null;
+    if($('alerts').textContent==='Loading interactive charts…')alertMessage('');
     requestPlotFrame();
    }).catch(error=>{
     chartWait=null;
     for(const where of pendingPlots.keys())chartMessage($(where),'Chart unavailable. Check your connection.',false);
     pendingPlots.clear();
     alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'. ');
-    const retry=document.createElement('button');retry.type='button';retry.className='btn secondary';retry.textContent='Retry charts';retry.addEventListener('click',()=>{alertMessage('');render();});$('alerts').append(retry);
+    const retry=document.createElement('button');retry.type='button';retry.className='btn secondary';retry.textContent='Retry charts';retry.addEventListener('click',()=>{alertMessage(window.echarts?.init?'':'Loading interactive charts…');requestPlotFrame(true);render();});$('alerts').append(retry);
    });
   }
   return;
  }
- plotFrame=requestAnimationFrame(drawNextPlot);
+ if(pendingPlots.size)plotFrame=requestAnimationFrame(drawNextPlot);
 }
 function drawNextPlot(){
  plotFrame=0;

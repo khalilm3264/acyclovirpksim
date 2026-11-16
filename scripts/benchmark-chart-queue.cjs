@@ -25,7 +25,7 @@ async function main(){
   const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const source=fs.readFileSync(previous||path.join(root,'assets/simulator-ui.js'),'utf8');
-  await page.route('**/assets/simulator-ui.js',route=>route.fulfill({contentType:'application/javascript',body:source.replace('function drawNextPlot(){','function drawNextPlot(){window.queueFrames=(window.queueFrames||0)+1;').replace('function requestPlotFrame(){','window.queueKeys=()=>Array.from(pendingPlots.keys());\nfunction requestPlotFrame(){')}));
+  await page.route('**/assets/simulator-ui.js',route=>route.fulfill({contentType:'application/javascript',body:source.replace('function drawNextPlot(){','function drawNextPlot(){window.queueFrames=(window.queueFrames||0)+1;').replace('function requestPlotFrame(', 'window.queueKeys=()=>Array.from(pendingPlots.keys());\nfunction requestPlotFrame(')}));
   let release;
   const gate=new Promise(resolve=>{release=resolve;});
   await page.route('**/assets/vendor/echarts-6.1.0.min.js*',async route=>{await gate;await route.continue();});
