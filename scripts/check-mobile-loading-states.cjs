@@ -200,7 +200,14 @@ async function runLoadingStatesAudit() {
       const failedPage = await context.newPage();
       let heldRenderer;
       const heldRequest = new Promise(resolve => { heldRenderer = resolve; });
-      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js', route => heldRenderer(route));
+      let failedRendererAttempts = 0;
+      await failedPage.route('**/assets/vendor/echarts-6.1.0.min.js', route => {
+        // Only the initial request is gated. Input changes and intersection
+        // observers may retry while offline; those requests must fail rather
+        // than remain held after the test restores the connection.
+        failedRendererAttempts++;
+        return failedRendererAttempts === 1 ? heldRenderer(route) : route.abort();
+      });
       const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js');
 
       await failedPage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
@@ -249,6 +256,8 @@ async function runLoadingStatesAudit() {
       // 3. Clear threshold while download is in failed state
       console.log('  3. Clearing threshold field while in failed state...');
       await thresholdField.fill('');
+      await failedPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      await failedPage.waitForFunction(() => document.querySelector('#plasmaChart .chart-status')?.textContent === 'Chart unavailable. Check your connection.');
 
       // 4. Retry the renderer without changing or recalculating the simulation.
       console.log('  4. Restoring the connection and retrying charts without changing inputs...');
