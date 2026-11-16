@@ -624,10 +624,16 @@ function requestPlotFrame(){
 }
 function drawNextPlot(){
  plotFrame=0;
- const entry=pendingPlots.entries().next();if(entry.done)return;
- const [where,job]=entry.value;pendingPlots.delete(where);
- const target=$(where);
- if(!dataIsCurrent||job.signature!==chartSignature(job.key)||!chartNearViewport(target)){requestPlotFrame();return;}
+ // Discard obsolete or hidden work without spending a frame per skipped chart.
+ // Keep one real draw per frame so chart rendering still yields to input/paint.
+ let entry,target;
+ while(!(entry=pendingPlots.entries().next()).done){
+  const [where,job]=entry.value;pendingPlots.delete(where);
+  target=$(where);
+  if(dataIsCurrent&&job.signature===chartSignature(job.key)&&chartNearViewport(target))break;
+ }
+ if(entry.done)return;
+ const [where,job]=entry.value;
  plotRunning=true;activePlot={where,signature:job.signature};
  // Restore the live view after drawing, so Reset axes still returns to full axes.
  const factor=job.unitFactor/(chartStates.get(where)?.unitFactor||job.unitFactor);

@@ -58,3 +58,15 @@ test('dynamic renal chart producer draws current jobs and rejects superseded res
  assert.equal(drawn.length,2,'latest renal results can draw after rejecting an older job');
  assert.deepEqual(errors,[]);
 });
+test('discarded chart jobs do not delay the next visible chart by extra animation frames',async()=>{
+ const drawn=[],errors=[],frames=[];
+ const jobs=[...Array.from({length:4},(_,i)=>['old'+i,{key:'csf',signature:'old',option:{}}]),...Array.from({length:3},(_,i)=>['hidden'+i,{key:'csf',signature:'current',option:{}}]),...['visibleA','visibleB'].map(id=>[id,{key:'csf',signature:'current',option:{id}}])];
+ const state={plotFrame:1,plotRunning:false,activePlot:null,pendingPlots:new Map(jobs),chartStates:new Map(),dataIsCurrent:true,chartSignature:()=> 'current',chartNearViewport:target=>!target.id.startsWith('hidden'),$:id=>({id,getBoundingClientRect:()=>({width:600,height:300})}),requestPlotFrame(){if(state.pendingPlots.size)frames.push('frame');},window:{AyFluxCharts:{draw(_,option){drawn.push(option.id);return {};}}},document:{documentElement:{dataset:{ayfluxReady:'true'}}},chartMessage(){},alertMessage:message=>errors.push(message)};
+ vm.createContext(state);vm.runInContext(section('function drawNextPlot(', 'function resizeVisibleCharts('),state);
+ vm.runInContext('drawNextPlot()',state);await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(drawn,['visibleA'],'skip seven obsolete/hidden jobs in the same frame');
+ assert.deepEqual([...state.pendingPlots.keys()],['visibleB'],'still yield between actual chart draws');
+ assert.equal(frames.length,1);
+ vm.runInContext('drawNextPlot()',state);await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(drawn,['visibleA','visibleB']);assert.equal(state.pendingPlots.size,0);assert.deepEqual(errors,[]);
+});
