@@ -3,10 +3,10 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const source=fs.readFileSync(require.resolve('../public/assets/simulator-ui.js'),'utf8');
 const section=source.slice(source.indexOf('function requestPlotFrame('),source.indexOf('function drawNextPlot('));
 function harness(){
- const children=[],loads=[],alerts={textContent:'',append(...items){children.push(...items);}};
- const state={pendingPlots:new Map([['plasmaChart',{}]]),plotFrame:0,plotRunning:false,chartWait:null,window:{AyFluxCharts:{ensure(){return new Promise((resolve,reject)=>loads.push({resolve,reject}));}}},$:()=>alerts,chartMessage(){},alertMessage(message){alerts.textContent=message;children.length=0;},document:{createElement:()=>({addEventListener(type,handler){this[type]=handler;}})},render(){},requestAnimationFrame(){throw Error('No chart should be drawn while offscreen');}};
+ const children=[],loads=[],messages=[],alerts={textContent:'',append(...items){children.push(...items);}};
+ const state={dataIsCurrent:true,pendingPlots:new Map([['plasmaChart',{}]]),plotFrame:0,plotRunning:false,chartWait:null,window:{AyFluxCharts:{ensure(){return new Promise((resolve,reject)=>loads.push({resolve,reject}));}}},$:()=>alerts,chartMessage(...args){messages.push(args);},alertMessage(message){alerts.textContent=message;children.length=0;},document:{createElement:()=>({addEventListener(type,handler){this[type]=handler;}})},render(){},requestAnimationFrame(){throw Error('No chart should be drawn while offscreen');}};
  vm.createContext(state);vm.runInContext(section,state);
- return {state,loads,alerts,children,run:code=>vm.runInContext(code,state)};
+ return {state,loads,alerts,children,messages,run:code=>vm.runInContext(code,state)};
 }
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('Retry charts starts one shared renderer download even with no queued visible charts',async()=>{
@@ -35,4 +35,17 @@ test('retry after another chart has loaded the renderer does not leave a loading
  h.state.window.echarts={init(){}};
  h.children.find(x=>x.textContent==='Retry charts').click();
  assert.equal(h.loads.length,1,'reuse the available renderer');assert.equal(h.alerts.textContent,'');
+});
+
+for(const notice of ['Please correct input(s): Total planned doses must be an integer from 1 to 200',''])test('renderer failure preserves newer invalid/pending simulation feedback: '+(notice?'invalid':'pending'),async()=>{
+ const h=harness();h.run('requestPlotFrame()');
+ h.state.dataIsCurrent=false;h.alerts.textContent=notice;
+ h.loads[0].reject(Error('late renderer failure'));await flush();
+ assert.equal(h.alerts.textContent,notice);
+ assert.deepEqual(h.messages,[],'do not replace calculating/invalid overlays with a download error');
+ assert.equal(h.state.pendingPlots.size,0);assert.equal(h.state.chartWait,null);
+ h.state.dataIsCurrent=true;h.state.pendingPlots.set('plasmaChart',{});h.run('requestPlotFrame()');
+ assert.equal(h.loads.length,2,'valid results can attempt renderer recovery');
+ h.loads[1].reject(Error('still offline'));await flush();
+ assert.match(h.alerts.textContent,/Unable to load/,'current results still report renderer failures');
 });

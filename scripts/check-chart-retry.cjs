@@ -48,8 +48,32 @@ async function main(){
    return selected&&JSON.stringify(selected.data)===JSON.stringify(d.time.map((t,i)=>[t,d.plasma.median[i]]));
   },null,{timeout:60000});
   assert.equal(await page.locator('#plasmaChart .chart-status').count(),0);
+  // A delayed renderer failure must not hide a newer model-validation error.
+  const invalidPage=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
+  invalidPage.on('pageerror',error=>errors.push(error.message));
+  let failInvalid=true,rejectDownload;
+  const failedGate=new Promise(resolve=>{rejectDownload=resolve;});
+  await invalidPage.route('**/assets/vendor/echarts-6.1.0.min.js*',async route=>{
+   if(failInvalid){await failedGate;await route.abort('failed');}else await route.continue();
+  });
+  await invalidPage.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'domcontentloaded'});
+  await invalidPage.waitForFunction(()=>window.AyFluxResearchBridge.snapshot().updated,null,{timeout:60000});
+  await invalidPage.fill('#num_doseCount','1.5');await invalidPage.locator('#num_doseCount').dispatchEvent('change');
+  await invalidPage.waitForFunction(()=>document.querySelector('#status').textContent.includes('invalid settings'));
+  const validation=await invalidPage.textContent('#alerts');assert.match(validation,/Total planned doses must be an integer/);
+  const failed=invalidPage.waitForEvent('requestfailed',{predicate:r=>r.url().includes('/assets/vendor/echarts-6.1.0.min.js')});
+  rejectDownload();await failed;
+  await invalidPage.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(await invalidPage.textContent('#alerts'),validation);
+  assert.equal(await invalidPage.textContent('#plasmaChart .chart-status'),'Simulation not updated. Check inputs.');
+  failInvalid=false;
+  await invalidPage.fill('#num_doseCount','12');await invalidPage.locator('#num_doseCount').dispatchEvent('change');
+  await invalidPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
+  await invalidPage.waitForFunction(()=>window.AyFluxResearchBridge.snapshot().updated&&window.echarts?.getInstanceByDom(document.querySelector('#plasmaChart'))&&!document.querySelector('#plasmaChart .chart-status'),null,{timeout:60000});
+  assert.equal(await invalidPage.textContent('#alerts'),'');
+  await invalidPage.close();
   assert.deepEqual(errors,[]);
-  console.log('Offscreen Retry charts fetches the renderer, reports progress, preserves the model revision, and draws exact current points on return.');
+  console.log('Offscreen retry preserves results; late download failure preserves validation feedback, and corrected inputs recover the charts.');
  }finally{try{await browser?.close();}finally{server.close();}}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

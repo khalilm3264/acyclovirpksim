@@ -614,6 +614,8 @@ function requestPlotFrame(loadWithoutPlots=false){
     requestPlotFrame();
    }).catch(error=>{
     chartWait=null;
+    // A late download failure must not replace newer calculation/input feedback.
+    if(!dataIsCurrent){pendingPlots.clear();return;}
     for(const where of pendingPlots.keys())chartMessage($(where),'Chart unavailable. Check your connection.',false);
     pendingPlots.clear();
     alertMessage('Unable to load interactive charts. Check your connection or ');const liteLink=document.createElement('a');liteLink.href='/lite/';liteLink.textContent='open AyFlux Lite';$('alerts').append(liteLink,'. ');
