@@ -1,6 +1,6 @@
 # Contributing to AyFlux
 
-Thank you for helping improve AyFlux, an **educational** acyclovir and valacyclovir pharmacokinetic simulator. AyFlux is **not clinically validated** and must not be used for patient dosing, diagnosis, dialysis prescriptions, or care decisions.
+AyFlux is an educational pharmacokinetic simulator. Contributions should preserve explicit assumptions, reproducible calculations and clear limits on interpreting results.
 
 ## Before proposing a change
 
@@ -12,8 +12,8 @@ Thank you for helping improve AyFlux, an **educational** acyclovir and valacyclo
 ## Development and pull requests
 
 - Work on a branch; open a focused pull request against `main`. Avoid committing directly to `main`.
-- Use **Node.js 22 or newer**. Run `npm ci` once, then `npm run stage` to copy the chart and font files into `public/`, and `npm test` before opening a pull request. `npm run dev` serves the site locally. Run `node --check` on changed JavaScript files.
-- Explain any changes to pharmacokinetic equations, units, default values, dialysis scheduling, CMMG or CSF estimates. Add regression tests covering expected and boundary behavior.
+- Follow the [local setup](README.md#run-locally) with Node.js 22 or newer. Run `npm run stage`, `npm run format:check`, `npm test` and `npm run build:site`. For interface changes, also run the relevant browser check in `scripts/` and describe the browser and viewport tested.
+- Explain changes to equations, units, defaults, dialysis scheduling, CMMG or CSF estimates. Include the source and expected numerical effect. Add regression tests for changed behavior and its boundaries.
 - Keep units explicit in code, graphs, CSV columns, and docs: e.g., hours, mg/L, mL/min, and mg/hour. Do not silently convert values.
 - Preserve renal edge cases such as zero renal clearance at `CrCl = 0`, and prevent impossible or unphysical negative concentrations from silently reaching users.
 - Maintain plain-language educational disclaimers, responsive layouts, colorblind-accessible charts, accessible labels, and keyboard usability.
@@ -21,6 +21,12 @@ Thank you for helping improve AyFlux, an **educational** acyclovir and valacyclo
 - Do not add third-party libraries or assets without recording their licenses in `THIRD_PARTY_NOTICES.md`.
 - Keep the current AGPL-3.0-only license notices for first-party code; do not modify the verbatim `LICENSE` text.
 - Do not commit generated files containing personal health information. Assume uploads and exports may be shared.
+
+## Model source and frozen results
+
+Use the [code guide](docs/reading-the-code.md) to locate the relevant implementation. `src/model/pk-engine.js` is the readable counterpart of the byte-pinned runtime in `public/assets/pk-engine.js`; the syntax-equivalence check must pass. A model change needs an explicit review of both files and affected study reconstructions. Do not update frozen fixture values or remove a failing assertion merely to make a test pass.
+
+In the pull request, describe the problem, resulting behavior, checks run and remaining limitations. Separate numerical model changes from unrelated interface cleanup. Preserve citations, authorship and license notices.
 
 ## Medical and scientific guardrails
 

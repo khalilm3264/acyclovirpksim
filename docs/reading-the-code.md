@@ -15,6 +15,20 @@ In the model, `c` means the entered configuration and `p` means one sampled para
 
 The model file in `public/assets` is a byte-pinned runtime artifact used by frozen validation protocols. Its readable counterpart is in `src/model`. `npm test` checks that they contain the same executable syntax. Formatting is not a reason to change the frozen model hashes or loosen the validation protocols. Model changes need a separate, documented review.
 
+## Repository layout
+
+| Directory | Contents |
+| --- | --- |
+| `src/model/` | Readable model source checked against the pinned runtime. |
+| `public/` | Browser application, Workers, styles, methods and reference pages. |
+| `src/index.js` | Cloudflare request handler and response headers. |
+| `tests/` | Numerical regression, data exchange and interface checks. |
+| `research/validation/` and `interop/` | Study reconstructions and independent implementation comparisons. |
+| `scripts/` | Asset staging, build, release checks and browser verification. |
+| `docs/` | User and contributor documentation; start with the [index](README.md). |
+
+The chart-staging script builds ECharts assets required by the application. Browser-check scripts exercise the interface; they are development dependencies and are not served by the website. Deployment copies only `public/` into `dist/site`, then compacts application JavaScript. Tests and research scripts remain available for review without being shipped to browsers.
+
 ## Making and checking changes
 
 - `npm run format` formats the authored application JavaScript. The pinned runtime, release metadata, vendor libraries and frozen research artifacts are excluded.
