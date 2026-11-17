@@ -10,7 +10,7 @@
  */
 
 // Adult acyclovir model. The browser uses the byte-pinned copy in public/assets.
-// Keep these calculations identical; the source check compares their parsed syntax.
+// Keep calculations identical; source check compares their parsed syntax.
 (function (root) {
   'use strict';
   const MODES = [
