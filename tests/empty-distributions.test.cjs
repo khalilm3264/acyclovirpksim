@@ -1,9 +1,10 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 // Execute the production option-builder functions with a minimal chart-options stub.
 const source=fs.readFileSync(path.join(__dirname,'../public/assets/analysis-views.js'),'utf8');
 const box={charts:{options:()=>({tooltip:{}})},$:()=>({value:'0'}),dimensions:['V','CL','AUC','C']};
-vm.createContext(box);vm.runInContext(source.slice(source.indexOf('function quantile('),source.indexOf('async function renderEnsemble(')),box);
+vm.createContext(box);vm.runInContext(source.slice(findCode(source,'function quantile('),findCode(source,'async function renderEnsemble(')),box);
 test('empty distributions do not produce zero-valued boxplots or violin geometry',()=>{
  assert.equal(box.quantile([],0.5),null);
  for(const kind of ['box','violin']){

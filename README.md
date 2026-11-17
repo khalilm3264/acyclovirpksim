@@ -34,3 +34,7 @@ npx --yes http-server@14.1.1 public -a 127.0.0.1 -p 8000
 Open `http://localhost:8000`. Run the regression suite with `node --test tests/*.test.cjs`.
 
 [Contributing](CONTRIBUTING.md) · [Release history](CHANGELOG.md) · [AGPL-3.0-only license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+
+## Reading the code
+
+Start with the [code guide](docs/reading-the-code.md) and the [readable model](src/model/pk-engine.js). Application JavaScript is formatted for review; deployment output stays compact.

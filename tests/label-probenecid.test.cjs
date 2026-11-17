@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -29,16 +30,16 @@ test('probenecid lowers only renal acyclovir clearance and is off by default',()
 
 test('interface wires the label button and probenecid option, citing sources on the page',()=>{
  assert.match(ui,/id="labelAdjust"/);assert.match(ui,/id="probenecid"/);
- assert.match(ui,/function defer\(\)\{refreshLabelAdjust\(\);/);
- assert.match(ui,/rememberVersion\('Before label kidney adjustment'\)/);
- assert.match(ui,/if\(c\.every!==8\)return \{ok:false/,'idempotent: only adjusts an every-8-hour regimen');
+ assert.ok(includesCode(ui,"function defer(){refreshLabelAdjust();"));
+ assert.ok(includesCode(ui,"rememberVersion('Before label kidney adjustment')"));
+ assert.ok(includesCode(ui,"if(c.every!==8)return {ok:false"),'idempotent: only adjusts an every-8-hour regimen');
  assert.match(html,/<li id="ref10">/);assert.match(html,/<li id="ref41">/);
 });
 
 
 // Exercise the normal importer, including old saved files and links, against current defaults.
 function importer(){
- const source=ui.slice(ui.indexOf('function parseConfiguration(input)'),ui.indexOf('// ---------- Shareable links'));
+ const source=ui.slice(findCode(ui,'function parseConfiguration(input)'),findCode(ui,'// ---------- Shareable links'));
  return new Function('E','DEFS','fieldDef',source+';return parseConfiguration;')(E,{},()=>null);
 }
 function payload(config){return {format:'acyclovir-pk-simulator',schemaVersion:2,config,primary:'No dialysis',visibleScenarios:['No dialysis'],appearance:{palette:'standard'}};}
@@ -52,7 +53,7 @@ test('older files gain optional label and probenecid defaults and new files pres
  assert.throws(()=>parse(payload({...next,probenecid:'yes'})),/parameter type/);
 });
 test('label comparison uses indexed CrCl and waits for explicit body surface area',()=>{
- const source=ui.slice(ui.indexOf('function labelAdjustmentState()'),ui.indexOf('function medicationTools()'));
+ const source=ui.slice(findCode(ui,'function labelAdjustmentState()'),findCode(ui,'function medicationTools()'));
  const state=config=>new Function('E','c',source+';return labelAdjustmentState();')(E,config);
  assert.equal(state({...E.DEFAULTS,crcl:25}).ok,false);
  const small=state({...E.DEFAULTS,crcl:25,labelBsa:1.5});

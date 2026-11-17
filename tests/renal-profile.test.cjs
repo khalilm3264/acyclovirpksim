@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -88,7 +89,7 @@ test('kidney profile editor, CSV format selector and layout share consistent UI 
  assert.ok(ui.includes('function renalProfileControls'));
  assert.ok(ui.includes('function applyRenalDraft'));
  assert.ok(ui.includes('function renderRenalProfileChart'));
- assert.ok(ui.includes('renalDraft=structuredClone(c.renalProfile)'));
+ assert.ok(includesCode(ui,'renalDraft=structuredClone(c.renalProfile)'));
  assert.ok(html.includes('id="enableRenalProfile"'));
  assert.ok(html.includes('Unified simulator spacing'));
  assert.ok(html.includes('--ui-space-3:14px'));

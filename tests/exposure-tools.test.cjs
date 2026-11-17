@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -8,7 +9,7 @@ const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const ui=read('public/assets/simulator-ui.js');
 const E=require('../public/assets/pk-engine.js');
-const fn=(start,end,name)=>{const i=ui.indexOf(start),j=ui.indexOf(end,i);assert.ok(i>=0&&j>i,start);const c={};vm.runInNewContext(ui.slice(i,j)+';this.f='+name+';',c);return c.f;};
+const fn=(start,end,name)=>{const i=findCode(ui,start),j=findCode(ui,end,i);assert.ok(i>=0&&j>i,start);const c={};vm.runInNewContext(ui.slice(i,j)+';this.f='+name+';',c);return c.f;};
 
 test('time above a level interpolates crossings and handles edge cases',()=>{
  const timeAbove=fn('function timeAbove(','let aboveLevelMg','timeAbove');
@@ -52,7 +53,7 @@ test('exposure tools stay descriptive and no measurement pixel is shipped',()=>{
 
 test('every guided scenario passes engine validation for each curve it shows, and carries no measurements',()=>{
  const context={E,structuredClone};
- const i=ui.indexOf('function kidneyInjuryExample('),j=ui.indexOf('function addRenalPoint(',i),k=ui.indexOf('function guidedScenarios('),l=ui.indexOf('function showScenarioNote(',k);
+ const i=findCode(ui,'function kidneyInjuryExample('),j=findCode(ui,'function addRenalPoint(',i),k=findCode(ui,'function guidedScenarios('),l=findCode(ui,'function showScenarioNote(',k);
  vm.runInNewContext(ui.slice(i,j)+ui.slice(k,l)+';this.list=guidedScenarios();',context);
  const list=JSON.parse(JSON.stringify(context.list));
  assert.equal(list.length,3);
@@ -125,7 +126,7 @@ test('summary readouts never show values from stale results',()=>{
  const run=E.simulateMany({...E.DEFAULTS,draws:1,requestedModes:['No dialysis']});
  const context={E,results:run,primary:'No dialysis',c:{...E.DEFAULTS},dataIsCurrent:true,$:id=>elements[id],
   document:{activeElement:null,getElementById:id=>elements[id]||null,querySelector:()=>({setAttribute(){}}),querySelectorAll:()=>[]}};
- const a=ui.indexOf('const MOLAR_MASS='),b=ui.indexOf('function tableOpen(',a),s1=ui.indexOf('function setBusy('),s2=ui.indexOf('function calculationError(',s1);
+ const a=findCode(ui,'const MOLAR_MASS='),b=findCode(ui,'function tableOpen(',a),s1=findCode(ui,'function setBusy('),s2=findCode(ui,'function calculationError(',s1);
  vm.runInNewContext(ui.slice(a,b)+ui.slice(s1,s2)+';aboveLevelMg=2;this.render=renderTimeAbove;this.busy=setBusy;',context);
  const shown=()=>[elements.timeAboveResult.textContent,elements.accumulationResult.textContent,elements.scenarioWords.textContent];
  context.render();
@@ -144,9 +145,10 @@ test('summary readouts never show values from stale results',()=>{
  // Results exist but not for the selected scenario.
  context.primary='CRRT';context.render();assert.deepEqual(shown(),['','','']);
  // Every path that starts, fails or finishes a calculation goes through setBusy.
- assert.match(ui,/function defer\(\)\{[^\n]*dataIsCurrent=false;setBusy\(true\)/);
- assert.match(ui.slice(ui.indexOf('function calculationError('),ui.indexOf('function calculationError(')+400),/dataIsCurrent=false;setBusy\(false\)/);
- assert.match(ui.slice(ui.indexOf('function calculate(forceAll'),ui.indexOf('function defer()')),/dataIsCurrent=false;[\s\S]*setBusy\(true\);startNextJob\(\);[\s\S]*calculationError\(error\)/);
+ assert.ok(includesCode(ui,'dataIsCurrent=false;setBusy(true)'));
+ assert.ok(includesCode(ui.slice(findCode(ui,'function calculationError('),findCode(ui,'function acceptResults(')), 'dataIsCurrent=false;setBusy(false)'));
+ const calculation=ui.slice(findCode(ui,'function calculate(forceAll'),findCode(ui,'function defer()'));
+ for(const statement of ['dataIsCurrent=false','setBusy(true);startNextJob();','calculationError(error)'])assert.ok(includesCode(calculation,statement));
 });
 
 test('accumulation ratio compares last-dose and first-dose peaks and needs two dose times',()=>{
@@ -176,7 +178,7 @@ test('scenario description states dose per kg and never invents a recommendation
  const html=read('public/index.html');
  for(const id of ['scenarioWords','accumulationResult','resetDefaults'])assert.ok(html.includes('id="'+id+'"'),id);
  // Reset goes through version history like every other bulk change.
- const reset=ui.slice(ui.indexOf("$('resetDefaults')"),ui.indexOf("$('scenarioNoteClose')"));
+ const reset=ui.slice(findCode(ui,"$('resetDefaults')"),findCode(ui,"$('scenarioNoteClose')"));
  assert.ok(reset.indexOf('rememberVersion(')<reset.indexOf('applyVersion('));
 });
 

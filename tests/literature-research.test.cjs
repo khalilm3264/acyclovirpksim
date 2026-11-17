@@ -1,9 +1,10 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const pk=require('../public/assets/pk-engine.js'),literature=require('../public/assets/literature-cases.js');
 test('literature exports pass the actual configuration importer',()=>{
  const ui=fs.readFileSync(require.resolve('../public/assets/simulator-ui.js'),'utf8');
- const start=ui.indexOf('function parseConfiguration('),end=ui.indexOf('// ---------- Shareable links',start);
+ const start=findCode(ui,'function parseConfiguration('),end=findCode(ui,'// ---------- Shareable links',start);
  const context={E:pk,structuredClone,DEFS:{},Date};
  vm.createContext(context);vm.runInContext(ui.slice(start,end)+';this.parse=parseConfiguration;',context);
  for(const study of literature.cases()){

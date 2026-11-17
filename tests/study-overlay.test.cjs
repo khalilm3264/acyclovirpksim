@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -8,7 +9,7 @@ const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const ui=read('public/assets/simulator-ui.js'),html=read('public/index.html');
 const E=require('../public/assets/pk-engine.js'),S=require('../public/assets/study-library.js');
-const fn=(start,end,name)=>{const i=ui.indexOf(start),j=ui.indexOf(end,i);assert.ok(i>=0&&j>i,start);const c={REG:require('../public/assets/regimen-tools.js')};vm.runInNewContext(ui.slice(i,j)+';this.f='+name+';',c);return c.f;};
+const fn=(start,end,name)=>{const i=findCode(ui,start),j=findCode(ui,end,i);assert.ok(i>=0&&j>i,start);const c={REG:require('../public/assets/regimen-tools.js')};vm.runInNewContext(ui.slice(i,j)+';this.f='+name+';',c);return c.f;};
 
 test('every published study loads as a valid regimen with positive, time-ordered points',()=>{
  assert.ok(S.STUDIES.length>=4);
@@ -124,13 +125,13 @@ test('overlay, scorecard and ratio are wired into the page without entering save
  assert.match(read('public/sw.js'),/"\/assets\/study-library\.js"/);
  // Overlay state lives outside the configuration object, so files and links never carry it.
  assert.doesNotMatch(ui,/c\.studyOverlay|studyOverlay:/);
- assert.match(ui,/function chartSignature\(key\)\{return JSON\.stringify\(\[key==='plasma'\|\|key==='cmmg'\?overlayStudy\(\)/);
+ assert.ok(includesCode(ui,"function chartSignature(key){return JSON.stringify([key==='plasma'||key==='cmmg'?overlayStudy()"));
  assert.match(html,/id="scorecardFigure"/);assert.match(html,/id="scorecardCsv" disabled/);
  // Readouts are rendered only from current results.
- const render=ui.slice(ui.indexOf('function renderTimeAbove('),ui.indexOf('function tableOpen('));
- assert.match(render,/run=dataIsCurrent&&results\?results\[primary\]:null/);
- assert.match(render,/cmmgAucRatio\(run\.time/);
- assert.match(ui,/if\(tab==='method'\)renderScorecard\(\)/);
+ const render=ui.slice(findCode(ui,'function renderTimeAbove('),findCode(ui,'function tableOpen('));
+ assert.ok(includesCode(render,"run=dataIsCurrent&&results?results[primary]:null"));
+ assert.ok(includesCode(render,"cmmgAucRatio(run.time"));
+ assert.ok(includesCode(ui,"if(tab==='method')renderScorecard()"));
 });
 
 test('bias cancellation does not hide error magnitude, and analytes remain separate',()=>{
@@ -185,8 +186,8 @@ test('teaching cases load as valid regimens but are never scored',()=>{
  assert.equal(apd.config.route,'Valacyclovir oral');
  assert.equal(apd.config.dose*apd.config.doseCount,6000,'500 mg every 8 h for 4 days');
  // The scorecard iterates STUDIES only.
- assert.match(ui,/for\(const \[label,list\] of \[\['Measured concentrations',STUDIES\.STUDIES\],\['Teaching cases \(no measured levels\)',STUDIES\.CASES\|\|\[\]\]\]\)/);
- assert.match(ui,/if\(studyPoints\?\.length\)series\.push/);
+ assert.ok(includesCode(ui,"for(const [label,list] of [['Measured concentrations',STUDIES.STUDIES],['Teaching cases (no measured levels)',STUDIES.CASES||[]]])"));
+ assert.ok(includesCode(ui,"if(studyPoints?.length)series.push"));
 });
 
 

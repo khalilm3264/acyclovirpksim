@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -6,8 +7,8 @@ const path=require('node:path');
 const pk=require('../public/assets/pk-engine.js');
 
 const src=fs.readFileSync(path.join(__dirname,'../public/assets/simulator-ui.js'),'utf8');
-const begin=src.indexOf('function renderDoseRows(){');
-const end=src.indexOf('function paintDoses(){',begin);
+const begin=findCode(src,'function renderDoseRows(){');
+const end=findCode(src,'function paintDoses(){',begin);
 assert.ok(begin>=0&&end>begin,'Custom dose editor must exist');
 const renderSource=src.slice(begin,end);
 

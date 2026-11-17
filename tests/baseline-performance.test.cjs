@@ -1,8 +1,9 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const E=require('../public/assets/pk-engine.js');
 const source=fs.readFileSync(require.resolve('../public/assets/simulator-ui.js'),'utf8');
-const section=(a,b)=>source.slice(source.indexOf(a),source.indexOf(b,source.indexOf(a)));
+const section=(a,b)=>source.slice(findCode(source,a),findCode(source,b,findCode(source,a)));
 function cacheHarness(){
  const state={E,structuredClone,clearTimeout(){},timer:null,calculationVersion:0,dataIsCurrent:true,queuedJob:null,activeJob:null,worker:null,primary:'No dialysis',c:structuredClone(E.DEFAULTS),requestedModes:()=>['No dialysis'],calculatedCrCl:()=>95,setBusy(){},startNextJob(){state.started++;},started:0,acceptResults(d){state.accepted=d;},calculationError(e){throw e;}};
  vm.createContext(state);
@@ -36,7 +37,7 @@ function curveHarness(){
  const config={...E.DEFAULTS,draws:1,horizon:24,requestedModes:['No dialysis']},data=E.simulateMany(config),elements={};
  for(const [i,id] of ['plasmaChart','csfChart','cmmgChart','csfCmmgChart'].entries())elements[id]={getClientRects:()=>[{}],getBoundingClientRect:()=>({top:i<2?600:1400,bottom:i<2?900:1700})};
  const state={overlayStudy:()=>null,savedRevision:0,savedRegimens:[],results:data,dataIsCurrent:true,resultsRevision:1,baselineRevision:0,primary:'No dialysis',modes:E.MODES,visible:new Set(['No dialysis']),c:config,baseline:null,DEFS:{dose:['Dose','mg']},presentationKeys:new Set(['showBands','virus']),COLORS:{'No dialysis':'#88949f'},LINE_DASH:{'No dialysis':'solid'},paletteMode:'standard',E,window:{innerHeight:900},IntersectionObserver:function(){},$:id=>elements[id],pendingPlots:new Map(),chartStates:new Map(),activePlot:null,labelsFor:t=>t,rgba:()=>'',layout:(u,h,series)=>({toolbox:{feature:{saveAsImage:{}}},series}),requestPlotFrame(){},structuredClone};
- vm.createContext(state);vm.runInContext(fs.readFileSync(require.resolve('../public/assets/charts.js'),'utf8'),state);vm.runInContext(section('const MOLAR_MASS=', 'function tableOpen(')+section('function chartNearViewport(', "\nif(typeof IntersectionObserver")+section('function chartSignature(', 'let chartWait')+section('function curve(', 'function baselineChanges(')+section('function baselineChanges(', 'function renderBaseline('),state);
+ vm.createContext(state);vm.runInContext(fs.readFileSync(require.resolve('../public/assets/charts.js'),'utf8'),state);vm.runInContext(section('const MOLAR_MASS=', 'function tableOpen(')+section('function chartNearViewport(', "if(typeof IntersectionObserver!=='undefined'){")+section('function chartSignature(', 'let chartWait')+section('function curve(', 'function baselineChanges(')+section('function baselineChanges(', 'function renderBaseline('),state);
  return {state,elements,run:s=>vm.runInContext(s,state)};
 }
 test('off-screen charts defer traces; scrolling draws latest data and baseline stays frozen',()=>{

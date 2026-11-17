@@ -2,7 +2,7 @@
 
 ## Release identity
 
-The current application metadata identifies **v0.28.0 preview** (released 2026-11-16). Configuration schema 2 and AGPL-3.0-only are tracked separately.
+The current application metadata identifies **v0.29.0 preview** (released 2026-11-17). Configuration schema 2 and AGPL-3.0-only are tracked separately.
 
 ### Daily development versions
 

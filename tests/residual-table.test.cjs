@@ -1,4 +1,5 @@
 'use strict';
+const {includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -25,5 +26,5 @@ test('per-study residual summary: ratio, median, direction and reported peaks an
 test('the per-study table sits under the residuals figure and is filled with the figure',()=>{
  const html=fs.readFileSync(path.join(__dirname,'../public/index.html'),'utf8'),ui=fs.readFileSync(path.join(__dirname,'../public/assets/simulator-ui.js'),'utf8');
  assert.ok(html.indexOf('id="residualRows"')>html.indexOf('id="residualFigure"'));
- assert.match(ui,/async function drawResidualFigure\(\)\{\n renderResidualTable\(\);/);
+ assert.ok(includesCode(ui,'async function drawResidualFigure(){renderResidualTable();'));
 });

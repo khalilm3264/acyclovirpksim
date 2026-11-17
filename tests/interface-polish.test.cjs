@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -77,17 +78,17 @@ test('page layout: primary mode first, merged reference tab, table under Concent
 
 test('imports snapshot the replaced settings before applying, and restores are undoable',()=>{
  const ui=read('public/assets/simulator-ui.js');
- const commit=ui.indexOf("rememberVersion('Before importing '+file.name);");
+ const commit=findCode(ui,"rememberVersion('Before importing '+file.name);");
  assert.ok(commit>0);
  // Snapshot happens after every validation step and immediately before the single apply call.
  // All validation lives in parseConfiguration, which the import calls before the snapshot.
- assert.ok(ui.indexOf('parseConfiguration(input);\n  rememberVersion(')>0);
- assert.ok(ui.slice(ui.indexOf('function parseConfiguration'),ui.indexOf('// ---------- Shareable links')).includes('Configuration fails model validation'));
- assert.match(ui.slice(commit,commit+220),/applyVersion\(\{config:next,primary:input\.primary,visible:input\.visibleScenarios,palette:importedPalette,unit:concUnit\},request\);/);
- const restore=ui.slice(ui.indexOf('function restoreVersion'),ui.indexOf('function renderImportHistory'));
+ assert.ok(findCode(ui,'parseConfiguration(input);rememberVersion(')>0);
+ assert.ok(ui.slice(findCode(ui,'function parseConfiguration'),findCode(ui,'// ---------- Shareable links')).includes('Configuration fails model validation'));
+ assert.ok(includesCode(ui.slice(commit),"rememberVersion('Before importing '+file.name);applyVersion({config:next,primary:input.primary,visible:input.visibleScenarios,palette:importedPalette,unit:concUnit},request);"));
+ const restore=ui.slice(findCode(ui,'function restoreVersion'),findCode(ui,'function renderImportHistory'));
  assert.ok(restore.indexOf('rememberVersion(')<restore.indexOf('applyVersion('),'restoring first saves the current settings');
- assert.match(ui,/IMPORT_HISTORY_LIMIT=10/);
- const history=ui.slice(ui.indexOf('const importHistory=[]'),ui.indexOf("$('downloadMigrated')"));
+ assert.ok(includesCode(ui,"IMPORT_HISTORY_LIMIT=10"));
+ const history=ui.slice(findCode(ui,'const importHistory=[]'),findCode(ui,"$('downloadMigrated')"));
  assert.doesNotMatch(history,/localStorage|sessionStorage|indexedDB|fetch\(/,'history must stay in memory');
  // File names are user-controlled: they are rendered as text, never as markup.
  assert.doesNotMatch(history,/innerHTML/);

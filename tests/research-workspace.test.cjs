@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const pk=require('../public/assets/pk-engine.js');
@@ -80,7 +81,7 @@ test('research heatmap is interactive when ECharts is staged and still has numer
  assert.match(html,/id="heatmapPlot"/);
  assert.match(html,/id="heatmapArea"/);
  assert.match(source,/window\.AyFluxCharts\.ensure/);
- assert.match(source,/type:'heatmap'/);
+ assert.ok(includesCode(source,"type:'heatmap'"));
  assert.match(source,/Interactive plot unavailable; numeric table shown/);
  assert.ok(workflow.includes('npm ci --ignore-scripts'));
  assert.equal(JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8')).packages['node_modules/echarts'].version,'6.1.0');
@@ -101,7 +102,7 @@ test('research report protects PNG charts from printing across pages',()=>{
  assert.match(html,/\.report-charts\{break-before:page;page-break-before:always\}/);
  assert.match(html,/page-break-inside:avoid/);
  assert.equal((html.match(/class="report-figure"/g)||[]).length,3);
- assert.match(script,/await Promise\.all\(Array\.from\(popup\.document\.images/);
+ assert.ok(includesCode(script,'await Promise.all(Array.from(popup.document.images'));
  assert.match(script,/charts\.draw\(target,/);
  assert.match(script,/chart\.getDataURL/);
 });
@@ -141,7 +142,7 @@ function importWorkspace(){
  const snapshot={updated:true,primary:'No dialysis',results:{'No dialysis':{time:[0,1],plasma:{median:[0,2]}}}};
  const context={$:el,importer:csv,bridge:{snapshot:()=>snapshot},
   document:{createElement:()=>({})},window:{AyFluxCharts:charts,addEventListener:(name,fn)=>{listeners[name]=fn;}}};
- vm.runInNewContext(source.slice(source.indexOf('let externalTable='),source.indexOf('// One worker per research operation')),context);
+ vm.runInNewContext(source.slice(findCode(source,'let externalTable='),findCode(source,'// One worker per research operation')),context);
  async function load(text='time,conc\n0,0\n1,1'){
   await el('ospFile').change({target:{files:[{size:text.length,text:async()=>text}]}});
   for(const [id,value] of Object.entries({ospTimeColumn:'time',ospValueColumn:'conc',ospTimeUnit:'h',ospConcUnit:'mg/L',ospTarget:'plasma'}))el(id).value=value;
