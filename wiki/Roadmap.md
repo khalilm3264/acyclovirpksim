@@ -18,20 +18,9 @@ ECharts concentration and clearance charts, baseline comparison, unit switching,
 | P1 | Complete full-text review | [#53](https://github.com/khalilm3264/acyclovirpksim/issues/53); distinguish bibliographic verification, abstract review and reviewed full text |
 | P1 | Replayable literature cases | [#54](https://github.com/khalilm3264/acyclovirpksim/issues/54); keep observed samples, author-fitted values and reconstructed inputs distinct |
 
-## Current integration candidate
+## Development and releases
 
-- Combine #101 benchmark/usability changes with main's #109 export/print and ECharts work.
-- Retain #104's unique event table and teaching note; use #103's existing print preview.
-- Include #107 academic exports and #110's unavailable-data corrections on top of #108.
-- Check the combined export menu, mobile/desktop, clipboard fallback, single-page PDF and first-load offline cache installation.
-- Re-run the immutable benchmark pins. UI changes must not alter either the manuscript snapshot or current engine blob.
-- Review the combined candidate before merging; verify production and publish wiki sources after deployment.
-
-## Planned release work
-
-[v0.27.0 release tracking (#55)](https://github.com/khalilm3264/acyclovirpksim/issues/55) follows the [release checklist](Release-Plan). Release labels change only when the release is deliberately prepared. Documentation should describe pending functionality as pending.
-
-Open PR dependencies and overlap are recorded in the repository's [maintenance plan](https://github.com/khalilm3264/acyclovirpksim/blob/main/docs/repository-maintenance.md). The live PR state takes precedence over that dated snapshot. Drafts and closed unmerged branches require review before their work is discarded or merged.
+Use the repository’s open issues and pull requests for current development status. The [release plan](Release-Plan) describes versioning and checks. Historical review branches remain separate from released code.
 
 ## Quality and research follow-up
 

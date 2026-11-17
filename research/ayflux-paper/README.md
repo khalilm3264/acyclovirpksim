@@ -1,6 +1,6 @@
-# AyFlux manuscript development package
+# Historical HD and CAPD comparison
 
-This directory contains a **research-planning experiment**, not a clinically validated dosing model or final manuscript.
+This directory preserves a historical HD/CAPD comparison, its calculation script and exported results. It is not a clinically validated dosing model.
 
 ## Reproduce the experiment
 
@@ -17,12 +17,10 @@ The script uses the **existing production engine** `public/assets/pk-engine.js` 
 - `results/ablations.csv`: four component-removal experiments and baseline
 - `results/curves.csv`: exported deterministic HD and CAPD model concentrations
 
-**Engine code snapshot reviewed:** GitHub blob SHA `cb07505a2b9e619ee3351bb0bf66d5610a611a6f` (non-kidney CMMG clearance 0.5 L/h, #46). The study was rerun for that change: only the CMMG columns of `ablations.csv` and `curves.csv` moved (full-model CMMG peak 3.82 → 3.03 mg/L); every plasma value quoted in the manuscript is unchanged. If the engine changes again, rerun the study and update the manuscript.
+**Engine code snapshot reviewed:** GitHub blob SHA `cb07505a2b9e619ee3351bb0bf66d5610a611a6f` (non-kidney CMMG clearance 0.5 L/h, #46). The study was rerun for that change: only the CMMG columns of `ablations.csv` and `curves.csv` moved (full-model CMMG peak 3.82 → 3.03 mg/L); every plasma value quoted in the manuscript is unchanged. For a new engine version, rerun the study and report any changed results.
 
 ## Read next
 
-- [Manuscript draft](manuscript_draft.md)
-- [Journal targets and constraints](journal_targets.md)
 - [Original independent-model-comparison documentation](../../docs/research-model-comparison.md)
 
 ## Source evidence and limitations
@@ -39,7 +37,7 @@ AyFlux is a **mechanistic compartmental PK / ODE simulator** using an event-awar
 
 **Independent comparisons not completed by this script:** run `interop/compare_mrgsolve.R` for equation/solver parity; carefully match a genuine PK-Sim/MoBi model for a scientifically meaningful PBPK comparison. No mrgsolve/OSPSuite runs are claimed here.
 
-## Checklist before publication
+## Review requirements
 
 - [ ] Add frozen version/tag and DOI, archived source and exact dependency versions
 - [ ] Audit model units, calibration sources, parameter provenance, mass balance and numerical convergence
