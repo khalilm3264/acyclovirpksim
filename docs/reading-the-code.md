@@ -1,6 +1,6 @@
 # Reading the AyFlux code
 
-Start with model, then follow how the page sends settings to it and draws the returned results.
+Start with the model, then follow how the page sends settings to it and draws the returned results.
 
 | File | What to look for |
 | --- | --- |

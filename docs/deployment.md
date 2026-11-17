@@ -4,7 +4,7 @@ This document preserves the deployment setup for the Cloudflare Worker and the G
 
 ## Deployment
 
-Cloudflare Wrangler uses `./public` as the assets directory (see `wrangler.jsonc`).
+Cloudflare Wrangler uses `./public` as the default assets directory for local development (see `wrangler.jsonc`). In GitHub Actions, production deployments run `npm run build:site` and publish the verified, compacted distribution in `dist/site` (`wrangler deploy --assets dist/site`).
 
 GitHub Actions runs syntax checks and pharmacokinetic regression tests on pull requests and pushes to `main`. Only successful pushes can deploy. The same workflow retains GitHub Pages hosting and can deploy the Cloudflare Worker.
 
