@@ -1,6 +1,6 @@
 # Development roadmap
 
-Reviewed 2026-11-14 against main and the combined release candidate. Current release metadata is **v0.28.0 preview**, released 2026-11-16. This page describes priorities rather than promised release dates.
+Reviewed 2026-11-14 against main and the combined release candidate. Current release metadata is **v0.29.0 preview**, released 2026-11-17. This page describes priorities rather than promised release dates.
 
 ## Already available
 

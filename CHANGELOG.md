@@ -14,6 +14,19 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 No changes recorded yet.
 
+## [0.29.0] - 2026-11-17 (preview)
+
+### Readable application source
+
+- Format authored application JavaScript for review and add a readable model under src/model. Preserve the byte-pinned runtime used by validation protocols.
+- Explain the model flow and units in plain comments and a short code-reading guide. Retain scientific references and license notices.
+- Check readable model/runtime agreement during tests and compare application syntax with the preceding release.
+- Build compact deployment assets separately; verify their executable syntax before writing them. Keep the existing Lite payload budget.
+- Make source-level test checks insensitive to formatting while retaining runtime regression tests.
+- Ignore local full-text literature directories. The separate literature repository was verified private; papers were not added to the public application.
+
+No pharmacokinetic equations, sampled parameters, defaults, random seeds or configuration schema change. The runtime model file remains byte-for-byte identical.
+
 ## [0.28.0] - 2026-11-16 (preview)
 
 This release collects the work since v0.27.0, including the model changes recorded below. The graph performance and overlay changes themselves do not alter model calculations.
@@ -273,7 +286,8 @@ Everything merged to `main` since 0.26.0 ([full comparison](https://github.com/k
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
-[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.28.0...main
+[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.29.0...main
+[0.29.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/khalilm3264/acyclovirpksim/compare/b928978...v0.27.0
 [0.26.0]: https://github.com/khalilm3264/acyclovirpksim/blob/main/CHANGELOG.md#0260---2026-11-09-preview

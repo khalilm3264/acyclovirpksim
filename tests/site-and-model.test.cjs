@@ -1,4 +1,5 @@
 'use strict';
+const {includesCode}=require('./source-tokens.cjs');
 
 // Dependency-free smoke and pharmacokinetic regression tests.
 // Run with: node --test tests/*.test.cjs
@@ -50,7 +51,7 @@ test('simulator script assets exist and use the expected loader', () => {
     assert.ok(fs.statSync(filename).size > 0, relative + ' must exist');
   }
   assert.ok(!html.includes('<script src="./assets/vendor/echarts-6.1.0.min.js"'));
-  assert.ok(read('public/assets/charts.js').includes('script.async=true'));
+  assert.ok(includesCode(read('public/assets/charts.js'),'script.async=true'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.AyFluxCharts.ensure()'));
   assert.ok(read('public/assets/simulator-ui.js').includes('window.RenalPKV7'));
 });

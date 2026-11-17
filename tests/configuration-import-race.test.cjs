@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const source=fs.readFileSync(path.resolve(__dirname,'../public/assets/simulator-ui.js'),'utf8');
@@ -26,9 +27,9 @@ function workspace(){
     converted:input.old?{converted:true}:null};
   }};
  vm.createContext(context);
- const apply=source.slice(source.indexOf('function applyVersion('),source.indexOf('function restoreVersion('));
- const load=source.slice(source.indexOf("$('loadConfig').addEventListener("),source.indexOf('\nopenSharedLink(true);'));
- const reset=source.slice(source.indexOf("$('resetDefaults').addEventListener("),source.indexOf("$('scenarioNoteClose').addEventListener("));
+ const apply=source.slice(findCode(source,'function applyVersion('),findCode(source,'function restoreVersion('));
+ const load=source.slice(findCode(source,"$('loadConfig').addEventListener("),findCode(source,'\nopenSharedLink(true);'));
+ const reset=source.slice(findCode(source,"$('resetDefaults').addEventListener("),findCode(source,"$('scenarioNoteClose').addEventListener("));
  vm.runInContext(apply+load+reset,context);
  function select(name){
   let resolve,reject;

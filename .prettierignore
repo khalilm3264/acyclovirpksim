@@ -1,0 +1,8 @@
+node_modules/
+dist/
+public/assets/vendor/
+public/assets/pk-engine.js
+public/assets/ayflux-version.js
+public/sw.js
+research/
+tests/fixtures/

@@ -1,4 +1,5 @@
 'use strict';
+const {includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -26,7 +27,7 @@ test('Lite ships a small Canvas fallback alongside interactive charts',()=>{
  for(const field of Object.keys(lite.DEFAULT_INPUTS)){
   assert.ok(page.includes('id="lite_'+field+'"'),field+' must have user control');
  }
- assert.ok(page.length+app.length+engine.length<80000,'HTML + UI + engine must stay below 80 KB uncompressed');
+ assert.ok(page.length+require('../scripts/build-release-site.cjs').compactJavaScript(app).length+engine.length<80000,'HTML + UI + engine must stay below 80 KB uncompressed');
 });
 
 test('v2-like defaults provide repeated IV doses and five independent scenarios',()=>{
@@ -119,7 +120,7 @@ test('pointer interaction and nice-axis ticks are implemented for the offline re
  const js=read('public/lite/lite.js');
  assert.ok(js.includes('pointermove'));
  assert.ok(js.includes('requestAnimationFrame'));
- assert.ok(js.includes('clearTimeout(pending);pending=setTimeout(update,180)'));
+ assert.ok(includesCode(js,'clearTimeout(pending);pending=setTimeout(update,180)'));
 });
 
 test('Lite is discoverable only inside the guide, with a direct guide header link',()=>{

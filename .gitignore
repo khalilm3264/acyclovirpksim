@@ -10,3 +10,11 @@ research/validation/results/
 
 .DS_Store
 .wrangler/
+
+# Compact deployment output; readable sources remain tracked.
+dist/
+
+# Local literature full texts must not be added to this public repository.
+/sources/
+/private-sources/
+/literature-pdfs/

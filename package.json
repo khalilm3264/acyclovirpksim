@@ -1,6 +1,6 @@
 {
   "name": "ayflux",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "private": true,
   "description": "Educational acyclovir and valacyclovir pharmacokinetics simulator",
   "license": "AGPL-3.0-only",
@@ -9,16 +9,21 @@
   },
   "scripts": {
     "stage": "node scripts/stage-visualizations.cjs && node scripts/stage-poppins.cjs",
-    "test": "node scripts/release-metadata.cjs && node scripts/references.cjs --check && node scripts/sitemap.cjs && node --test tests/*.test.cjs",
+    "test": "node scripts/check-source-equivalence.cjs --model && npm run format:check && node scripts/check-source-equivalence.cjs --model && node scripts/release-metadata.cjs && node scripts/references.cjs --check && node scripts/sitemap.cjs && node --test tests/*.test.cjs",
     "dev": "npm run stage && npx --yes http-server public -p 8080 -c-1",
     "benchmark:report": "node scripts/benchmark-report.cjs",
-    "benchmark:verify": "node scripts/benchmark-report.cjs --verify"
+    "benchmark:verify": "node scripts/benchmark-report.cjs --verify",
+    "format": "prettier --write \"public/**/*.js\" \"src/**/*.js\"",
+    "format:check": "prettier --check \"public/**/*.js\" \"src/**/*.js\"",
+    "build:site": "node scripts/build-release-site.cjs"
   },
   "devDependencies": {
     "@fontsource/poppins": "5.3.0",
+    "acorn": "8.19.0",
     "echarts": "6.1.0",
     "echarts-gl": "2.1.0",
+    "esbuild": "0.28.2",
     "parse5": "7.3.0",
-    "esbuild": "0.28.2"
+    "prettier": "3.10.1"
   }
 }

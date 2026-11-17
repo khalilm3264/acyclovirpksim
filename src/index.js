@@ -9,14 +9,14 @@
  * Contact: contact@ayflux.org
  */
 const securityHeaders = {
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
-  "Content-Security-Policy":
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  'Content-Security-Policy':
     "default-src 'self'; script-src 'self'; connect-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
-  "X-XSS-Protection": "1; mode=block",
+  'X-XSS-Protection': '1; mode=block'
 };
 
 const homepageMetadata = [
@@ -28,14 +28,14 @@ const homepageMetadata = [
   '<meta property="og:title" content="AyFlux — Acyclovir PK Simulator for Renal Function and Dialysis">',
   '<meta property="og:description" content="Explore how model assumptions about kidney function and dialysis affect simulated acyclovir concentrations. Not for patient care.">',
   '<meta property="og:url" content="https://ayflux.org/">',
-  '<meta name="twitter:card" content="summary">',
-].join("\n");
+  '<meta name="twitter:card" content="summary">'
+].join('\n');
 
 export default {
   async fetch(request, env, ctx) {
     const response = env.ASSETS
       ? await env.ASSETS.fetch(request)
-      : new Response("ASSETS binding not configured", { status: 500 });
+      : new Response('ASSETS binding not configured', { status: 500 });
 
     const headers = new Headers(response.headers);
     for (const [key, value] of Object.entries(securityHeaders)) {
@@ -45,24 +45,24 @@ export default {
     const securedResponse = new Response(response.body, {
       status: response.status,
       statusText: response.statusText,
-      headers,
+      headers
     });
 
     const url = new URL(request.url);
-    const isHomepage = url.pathname === "/" || url.pathname === "/index.html";
-    const isHtml = securedResponse.headers.get("content-type")?.includes("text/html");
+    const isHomepage = url.pathname === '/' || url.pathname === '/index.html';
+    const isHtml = securedResponse.headers.get('content-type')?.includes('text/html');
 
     // Insert search metadata without changing the bundled simulator HTML or JavaScript.
-    if (request.method === "GET" && securedResponse.ok && isHomepage && isHtml) {
+    if (request.method === 'GET' && securedResponse.ok && isHomepage && isHtml) {
       return new HTMLRewriter()
-        .on("head", {
+        .on('head', {
           element(element) {
             element.append(homepageMetadata, { html: true });
-          },
+          }
         })
         .transform(securedResponse);
     }
 
     return securedResponse;
-  },
+  }
 };

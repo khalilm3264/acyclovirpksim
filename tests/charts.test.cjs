@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -55,7 +56,7 @@ test('simulator preloads its renderer while execution and research tools remain 
  assert.doesNotMatch(html,/<link[^>]+(?:preload|prefetch)[^>]+echarts-gl/);
  assert.doesNotMatch(read('public/lite/index.html'),/<link[^>]+(?:preload|prefetch)[^>]+echarts/);
  assert.match(ui,/Retry charts/);
- assert.match(ui,/chartWait=window\.AyFluxCharts\.ensure\(\)/);
+ assert.ok(includesCode(ui,"chartWait=window.AyFluxCharts.ensure()"));
  assert.match(research,/await window\.AyFluxCharts\.ensure\(\)/);
  assert.ok(sw.includes('"/assets/charts.js"'));
  // The heavyweight library is stored on first use, rather than precached.

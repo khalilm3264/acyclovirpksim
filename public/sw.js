@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.28.0-updating-overlay-v1-20261116";
+const CACHE = "ayflux-static-v0.29.0-readable-source-v1-20261117";
 const CORE = [
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",

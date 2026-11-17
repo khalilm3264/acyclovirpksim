@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -70,15 +71,15 @@ test('residuals: each published value carries a sample type and hours since its 
  // A trough taken as the next dose starts counts from the previous dose.
  assert.deepEqual(S.score(S.find('label-10'),E,{draws:5}).rows.map(r=>[r.kind,r.sinceDose]),[['peak',1],['trough',8]]);
  assert.deepEqual(S.score(S.find('boelaert-4'),E,{draws:5}).rows.map(r=>r.sinceDose),[1,24,1,24]);
- assert.match(html,/id="residualFigure"/);assert.match(ui,/drawScorecardFigure\(\);drawResidualFigure\(\);/);
+ assert.match(html,/id="residualFigure"/);assert.ok(includesCode(ui,"drawScorecardFigure();drawResidualFigure();"));
 });
 
 test('regimen comparison and post-HD panels are wired without entering saved settings',()=>{
  for(const id of ['regimenPanel','saveRegimen','regimenRows','postHdPanel','applyPostHd','postHdRows'])assert.match(html,new RegExp('id="'+id+'"'));
  assert.ok(html.indexOf('assets/regimen-tools.js')<html.indexOf('assets/simulator-ui.js'));
  assert.doesNotMatch(ui,/c\.savedRegimens/);
- assert.match(ui,/rememberVersion\('Before post-dialysis dose timing'\)/);
- assert.match(ui,/config:structuredClone\(c\),data:\{time:d\.time\.slice\(\)/,'saved regimens are frozen copies');
+ assert.ok(includesCode(ui,"rememberVersion('Before post-dialysis dose timing')"));
+ assert.ok(includesCode(ui,"config:structuredClone(c),data:{time:d.time.slice()"),'saved regimens are frozen copies');
 });
 
 test('provenance: every recorded input has a valid status, what the paper reports, what AyFlux uses and a source; counts add up',()=>{
@@ -104,9 +105,9 @@ test('provenance: every recorded input has a valid status, what the paper report
 test('prediction exercise hides results until revealed',()=>{
  assert.match(html,/id="predictMode"/);assert.match(html,/id="revealPrediction"/);
  assert.match(html,/main\.predicting \.chart,/);
- assert.match(ui,/\(current&&!hidden\?regimenRow/,'current row hidden while predicting');
- assert.match(ui,/f=v=>hidden\?'\?'/,'metric cells hidden while predicting');
- assert.match(ui,/\$\('predictMode'\)\.checked=false;renderRegimens\(\);/,'reveal ends the exercise');
+ assert.ok(includesCode(ui,"(current&&!hidden?regimenRow"),'current row hidden while predicting');
+ assert.ok(includesCode(ui,"f=(v)=>(hidden?'?'"),'metric cells hidden while predicting');
+ assert.ok(includesCode(ui,"$('predictMode').checked=false;renderRegimens();"),'reveal ends the exercise');
 });
 
 test('regimen-tools interpolation and AUC handle empty or singleton inputs safely',()=>{

@@ -5,7 +5,10 @@ function createEChartsView(container, status, selectCell) {
   let revision = 0;
   let activeGrid, activeKind;
   const resize = new ResizeObserver(() => {
-    if (chart && (chart.getWidth() !== container.clientWidth || chart.getHeight() !== container.clientHeight))
+    if (
+      chart &&
+      (chart.getWidth() !== container.clientWidth || chart.getHeight() !== container.clientHeight)
+    )
       chart.resize();
   });
   let webglAvailable;
@@ -30,10 +33,13 @@ function createEChartsView(container, status, selectCell) {
         };
         document.head.append(script);
       });
-      downloads.set(file, promise.catch(error => {
-        downloads.delete(file);
-        throw error;
-      }));
+      downloads.set(
+        file,
+        promise.catch((error) => {
+          downloads.delete(file);
+          throw error;
+        })
+      );
     }
     return downloads.get(file);
   }
@@ -60,7 +66,7 @@ function createEChartsView(container, status, selectCell) {
       container.hidden = false;
       resize.observe(container);
       const metric = window.AyFluxExplore.metrics[grid.metric];
-      status.textContent = metric.label+' ('+metric.unit+')';
+      status.textContent = metric.label + ' (' + metric.unit + ')';
       return;
     }
     close();
@@ -80,51 +86,100 @@ function createEChartsView(container, status, selectCell) {
       const metric = model.metrics[grid.metric];
       const xName = model.axes[grid.xKey].label;
       const yName = model.axes[grid.yKey].label;
-      const data = grid.ys.flatMap((y,j) => grid.xs.map((x,i) =>
-        [surface ? x : i, surface ? y : j, grid.z[j][i]]));
+      const data = grid.ys.flatMap((y, j) =>
+        grid.xs.map((x, i) => [surface ? x : i, surface ? y : j, grid.z[j][i]])
+      );
       const values = grid.z.flat();
-      const min = Math.min(...values), max = Math.max(...values);
+      const min = Math.min(...values),
+        max = Math.max(...values);
       container.hidden = false;
       chart = window.echarts.init(container);
       const option = {
-        animation:false,
-        tooltip:{renderMode:'richText',formatter:point => {
-          const [x,y,value] = point.value;
-          return [xName+' '+Number((surface?x:grid.xs[x]).toPrecision(4)), yName+' '+Number((surface?y:grid.ys[y]).toPrecision(4)),
-            metric.label+' '+Number(value.toPrecision(5))+' '+metric.unit].join('\n');
-        }},
-        visualMap:{dimension:2,min,max:max===min?min+1:max,orient:'horizontal',left:'center',bottom:0,
-          inRange:{color:window.AyFluxCharts.heatColors()}},
-        series:[{type:kind,data,...(surface ? {dataShape:[grid.ys.length,grid.xs.length],shading:'color'} : {})}]
+        animation: false,
+        tooltip: {
+          renderMode: 'richText',
+          formatter: (point) => {
+            const [x, y, value] = point.value;
+            return [
+              xName + ' ' + Number((surface ? x : grid.xs[x]).toPrecision(4)),
+              yName + ' ' + Number((surface ? y : grid.ys[y]).toPrecision(4)),
+              metric.label + ' ' + Number(value.toPrecision(5)) + ' ' + metric.unit
+            ].join('\n');
+          }
+        },
+        visualMap: {
+          dimension: 2,
+          min,
+          max: max === min ? min + 1 : max,
+          orient: 'horizontal',
+          left: 'center',
+          bottom: 0,
+          inRange: { color: window.AyFluxCharts.heatColors() }
+        },
+        series: [
+          {
+            type: kind,
+            data,
+            ...(surface ? { dataShape: [grid.ys.length, grid.xs.length], shading: 'color' } : {})
+          }
+        ]
       };
       if (surface) {
-        option.grid3D = {temporalSuperSampling:{enable:false},viewControl:{projection:'perspective'}};
-        option.xAxis3D = {type:'value',name:xName,scale:true};
-        option.yAxis3D = {type:'value',name:yName,scale:true};
-        option.zAxis3D = {type:'value',name:metric.label+' ('+metric.unit+')',scale:true};
+        option.grid3D = {
+          temporalSuperSampling: { enable: false },
+          viewControl: { projection: 'perspective' }
+        };
+        option.xAxis3D = { type: 'value', name: xName, scale: true };
+        option.yAxis3D = { type: 'value', name: yName, scale: true };
+        option.zAxis3D = {
+          type: 'value',
+          name: metric.label + ' (' + metric.unit + ')',
+          scale: true
+        };
       } else {
         // Grid points such as 46.666… are shown to four significant figures.
-        const tick = value => Number(Number(value).toPrecision(4)).toString();
-        option.grid = {left:72,right:22,top:35,bottom:78};
-        option.xAxis = {type:'category',data:grid.xs.map(tick),name:xName,nameLocation:'middle',nameGap:28};
-        option.yAxis = {type:'category',data:grid.ys.map(tick),name:yName,nameLocation:'middle',nameGap:52};
-        option.series[0].itemStyle = {borderColor:'#fff',borderWidth:1};
+        const tick = (value) => Number(Number(value).toPrecision(4)).toString();
+        option.grid = { left: 72, right: 22, top: 35, bottom: 78 };
+        option.xAxis = {
+          type: 'category',
+          data: grid.xs.map(tick),
+          name: xName,
+          nameLocation: 'middle',
+          nameGap: 28
+        };
+        option.yAxis = {
+          type: 'category',
+          data: grid.ys.map(tick),
+          name: yName,
+          nameLocation: 'middle',
+          nameGap: 52
+        };
+        option.series[0].itemStyle = { borderColor: '#fff', borderWidth: 1 };
       }
       chart.setOption(option);
       activeGrid = grid;
       activeKind = kind;
-      chart.on('click', 'series', point => {
+      chart.on('click', 'series', (point) => {
         const index = point.dataIndex;
-        if (Number.isInteger(index) && index>=0 && index<data.length)
-          selectCell(index % grid.xs.length, Math.floor(index/grid.xs.length));
+        if (Number.isInteger(index) && index >= 0 && index < data.length)
+          selectCell(index % grid.xs.length, Math.floor(index / grid.xs.length));
       });
       resize.observe(container);
-      status.textContent = metric.label+' ('+metric.unit+')';
+      status.textContent = metric.label + ' (' + metric.unit + ')';
     } catch (error) {
       if (current !== revision) return;
       close();
       status.textContent = error.message;
     }
   }
-  return {show,close,resetCamera(){if(activeKind==='surface')chart.setOption({grid3D:{viewControl:{alpha:20,beta:40,distance:200,center:[0,0,0]}}});}};
+  return {
+    show,
+    close,
+    resetCamera() {
+      if (activeKind === 'surface')
+        chart.setOption({
+          grid3D: { viewControl: { alpha: 20, beta: 40, distance: 200, center: [0, 0, 0] } }
+        });
+    }
+  };
 }

@@ -1,4 +1,5 @@
 'use strict';
+const {findCode,includesCode}=require('./source-tokens.cjs');
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -8,7 +9,7 @@ const root=path.resolve(__dirname,'..');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const ui=read('public/assets/simulator-ui.js');
 const E=require('../public/assets/pk-engine.js');
-const section=(start,end)=>{const i=ui.indexOf(start),j=ui.indexOf(end,i);assert.ok(i>=0&&j>i,start);return ui.slice(i,j);};
+const section=(start,end)=>{const i=findCode(ui,start),j=findCode(ui,end,i);assert.ok(i>=0&&j>i,start);return ui.slice(i,j);};
 
 test('µmol/L display uses the molar masses the engine uses, and leaves non-concentrations alone',()=>{
  const context={document:{getElementById:()=>null}};
@@ -41,11 +42,11 @@ test('share codes round-trip Unicode and reject anything that is not base64url',
 test('shared links go through full validation, never carry measurements, and leave the address bar',()=>{
  const share=section('// ---------- Shareable links','$(\'undoImport\')');
  // Building: observations are skipped and only non-default settings are sent.
- assert.match(share,/if\(key==='observations'\)continue;/);
- assert.match(share,/JSON\.stringify\(c\[key\]\)!==JSON\.stringify\(E\.DEFAULTS\[key\]\)/);
+ assert.ok(includesCode(share,"if(key==='observations')continue;"));
+ assert.ok(includesCode(share,"JSON.stringify(c[key])!==JSON.stringify(E.DEFAULTS[key])"));
  // Reading: the same validator as file import, on a defaults-filled configuration; measurements refused.
- assert.match(share,/parseConfiguration\(\{format:'acyclovir-pk-simulator',schemaVersion:2,config:\{\.\.\.structuredClone\(E\.DEFAULTS\),\.\.\.data\.c\}/);
- assert.match(share,/hasOwnProperty\.call\(data\.c,'observations'\)\)throw/);
+ assert.ok(includesCode(share,"parseConfiguration({format:'acyclovir-pk-simulator',schemaVersion:2,config:{...structuredClone(E.DEFAULTS),...data.c}"));
+ assert.ok(includesCode(share,"hasOwnProperty.call(data.c,'observations'))throw"));
  // The fragment is removed before anything is parsed or applied.
  const open=share.slice(share.indexOf('function openSharedLink'));
  assert.ok(open.indexOf('history.replaceState')<open.indexOf('readShare(hash)'));
