@@ -820,6 +820,26 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
  <div class="import-history"><div class="timeline-actions"><button class="btn secondary" id="undoImport" type="button" disabled>Undo last import</button></div>
  <details id="importHistoryPanel"><summary>Version history <span id="importHistoryCount">(empty)</span></summary><p class="tip">Each import first saves the settings it replaces. Restore any earlier version below; restoring is itself undoable. History holds the last 10 versions and is kept only in this browser tab until it is closed or reloaded.</p><ol id="importHistoryList" class="import-history-list"></ol></details></div></div>
 
+<div class="card" id="pairedReplayPanel">
+ <h2>Paired study replays</h2>
+ <p class="tip">Compare the current model and a variant on the same published schedule. Each replay changes one assumption and uses nominal parameters.</p>
+ <div class="research-inputs"><label>Published study<select id="pairedReplayCase"></select></label></div>
+ <div class="research-tools-actions"><button type="button" class="btn" id="runPairedReplay">Run paired replay</button></div>
+ <p class="research-status" id="pairedReplayStatus" role="status"></p>
+ <div id="pairedReplayResults" hidden>
+  <p class="tip" id="pairedReplayNote"></p>
+  <p class="tip"><a id="pairedReplaySource">Study source</a></p>
+  <div class="scroll" role="region" aria-label="Paired study results" tabindex="0">
+   <table><caption>Errors use the same units as the reference. Signed error is prediction minus reference.</caption><thead><tr><th scope="col">Analyte and specimen</th><th scope="col">Time and phase</th><th scope="col">Evidence</th><th scope="col">Reference</th><th scope="col">Baseline</th><th scope="col">Variant</th><th scope="col">Baseline error (signed / absolute)</th><th scope="col">Variant error (signed / absolute)</th><th scope="col">Variant fit</th></tr></thead><tbody id="pairedReplayRows"></tbody></table>
+  </div>
+  <div id="pairedRecovery" hidden>
+   <h3>Dialysate recovery</h3>
+   <p class="tip">Boelaert reported patient 4’s daily recovery as 13.6% of one daily dose. The model shows the final day and the full course separately.</p>
+   <div class="scroll" role="region" aria-label="Dialysate recovery" tabindex="0"><table><thead><tr><th scope="col">Collection window</th><th scope="col">Baseline mass / dose</th><th scope="col">Variant mass / dose</th></tr></thead><tbody id="pairedRecoveryRows"></tbody></table></div>
+  </div>
+ </div>
+</div>
+
 <div class="card" id="ospPanel">
  <h2>Compare an external PK-Sim / MoBi CSV</h2><p class="tip">Have an XLSX workbook? Open it in Excel or LibreOffice, select the worksheet containing one concentration series, and save that sheet as CSV. Choose that CSV below, confirm the time and concentration columns, units and target analyte, then click Compare curves. XLSX import is not supported here.</p>
  <p class="tip">Import simulation <strong>results</strong>, not native model files. Everything stays in your browser. Choose the exported columns and units explicitly; no clinical comparison or validation is implied. <a href="/learn/interoperability/">Data exchange guide</a>.</p>
@@ -938,6 +958,7 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 <script src="./assets/analysis-views.js"></script>
 <script src="./assets/research-workspace.js"></script>
 <script src="./assets/literature-cases.js"></script>
+<script src="./assets/paired-study-replays.js"></script>
 <script src="./assets/literature-workspace.js"></script>
 <script src="./assets/pwa-register.js"></script>
 <script src="./assets/offline-update.js"></script>

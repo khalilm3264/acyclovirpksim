@@ -22,6 +22,7 @@ const expectedSources = [
   './assets/analysis-views.js',
   './assets/research-workspace.js',
   './assets/literature-cases.js',
+  './assets/paired-study-replays.js',
   './assets/literature-workspace.js',
   './assets/pwa-register.js',
   './assets/offline-update.js',

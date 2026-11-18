@@ -6,7 +6,7 @@ const CORE = [
  "/assets/teaching-exports.js",
  "/assets/academic-exports.js", "/references/ayflux.bib",
  "/research/exchanges/", "/research/exchanges/view.js", "/research/exchanges/style.css",
- "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js",
+ "/assets/research-worker.js", "/assets/literature-cases.js", "/assets/literature-workspace.js", "/assets/paired-study-replays.js",
  "/", "/index.html", "/manifest.webmanifest", "/app-icon.svg",
  "/favicon.ico", "/ayflux-molecular-logo.svg",
  "/assets/simulator-navigation.js",
