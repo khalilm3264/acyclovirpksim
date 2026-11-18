@@ -12,7 +12,7 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-No changes recorded yet.
+- Add paired study replays to Research tools. Compare isolated renal-clearance and CSF CMMG partition changes against published endpoints, with evidence labels and separate CAPD recovery windows. The simulator equations, parameters and defaults are unchanged.
 
 ## [0.29.0] - 2026-11-17 (preview)
 
