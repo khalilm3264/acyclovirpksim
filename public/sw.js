@@ -1,7 +1,8 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.29.0-readable-source-v1-20261117";
+const CACHE = "ayflux-static-v0.30.0-20261119";
 const CORE = [
+ "/assets/number-expressions.js", "/assets/number-expressions.css",
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
  "/assets/academic-exports.js", "/references/ayflux.bib",

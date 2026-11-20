@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: "Khalil"
     given-names: "Muhammad"
-version: "0.29.0"
-date-released: "2026-11-17"
+version: "0.30.0"
+date-released: "2026-11-19"
 license: "AGPL-3.0-only"
 repository-code: "https://github.com/khalilm3264/acyclovirpksim"
 url: "https://ayflux.org/"
