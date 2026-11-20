@@ -12,7 +12,7 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-No changes recorded yet.
+Added a synthetic sampling comparison for repeated dosing in HD and CAPD. Each design forecasts a later trough withheld from the fit. No pharmacokinetic equations, parameters or defaults changed.
 
 ## [0.29.0] - 2026-11-17 (preview)
 

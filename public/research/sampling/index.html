@@ -2,14 +2,14 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Plasma sampling and parameter recovery | AyFlux</title>
-<meta name="description" content="Synthetic experiment: how three plasma sampling schedules change estimates of acyclovir peak, exposure and clearance after one IV infusion. Educational only.">
+<meta name="description" content="Compare simulated acyclovir sampling after one IV infusion and before a later trough during repeated dosing with HD or CAPD.">
 <link rel="canonical" href="https://ayflux.org/research/sampling/">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="AyFlux">
 <meta property="og:title" content="Plasma sampling and parameter recovery | AyFlux">
-<meta property="og:description" content="Synthetic experiment: how three plasma sampling schedules change estimates of acyclovir peak, exposure and clearance after one IV infusion. Educational only.">
+<meta property="og:description" content="Compare simulated acyclovir sampling after one IV infusion and before a later trough during repeated dosing with HD or CAPD.">
 <meta property="og:url" content="https://ayflux.org/research/sampling/">
-<link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="style.css"><script defer src="/assets/charts.js"></script><script defer src="view.js"></script><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/research-controls-v1.css">
+<link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="style.css"><script defer src="/assets/charts.js"></script><script defer src="view.js"></script><script defer src="dialysis-view.js"></script><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/research-controls-v1.css">
 </head>
 <body><header class="site-header ay-header">
   <div class="ay-header-brand">
@@ -23,7 +23,38 @@
 </header>
 <div class="shell"><nav class="guide-topics" aria-label="Research navigation"><a href="/learn/">User guide</a><a href="/learn/model-methods/">Model methods</a><a href="/references/">References</a><span aria-current="page">Plasma sampling</span></nav><main>
 <div class="page-intro"><h1>Plasma sampling and parameter recovery</h1>
-<p>Three sampling schedules use subsets of the same six simulated plasma concentrations. Select a synthetic adult to compare estimated peak concentration, exposure and total systemic clearance after one IV infusion.</p></div>
+<p>Compare sampling schedules after one IV infusion or during repeated dosing with dialysis.</p>
+<p><a href="#dialysis-sampling">Repeated dosing with dialysis</a> · <a href="#single-infusion">Single IV infusion</a></p></div>
+<section class="card" id="dialysis-sampling" aria-labelledby="dialysis-heading">
+  <h2 id="dialysis-heading">Which second sample improves a later trough prediction?</h2>
+  <p>Start with one predose plasma acyclovir sample at hour 24. Compare adding a post-infusion sample, a sample timed to dialysis, or a second predose sample. The hour-72 trough is withheld from every fit.</p>
+  <div class="tool-fields tool-controls"><label for="dialysis-mode">Dialysis scenario
+    <select id="dialysis-mode">
+      <option value="hd">Intermittent hemodialysis</option>
+      <option value="capd">Continuous ambulatory peritoneal dialysis</option>
+    </select>
+  </label></div>
+  <p id="dialysis-sampling-status" role="status">Loading simulated results…</p>
+  <div class="scroll" id="dialysis-sampling-results" hidden>
+    <table>
+      <caption>Hour-72 trough prediction across simulated courses</caption>
+      <thead><tr>
+        <th scope="col">Samples used</th><th scope="col">Hours</th>
+        <th scope="col">Median absolute error (mg/L)</th><th scope="col">Median 90% interval width (mg/L)</th>
+        <th scope="col">True trough inside interval</th>
+      </tr></thead><tbody id="dialysis-sampling-rows"></tbody>
+    </table>
+  </div>
+  <details><summary>Study design and parameter uncertainty</summary>
+    <p>Each synthetic course represents a 70 kg adult with zero residual creatinine clearance and three one-hour IV infusions at hours 0, 24 and 48. HD runs from hours 28 to 32 and 52 to 56. CAPD uses four 2 L dwells of 4, 4, 4 and 12 hours per day. The second sample tied to dialysis is at the end of the first HD session or at the hour-36 CAPD exchange boundary.</p>
+    <p>Three off-grid parameter profiles each generate 24 assay-error realizations. Each fit reweights 169 combinations of systemic clearance and dialysis strength. Dialysis strength scales HD clearance or CAPD membrane transport. The assay error has a 5% coefficient of variation with a minimum standard deviation of 0.1 mg/L. The held-out concentration is the noise-free simulated trough.</p>
+    <p id="dialysis-parameter-note"></p>
+    <p>These results depend on the two parameters varied, the dialysis schedules and the assumed assay error. Coverage describes this simulation and does not establish clinical accuracy or a preferred clinical sampling time.</p>
+    <p><a href="https://github.com/khalilm3264/acyclovirpksim/blob/main/research/verification/dialysis-sampling.cjs">Reproduce the dialysis sampling experiment</a></p>
+  </details>
+</section>
+<div class="page-intro" id="single-infusion"><h2>Single IV infusion</h2>
+<p>Three sampling schedules use subsets of the same six simulated plasma concentrations. Select a synthetic adult to compare estimated peak concentration, exposure and total systemic clearance.</p></div>
 <section class="card"><div class="tool-fields tool-controls"><label>Synthetic adult <select id="patient"><option value="0">Lower clearance, larger central volume</option><option value="1">Higher clearance, smaller central volume</option><option value="2">Reference clearance and volume</option></select></label></div>
 <fieldset><legend>Curves shown</legend><label><input type="checkbox" checked value="0"> Late sample (12 h)</label> <label><input type="checkbox" checked value="1"> Early and late (1, 12 h)</label> <label><input type="checkbox" checked value="2"> All six samples</label></fieldset>
 <p>Lines show pointwise posterior medians. Circles show the six simulated measurements. The 12-hour sample represents a pre-dose trough for an assumed 12-hour interval.</p>
