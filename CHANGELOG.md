@@ -16,7 +16,7 @@ No changes recorded yet.
 
 ## [0.30.0] - 2026-11-19 (preview)
 
-- Evaluate arithmetic in numeric fields. Open the calculator with the ƒx button or the equals key, then apply the result in the field's existing units.
+- Evaluate arithmetic in numeric fields. Open the calculator with the ƒx button or the equals key, then apply the result in the field's existing units. For example, enter `24*9` for 216 hours.
 
 No pharmacokinetic equations, parameters, defaults or configuration schema change.
 
