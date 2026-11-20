@@ -14,6 +14,12 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 No changes recorded yet.
 
+## [0.30.0] - 2026-11-19 (preview)
+
+- Evaluate arithmetic in numeric fields. Open the calculator with the ƒx button or the equals key, then apply the result in the field's existing units. For example, enter `24*9` for 216 hours.
+
+No pharmacokinetic equations, parameters, defaults or configuration schema change.
+
 ## [0.29.0] - 2026-11-17 (preview)
 
 ### Readable application source
@@ -286,7 +292,8 @@ Everything merged to `main` since 0.26.0 ([full comparison](https://github.com/k
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
-[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.29.0...main
+[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.30.0...main
+[0.30.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/khalilm3264/acyclovirpksim/compare/b928978...v0.27.0
