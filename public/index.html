@@ -698,7 +698,17 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 <label id="forecastHeldLabel" hidden>Held-out sampling time <select id="forecastHeld"></select></label>
 <button class="btn" type="button" id="runForecast">Forecast next level</button>
 <p id="forecastSummary" role="status"></p><div id="forecastOutput"></div>
-<button class="btn secondary" type="button" id="revealForecast" hidden>Reveal observed level and errors</button></div></section>
+<button class="btn secondary" type="button" id="revealForecast" hidden>Reveal observed level and errors</button></div>
+<details class="card"><summary>Rolling forecast replay</summary>
+<p>After applying measurements, step through each sampling time and predict the next one. The updated forecast uses only Fit rows through each cutoff. Both forecasts use the supplied dosing, dialysis and kidney-function histories.</p>
+<button class="btn" type="button" id="runForecastReplay">Run replay</button>
+<button class="btn secondary" type="button" id="downloadForecastReplay" hidden>Download replay CSV</button>
+<p id="forecastReplayStatus" role="status"></p>
+<div class="table-wrap" id="forecastReplayResults" hidden><table>
+<caption>Next measured concentration at each cutoff (mg/L)</caption>
+<thead><tr><th scope="col">Cutoff (h)</th><th scope="col">Target (h)</th><th scope="col">Analyte</th><th scope="col">Fit rows</th><th scope="col">Observed</th><th scope="col">Population median (90% interval)</th><th scope="col">Updated median (90% interval)</th><th scope="col">Reduction in absolute error</th></tr></thead>
+<tbody id="forecastReplayRows"></tbody></table></div>
+</details></section>
 <section id="reference" role="tabpanel" aria-labelledby="tab-method" tabindex="0" class="hidden"><nav class="card ref-nav" aria-label="On this tab"><strong>On this tab</strong> <a href="#drugReference">Drug reference</a> · <a href="#methodsCard">Methods</a> · <a href="#referenceList">Reference list</a></nav><div class="card" id="drugReference"><h2>Antiviral activity and interpretation</h2>
 <p><strong>Herpes simplex (HSV-1 and HSV-2) and varicella-zoster virus (VZV):</strong> Acyclovir is phosphorylated first by viral thymidine kinase and then by cellular enzymes to acyclovir triphosphate, which inhibits viral DNA polymerase and terminates viral DNA synthesis <a href="#ref11">[11]</a>. This simulator predicts acyclovir and CMMG concentrations; it does not simulate viral replication, intracellular acyclovir triphosphate, clinical response, or clearance of infection.</p>
 <p><strong>Laboratory susceptibility:</strong> Reported cell-culture IC₅₀ ranges are HSV-1, 0.02–13.5 mg/L; HSV-2, 0.01–9.9 mg/L; and VZV, 0.12–10.8 mg/L <a href="#ref11">[11]</a>. The selected virus determines the optional laboratory susceptibility range. It does not change the modeled distribution or elimination of acyclovir. These ranges do not establish a therapeutic plasma or CSF target.</p>
@@ -937,6 +947,7 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 <script src="./assets/timeline-labels.js"></script>
 <script src="./assets/analysis-views.js"></script>
 <script src="./assets/research-workspace.js"></script>
+<script src="./assets/forecast-replay-view.js"></script>
 <script src="./assets/literature-cases.js"></script>
 <script src="./assets/literature-workspace.js"></script>
 <script src="./assets/pwa-register.js"></script>
