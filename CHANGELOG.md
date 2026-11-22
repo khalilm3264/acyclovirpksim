@@ -12,7 +12,8 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-No changes recorded yet.
+- Add a local finder for common simulator tools and site pages and link the user guide directly to related simulator controls.
+- Keep the three plasma metrics visible by default and move secondary outputs and the uncertainty explanation into the summary disclosures. No model equations, parameters, defaults, or configuration schema changes.
 
 ## [0.29.0] - 2026-11-17 (preview)
 
