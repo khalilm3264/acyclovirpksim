@@ -5,12 +5,14 @@ on:
     paths:
       - 'research/pediatric/**'
       - 'public/research/pediatric/model.js'
+      - 'public/experimental/neonatal/model.js'
       - 'tests/pediatric-*.test.cjs'
       - '.github/workflows/pediatric-research.yml'
   pull_request:
     paths:
       - 'research/pediatric/**'
       - 'public/research/pediatric/model.js'
+      - 'public/experimental/neonatal/model.js'
       - 'tests/pediatric-*.test.cjs'
       - '.github/workflows/pediatric-research.yml'
   workflow_dispatch:
@@ -35,12 +37,13 @@ jobs:
           for fixture in reference-results model-comparison; do
             cmp "research/pediatric/$fixture.json" "$output/$fixture.json"
           done
-          for study in funaki-crrt-sampling neonatal-model-comparison hintz-neonatal-sampling maximova-timed-sampling; do
+          for study in funaki-crrt-sampling neonatal-model-comparison hintz-neonatal-sampling maximova-timed-sampling englund-neonatal-replay; do
             node "research/pediatric/$study.cjs" > "$output/$study.json"
             node -e "JSON.parse(require('node:fs').readFileSync(process.argv[1],'utf8'))" "$output/$study.json"
           done
           git rev-parse HEAD > "$output/commit.txt"
           git hash-object public/research/pediatric/model.js > "$output/model-blob.txt"
+          git hash-object public/experimental/neonatal/model.js > "$output/neonatal-model-blob.txt"
       - name: Archive pediatric research outputs
         uses: actions/upload-artifact@v4
         with:
