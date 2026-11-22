@@ -12,7 +12,7 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-No changes recorded yet.
+Added rolling forecast replay to compare population and measurement-updated predictions at each successive sampling time. No pharmacokinetic equations, parameters or defaults changed.
 
 ## [0.29.0] - 2026-11-17 (preview)
 
