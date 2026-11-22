@@ -119,7 +119,9 @@
     if (!location.hash && targetFor(new URL(event.oldURL).hash)) buttons[0].click();
     revealTarget();
   });
-  revealTarget();
+  // Wait for the browser's initial fragment navigation before setting focus.
+  if (document.readyState === 'complete') revealTarget();
+  else window.addEventListener('load', revealTarget, { once: true });
   document.addEventListener('click', (event) => {
     const link = event.target.closest('a[href^="#"]');
     if (
