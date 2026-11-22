@@ -2015,12 +2015,14 @@
       m && m.trough !== null
         ? `<div class="metric primary" id="troughMetric" style="--tone:#315d74"><div class="key">Plasma acyclovir trough</div><div class="val">${shown(m.trough, 'acyclovir').toFixed(2)} <span style="font-size:11px">${unitText('mg/L')}</span></div><div class="sub">Median curve at hour ${Number(m.troughTime.toFixed(1))}, just before the last dose within the simulation window; steady state is not assumed</div></div>`
         : '';
+    const secondary = other.map(card('minor')).join('');
+    const extra = $('metricsExtra');
     $('metrics').innerHTML =
       '<div class="metric-group">Plasma acyclovir · start here</div>' +
       main.map(card('primary')).join('') +
       trough +
-      '<div class="metric-group">Other outputs</div>' +
-      other.map(card('minor')).join('');
+      (extra ? '' : secondary);
+    if (extra) extra.innerHTML = secondary;
   }
   function table() {
     const cols = [
