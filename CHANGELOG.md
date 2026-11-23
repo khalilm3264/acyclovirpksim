@@ -12,6 +12,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-11-23 (preview)
+
+- Add the von Euler and Chen–Chu case measurements to the simulator references and downloadable bibliography. No pharmacokinetic equations, parameters or defaults changed.
+
 - Add a local finder for common simulator tools and site pages and link the user guide directly to related simulator controls.
 - Keep the three plasma metrics visible by default and move secondary outputs and the uncertainty explanation into the summary disclosures. No model equations, parameters, defaults, or configuration schema changes.
 - Add rolling forecast replay to compare population and measurement-updated predictions at each successive sampling time. No pharmacokinetic equations, parameters or defaults changed.
