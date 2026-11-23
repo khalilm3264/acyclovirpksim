@@ -390,7 +390,7 @@
       ],
       kinds: ['trough', 'post-infusion'],
       cmmgKinds: ['trough', 'post-infusion'],
-      note: "A 36-year-old man (86 kg, serum creatinine 87 µmol/L) given 750 mg IV every 8 hours for two days, then 850 mg. The dots are a measured trough and a sample 25 minutes after the ninth infusion, for both acyclovir and CMMG (shown on the CMMG graph). AyFlux estimates CrCl by Cockcroft–Gault. The infusion length (1 hour) and which infusion was sampled are read from the paper's figure, and the preceding oral course is not simulated."
+      note: 'A 36-year-old man (86 kg, serum creatinine 87 µmol/L) given 750 mg IV every 8 hours for two days, then 850 mg. Dr. Kacířová confirmed oral acyclovir 400 mg four times daily from July 17 to 22 before IV therapy. The dots show serum measurements before and 25 minutes after infusion. The reconstruction uses a one-hour infusion from the cohort methods and assumes the ninth IV dose was sampled. The last oral dose time is unknown and the preceding oral course is not simulated.'
     },
     {
       id: 'vasquez',

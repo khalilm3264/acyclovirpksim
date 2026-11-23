@@ -12,6 +12,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+## [0.30.1] - 2026-11-23 (preview)
+
+- Correct the Berry CMMG sampling days and document the preceding oral acyclovir regimen in the Kacířová IV case using author clarifications. No model equations, parameters or defaults changed.
+
 ## [0.30.0] - 2026-11-23 (preview)
 
 - Add the von Euler and Chen–Chu case measurements to the simulator references and downloadable bibliography. No pharmacokinetic equations, parameters or defaults changed.
