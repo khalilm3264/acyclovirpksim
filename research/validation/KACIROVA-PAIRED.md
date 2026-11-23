@@ -33,3 +33,20 @@ The scenarios pair median daily doses of 2250/1500 mg with the corresponding med
 Observed post-infusion medians combine draws at different times. The ratio column uses the published medians of individual ratios. Both modeled regimens reproduce the direction of the between-group difference in troughs and ratios, while both underpredict the parent and metabolite troughs in each stratum. Post-infusion parent agreement is sensitive to timing. For the higher-eGFR q8h scenario, sampling at +1 versus +40 min gives 17.31 versus 8.33 mg/L. Replacing the current renal metabolite coefficient with the thesis slope of 3.7474 mL/min per mL/min absolute CrCl lowers q8h CMMG troughs to 0.10/0.46 mg/L and post-infusion levels to 0.71/1.05 mg/L, further below the two measured troughs. These aggregate comparisons do not identify an individual elimination rate. The article's daily mg/kg divided by trough mg/L has units L/kg and is excluded from clearance comparisons.
 
 Run `node research/validation/kacirova-iv-cohort.cjs` for all 16 combinations of interval, kidney-function proxy and CMMG slope, including the sensitivity that directly substitutes the indexed eGFR number. Each output includes the three post-infusion times and a step-halving check.
+
+## Forecasting the next sample from a measured trough
+
+Run `node research/validation/kacirova-forecast.cjs` to reproduce the two Figure 1–2 cases with the forecast replay engine used at `44ddec7`. The JSON includes each forecast, the observed target and the effective sample size. Each run uses 120 parameter draws and an assumed assay coefficient of variation of 15%. Only the predose acyclovir measurement is used to update the weights. The post-infusion acyclovir measurement is held out.
+
+In case 1, the population median forecast was 9.58 mg/L and the trough-updated median was 14.68 mg/L against 8.90 mg/L measured. Absolute error increased by 5.09 mg/L.
+
+Figure 2 reports a second patient, an 85-year-old woman weighing 70 kg, with measured trough and post-infusion serum acyclovir of 3.2 and 25.7 mg/L. Eight 750 mg doses eight hours apart were approximated from the figure. The next 750 mg dose was placed at hour 64 or 66 and the sampled infusion 24 hours later. One-hour infusions were assumed. The figure labels 700 mg and 750 mg daily regimens. Both doses were tested for the sampled infusion. Each of the four reported creatinine values (126, 135, 148 and 160 µmol/L) was held constant in turn as a sensitivity analysis during changing renal function. Exact clock times and the patient-specific post-infusion sampling lag remain uncertain.
+
+| Assumed minutes after infusion end | Reconstructions with smaller absolute error after updating | Reduction in absolute error (mg/L) |
+|---:|---:|---:|
+| 1 | 10/16 | −2.36 to 2.28 |
+| 15 | 16/16 | 2.37 to 3.20 |
+| 30 | 16/16 | 2.54 to 3.87 |
+| 40 | 16/16 | 2.60 to 4.16 |
+
+Each row varies dose, transition time and creatinine for the same patient. The counts describe sensitivity to assumptions. They cannot estimate how often a trough improves forecasting across patients. [Kacířová et al., Figures 1 and 2, p. 134](https://www.solen.cz/incpdfs/far-202204-0002_10_001.pdf)
