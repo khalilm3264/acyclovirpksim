@@ -16,7 +16,7 @@ let best;
 for (const clearanceScale of [0.4, 0.55, 0.7, 0.85, 1, 1.15]) {
   for (const vcScale of [0.6, 0.8, 1, 1.2, 1.5, 2]) {
     const overrides = {clearanceScale, vcScale};
-    const values = kac.predict(87, 8, 1, 1 / 12, overrides);
+    const values = kac.predict(87, 9, 1, 1 / 12, overrides);
     const loss = parentLoss(values);
     if (!best || loss < best.loss) best = {overrides, loss};
   }
@@ -28,9 +28,9 @@ console.log('|---|---:|---:|---:|');
 function row(label, observed, baseline, candidate) {
   console.log('| ' + [label, observed.toFixed(3), baseline.toFixed(3), candidate.toFixed(3)].join(' | ') + ' |');
 }
-const baselineKac = kac.predict(87, 8, 1, 1 / 12);
-const selectedKac = kac.predict(87, 8, 1, 1 / 12, best.overrides);
-const fineKac = kac.predict(87, 8, 1, 1 / 24, best.overrides);
+const baselineKac = kac.predict(87, 9, 1, 1 / 12);
+const selectedKac = kac.predict(87, 9, 1, 1 / 12, best.overrides);
+const fineKac = kac.predict(87, 9, 1, 1 / 24, best.overrides);
 selectedKac.forEach((value, i) => {
   assert.ok(Math.abs(value - fineKac[i]) < 0.001);
   row(['Kacířová ACV trough (mg/L)', 'Kacířová ACV +25 min (mg/L)',
