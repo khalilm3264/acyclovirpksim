@@ -12,6 +12,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+## [0.30.2] - 2026-11-23 (preview)
+
+- Align the Kacířová overlay and research comparison with the author-confirmed fourth 850 mg infusion. No model equations, parameters or defaults changed.
+
 ## [0.30.1] - 2026-11-23 (preview)
 
 - Correct the Berry CMMG sampling days and document the preceding oral acyclovir regimen in the Kacířová IV case using author clarifications. No model equations, parameters or defaults changed.
