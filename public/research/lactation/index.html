@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Postpartum acyclovir in serum and milk | AyFlux</title>
+  <meta name="description" content="An evidence comparison of acyclovir in maternal serum and breast milk after oral valacyclovir.">
+  <link rel="canonical" href="https://ayflux.org/research/lactation/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/learn/learn.css">
+</head>
+<body>
+<header class="site-header ay-header">
+  <div class="ay-header-brand">
+    <img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" alt="" width="42" height="42">
+    <div class="ay-title-stack">
+      <a class="brand ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a>
+      <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function and dialysis</p>
+    </div>
+  </div>
+  <a class="ay-guide-link" href="/">← Simulator</a>
+</header>
+<div class="shell">
+  <nav class="guide-topics" aria-label="Research navigation">
+    <a href="/learn/">User guide</a>
+    <a href="/learn/model-methods/">Model methods</a>
+    <span aria-current="page">Postpartum lactation</span>
+  </nav>
+  <main>
+    <div class="page-intro">
+      <h1>Postpartum acyclovir in serum and milk</h1>
+      <p>In a five-person study after oral valacyclovir, the median observed acyclovir peak was at <strong>1 hour in maternal serum</strong> and <strong>4 hours in breast milk</strong>. A constant milk-to-serum multiplier cannot shift the peak. This research view compares that assumption with the published evidence; it does not generate individual forecasts.</p>
+    </div>
+    <section class="card" aria-labelledby="evidence">
+      <h2 id="evidence">First-dose evidence</h2>
+      <p>Sheffield et al. collected paired samples after the first dose and on day 5. The <a href="https://www.accessdata.fda.gov/drugsatfda_docs/nda/2004/20-487S005_Valtrex_biopharmr.PDF">FDA review, Table 1</a>, reports the following summaries for the same five participants. Concentrations in µg/mL have the same numerical values in mg/L.</p>
+      <div class="model-table-wrap" role="region" aria-label="First-dose acyclovir pharmacokinetic summaries" tabindex="0">
+        <table class="model-parameter-table">
+          <caption>Median (range), first oral valacyclovir dose in the study</caption>
+          <thead><tr><th scope="col">Endpoint</th><th scope="col">Maternal serum</th><th scope="col">Breast milk</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Time of peak (h)</th><td>1.0 (1.0–2.0)</td><td>4.0 (2.0–4.0)</td></tr>
+            <tr><th scope="row">Peak (mg/L)</th><td>2.7 (2.0–3.4)</td><td>4.2 (1.1–6.4)</td></tr>
+            <tr><th scope="row">AUC (mg·h/L)</th><td>14.7 (8.7–17.7)</td><td>26.9 (20.7–32.8)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The median of the individual milk-to-serum AUC ratios was <strong>2.2</strong> (range 1.4–2.6). This is not the ratio of the two group median AUCs. The three-hour difference between the median peak times is not a fitted transfer delay or a patient-level result.</p>
+    </section>
+    <section class="card" aria-labelledby="comparison">
+      <h2 id="comparison">What a fixed ratio misses</h2>
+      <p><strong>Instantaneous ratio:</strong> If milk concentration is a positive constant times serum concentration at every time point, scaling changes the peak height and AUC, but it cannot change when the peak occurs. It predicts a median milk peak at <strong>1 hour</strong> from the reported serum peak times, compared with <strong>4 hours</strong> in the reported milk summaries.</p>
+      <p><strong>Candidate with delayed equilibration:</strong> Model milk concentration as moving gradually toward a scaled serum concentration. In a first-order model, <code>dCmilk/dt = k × (R × Cserum − Cmilk)</code>, where <code>R</code> is the equilibrium ratio and <code>k</code> is a rate in h⁻¹. This can produce a later peak. Neither parameter was fitted here: peak summaries alone do not establish the rate, validate a milk concentration–time curve, or distinguish transport mechanisms.</p>
+    </section>
+    <section class="card" aria-labelledby="validation">
+      <h2 id="validation">What would test a delayed model?</h2>
+      <p>Compare both models at actual paired draw times, rather than comparing a simulated continuous maximum with the largest observed sample. If the first-dose and day-5 profiles can be recovered, use the first dose for fitting and hold day 5 out to test later predictions in the same cohort.</p>
+      <p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3324503/">Drake et al.</a> tested 44 milk samples from a separate cohort at two weeks postpartum. Use their full-text Results for the concentration units (µg/mL). The samples can contextualize the concentration range, but the time since dose was unavailable and infant drug concentrations were not measured.</p>
+      <p><strong>Scope:</strong> Maternal serum and milk only. This evidence does not estimate infant plasma or fetal exposure, validate a patient-specific model, or guide dosing or breastfeeding decisions. The core AyFlux simulator is unchanged.</p>
+      <p><a href="https://pubmed.ncbi.nlm.nih.gov/11810093/">Sheffield et al., 2002: study record</a> · <a href="/disclaimer/">AyFlux disclaimer</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <span>AyFlux · <a href="/license/">AGPLv3</a></span>
+    <span><a href="/learn/">User guide</a> · <a href="/cite/">Cite</a></span>
+  </footer>
+</div>
+</body>
+</html>
