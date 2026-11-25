@@ -1,0 +1,112 @@
+main {
+  box-sizing: border-box;
+  margin: 2rem auto;
+  max-width: 860px;
+  padding: 0 1rem;
+}
+section {
+  margin-block: 2rem;
+}
+h1 {
+  line-height: 1.15;
+}
+.notice {
+  padding: 0.85rem 1rem;
+  background: #f4eee3;
+  border-inline-start: 3px solid #88652f;
+}
+.plot {
+  width: 100%;
+  max-width: 700px;
+}
+.plot svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.plot text {
+  font-family: inherit;
+  font-size: 14px;
+  fill: #263e52;
+}
+.legend {
+  padding: 0;
+  display: flex;
+  gap: 0.75rem 1.5rem;
+  flex-wrap: wrap;
+  list-style: none;
+}
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.key {
+  display: inline-block;
+  width: 1.7rem;
+  border-top: 3px solid;
+}
+.fed-key {
+  color: #a43f13;
+}
+.fasted-key {
+  color: #215b87;
+  border-top-style: dashed;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-block: 1.2rem;
+}
+.controls label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.controls input {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-block: 0.75rem 1.25rem;
+}
+caption {
+  text-align: left;
+  font-weight: 650;
+  margin-bottom: 0.4rem;
+}
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.55rem 0.45rem;
+  border-bottom: 1px solid #ccd5da;
+}
+tbody th {
+  font-weight: 500;
+}
+summary {
+  cursor: pointer;
+  min-height: 2rem;
+}
+footer {
+  margin-block: 2rem 3rem;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  th,
+  td {
+    padding-inline: 0.25rem;
+  }
+  .plot text {
+    font-size: 17px;
+  }
+}
