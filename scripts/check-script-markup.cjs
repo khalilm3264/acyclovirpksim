@@ -40,6 +40,20 @@ function assertExternalScripts(allScripts, expected) {
   }
 }
 
+// Every local script and stylesheet the simulator page loads must be in the service worker's
+// install-time precache list, or an installed copy will fail to load it offline.
+function readPrecacheList(source) {
+  const match = source.match(/const CORE = (\[[\s\S]*?\]);/);
+  assert.ok(match, 'sw.js must declare its precache list as const CORE = [...]');
+  return JSON.parse(match[1]);
+}
+function assertPrecached(assets, core) {
+  const cached = new Set(core);
+  const local = assets.filter(asset => asset && !/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(asset));
+  const missing = local.filter(asset => !cached.has(asset.replace(/^\.\//, '/')));
+  assert.deepEqual(missing, [], 'Page assets must be listed in sw.js CORE for offline use');
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
   try {
@@ -53,6 +67,13 @@ function assertExternalScripts(allScripts, expected) {
     }, markup);
     const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
     assertExternalScripts(await parse(html), expectedSources);
+    const stylesheets = await page.evaluate(input => [...new DOMParser().parseFromString(input, 'text/html')
+      .querySelectorAll('link[rel~="stylesheet"]')].map(link => link.getAttribute('href')), html);
+    const core = readPrecacheList(fs.readFileSync(path.join(__dirname, '../public/sw.js'), 'utf8'));
+    assertPrecached([...expectedSources, ...stylesheets], core);
+    // The precache check normalizes ./ paths, ignores remote URLs and reports what is missing.
+    assertPrecached(['./assets/a.js', '/b.css', 'https://cdn.example/x.js', '//cdn.example/y.js'], ['/assets/a.js', '/b.css']);
+    assert.throws(() => assertPrecached(['./assets/new.js'], ['/assets/a.js']), /sw\.js CORE/);
 
     // HTML parsing handles quotes, case, comments and malformed end-tag attributes.
     const fixture = `<!-- <script src="decoy.js"></script> -->
@@ -71,7 +92,7 @@ function assertExternalScripts(allScripts, expected) {
     assert.throws(() => assertExternalScripts(typedInline, [null]), /Inline JavaScript/);
     const nearMiss = await parse('<script type="application/ld+json+x">{}</script>');
     assert.throws(() => assertExternalScripts(nearMiss, []), /required order/);
-    console.log('PASS script markup: browser parsing, asset order, inline rejection, JSON-LD data blocks and parser edge cases');
+    console.log('PASS script markup: browser parsing, asset order, inline rejection, JSON-LD data blocks, offline precache coverage and parser edge cases');
   } finally {
     await browser.close();
   }
