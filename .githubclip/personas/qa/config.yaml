@@ -1,0 +1,17 @@
+name: QA Engineer
+role: engineer
+label: qa
+escalates_to: ceo
+
+required_tools:
+  - github                              # GitHub issue management
+  # Add repo-specific tools below:
+  # - mcp__plugin_playwright_playwright # Browser automation
+
+runtime:
+  model: sonnet                         # Test authoring and verification — moderate complexity
+  thinking_effort: medium
+  max_turns: 200
+  enable_chrome: false
+  timeout: 0
+  extra_args: []
