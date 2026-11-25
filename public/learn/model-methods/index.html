@@ -21,6 +21,9 @@
   <meta property="og:description" content="Review the AyFlux two-compartment model, CSF and CMMG estimates, Monte Carlo uncertainty, and limitations of simulated acyclovir concentrations.">
   <meta property="og:url" content="https://ayflux.org/learn/model-methods/">
   <meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/learn/research-controls-v1.css">
+<script defer src="/assets/pk-engine.js"></script>
+<script defer src="post-hd.js"></script>
 </head>
 <body>
 <header class="site-header ay-header">
@@ -78,6 +81,22 @@
   <div class="model-equation"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="CSF_ACV(next) = max[0, CSF_ACV(t) + step size times lagged partition update]"><semantics><mrow><mrow><msub><mi>CSF</mi><mi>ACV</mi></msub><mrow><mo>(</mo><mrow><mi>t</mi><mo>+</mo><mi>Δt</mi></mrow><mo>)</mo></mrow></mrow><mo>=</mo><mi>max</mi><mo>{</mo><mn>0</mn><mo>,</mo><mrow><msub><mi>CSF</mi><mi>ACV</mi></msub><mrow><mo>(</mo><mi>t</mi><mo>)</mo></mrow></mrow><mo>+</mo><mi>Δt</mi><mo>×</mo><mfrac><mrow><msub><mi>k</mi><mi>CSF</mi></msub><mrow><mo>⟨</mo><msub><mi>C</mi><mi>c</mi></msub><mo>⟩</mo></mrow><mo>−</mo><mrow><msub><mi>CSF</mi><mi>ACV</mi></msub><mrow><mo>(</mo><mi>t</mi><mo>)</mo></mrow></mrow></mrow><msub><mi>τ</mi><mi>CSF</mi></msub></mfrac><mo>}</mo></mrow><annotation encoding="application/x-tex">\mathrm{CSF}_{ACV}(t+\Delta t)=\max\left\{0,\mathrm{CSF}_{ACV}(t)+\Delta t\frac{k_{\mathrm{CSF}}\langle C_c\rangle-\mathrm{CSF}_{ACV}(t)}{\tau_{\mathrm{CSF}}}\right\}</annotation></semantics></math>
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="CSF_CMMG(next) = max[0, CSF_CMMG(t) + step size times lagged partition update]"><semantics><mrow><mrow><msub><mi>CSF</mi><mi>CMMG</mi></msub><mrow><mo>(</mo><mrow><mi>t</mi><mo>+</mo><mi>Δt</mi></mrow><mo>)</mo></mrow></mrow><mo>=</mo><mi>max</mi><mo>{</mo><mn>0</mn><mo>,</mo><mrow><msub><mi>CSF</mi><mi>CMMG</mi></msub><mrow><mo>(</mo><mi>t</mi><mo>)</mo></mrow></mrow><mo>+</mo><mi>Δt</mi><mo>×</mo><mfrac><mrow><msub><mi>k</mi><mi>CMMG</mi></msub><mrow><mo>⟨</mo><msub><mi>C</mi><mi>M</mi></msub><mo>⟩</mo></mrow><mo>−</mo><mrow><msub><mi>CSF</mi><mi>CMMG</mi></msub><mrow><mo>(</mo><mi>t</mi><mo>)</mo></mrow></mrow></mrow><msub><mi>τ</mi><mi>CMMG</mi></msub></mfrac><mo>}</mo></mrow><annotation encoding="application/x-tex">\mathrm{CSF}_{CMMG}(t+\Delta t)=\max\left\{0,\mathrm{CSF}_{CMMG}(t)+\Delta t\frac{k_{\mathrm{CMMG}}\langle C_M\rangle-\mathrm{CSF}_{CMMG}(t)}{\tau_{\mathrm{CMMG}}}\right\}</annotation></semantics></math></div>
   <p><span class="math-mean-definition">Angle brackets denote the arithmetic mean of the concentrations at the two step endpoints.</span> The core amount states use fourth-order Runge–Kutta with inserted medication and treatment boundaries; the CSF lag state uses the explicit update shown here. These are separate numerical methods, not a whole-body PBPK model.</p>
+</section>
+<section class="card" id="post-hd-forecast">
+  <h2>One-hour post-hemodialysis forecast</h2>
+  <p>Estimate plasma acyclovir one hour after disconnect using two measured concentrations from the same session. This research calculation assumes negligible kidney clearance, no intervening doses or further dialysis, and equal plasma and tissue concentrations at the start of dialysis.</p>
+  <form id="hd-forecast"><div class="tool-fields tool-controls">
+    <label>Body weight (kg) <input name="weight" type="number" step="any" required></label>
+    <label>Session duration (h) <input name="hours" type="number" step="any" required></label>
+    <label>Before dialysis (µmol/L) <input name="before" type="number" step="any" required></label>
+    <label>At disconnect (µmol/L) <input name="end" type="number" step="any" required></label>
+  </div><button class="btn" type="submit">Forecast one-hour level</button></form>
+  <p role="status" id="hd-result"></p>
+  <form id="hd-compare" hidden><div class="tool-fields tool-controls"><label>Measured one-hour level (µmol/L) <input name="observed" type="number" min="0" step="any" required></label></div>
+    <button class="btn secondary" type="submit">Compare with measurement</button>
+    <p role="status" id="hd-errors"></p></form>
+  <details><summary>Try a published case</summary><p>In <a href="/references/#ref21">Almond et al., Tables 1 and 2</a>, patient 5 weighed 55.5 kg. Plasma acyclovir fell from 2.24 to 1.28 µmol/L over four hours of dialysis. Run the forecast, then compare it with the measured one-hour value of 1.79 µmol/L.</p>
+  <p>The calculation interpolates plasma concentrations on a logarithmic scale during dialysis and uses AyFlux’s adult blood–tissue exchange equations for the following hour. Carry-forward uses the disconnect concentration as its prediction. Evaluation so far covers five patients from one retrospective study.</p></details>
 </section>
 <section class="card">
   <h2>Changing kidney function over time</h2>
