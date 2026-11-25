@@ -1,0 +1,140 @@
+.cvvhdf {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 34px clamp(16px, 4vw, 28px) 48px;
+  color: #182838;
+}
+.cvvhdf p {
+  max-width: 78ch;
+  line-height: 1.5;
+}
+.cvvhdf .eyebrow {
+  margin-top: 32px;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: #405c72;
+}
+.cvvhdf h1 {
+  margin: 0.3rem 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.15;
+}
+.cvvhdf h2 {
+  margin-top: 2rem;
+}
+.cvvhdf .lede {
+  font-size: 1.15rem;
+}
+.cvvhdf .method-grid,
+.cvvhdf .plot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+  margin: 1.2rem 0;
+}
+.cvvhdf [hidden] {
+  display: none;
+}
+.cvvhdf .method {
+  min-width: 0;
+  border: 1px solid #b6c8d8;
+  padding: 1rem 1.1rem;
+  background: #f5f8fb;
+}
+.cvvhdf .method h2,
+.cvvhdf .method h3 {
+  margin: 0 0 0.45rem;
+}
+.cvvhdf .method h2 {
+  font-size: 1rem;
+}
+.cvvhdf .method strong {
+  display: block;
+  font-size: 1.28rem;
+}
+.cvvhdf .method p {
+  margin: 0.55rem 0 0;
+}
+.cvvhdf .chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 330px;
+  overflow: visible;
+}
+.cvvhdf .chart text {
+  fill: #334e61;
+  font:
+    13px system-ui,
+    sans-serif;
+}
+.cvvhdf .chart .gridline {
+  stroke: #c7d5e1;
+  stroke-width: 1;
+}
+.cvvhdf .key {
+  font-size: 0.88rem;
+}
+.cvvhdf .key b:not(:first-child) {
+  margin-left: 0.65em;
+}
+.cvvhdf .pre {
+  color: #174c72;
+}
+.cvvhdf .post {
+  color: #64427c;
+}
+.cvvhdf .eff {
+  color: #965118;
+}
+.cvvhdf fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  border: 0;
+  padding: 0;
+  margin: 0 0 0.5rem;
+}
+.cvvhdf legend {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.cvvhdf label {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  gap: 0.35rem;
+}
+.cvvhdf .table-scroll {
+  overflow-x: auto;
+}
+.cvvhdf table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+.cvvhdf th,
+.cvvhdf td {
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid #c7d5e1;
+}
+.cvvhdf caption {
+  text-align: left;
+  padding: 0.5rem 0;
+}
+.cvvhdf details {
+  margin: 1rem 0;
+}
+.cvvhdf summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.cvvhdf code {
+  overflow-wrap: anywhere;
+}
+.cvvhdf .source {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}

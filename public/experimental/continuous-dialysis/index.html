@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Continuous dialysis lab | AyFlux Experimental</title>
+    <meta
+      name="description"
+      content="Explore how two clearance estimates change a fixed acyclovir replay based on a published pediatric CVVHDF case. Research only."
+    />
+    <link rel="canonical" href="https://ayflux.org/experimental/continuous-dialysis/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AyFlux" />
+    <meta property="og:title" content="Continuous dialysis lab | AyFlux Experimental" />
+    <meta
+      property="og:description"
+      content="Explore how two clearance estimates change a fixed acyclovir replay based on a published pediatric CVVHDF case. Research only."
+    />
+    <meta property="og:url" content="https://ayflux.org/experimental/continuous-dialysis/" />
+    <link rel="stylesheet" href="/learn/learn.css" />
+    <link rel="stylesheet" href="./replay.css" />
+    <script src="./model.js" defer></script>
+    <script src="./replay.js" defer></script>
+  </head>
+  <body>
+    <main class="cvvhdf">
+      <nav aria-label="Breadcrumb">
+        <a href="/experimental/">AyFlux Experimental</a>
+      </nav>
+      <p class="eyebrow">CASE REPLAY · RESEARCH ONLY</p>
+      <h1>Continuous dialysis lab</h1>
+      <p class="lede">
+        How much acyclovir did the filter remove? In a single pediatric case, the answer depended on
+        where the researchers measured it. The study estimates clearance in mL/min, not the total mass removed.
+      </p>
+      <div class="method-grid">
+        <section class="method">
+          <h2>Before and after the filter</h2>
+          <strong>19.2–26.3 mL/min</strong>
+          <p>Uses the drop across the filter with adjusted blood flow.</p>
+        </section>
+        <section class="method">
+          <h2>In the drained fluid</h2>
+          <strong>27.6–44.3 mL/min</strong>
+          <p>Uses effluent flow and the effluent-to-prefilter concentration ratio.</p>
+        </section>
+      </div>
+      <h2>Published measurements</h2>
+      <p>
+        Collignon et al. measured plasma and effluent in a 21-month-old child receiving continuous
+        venovenous hemodiafiltration (CVVHDF). The six labels below are from Table 1. H2, H5 and H7
+        come from one sampled infusion; H1, H4 and H8 from a different infusion sampled one day
+        apart. These are not one continuous profile. During sampling, blood flow was 100 mL/min and reported dialysate plus replacement and net fluid removal gave 2.95–2.99 L/h of total effluent.
+      </p>
+      <div id="measurement-plots" class="plot-grid" hidden>
+        <section class="method">
+          <h3>Plasma</h3>
+          <div id="plasma-chart"></div>
+          <p class="key"><b class="pre">●</b> Prefilter <b class="post">◆</b> Post-filter</p>
+        </section>
+        <section class="method">
+          <h3>Effluent</h3>
+          <div id="effluent-chart"></div>
+          <p class="key"><b class="eff">■</b> Measured in drained fluid</p>
+        </section>
+      </div>
+      <details open>
+        <summary>Table 1 measurements and estimates</summary>
+        <div
+          class="table-scroll"
+          role="region"
+          tabindex="0"
+          aria-label="Scrollable measurements table"
+        >
+          <table>
+            <caption>
+              Observations in mg/L; filter-clearance estimates in mL/min.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Label</th>
+                <th scope="col">Sampled infusion</th>
+                <th scope="col">Prefilter plasma</th>
+                <th scope="col">Post-filter plasma</th>
+                <th scope="col">Effluent</th>
+                <th scope="col">Post-filter estimate</th>
+                <th scope="col">Effluent estimate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">H1</th>
+                <td>Second</td>
+                <td>28</td>
+                <td>20.9</td>
+                <td>15.6</td>
+                <td>19.2</td>
+                <td>27.6</td>
+              </tr>
+              <tr>
+                <th scope="row">H2</th>
+                <td>First</td>
+                <td>10.93</td>
+                <td>8.26</td>
+                <td>9.34</td>
+                <td>19.8</td>
+                <td>42</td>
+              </tr>
+              <tr>
+                <th scope="row">H4</th>
+                <td>Second</td>
+                <td>7.03</td>
+                <td>5.26</td>
+                <td>5.34</td>
+                <td>21.8</td>
+                <td>37.9</td>
+              </tr>
+              <tr>
+                <th scope="row">H5</th>
+                <td>First</td>
+                <td>4.87</td>
+                <td>3.59</td>
+                <td>4.37</td>
+                <td>24.6</td>
+                <td>44.1</td>
+              </tr>
+              <tr>
+                <th scope="row">H7</th>
+                <td>First</td>
+                <td>2.65</td>
+                <td>2.03</td>
+                <td>2.17</td>
+                <td>26.3</td>
+                <td>40.3</td>
+              </tr>
+              <tr>
+                <th scope="row">H8</th>
+                <td>Second</td>
+                <td>3.15</td>
+                <td>2.51</td>
+                <td>2.8</td>
+                <td>21.2</td>
+                <td>44.3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+      <h2>What changes when you swap the estimate?</h2>
+      <p>
+        Start both curves at the same measured H1 prefilter concentration (28 mg/L), then vary only
+        filter clearance. The shaded areas use the ends of each reported range; they are not
+        confidence intervals.
+      </p>
+      <section class="method" id="replay-controls" hidden>
+        <fieldset>
+          <legend>Show modeled decline using</legend>
+          <label><input name="estimate" type="radio" value="both" checked /> Both methods</label>
+          <label><input name="estimate" type="radio" value="postfilter" /> Post-filter</label>
+          <label><input name="estimate" type="radio" value="effluent" /> Effluent</label>
+        </fieldset>
+        <div id="replay-chart"></div>
+        <p id="replay-summary" aria-live="polite"></p>
+      </section>
+      <p>
+        Illustrative one-compartment decline with no additional input, not a fit to the published
+        curve. Endogenous clearance is fixed at 29.45 mL/min (midpoint of the reported 25.9–33
+        range); volume is fixed at 10.8 L from the Abdalla population model scaled to 10 kg, not
+        measured in this child. No dialysis prescription or dose recommendation is provided.
+      </p>
+      <details>
+        <summary>Model equation and source details</summary>
+        <p>
+          <code>C(t) = 28 exp[-0.06 (CLendogenous + CLfilter) t / V]</code>, where clearance is in
+          mL/min, t is hours after H1, V is in liters, and 0.06 converts mL/min to L/h. Center lines
+          use the midpoint of each method’s range. Only the H4 and H8 prefilter samples from the
+          same sampled infusion as H1 are included as comparison markers, at their nominal offsets.
+          The model does not estimate patient-specific volume, filter adsorption, or dosing history.
+          No medians or confidence limits are inferred from the reported ranges.
+        </p>
+      </details>
+      <p class="source">
+        Sources:
+        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9880359/#Tab1"
+          >Collignon et al., 2023, Table 1 and Methods</a
+        >
+        ·
+        <a href="https://doi.org/10.1128/AAC.01426-20">Abdalla et al., 2020, Table 2</a>
+        ·
+        <a
+          href="https://github.com/khalilm3264/acyclovirpksim/blob/main/research/validation/COLLIGNON-CRRT.md"
+          >AyFlux circuit arithmetic audit</a
+        >.
+      </p>
+    </main>
+  </body>
+</html>

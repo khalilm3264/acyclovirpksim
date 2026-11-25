@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kidney recovery after AKI | AyFlux Experimental</title>
+    <meta
+      name="description"
+      content="Compare fixed and recovering kidney clearance against measured acyclovir after an acute kidney injury case. Research only."
+    />
+    <link
+      rel="canonical"
+      href="https://ayflux.org/experimental/aki-recovery/"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AyFlux" />
+    <meta
+      property="og:title"
+      content="Kidney recovery after AKI | AyFlux Experimental"
+    />
+    <meta
+      property="og:description"
+      content="Compare fixed and recovering kidney clearance against measured acyclovir after an acute kidney injury case. Research only."
+    />
+    <meta
+      property="og:url"
+      content="https://ayflux.org/experimental/aki-recovery/"
+    />
+    <link rel="stylesheet" href="/learn/learn.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="model.js"></script>
+    <script defer src="view.js"></script>
+  </head>
+  <body>
+    <main class="aki">
+      <nav aria-label="Breadcrumb">
+        <a href="/">AyFlux</a> / <a href="/experimental/">Experimental</a>
+      </nav>
+      <h1>Kidney recovery after acute injury</h1>
+      <p class="lead">
+        Acyclovir stayed measurable for days after treatment stopped. Would
+        allowing kidney function to recover explain the observed tail?
+      </p>
+      <p class="notice">
+        <strong>Research only.</strong> A single historical case and two
+        assumptions about clearance. Not a patient-specific prediction or dosing
+        recommendation.
+      </p>
+      <p>
+        Haefeli and colleagues reported a 77-year-old woman with acute kidney
+        injury after IV acyclovir. This replay starts at her first plotted serum
+        measurement after treatment, not at the first infusion. It does not
+        reconstruct dose timing.
+      </p>
+      <label for="recovery"><strong>Recovery scenario</strong></label>
+      <select id="recovery">
+        <option value="later">Day 4–12 recovery</option>
+        <option value="earlier">Day 3–10 recovery (sensitivity)</option>
+      </select>
+      <ul class="legend">
+        <li><span class="legend-obs">●</span> Reported serum sample</li>
+        <li><span class="legend-fixed">━</span> Fixed impaired clearance</li>
+        <li><span class="legend-recovery">┄</span> Recovering clearance</li>
+        <li><span class="legend-shade">▧</span> Assumed recovery interval</li>
+      </ul>
+      <svg
+        id="serum"
+        viewBox="0 0 680 340"
+        role="img"
+        aria-label="Observed serum acyclovir versus fixed and recovering kidney function on a logarithmic concentration axis. Numerical observations appear below."
+      ></svg>
+      <svg
+        id="kidney"
+        viewBox="0 0 680 190"
+        role="img"
+        aria-label="Fixed and assumed kidney function histories. The published 8.5 mL/min value is an anchor, not a measured trajectory."
+      ></svg>
+      <p id="result" class="result" aria-live="polite"></p>
+      <h2>Measured serum concentrations</h2>
+      <p>
+        Times are approximate figure-relative days (not exact draw times). The
+        first concentration is reported in the text. The other marked samples
+        were read from the logarithmic axis in Figure 1.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Figure day</th>
+              <th scope="col">Serum acyclovir (µmol/L)</th>
+              <th scope="col">Source</th>
+            </tr>
+          </thead>
+          <tbody id="samples">
+            <tr><th scope="row">≈ 2.31</th><td>229.9</td><td>Concentration in case text; time from Figure 1</td></tr>
+            <tr><th scope="row">≈ 4.04</th><td>≈ 72.7</td><td>Figure 1, digitized</td></tr>
+            <tr><th scope="row">≈ 6.00</th><td>≈ 25.1</td><td>Figure 1, digitized</td></tr>
+            <tr><th scope="row">≈ 6.59</th><td>≈ 12.4</td><td>Figure 1, digitized</td></tr>
+            <tr><th scope="row">≈ 7.09</th><td>≈ 3.58</td><td>Figure 1, digitized</td></tr>
+            <tr><th scope="row">≈ 8.07</th><td>≈ 0.831</td><td>Figure 1, digitized</td></tr>
+            <tr><th scope="row">≈ 13.19</th><td>≈ 0.0760</td><td>Figure 1, digitized</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h2>What is measured and what is assumed?</h2>
+      <ul>
+        <li>
+          <strong>Reported:</strong> peak serum acyclovir 229.9 µmol/L;
+          creatinine clearance 8.5 mL/min around maximum kidney impairment;
+          baseline serum creatinine 96 µmol/L and weight 59.5 kg. The graph’s
+          renal marker is serum urea, not a creatinine clearance time series.
+        </li>
+        <li>
+          <strong>Assumed:</strong> impaired clearance at replay start;
+          approximate recovery endpoints chosen for sensitivity, not inferred
+          from observations. The recovery target is an illustrative
+          Cockcroft–Gault calculation from reported pre-treatment inputs, not a
+          measured baseline clearance. Shading shows where each selected
+          recovery ramp is assumed.
+        </li>
+        <li>
+          <strong>Common setup:</strong> same two-compartment adult AyFlux
+          disposition coefficients, no further drug input or dialytic removal,
+          and equal central and peripheral initial concentrations. Peripheral
+          concentration and continuous renal function were not measured. The
+          first sample initializes both curves; it is not an independent model
+          check. The other samples were not used to fit either run.
+        </li>
+      </ul>
+      <p>
+        Haefeli WE, Schoenenberger RAZ, Weiss P, Ritz RF.
+        <a href="https://pubmed.ncbi.nlm.nih.gov/8430717/"
+          >Acyclovir-induced neurotoxicity: concentration-side effect
+          relationship in acyclovir overdose.</a
+        >
+        Am J Med. 1993;94:212–215. Figure 1, p. 213.
+        <a href="https://doi.org/10.1016/0002-9343(93)90186-S">DOI</a>.
+      </p>
+      <noscript
+        >Enable JavaScript to compare the modeled curves. The measured data remain visible above.</noscript
+      >
+    </main>
+  </body>
+</html>

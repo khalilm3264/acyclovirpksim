@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fed vs. fasted acyclovir tablet | AyFlux Experimental</title>
+    <meta
+      name="description"
+      content="Compare measured fed and fasted plasma acyclovir curves and explore why changing absorption speed alone cannot change total exposure."
+    />
+    <link rel="canonical" href="https://ayflux.org/experimental/tablet-food/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AyFlux" />
+    <meta property="og:title" content="Fed vs. fasted acyclovir tablet | AyFlux Experimental" />
+    <meta
+      property="og:description"
+      content="Compare measured fed and fasted plasma acyclovir curves and explore why changing absorption speed alone cannot change total exposure."
+    />
+    <meta property="og:url" content="https://ayflux.org/experimental/tablet-food/" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/learn/learn.css" />
+    <link rel="stylesheet" href="./lab.css" />
+    <script src="./model.js" defer></script>
+    <script src="./view.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <nav aria-label="Breadcrumb">
+        <a href="/">AyFlux</a> / <a href="/experimental/">Experimental</a>
+      </nav>
+      <h1>Fed vs. fasted, same acyclovir tablet</h1>
+      <p class="notice">
+        Research only. One tablet formulation and one meal comparison, not advice about taking
+        acyclovir.
+      </p>
+
+      <section aria-labelledby="observed-heading">
+        <h2 id="observed-heading">What the crossover measured</h2>
+        <p>
+          FDA Table II reports 19 plasma group means after a single direct acyclovir 800 mg tablet,
+          not valacyclovir. The same 16 analyzed adults took the same Carlsbad tablet lot after a
+          high-fat breakfast and after an overnight fast.
+        </p>
+        <ul class="legend" aria-label="Measured curve legend">
+          <li><span class="key fed-key" aria-hidden="true"></span> Fed (circles)</li>
+          <li><span class="key fasted-key" aria-hidden="true"></span> Fasted (squares)</li>
+        </ul>
+        <div class="plot">
+          <svg
+            id="observed-chart"
+            viewBox="0 0 620 300"
+            role="img"
+            aria-labelledby="observed-title observed-desc"
+          >
+            <title id="observed-title">
+              Measured fed and fasted plasma acyclovir concentrations
+            </title>
+            <desc id="observed-desc">
+              Fed peaks later and higher on the sampled group-mean curve. The exact samples are in
+              the expandable table.
+            </desc>
+          </svg>
+        </div>
+        <table class="summary">
+          <caption>
+            Plasma exposure and peak comparison
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              <th scope="col">Fed</th>
+              <th scope="col">Fasted</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Sampled peak of group curve (mg/L)</th>
+              <td>0.874</td>
+              <td>0.668</td>
+            </tr>
+            <tr>
+              <th scope="row">Time of sampled group peak (h)</th>
+              <td>3.00</td>
+              <td>1.33</td>
+            </tr>
+            <tr>
+              <th scope="row">Group-curve AUC₀₋₁₂ (mg·h/L)</th>
+              <td>5.404</td>
+              <td>3.510</td>
+            </tr>
+            <tr>
+              <th scope="row">Mean individual AUC∞ (mg·h/L)</th>
+              <td>6.556</td>
+              <td>4.543</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          The review’s mean individual AUC∞ was 44% higher when fed. Group-curve AUC₀₋₁₂ uses linear
+          trapezoids on the published samples; the mean individual AUC∞ is a different endpoint,
+          including extrapolation beyond the measured window.
+        </p>
+        <details>
+          <summary>Show all 19 measured group means</summary>
+          <table id="measured">
+            <caption>
+              FDA Table II, reported ng/mL
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Time (h)</th>
+                <th scope="col">Fed</th>
+                <th scope="col">Fasted</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">0</th>
+                <td>1.46</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <th scope="row">0.33</th>
+                <td>8.09</td>
+                <td>178.02</td>
+              </tr>
+              <tr>
+                <th scope="row">0.67</th>
+                <td>210.64</td>
+                <td>491.25</td>
+              </tr>
+              <tr>
+                <th scope="row">1.00</th>
+                <td>572.78</td>
+                <td>639.75</td>
+              </tr>
+              <tr>
+                <th scope="row">1.33</th>
+                <td>741.14</td>
+                <td>668.13</td>
+              </tr>
+              <tr>
+                <th scope="row">1.67</th>
+                <td>774.00</td>
+                <td>662.88</td>
+              </tr>
+              <tr>
+                <th scope="row">2.00</th>
+                <td>795.06</td>
+                <td>637.25</td>
+              </tr>
+              <tr>
+                <th scope="row">2.50</th>
+                <td>851.63</td>
+                <td>593.81</td>
+              </tr>
+              <tr>
+                <th scope="row">3.00</th>
+                <td>874.31</td>
+                <td>534.44</td>
+              </tr>
+              <tr>
+                <th scope="row">3.50</th>
+                <td>854.13</td>
+                <td>470.31</td>
+              </tr>
+              <tr>
+                <th scope="row">4.00</th>
+                <td>791.00</td>
+                <td>413.19</td>
+              </tr>
+              <tr>
+                <th scope="row">5.00</th>
+                <td>646.81</td>
+                <td>322.75</td>
+              </tr>
+              <tr>
+                <th scope="row">6.00</th>
+                <td>485.94</td>
+                <td>242.81</td>
+              </tr>
+              <tr>
+                <th scope="row">8.00</th>
+                <td>287.75</td>
+                <td>152.96</td>
+              </tr>
+              <tr>
+                <th scope="row">10.00</th>
+                <td>176.45</td>
+                <td>96.64</td>
+              </tr>
+              <tr>
+                <th scope="row">12.00</th>
+                <td>116.34</td>
+                <td>68.74</td>
+              </tr>
+              <tr>
+                <th scope="row">14.00</th>
+                <td>84.42</td>
+                <td>50.53</td>
+              </tr>
+              <tr>
+                <th scope="row">16.00</th>
+                <td>63.60</td>
+                <td>40.81</td>
+              </tr>
+              <tr>
+                <th scope="row">24.00</th>
+                <td>36.40</td>
+                <td>35.05</td>
+              </tr>
+            </tbody>
+          </table>
+        </details>
+      </section>
+
+      <section aria-labelledby="model-heading">
+        <h2 id="model-heading">What changing absorption speed alone can do</h2>
+        <p>
+          Try changing the comparison curve’s absorption rate. In this illustrative model, slower
+          absorption delays and lowers the peak, but total exposure stays fixed because the same
+          amount is absorbed and clearance does not change.
+        </p>
+        <div class="controls">
+          <label for="slower"
+            ><input id="slower" type="checkbox" checked /> Slow the comparison curve</label
+          >
+          <span id="rate-caption">Reference 2.0 h⁻¹ · Comparison 0.5 h⁻¹</span>
+        </div>
+        <ul class="legend" aria-label="Model curve legend">
+          <li><span class="key fed-key" aria-hidden="true"></span> Comparison (solid)</li>
+          <li><span class="key fasted-key" aria-hidden="true"></span> Reference (dashed)</li>
+        </ul>
+        <div class="plot">
+          <svg
+            id="model-chart"
+            viewBox="0 0 620 300"
+            role="img"
+            aria-labelledby="model-title model-desc"
+          >
+            <title id="model-title">Illustrative comparison of two absorption speeds</title>
+            <desc id="model-desc">
+              The comparison curve can change speed, while both curves keep the same area to
+              infinity. Model outputs are in the table.
+            </desc>
+          </svg>
+        </div>
+        <table class="summary" aria-live="polite">
+          <caption>
+            Illustrative model outputs, not fitted predictions
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              <th scope="col">Reference</th>
+              <th scope="col">Comparison</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Peak (mg/L)</th>
+              <td id="reference-peak">2.172</td>
+              <td id="comparison-peak">1.142</td>
+            </tr>
+            <tr>
+              <th scope="row">Time of peak (h)</th>
+              <td id="reference-time">0.76</td>
+              <td id="comparison-time">1.57</td>
+            </tr>
+            <tr>
+              <th scope="row">Total AUC∞ (mg·h/L)</th>
+              <td id="reference-auc">5.00</td>
+              <td id="comparison-auc">5.00</td>
+            </tr>
+          </tbody>
+        </table>
+        <noscript
+          ><p>
+            The tables show measurements and the default example. Enable JavaScript to view the
+            curves and change the comparison.
+          </p></noscript
+        >
+        <details>
+          <summary>Model assumptions and limits</summary>
+          <p>
+            One compartment with first-order absorption and elimination. Fixed dose 800 mg,
+            bioavailability 15%, volume 30 L, clearance 24 L/h. These are illustrative settings, not
+            fitted or intended as clinical estimates. Only the rate of absorption (kₐ) changes.
+            Total AUC∞ = dose × bioavailability ÷ clearance. Area over a finite window can change.
+          </p>
+          <p>
+            The two observed conditions differ in both timing and total exposure. A rate-only change
+            under this model cannot explain both; the crossover alone does not establish an absolute
+            bioavailability or a mechanism for the difference.
+          </p>
+        </details>
+      </section>
+
+      <footer>
+        <h2>Source</h2>
+        <p>
+          <a
+            href="https://www.accessdata.fda.gov/drugsatfda_docs/nda/99/075382_ORIGINAL%20APPROVAL_PACKAGE.pdf#page=61"
+            >FDA ANDA 075382 bioequivalence review, Table II (printed page 10)</a
+          >. Carlsbad lot RB7002E, treatments A and C only. The fed reference-tablet arm and the
+          separate fasting study in Table I are not included.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

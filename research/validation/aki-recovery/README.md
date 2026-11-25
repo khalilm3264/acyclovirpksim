@@ -1,0 +1,11 @@
+# Haefeli 1993 post-treatment AKI replay
+
+Source: [Haefeli et al. 1993](https://pubmed.ncbi.nlm.nih.gov/8430717/), doi:10.1016/0002-9343(93)90186-S, Figure 1, printed p. 213. The user-provided PDF SHA-256 is `ffccf8f9fabb136a500435272dd849c5821098bb1d26bc21a409ab9234de4fbd`. The PDF and crops are intentionally not redistributed.
+
+Render PDF page 2 at 240 dpi; pixel coordinates in `public/experimental/aki-recovery/model.js` are in a crop whose upper-left origin is original pixel (100, 140). The x-axis calibration uses 0 and 14 days. The logarithmic serum acyclovir y-axis endpoints are 300 and 0.03 µmol/L. The seven star centers were read manually; approximate visual error for selecting centers is ±3 px (±0.074 days or ×/÷1.14 in concentration, not a statistical or assay confidence interval). The text's exact first concentration (229.9 µmol/L) replaces the digitized ordinate; its time is still digitized. Triangles are urea, not clearance. The source reports a measured creatinine clearance of 8.5 mL/min around peak renal impairment, not serial values.
+
+Both runs initialize central and peripheral concentrations to the text's first serum value and start on the calculated figure day of that marker. Adult coefficients are copied from AyFlux engine commit 8fc1c9d without variability: VC=0.32×weight, VP=0.37×weight, Q=10×(weight/70)^0.75, total parent elimination clearance =(0.12+1.60+0.202×CrCl)×(weight/70)^0.75, in L/h at 59.5 kg. This uses no further dose or dialysis. The fixed scenario holds CrCl at 8.5. The other scenarios linearly interpolate from 8.5 to 40.75 (an illustrative Cockcroft–Gault approximation from pre-treatment age, weight and creatinine, not a measured recovery target) across figure days 4–12 or 3–10. No ramp or disposition parameter was estimated from the concentration observations.
+
+Interpretation: speeding assumed renal recovery shortens the modeled tail, but modeled parent decays substantially faster than measured under every shown setup. The initial peripheral concentration and the renal trajectory are unobserved, so this is a demonstration of sensitivity and model limitations, not an independent clearance validation. This case is not a dose or toxicity calculator.
+
+Run: `node --test tests/aki-recovery.test.cjs`.
