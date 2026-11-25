@@ -38,6 +38,30 @@
   const comparison = document.getElementById('hd-compare');
   const result = document.getElementById('hd-result');
   const errors = document.getElementById('hd-errors');
+  const selector = document.getElementById('hd-case');
+  // Table 1 supplies weight and duration. Table 2 supplies the three measurements (µmol/L).
+  const cases = {
+    1: { weight: 74.5, hours: 5, before: 4.38, end: 1.77, observed: 1.96 },
+    2: { weight: 60, hours: 4, before: 1.78, end: 0.17, observed: 0.21 },
+    4: { weight: 68, hours: 4, before: 1.13, end: 0.52, observed: 0.56 },
+    5: { weight: 55.5, hours: 4, before: 2.24, end: 1.28, observed: 1.79 },
+    7: { weight: 57.5, hours: 4, before: 2.26, end: 2.25, observed: 1.46 }
+  };
+  for (const id of Object.keys(cases)) selector.add(new Option('Almond patient ' + id, id));
+  function selectCase() {
+    reset();
+    const patient = cases[selector.value];
+    for (const input of form.querySelectorAll('input')) {
+      input.value = patient ? patient[input.name] : '';
+      input.readOnly = Boolean(patient);
+    }
+    comparison.elements.observed.disabled = Boolean(patient);
+    document.getElementById('hd-observed-entry').hidden = Boolean(patient);
+    document.getElementById('hd-score').textContent = patient
+      ? 'Reveal measured level and errors'
+      : 'Compare with measurement';
+  }
+  selector.addEventListener('change', selectCase);
   const fmt = (n) => Number(n.toPrecision(4)).toString();
   let saved;
   function reset() {
@@ -74,12 +98,15 @@
   comparison.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!saved) return;
-    const observed = comparison.elements.observed.valueAsNumber;
+    const observed = cases[selector.value]?.observed ?? comparison.elements.observed.valueAsNumber;
     errors.textContent =
-      'Absolute error at one hour: ' +
+      'Measured: ' +
+      fmt(observed) +
+      ' µmol/L. Absolute error at one hour: ' +
       fmt(Math.abs(saved.estimate - observed)) +
       ' µmol/L for the forecast and ' +
       fmt(Math.abs(saved.baseline - observed)) +
       ' µmol/L for carry-forward.';
   });
+  selectCase();
 })();

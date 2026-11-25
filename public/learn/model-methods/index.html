@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="/learn/research-controls-v1.css">
 <script defer src="/assets/pk-engine.js"></script>
 <script defer src="post-hd.js"></script>
+<script defer src="crrt-interruption.js"></script>
 </head>
 <body>
 <header class="site-header ay-header">
@@ -85,6 +86,7 @@
 <section class="card" id="post-hd-forecast">
   <h2>One-hour post-hemodialysis forecast</h2>
   <p>Estimate plasma acyclovir one hour after disconnect using two measured concentrations from the same session. This research calculation assumes negligible kidney clearance, no intervening doses or further dialysis, and equal plasma and tissue concentrations at the start of dialysis.</p>
+  <div class="tool-fields tool-controls"><label>Forecast inputs <select id="hd-case"><option value="">Enter your own measurements</option></select></label></div>
   <form id="hd-forecast"><div class="tool-fields tool-controls">
     <label>Body weight (kg) <input name="weight" type="number" step="any" required></label>
     <label>Session duration (h) <input name="hours" type="number" step="any" required></label>
@@ -92,11 +94,20 @@
     <label>At disconnect (µmol/L) <input name="end" type="number" step="any" required></label>
   </div><button class="btn" type="submit">Forecast one-hour level</button></form>
   <p role="status" id="hd-result"></p>
-  <form id="hd-compare" hidden><div class="tool-fields tool-controls"><label>Measured one-hour level (µmol/L) <input name="observed" type="number" min="0" step="any" required></label></div>
-    <button class="btn secondary" type="submit">Compare with measurement</button>
+  <form id="hd-compare" hidden><div id="hd-observed-entry"><div class="tool-fields tool-controls"><label>Measured one-hour level (µmol/L) <input name="observed" type="number" min="0" step="any" required></label></div></div>
+    <button id="hd-score" class="btn secondary" type="submit">Compare with measurement</button>
     <p role="status" id="hd-errors"></p></form>
-  <details><summary>Try a published case</summary><p>In <a href="/references/#ref21">Almond et al., Tables 1 and 2</a>, patient 5 weighed 55.5 kg. Plasma acyclovir fell from 2.24 to 1.28 µmol/L over four hours of dialysis. Run the forecast, then compare it with the measured one-hour value of 1.79 µmol/L.</p>
+  <details><summary>Source and calculation</summary><p><a href="/references/#ref21">Almond et al., Tables 1 and 2</a> provide five patients with measurements before dialysis, at disconnect and one hour later. Patients 3 and 6 lacked a disconnect measurement.</p>
   <p>The calculation interpolates plasma concentrations on a logarithmic scale during dialysis and uses AyFlux’s adult blood–tissue exchange equations for the following hour. Carry-forward uses the disconnect concentration as its prediction. Evaluation so far covers five patients from one retrospective study.</p></details>
+</section>
+<section class="card" id="crrt-interruption">
+  <h2>When continuous dialysis stops</h2>
+  <p>Move a break in continuous renal replacement therapy (CRRT) from the end of the infusion to the hours before the next dose. Both schedules deliver the same number of hours.</p>
+  <div class="tool-fields tool-controls"><label>Time off dialysis in each schedule <select id="crrt-break"><option value="0">0 hours</option><option value="2">2 hours</option><option value="4" selected>4 hours</option><option value="8">8 hours</option></select></label></div>
+  <div style="overflow-x:auto"><table><caption>Simulated plasma concentration and circuit removal at 24 hours</caption><thead><tr><th scope="col">Break timing</th><th scope="col">Hours on CRRT</th><th scope="col">Predose plasma (mg/L)</th><th scope="col">Removed by CRRT (mg)</th></tr></thead><tbody id="crrt-comparison"></tbody></table></div>
+  <p id="crrt-summary" role="status"></p>
+  <details><summary>Scenario and source</summary><p>The simulated adult weighs 70 kg and starts with zero acyclovir and zero residual creatinine clearance. A 700 mg IV infusion runs from hour 0 to 1. The next dose is scheduled at hour 24. While running, the circuit delivers 25 mL/kg/h of effluent with a sieving coefficient of 0.95.</p>
+  <p>In <a href="/references/#ref43">Khajehdehi et al.</a>, one circuit clotted after six hours. If its spot effluent concentration of 11 mg/L had held at 1 L/h, estimated removal would be 66 mg over those six hours or 264 mg over a full day. The two schedules above are illustrative simulations.</p></details>
 </section>
 <section class="card">
   <h2>Changing kidney function over time</h2>

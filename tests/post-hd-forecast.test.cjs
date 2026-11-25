@@ -34,3 +34,21 @@ test('requires quantified positive inputs and handles the limiting interpolation
   const nearby = forecast(pk, {...args, end: end * (1 + 1e-8)});
   assert.ok(central > 0 && Math.abs(central - nearby) < 1e-7);
 });
+
+test('CRRT comparisons keep hours equal and produce identical results without interruption', () => {
+  const compare = require('../public/learn/model-methods/crrt-interruption.js');
+  for (const duration of [0, 2, 4, 8]) {
+    const [early, late] = compare(pk, duration);
+    assert.equal(early.hours, 24-duration);
+    assert.equal(early.hours, late.hours);
+    if (duration === 0) {
+      assert.equal(early.plasma, late.plasma);
+      assert.equal(early.removed, late.removed);
+    } else {
+      assert.equal(early.start, 1);
+      assert.equal(late.end, 24);
+      assert.ok(late.plasma > early.plasma);
+      assert.ok(late.removed > early.removed && late.removed < 700);
+    }
+  }
+});

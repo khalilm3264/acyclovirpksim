@@ -12,6 +12,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-11-25 (preview)
+
+- Add a held-out measurement reveal for all five complete Almond cases and compare equal-duration CRRT interruptions early and late in a dose interval. No simulation engine equations, parameters or defaults changed.
+
 ## [0.31.0] - 2026-11-24 (preview)
 
 - Add an experimental one-hour post-HD plasma acyclovir forecast and a carry-forward comparison. The tool estimates tissue concentration from two measurements using log-linear interpolation during dialysis. The simulation engine equations, parameters and defaults are unchanged.
