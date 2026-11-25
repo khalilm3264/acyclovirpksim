@@ -1,8 +1,9 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.30.0-20261119";
+const CACHE = "ayflux-static-v0.32.0-number-expressions-20261125";
 const CORE = [
  "/assets/number-expressions.js", "/assets/number-expressions.css",
+ "/assets/forecast-replay-view.js", "/assets/forecast-replay.js",
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
  "/assets/academic-exports.js", "/references/ayflux.bib",
@@ -21,7 +22,7 @@ const CORE = [
  "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
  "/learn/research-controls-v1.css",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",
- "/learn/model-methods/", "/learn/dialysis/",
+ "/learn/model-methods/", "/learn/model-methods/post-hd.js", "/learn/model-methods/crrt-interruption.js", "/learn/dialysis/",
  "/license/", "/cite/", "/references/", "/disclaimer/"
 ];
 self.addEventListener("install", event => {

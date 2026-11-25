@@ -17,7 +17,7 @@ const server=http.createServer((req,res)=>{
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:'+server.address().port+'/');
   await page.waitForFunction(()=>!document.getElementById('saveBaseline').disabled);
-  await page.locator('#summaryMore summary').click();
+  await page.locator('#summaryMore > summary').click();
   const field=page.getByLabel('Plasma acyclovir threshold',{exact:true});
   const revision=await page.evaluate(()=>AyFluxResearchBridge.snapshot().revision);
   await page.locator('#comparisonPanel summary').click();

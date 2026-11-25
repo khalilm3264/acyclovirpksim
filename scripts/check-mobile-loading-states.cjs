@@ -256,7 +256,7 @@ async function runLoadingStatesAudit() {
 
       // 1. Enter a threshold while download is pending
       console.log('  1. Entering threshold (10 mg/L) while chart download is pending...');
-      await failedPage.locator('#summaryMore summary').click();
+      await failedPage.locator('#summaryMore > summary').click();
       const thresholdField = failedPage.getByLabel('Plasma acyclovir threshold', { exact: true });
       await thresholdField.fill('10');
 

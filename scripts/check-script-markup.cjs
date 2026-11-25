@@ -6,6 +6,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const expectedSources = [
+  './assets/number-expressions.js',
   './assets/charts.js',
   './assets/pk-engine.js',
   './assets/ayflux-exchange.js',
@@ -21,6 +22,7 @@ const expectedSources = [
   './assets/timeline-labels.js',
   './assets/analysis-views.js',
   './assets/research-workspace.js',
+  './assets/forecast-replay-view.js',
   './assets/literature-cases.js',
   './assets/literature-workspace.js',
   './assets/pwa-register.js',

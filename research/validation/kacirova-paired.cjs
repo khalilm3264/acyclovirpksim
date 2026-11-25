@@ -25,18 +25,16 @@ function predict(scrUmol, sampledDoseIndex, infusion, dt, overrides = {}) {
 }
 
 if (require.main === module) {
-const reference = predict(87, 8, 1, 1/12);
+const reference = predict(87, 9, 1, 1/12);
 const observations = [1.7, 8.9, 0.27, 0.64];
 const endpoints = ['Acyclovir trough', 'Acyclovir +25 min', 'CMMG trough', 'CMMG +25 min'];
 const grid = [];
 for (const scr of [86, 87, 102]) {
-  for (const index of [7, 8, 9]) {
-    for (const infusion of [1, 2]) {
-      const prediction = predict(scr, index, infusion, 1/12);
-      const fine = predict(scr, index, infusion, 1/24);
-      prediction.forEach((value, i) => assert.ok(Math.abs(value - fine[i]) < 0.001));
-      grid.push(prediction);
-    }
+  for (const infusion of [1, 2]) {
+    const prediction = predict(scr, 9, infusion, 1/12);
+    const fine = predict(scr, 9, infusion, 1/24);
+    prediction.forEach((value, i) => assert.ok(Math.abs(value - fine[i]) < 0.001));
+    grid.push(prediction);
   }
 }
 console.log('| Serum endpoint | Measured | Predicted | Predicted minus measured | Scenario range |');

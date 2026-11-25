@@ -12,13 +12,31 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
-No changes recorded yet.
+- Evaluate arithmetic in numeric fields. Open the calculator with the ƒx button or the equals key, then apply the result in the field's existing units. For example, enter `24*9` for 216 hours. No pharmacokinetic equations, parameters, defaults or configuration schema changed.
 
-## [0.30.0] - 2026-11-19 (preview)
+## [0.32.0] - 2026-11-25 (preview)
 
-- Evaluate arithmetic in numeric fields. Open the calculator with the ƒx button or the equals key, then apply the result in the field's existing units. For example, enter `24*9` for 216 hours.
+- Add a held-out measurement reveal for all five complete Almond cases and compare equal-duration CRRT interruptions early and late in a dose interval. No simulation engine equations, parameters or defaults changed.
 
-No pharmacokinetic equations, parameters, defaults or configuration schema change.
+## [0.31.0] - 2026-11-24 (preview)
+
+- Add an experimental one-hour post-HD plasma acyclovir forecast and a carry-forward comparison. The tool estimates tissue concentration from two measurements using log-linear interpolation during dialysis. The simulation engine equations, parameters and defaults are unchanged.
+
+## [0.30.2] - 2026-11-23 (preview)
+
+- Align the Kacířová overlay and research comparison with the author-confirmed fourth 850 mg infusion. No model equations, parameters or defaults changed.
+
+## [0.30.1] - 2026-11-23 (preview)
+
+- Correct the Berry CMMG sampling days and document the preceding oral acyclovir regimen in the Kacířová IV case using author clarifications. No model equations, parameters or defaults changed.
+
+## [0.30.0] - 2026-11-23 (preview)
+
+- Add the von Euler and Chen–Chu case measurements to the simulator references and downloadable bibliography. No pharmacokinetic equations, parameters or defaults changed.
+
+- Add a local finder for common simulator tools and site pages and link the user guide directly to related simulator controls.
+- Keep the three plasma metrics visible by default and move secondary outputs and the uncertainty explanation into the summary disclosures. No model equations, parameters, defaults, or configuration schema changes.
+- Add rolling forecast replay to compare population and measurement-updated predictions at each successive sampling time. No pharmacokinetic equations, parameters or defaults changed.
 
 ## [0.29.0] - 2026-11-17 (preview)
 
@@ -292,8 +310,7 @@ Everything merged to `main` since 0.26.0 ([full comparison](https://github.com/k
 - `appVersion: "19"` was the previous internal JSON export label.
 - Configuration schema 2 was introduced in prior releases and remains supported.
 
-[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.30.0...main
-[0.30.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.29.0...v0.30.0
+[Unreleased]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.29.0...main
 [0.29.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/khalilm3264/acyclovirpksim/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/khalilm3264/acyclovirpksim/compare/b928978...v0.27.0
