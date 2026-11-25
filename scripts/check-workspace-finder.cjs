@@ -40,9 +40,13 @@ module.exports = async function checkWorkspaceFinder(page) {
   await query.fill('bibliography');
   assert.equal(await results.getByRole('link', {name: /Bibliography/}).getAttribute('href'), '/references/');
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2));
-  await page.locator('.workspace-finder-links a').first().focus();
+  const resources = page.locator('#workspaceResources');
+  const toggle = resources.locator('summary');
+  await toggle.focus();
   assert.equal(await results.isVisible(), false);
-  await page.locator('a[href="#guidedPanel"]').click();
+  await toggle.press('Enter');
+  await resources.getByRole('link', {name: 'Guided scenarios'}).click();
+  assert.equal(await resources.evaluate(menu => menu.open), false);
   await page.waitForFunction(() => location.hash === '#guidedPanel' && document.activeElement.id === 'guidedPanel');
   assert.ok(await page.locator('#research').isVisible());
   assert.equal(await input.inputValue(), dose);
