@@ -9,7 +9,7 @@
 <script defer src="/assets/charts.js"></script><script defer src="model.js"></script><script defer src="view.js"></script></head><body><main>
 <nav><a href="/">AyFlux</a> / <a href="/experimental/">Experimental</a></nav><h1>Oral absorption comparison</h1>
 <p>How does absorption change the time of the plasma acyclovir peak after a single 500 mg dose of valacyclovir? Compare three absorption models with concentrations digitized from published group means.</p>
-<label for="study">Study group</label> <select id="study"><option value="0">Weller · Development</option><option value="1">Phan A · Held out</option><option value="2">Phan B · Held out</option></select>
+<label for="study">Study group</label> <select id="study"><option value="0">Weller · Development</option><option value="1">Phan Figure 3, visit 2 · Held out</option><option value="2">Phan Figure 4, visit 1 · Held out</option></select>
 <p id="context"></p><div id="plot" role="img" aria-label="Plasma acyclovir concentrations over time. Numerical results follow."></div>
 <div class="scroll"><table><caption id="caption"></caption><thead><tr><th>Series</th><th>Sampled peak (mg/L)</th><th>Peak time (h)</th><th>Window AUC (mg·h/L)</th><th>Total AUC (mg·h/L)</th></tr></thead><tbody id="metrics"></tbody></table></div>
 <p>Peak and window AUC use the study sampling times. Window AUC uses linear trapezoids. Model total AUC equals absorbed acyclovir mass divided by clearance, so all three absorption models give the same total within a study group. Weller’s observed total AUC is the mean individual estimate from Table II.</p>

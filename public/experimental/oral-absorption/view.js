@@ -23,7 +23,7 @@
     get('context').textContent =
       index === 0
         ? 'Seven adults. The fit uses ten resolved markers from 0.5 to 8 hours. The reconstruction uses 74.6 kg and creatinine clearance of 79.3 mL/min.'
-        : 'Five adults in this treatment sequence. Points show valacyclovir alone. The reconstruction uses 62 kg and an assumed creatinine clearance of 105 mL/min.';
+        : 'Five adults in this treatment sequence. Points show valacyclovir alone. Labels follow the figure and visit, because the paper’s group letters do not match its figures. The reconstruction uses 62 kg and an assumed creatinine clearance of 105 mL/min.';
     get('caption').textContent = 'Plasma acyclovir · ' + times[0] + '–' + times.at(-1) + ' hours';
     get('metrics').replaceChildren();
     get('points').replaceChildren();

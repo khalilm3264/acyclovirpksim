@@ -20,8 +20,8 @@
   };
   const studies = [
     weller,
-    { ...phan, name: 'Phan A · Held out', observed: [0, 1.336, 2.728, 2.296, 0.836, 0.252, 0.1] },
-    { ...phan, name: 'Phan B · Held out', observed: [0, 1.19, 2.794, 2.168, 0.809, 0.225, 0.071] }
+    { ...phan, name: 'Phan Figure 3, visit 2 · Held out', observed: [0, 1.336, 2.728, 2.296, 0.836, 0.252, 0.1] },
+    { ...phan, name: 'Phan Figure 4, visit 1 · Held out', observed: [0, 1.19, 2.794, 2.168, 0.809, 0.225, 0.071] }
   ];
   const amount = ((500 * 225.21) / 324.34) * 0.545;
   // Convolve the two-compartment IV impulse response with first-order or Erlang-2 input.
