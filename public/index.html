@@ -607,20 +607,18 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 .chart-status--previous{align-items:flex-start;padding:10px;background:rgba(244,248,251,.12)}
 .chart-status--previous>span{max-width:100%;padding:6px 10px;border:1px solid #becbd6;background:#f4f8fb;font-weight:600}
 /* Keep finding tools separate from configuring a simulation. */
-.workspace-finder{position:relative;margin:0 0 12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
-.workspace-finder form{position:relative;flex:0 1 360px;min-width:0;width:100%}
+@media(min-width:811px){
+  html body .shell>.layout{grid-template-rows:auto 1fr}
+  html body .shell .layout>.workspace-finder{grid-column:1;grid-row:1}
+  html body .shell .layout>aside{grid-column:1;grid-row:2}
+  html body .shell .layout>main{grid-column:2;grid-row:1 / span 2}
+}
+.workspace-finder{display:flex;align-items:stretch;gap:6px;min-width:0}
+.workspace-finder form{position:relative;min-width:0;flex:1;margin:0}
 .workspace-finder .sr-only{left:0;top:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.workspace-finder input[type="search"]{box-sizing:border-box;width:100%;min-height:42px;padding:8px 12px;border:1px solid #9baebc;border-radius:2px;background:#fff;color:#263e52;font:inherit}
-.workspace-resources{position:relative;color:#284f6b}
-.workspace-resources summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 10px;cursor:pointer;list-style:none;font-weight:600}
-.workspace-resources summary::-webkit-details-marker{display:none}
-.workspace-resources summary::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg)}
-.workspace-resources[open] summary::after{transform:translateY(2px) rotate(225deg)}
-.workspace-resources summary:hover,.workspace-resources[open] summary{background:#dce6ed}
-.workspace-resources nav{position:absolute;z-index:13;right:0;top:100%;min-width:168px;padding:4px;background:#fff;border:1px solid #aebfcb;border-radius:3px;box-shadow:0 4px 12px #142e4320}
-.workspace-resources a{display:flex;align-items:center;min-height:44px;padding:0 12px;color:#245779;text-decoration:none}
-.workspace-resources a:hover,.workspace-resources a:focus-visible{background:#e9f3fa}
-.workspace-resources :focus-visible{outline:2px solid #387da8;outline-offset:-2px}
+.workspace-finder input[type="search"]{box-sizing:border-box;width:100%;height:100%;min-height:40px;padding:6px 9px;border:1px solid #9baebc;border-radius:2px;background:#fff;color:#263e52;font:inherit}
+.workspace-finder .guided-shortcut{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;padding:6px 10px;min-height:40px;box-sizing:border-box}
+.workspace-finder .guided-shortcut:focus-visible{outline:2px solid #387da8;outline-offset:2px}
 .context-links{display:flex;gap:4px 14px;flex-wrap:wrap}
 .context-links a{color:#245779;text-underline-offset:2px}
 .context-links{font-size:13px;margin:9px 0 0}
@@ -633,7 +631,7 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 .layout :target{scroll-margin-top:12px}
 #uncertaintyNote{margin:6px 0 0}
 #uncertaintyNote p{margin:6px 0}
-@media(max-width:540px){.workspace-finder{gap:4px}.workspace-finder form{flex:1 1 0}.workspace-resources summary{padding:0 6px}}
+@media(max-width:650px){.workspace-finder{width:100%}.workspace-finder form{max-width:none}.workspace-finder .guided-shortcut,.workspace-finder input[type="search"]{min-height:44px}}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
@@ -643,24 +641,18 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
   <a class="ay-guide-link" href="/learn/" aria-label="Open AyFlux user guide">User guide</a>
 </header>
 <div class="shell"><div class="notice"><strong>Educational simulation only.</strong> Outputs are simplified model estimates, not clinical measurements or dosing recommendations. Do not use for prescribing, toxicity assessment, or dialysis decisions. <a href="/disclaimer/">Read the limitations</a>.</div>
+<a class="mobile-workspace-link" id="jumpToWorkspace" href="#tabs">Jump to results and tools</a>
+<div class="layout">
 <div class="workspace-finder">
   <form id="workspaceSearch" role="search" aria-label="Find AyFlux tools and pages" hidden>
     <label class="sr-only" for="workspaceQuery">Find a tool or page</label>
-    <input type="search" id="workspaceQuery" autocomplete="off" placeholder="Find a tool or page (e.g., PD, CSV)" aria-controls="workspaceResults">
+    <input type="search" id="workspaceQuery" autocomplete="off" placeholder="Find a tool or page" aria-controls="workspaceResults">
     <span class="sr-only" id="workspaceSearchStatus" role="status"></span>
     <ul id="workspaceResults" class="finder-results" aria-label="Search results" hidden></ul>
   </form>
-  <details class="workspace-resources" id="workspaceResources">
-    <summary>Resources</summary>
-    <nav aria-label="Simulator resources">
-    <a href="#guidedPanel">Guided scenarios</a>
-    <a href="/learn/dialysis/">Dialysis guide</a>
-    <a href="/references/">Bibliography</a>
-    </nav>
-  </details>
+  <a class="btn secondary guided-shortcut" href="#guidedPanel">Guided scenarios</a>
 </div>
-<a class="mobile-workspace-link" id="jumpToWorkspace" href="#tabs">Jump to results and tools</a>
-<div class="layout"><aside>
+<aside>
 <h2 id="patientInputs" tabindex="-1">Dialysis scenario</h2><label for="primary" class="tip">Primary mode for detailed modeling and uncertainty band</label><select id="primary"><option>No dialysis</option><option>Intermittent HD</option><option>Peritoneal dialysis</option><option>CRRT</option><option>Custom sequence</option></select><p id="modeHint" class="tip"></p><div id="modeControls"></div>
 <h2>Patient</h2><div id="patientControls"></div><div id="drugCaution" class="advisory hidden" role="note"></div>
 <details class="advanced" id="advanced"><summary>Advanced settings</summary><div id="advancedControls"></div><p class="context-links"><a href="#uncertaintyNote">Understand the uncertainty band</a></p></details>
