@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acyclovir routes and tissue exposure | AyFlux</title>
+<meta name="description" content="Explore oral acyclovir and medicated peritoneal exchanges, with human ocular and topical skin measurements.">
+<link rel="canonical" href="https://ayflux.org/research/routes/">
+<meta property="og:type" content="article"><meta property="og:site_name" content="AyFlux"><meta property="og:title" content="Acyclovir routes and tissue exposure | AyFlux"><meta property="og:description" content="Explore oral acyclovir and medicated peritoneal exchanges, with human ocular and topical skin measurements."><meta property="og:url" content="https://ayflux.org/research/routes/">
+<link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/learn/learn.css"><link rel="stylesheet" href="/learn/research-controls-v1.css">
+<script defer src="/assets/pk-engine.js"></script><script defer src="model.js"></script><script defer src="view.js"></script></head>
+<body><header class="site-header ay-header">
+  <div class="ay-header-brand">
+    <img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" alt="" width="42" height="42">
+    <div class="ay-title-stack">
+      <a class="brand ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a>
+      <p class="site-subtitle">Acyclovir pharmacokinetics across kidney function and dialysis</p>
+    </div>
+  </div>
+  <a class="ay-guide-link" href="/">← Simulator</a>
+</header>
+<div class="shell"><main><h1>Acyclovir routes and tissue exposure</h1>
+<nav class="guide-topics" aria-label="Research modules"><a href="#tablet">Oral tablets</a><a href="#dwell">Medicated dwell</a><a href="#eye">Eye</a><a href="#skin">Skin</a></nav>
+<section class="card" id="tablet"><h2>Oral acyclovir tablets</h2><p>Explore how much a preceding oral course could contribute to two IV measurements, or compare a single tablet dose with published dialysis cohorts. For educational research.</p>
+<div class="tool-fields tool-controls"><label>Course<select id="course"><option value="iv">Kacířová · oral to IV</option><option value="hd">Almond · single 800 mg tablet, HD</option><option value="pd">Stathoulopoulou · single 800 mg tablet, CAPD</option></select></label>
+<label>Assumed oral bioavailability<select id="fraction"><option>10%</option><option selected>15%</option><option>20%</option></select></label>
+<label>Assumed absorption rate (1/h)<select id="ka"><option>0.5</option><option selected>1</option><option>2</option></select></label>
+<div id="gapLabel"><label>Last tablet to first infusion (h)<select id="gap"><option>2</option><option selected>6</option><option>12</option></select></label></div></div>
+<div id="oralResult" aria-live="polite"></div><p id="courseNotes"></p>
+<details><summary>Tablet absorption and sources</summary><p>The label reports average oral bioavailability of 10–20%, decreasing with dose. In a crossover study, steady-state peak/trough concentrations were 0.83/0.46, 1.21/0.63 and 1.61/0.83 mg/L at 200, 400 and 800 mg. Each scenario explores a fixed dose with a selectable fraction. The uptake rate is an assumption. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=dbdb7903-0991-413d-b1ad-ab0f1ae2d8f4">US tablet label</a></p>
+<p><a href="https://www.solen.cz/pdfs/far/2022/04/02.pdf">Kacířová, case 1</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/7777108/">Almond, hemodialysis</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/8893152/">Stathoulopoulou, CAPD</a></p></details></section>
+<section class="card" id="dwell"><h2>Medicated peritoneal dwell</h2><p>Acyclovir starts in the first dialysis bag. Change when that bag drains to see how much drug remains in it and how much reaches the circulation.</p>
+<div class="tool-fields tool-controls"><label>First dwell (hours)<select id="hours"><option>2</option><option>4</option><option selected>6</option></select></label></div><p id="dwellResult" role="status"></p>
+<p>Burgess and Gill used 1 g intraperitoneally, 1.5 L exchanges with 1.5% dextrose and six-hour drains. Observed systemic bioavailability was 61 ± 10%. Boelaert’s separate IV-based model projected 91% for hypothetical peritoneal administration. <a href="https://pubmed.ncbi.nlm.nih.gov/2243158/">Burgess and Gill</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/3624115/">Boelaert et al.</a></p>
+<details><summary>Simulation assumptions</summary><p>Body weight is the reported CAPD group mean of 68.3 kg. Residual creatinine clearance is assumed zero. Fresh bags follow every six hours after the first drain. Relative exposure divides 240-hour plasma AUC after the medicated fill by AUC after an equal IV dose over one hour under the same schedule. Both runs use existing membrane parameters. Shorter first dwells are hypothetical.</p></details></section>
+<section class="card" id="eye"><h2>Vitreous exposure after oral valacyclovir</h2><p>Huynh et al. collected serum and undiluted vitreous at surgery after four oral valacyclovir doses in ten adults with normal kidney function and noninflamed eyes.</p>
+<table><caption>Measured acyclovir at surgery, mean (range)</caption><tbody><tr><th scope="row">Serum</th><td>4.41 (3.18–5.92) mg/L</td></tr><tr><th scope="row">Vitreous</th><td>1.03 (0.67–1.33) mg/L</td></tr><tr><th scope="row">Paired vitreous/serum ratio</th><td>0.24 (0.16–0.34)</td></tr></tbody></table><p>The study gives one sampling occasion per eye. The time course and transfer during dialysis remain open questions. <a href="https://pubmed.ncbi.nlm.nih.gov/18226802/">Huynh et al.</a></p></section>
+<section class="card" id="skin"><h2>Topical acyclovir and skin exposure</h2>
+<h3>Human 5% cream</h3><p>One hour after the final application, plasma acyclovir was below the assay detection limit of 0.01 µmol/L in five of six volunteers and measured 0.014 µmol/L in the sixth. A separate 20-person study sampled drug in the dermis for 36 hours. Its concentration curves describe local exposure even when little drug reaches plasma. <a href="https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=9167ea4a-959d-402c-96b4-619395821c01">Cream label</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7522073/">Dermal sampling study</a></p>
+<h3>Rabbit ointment and iontophoresis</h3><p>After ointment application, dermal acyclovir was detectable only in the first 30 minutes. With electrically assisted delivery, skin exposure ranged from 11% to 40% of IV-bolus skin exposure across the tested current densities. These animal measurements describe local delivery under the experimental conditions. Human tissue predictions would require a formulation-specific model. <a href="https://pubmed.ncbi.nlm.nih.gov/15072796/">Rabbit microdialysis study</a></p></section></main><footer class="site-footer">
+    <span>© 2026 Muhammad Khalil · AyFlux · <a href="/license/">AGPLv3</a></span>
+    <span><a href="/learn/">User guide</a> · <a href="/disclaimer/">Disclaimer</a> · <a href="/cite/">Cite</a> · <a class="github-icon-link" href="https://github.com/khalilm3264/acyclovirpksim" target="_blank" rel="noopener noreferrer" title="AyFlux on GitHub" aria-label="AyFlux source code on GitHub"><img src="/github-mark.svg" width="19" height="19" alt=""></a></span>
+  </footer></div></body></html>

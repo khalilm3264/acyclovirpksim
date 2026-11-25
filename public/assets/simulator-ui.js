@@ -867,6 +867,7 @@
             .join('')
         : `<button class="btn secondary" id="openDoses">Edit medication schedule</button><div class="advisory" id="customDoseSummary"></div>`) +
       `<p class="tip" id="doseWeightTip">${doseWeightText()}</p>` +
+      '<p class="tip"><a href="/research/routes/">Research routes: tablets, medicated dwell, eye and skin</a></p>' +
       medicationTools() +
       group('Simulation window', ['horizon']);
     $('modeControls').innerHTML = modalControls();
