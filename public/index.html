@@ -381,11 +381,10 @@ html body .shell .import-history summary{cursor:pointer;font-weight:700;color:#2
 html body .shell .import-history-list{margin:6px 0 0;padding-left:22px}
 html body .shell .import-history-list li{margin:5px 0;overflow-wrap:anywhere}
 html body .shell .import-history-list button{margin-left:8px;padding:2px 9px;font-size:12px}
-html body .shell .source-library{background:#f4f1e8;border:1px solid #d5cbb0;border-left:5px solid #8a7440;margin-top:22px}
-html body .shell .source-library h2{font-family:Georgia,"Times New Roman",serif;font-weight:700;color:#4d4020}
-html body .shell .source-library h2::before{content:"Sources";font:700 10.5px Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.6px;color:#8a7440;display:block;margin-bottom:2px}
-html body .shell .source-library ul{list-style:none;margin:8px 0 0;padding:0}
-html body .shell .source-library li{padding:8px 0;border-top:1px solid #ddd4bb;font-family:Georgia,"Times New Roman",serif;font-size:13px;line-height:1.5}
+.source-library ul{list-style:none;margin:8px 0 0;padding:0}
+.source-library li{padding:9px 0;border-top:1px solid #d6e0e8;line-height:1.5}
+.source-library li:last-child{padding-bottom:0}
+.source-library li a{font-weight:600;text-underline-offset:2px}
 html body #reference .medmeas tr.medmeas-group th{background:#dfe8ef;color:#21435c;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.3px;padding:6px 7px}
 @media(max-width:700px){html body #reference .medmeas tr.medmeas-group{border:0;background:none;padding:10px 0 2px;margin:0}html body #reference .medmeas tr.medmeas-group th{display:block;width:100%;background:none;padding:0}}
 html body .shell .share-link-field{width:100%;margin:8px 0 0;padding:6px;border:1px solid #abbac6;background:#f7f9fa;color:#183349;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
@@ -612,8 +611,18 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 .workspace-finder form{position:relative;flex:0 1 360px;min-width:0;width:100%}
 .workspace-finder .sr-only{left:0;top:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .workspace-finder input[type="search"]{box-sizing:border-box;width:100%;min-height:42px;padding:8px 12px;border:1px solid #9baebc;border-radius:2px;background:#fff;color:#263e52;font:inherit}
-.workspace-finder-links,.context-links{display:flex;gap:4px 14px;flex-wrap:wrap}
-.workspace-finder-links a,.context-links a{color:#245779;text-underline-offset:2px}
+.workspace-resources{position:relative;color:#284f6b}
+.workspace-resources summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 10px;cursor:pointer;list-style:none;font-weight:600}
+.workspace-resources summary::-webkit-details-marker{display:none}
+.workspace-resources summary::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-2px) rotate(45deg)}
+.workspace-resources[open] summary::after{transform:translateY(2px) rotate(225deg)}
+.workspace-resources summary:hover,.workspace-resources[open] summary{background:#dce6ed}
+.workspace-resources nav{position:absolute;z-index:13;right:0;top:100%;min-width:168px;padding:4px;background:#fff;border:1px solid #aebfcb;border-radius:3px;box-shadow:0 4px 12px #142e4320}
+.workspace-resources a{display:flex;align-items:center;min-height:44px;padding:0 12px;color:#245779;text-decoration:none}
+.workspace-resources a:hover,.workspace-resources a:focus-visible{background:#e9f3fa}
+.workspace-resources :focus-visible{outline:2px solid #387da8;outline-offset:-2px}
+.context-links{display:flex;gap:4px 14px;flex-wrap:wrap}
+.context-links a{color:#245779;text-underline-offset:2px}
 .context-links{font-size:13px;margin:9px 0 0}
 .finder-results{position:absolute;top:100%;left:0;right:0;z-index:12;max-height:min(46vh,320px);overflow:auto;background:#fff;border:1px solid #9baebc;box-shadow:0 4px 10px #142e4326;margin:3px 0 0;padding:0;list-style:none}
 .finder-results li{margin:0;padding:0}
@@ -624,7 +633,7 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 .layout :target{scroll-margin-top:12px}
 #uncertaintyNote{margin:6px 0 0}
 #uncertaintyNote p{margin:6px 0}
-@media(max-width:540px){.workspace-finder form{flex-basis:100%}}
+@media(max-width:540px){.workspace-finder{gap:4px}.workspace-finder form{flex:1 1 0}.workspace-resources summary{padding:0 6px}}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
@@ -641,11 +650,14 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
     <span class="sr-only" id="workspaceSearchStatus" role="status"></span>
     <ul id="workspaceResults" class="finder-results" aria-label="Search results" hidden></ul>
   </form>
-  <nav class="workspace-finder-links" aria-label="Common starting points">
+  <details class="workspace-resources" id="workspaceResources">
+    <summary>Resources</summary>
+    <nav aria-label="Simulator resources">
     <a href="#guidedPanel">Guided scenarios</a>
     <a href="/learn/dialysis/">Dialysis guide</a>
     <a href="/references/">Bibliography</a>
-  </nav>
+    </nav>
+  </details>
 </div>
 <a class="mobile-workspace-link" id="jumpToWorkspace" href="#tabs">Jump to results and tools</a>
 <div class="layout"><aside>

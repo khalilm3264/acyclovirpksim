@@ -18,6 +18,21 @@
     attributeFilter: ['class']
   });
   syncSelection();
+  const resources = document.getElementById('workspaceResources');
+  if (resources) {
+    document.addEventListener('click', (event) => {
+      if (!resources.contains(event.target) || event.target.closest('a')) resources.open = false;
+    });
+    resources.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && resources.open) {
+        resources.open = false;
+        resources.querySelector('summary').focus();
+      }
+    });
+    resources.addEventListener('focusout', (event) => {
+      if (!resources.contains(event.relatedTarget)) resources.open = false;
+    });
+  }
   const entries = [
     [
       'Patient & dialysis settings',
