@@ -59,8 +59,7 @@ test('simulator preloads its renderer while execution and research tools remain 
  assert.ok(includesCode(ui,"chartWait=window.AyFluxCharts.ensure()"));
  assert.match(research,/await window\.AyFluxCharts\.ensure\(\)/);
  assert.ok(sw.includes('"/assets/charts.js"'));
- // The heavyweight library is stored on first use, rather than precached.
  const precache=sw.slice(sw.indexOf('const CORE = ['),sw.indexOf('];')+2);
- assert.doesNotMatch(precache,/echarts-[56]/);
- assert.match(sw,/\["\/assets\/vendor\/echarts-6\.1\.0\.min\.js"/);
+ assert.ok(precache.includes('"/assets/vendor/echarts-6.1.0.min.js"'));
+ assert.doesNotMatch(precache,/echarts-gl/);
 });

@@ -1,7 +1,8 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.32.0-dialysis-timing-20261125";
+const CACHE = "ayflux-static-v0.32.0-offline-charts-20261125";
 const CORE = [
+ "/assets/vendor/echarts-6.1.0.min.js",
  "/assets/forecast-replay-view.js", "/assets/forecast-replay.js",
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
@@ -74,8 +75,7 @@ self.addEventListener("fetch", event => {
        return await cache.match(url.pathname) || await cache.match("/") || Response.error();
      }
    }
-   const vendor = ["/assets/vendor/echarts-6.1.0.min.js", "/assets/vendor/echarts-gl-2.1.0.min.js"];
-   if (!vendor.includes(url.pathname)) return fetch(request);
+   if (url.pathname !== "/assets/vendor/echarts-gl-2.1.0.min.js") return fetch(request);
    const cached = await cache.match(url.pathname);
    if (cached) return cached;
    const response = await fetch(request);
