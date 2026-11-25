@@ -12,6 +12,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+## [0.32.1] - 2026-11-25 (preview)
+
+- Add research scenarios for direct oral acyclovir and a medicated CAPD fill, with ocular and cutaneous exposure evidence. Research events can supply bioavailable acyclovir to the oral depot or drug mass to the first PD fill. Default simulator routes, equations and parameters are unchanged.
+
 ## [0.32.0] - 2026-11-25 (preview)
 
 - Add a held-out measurement reveal for all five complete Almond cases and compare equal-duration CRRT interruptions early and late in a dose interval. No simulation engine equations, parameters or defaults changed.

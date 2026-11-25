@@ -808,7 +808,12 @@
             (currentPD.dwell ?? (currentPD.type === 'CAPD' ? c.capdDwell : c.apdDwell))
           : null;
       }
-      const absorbedDose = timeline.oralDose[i] * p.oralF;
+      // Research replay inputs are absolute acyclovir amounts in mg.
+      if (i === 0 && currentPD && timeline.firstFillMg > 0) {
+        pdAmount += timeline.firstFillMg;
+        administeredAcyclovirEqMg += timeline.firstFillMg;
+      }
+      const absorbedDose = timeline.oralDose[i] * p.oralF + (timeline.tabletInputs?.get(t) ?? 0);
       oralDepot += absorbedDose;
       administeredAcyclovirEqMg += absorbedDose;
       const C = a / p.vc,

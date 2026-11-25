@@ -2,8 +2,8 @@
 'use strict';
 // Research-only conditional course comparison; no parameter fitting or pooled scoring.
 const fs=require('node:fs'), crypto=require('node:crypto'), assert=require('node:assert/strict');
-const E=require('../../public/assets/pk-engine.js');
-const engineBytes=fs.readFileSync(require.resolve('../../public/assets/pk-engine.js'));
+const E=require('./frozen/pk-engine-304ce53.js');
+const engineBytes=fs.readFileSync(require.resolve('./frozen/pk-engine-304ce53.js'));
 const engineBlob=crypto.createHash('sha1').update(`blob ${engineBytes.length}\0`).update(engineBytes).digest('hex');
 assert.equal(engineBlob,'17971df66e0a97b4d382572a582d35c444a3c83f','Frozen adult engine changed; review protocol before updating');
 const observed=[{day:1,acv:11.2,cmmg:36.4},{day:2,acv:5.39,cmmg:16.37},{day:3,acv:2.26,cmmg:7.22}];

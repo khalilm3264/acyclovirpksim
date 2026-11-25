@@ -33,7 +33,7 @@ function hashesFor(relPath) {
 
 function verifyPinnedArtifacts() {
   const assert = require('node:assert/strict');
-  const eng = hashesFor('public/assets/pk-engine.js');
+  const eng = hashesFor('research/validation/frozen/pk-engine-304ce53.js');
   assert.equal(eng.blob, ENGINE_BLOB, 'pk-engine.js blob must match 304ce53');
   assert.equal(eng.sha256, ENGINE_SHA256, 'pk-engine.js SHA-256 must match 304ce53');
 

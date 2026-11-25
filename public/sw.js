@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.32.0-dialysis-timing-20261125";
+const CACHE = "ayflux-static-v0.32.1-dialysis-timing-20261125";
 const CORE = [
  "/assets/forecast-replay-view.js", "/assets/forecast-replay.js",
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
