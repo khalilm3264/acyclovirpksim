@@ -632,6 +632,11 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 #uncertaintyNote{margin:6px 0 0}
 #uncertaintyNote p{margin:6px 0}
 @media(max-width:650px){.workspace-finder{width:100%}.workspace-finder form{max-width:none}.workspace-finder .guided-shortcut,.workspace-finder input[type="search"]{min-height:44px}}
+@media(max-width:300px){
+  .workspace-finder{flex-direction:column}
+  .workspace-finder form{flex:auto}
+  .workspace-finder .guided-shortcut{white-space:normal;overflow-wrap:anywhere;text-align:center}
+}
 </style></head><body>
 <header class="ay-header">
   <div class="ay-header-brand">
