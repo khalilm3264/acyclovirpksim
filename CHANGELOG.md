@@ -12,6 +12,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+## [0.32.1] - 2026-11-25 (preview)
+
+- Add an Experimental comparison of oral valacyclovir and IV acyclovir after chemotherapy using Höglund et al. benchmarks. The page tests a fixed two-stage oral absorption curve alongside the default. No core simulation engine equations, parameters or defaults changed.
+
 ## [0.32.0] - 2026-11-25 (preview)
 
 - Add a held-out measurement reveal for all five complete Almond cases and compare equal-duration CRRT interruptions early and late in a dose interval. No simulation engine equations, parameters or defaults changed.

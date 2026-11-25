@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acyclovir After Chemotherapy | AyFlux Experimental</title>
+  <meta name="description" content="Compare oral valacyclovir and IV acyclovir exposure after chemotherapy using AyFlux simulations and published crossover study results.">
+  <link rel="canonical" href="https://ayflux.org/experimental/oncology/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AyFlux">
+  <meta property="og:title" content="Acyclovir After Chemotherapy | AyFlux Experimental">
+  <meta property="og:description" content="Compare oral valacyclovir and IV acyclovir exposure after chemotherapy using AyFlux simulations and published crossover study results.">
+  <meta property="og:url" content="https://ayflux.org/experimental/oncology/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/learn/learn.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="/assets/pk-engine.js" defer></script>
+  <script src="model.js" defer></script>
+  <script src="view.js" defer></script>
+</head>
+<body>
+  <header class="site-header ay-header">
+    <div class="ay-header-brand">
+      <img class="ay-brand-mark" src="/ayflux-molecular-logo.svg" alt="" width="42" height="42">
+      <a class="brand ayflux-logo" href="/" aria-label="AyFlux home"><span class="ay">Ay</span><span class="flux">Flu<span class="x">x</span></span></a>
+    </div>
+    <a class="ay-guide-link" href="/experimental/">← Experimental</a>
+  </header>
+  <main class="oncology">
+    <h1>Acyclovir after chemotherapy</h1>
+    <p>Compare how fast acyclovir peaks and how much exposure accumulates after oral valacyclovir or IV acyclovir.</p>
+    <p class="notice">For pharmacokinetic research and education. The study enrolled neutropenic adults with normal kidney function after high-dose chemotherapy. Use this comparison to examine model behavior.</p>
+
+    <section class="comparison" aria-labelledby="comparison-title">
+      <h2 id="comparison-title">Oral and IV exposure</h2>
+      <p>Study regimens were 1,000 mg oral valacyclovir or 5 mg/kg IV acyclovir infused over one hour. Both arms received seven doses eight hours apart.</p>
+      <form id="scenario" class="scenario" aria-describedby="assumption">
+        <label for="weight">Weight (kg)<input id="weight" type="number" min="40" max="120" step="1" value="70" required></label>
+        <label for="crcl">Creatinine clearance (mL/min)<input id="crcl" type="number" min="70" max="140" step="1" value="100" required></label>
+        <button type="submit">Update comparison</button>
+      </form>
+      <p class="caption" id="assumption">Weight and creatinine clearance are illustrative model inputs. The study summary reports group averages.</p>
+      <p id="scenario-status" role="status" class="caption"></p>
+      <noscript><p>Enable JavaScript to run the comparison.</p></noscript>
+
+      <figure>
+        <div class="chart">
+          <canvas id="curves" role="img" aria-label="Simulated plasma acyclovir over eight hours after dose seven. The table below provides peak concentration, peak time and exposure for each curve."></canvas>
+        </div>
+        <ul class="legend" aria-label="Chart legend">
+          <li class="oral">Oral, default absorption</li>
+          <li class="transit">Oral, two-stage absorption</li>
+          <li class="iv">IV acyclovir</li>
+        </ul>
+        <figcaption>The chart shows simulated curves after dose seven. The table includes the published group measurements.</figcaption>
+      </figure>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Exposure comparison table">
+        <table>
+          <thead><tr><th scope="col">Route and source</th><th scope="col">Peak<br>(µmol/L)</th><th scope="col">Peak time<br>(h)</th><th scope="col">8 h AUC<br>(µmol·h/L)</th></tr></thead>
+          <tbody id="metrics"></tbody>
+        </table>
+      </div>
+      <p class="caption">AUC is the area under the concentration curve. Published values are means ± standard deviations.</p>
+    </section>
+
+    <section class="evidence" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">Study and model</h2>
+      <p>Höglund and colleagues enrolled 15 participants in a randomized crossover study. Thirteen completed both arms. The measured oral peak was later and lower than the IV peak, with similar eight-hour exposure.</p>
+      <p>Both oral simulations use AyFlux’s default bioavailability. The experimental curve runs absorption through two sequential stages at the previously selected rate of 1.636 h⁻¹ per stage. The rate is held fixed for this comparison. AyFlux uses the same distribution and clearance equations for all three curves.</p>
+      <p>Höglund M, Ljungman P, Weller S. J Antimicrob Chemother. 2001;47:855–861. <a href="https://doi.org/10.1093/jac/47.6.855">Study DOI</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/11389118/">Published summary</a></p>
+    </section>
+  </main>
+</body>
+</html>
