@@ -1,0 +1,38 @@
+.oncology { width: min(100% - 32px, 900px); margin: 28px auto 48px; font-size: 15px; }
+.oncology h1 { font-size: clamp(27px, 4vw, 41px); line-height: 1.1; margin: 0 0 8px; }
+.oncology h2 { font-size: 21px; margin: 0; }
+.oncology p { margin: 8px 0 12px; }
+.oncology .notice { margin: 18px 0; }
+.comparison, .evidence { background: var(--panel); border: 1px solid var(--border); padding: clamp(14px, 3vw, 24px); }
+.evidence { margin-top: 16px; }
+.scenario { display: flex; gap: 12px 20px; align-items: end; flex-wrap: wrap; margin-top: 16px; }
+.scenario label { display: grid; gap: 4px; font-weight: 600; }
+.scenario input, .scenario button { min-height: 40px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 3px; }
+.scenario input { width: 100%; }
+.scenario button { background: var(--navy); color: white; cursor: pointer; }
+.scenario button:hover { background: var(--blue-hover); }
+.oncology .caption, .oncology figcaption { color: var(--muted); font-size: 13px; }
+.oncology figure { margin: 18px 0; }
+.chart { width: 100%; }
+.chart canvas { display: block; width: 100%; height: clamp(240px, 40vw, 360px); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 18px; list-style: none; padding: 0; margin: 8px 0; }
+.legend li::before { content: ''; display: inline-block; width: 20px; border-top: 3px solid; vertical-align: middle; margin-right: 5px; }
+.legend .oral::before { color: #20736c; }
+.legend .transit::before { color: #9c460d; border-top-style: dashed; }
+.legend .iv::before { color: #36538d; border-top-style: dotted; }
+.table-scroll { overflow-x: auto; }
+.oncology table { width: 100%; min-width: 375px; border-collapse: collapse; font-size: 14px; }
+.oncology th, .oncology td { padding: 8px; border-bottom: 1px solid var(--rule); text-align: right; }
+.oncology th:first-child { text-align: left; }
+.oncology thead { background: var(--tab); }
+.oncology tbody th { font-weight: 500; }
+@media (max-width: 540px) {
+  .oncology { width: calc(100% - 20px); margin-top: 18px; }
+  .scenario { column-gap: 12px; }
+  .scenario label { font-size: 13px; }
+  .scenario label:first-child { width: 76px; }
+}
+@media (max-width: 420px) {
+  .oncology table { min-width: 0; font-size: 12px; }
+  .oncology th, .oncology td { padding: 7px 4px; }
+}

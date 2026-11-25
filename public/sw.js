@@ -1,6 +1,6 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.32.0-offline-charts-20261125";
+const CACHE = "ayflux-static-v0.32.1-offline-charts-20261125";
 const CORE = [
  "/assets/vendor/echarts-6.1.0.min.js",
  "/assets/forecast-replay-view.js", "/assets/forecast-replay.js",
