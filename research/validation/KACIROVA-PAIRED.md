@@ -2,13 +2,13 @@
 
 Kacířová, Uřinovská and Sagan report a 36-year-old man weighing 86 kg who received 750 mg IV acyclovir every eight hours for two days, followed by 850 mg every eight hours. Figure 1 identifies a trough and a sample taken 25 minutes after the infusion ended. Only the two measured points for each compound enter this comparison. The continuous curve in the figure is the authors’ pharmacokinetic reconstruction. [Original publication, Figure 1](https://www.klinickafarmakologie.cz/incpdfs/far-202204-0002_10_001.pdf)
 
-Time zero is the first IV infusion. The simulation starts with zero drug and metabolite because the preceding oral acyclovir course lacks a measured baseline. The sample markers appear about eight dosing intervals after the first IV infusion. The reference reconstruction therefore samples the ninth IV dose (third 850 mg dose), assumes a one-hour infusion, and uses the last listed serum creatinine, 87 µmol/L, as a constant Cockcroft–Gault input. The figure gives no sampling-day creatinine or explicit infusion duration. The scenario range spans IV doses eight through ten, one- and two-hour infusions, and each listed creatinine (86, 87 and 102 µmol/L). It reflects these input choices only. The model uses its default coefficients with no fitting or dialysis.
+Dr. Kacířová confirmed oral acyclovir 400 mg four times daily from July 17 to 22 before IV therapy. The last oral dose time and the interval to the first IV dose remain unknown. Time zero is the first IV infusion. The simulation starts with zero drug and metabolite because the preceding oral acyclovir course lacks a measured baseline. Dr. Kacířová also confirmed that the acyclovir samples bracketed the fourth 850 mg infusion. After six 750 mg doses this is the tenth IV dose, starting at hour 72 on the nominal schedule. The reference reconstruction places the second draw at hour 73 plus 25 minutes, assumes a one-hour infusion, and uses the last listed serum creatinine, 87 µmol/L, as a constant Cockcroft–Gault input. The figure gives no sampling-day creatinine or explicit infusion duration. The historical benchmark at `8fc1c9d` assumed the ninth IV dose and explored doses eight through ten. The updated six scenarios fix the sampled dose and vary infusion duration (one or two hours) and each listed creatinine (86, 87 and 102 µmol/L). It reflects these input choices only. The model uses its default coefficients with no fitting or dialysis.
 
 All concentrations and differences are in mg/L. Reproduce with `node research/validation/kacirova-paired.cjs` from the repository root.
 
 | Serum endpoint | Measured | Predicted | Predicted minus measured | Scenario range |
 |---|---:|---:|---:|---:|
-| Acyclovir trough | 1.7 | 0.45 | -1.25 | 0.43–0.71 |
+| Acyclovir trough | 1.7 | 0.45 | -1.25 | 0.44–0.71 |
 | Acyclovir +25 min | 8.9 | 9.05 | 0.15 | 5.97–10.34 |
 | CMMG trough | 0.27 | 0.11 | -0.16 | 0.10–0.21 |
 | CMMG +25 min | 0.64 | 0.70 | 0.06 | 0.66–0.83 |
@@ -33,3 +33,20 @@ The scenarios pair median daily doses of 2250/1500 mg with the corresponding med
 Observed post-infusion medians combine draws at different times. The ratio column uses the published medians of individual ratios. Both modeled regimens reproduce the direction of the between-group difference in troughs and ratios, while both underpredict the parent and metabolite troughs in each stratum. Post-infusion parent agreement is sensitive to timing. For the higher-eGFR q8h scenario, sampling at +1 versus +40 min gives 17.31 versus 8.33 mg/L. Replacing the current renal metabolite coefficient with the thesis slope of 3.7474 mL/min per mL/min absolute CrCl lowers q8h CMMG troughs to 0.10/0.46 mg/L and post-infusion levels to 0.71/1.05 mg/L, further below the two measured troughs. These aggregate comparisons do not identify an individual elimination rate. The article's daily mg/kg divided by trough mg/L has units L/kg and is excluded from clearance comparisons.
 
 Run `node research/validation/kacirova-iv-cohort.cjs` for all 16 combinations of interval, kidney-function proxy and CMMG slope, including the sensitivity that directly substitutes the indexed eGFR number. Each output includes the three post-infusion times and a step-halving check.
+
+## Forecasting the next sample from a measured trough
+
+Run `node research/validation/kacirova-forecast.cjs` to reproduce the two Figure 1–2 cases with the forecast replay engine used at `44ddec7`. The JSON includes each forecast, the observed target and the effective sample size. Each run uses 120 parameter draws and an assumed assay coefficient of variation of 15%. Only the predose acyclovir measurement is used to update the weights. The post-infusion acyclovir measurement is held out.
+
+In case 1, the population median forecast was 9.58 mg/L and the trough-updated median was 14.68 mg/L against 8.90 mg/L measured. Absolute error increased by 5.09 mg/L.
+
+Figure 2 reports a second patient, an 85-year-old woman weighing 70 kg, with measured trough and post-infusion serum acyclovir of 3.2 and 25.7 mg/L. Eight 750 mg doses eight hours apart were approximated from the figure. The next 750 mg dose was placed at hour 64 or 66 and the sampled infusion 24 hours later. One-hour infusions were assumed. The figure labels 700 mg and 750 mg daily regimens. Both doses were tested for the sampled infusion. Each of the four reported creatinine values (126, 135, 148 and 160 µmol/L) was held constant in turn as a sensitivity analysis during changing renal function. Exact clock times and the patient-specific post-infusion sampling lag remain uncertain.
+
+| Assumed minutes after infusion end | Reconstructions with smaller absolute error after updating | Reduction in absolute error (mg/L) |
+|---:|---:|---:|
+| 1 | 10/16 | −2.36 to 2.28 |
+| 15 | 16/16 | 2.37 to 3.20 |
+| 30 | 16/16 | 2.54 to 3.87 |
+| 40 | 16/16 | 2.60 to 4.16 |
+
+Each row varies dose, transition time and creatinine for the same patient. The counts describe sensitivity to assumptions. They cannot estimate how often a trough improves forecasting across patients. [Kacířová et al., Figures 1 and 2, p. 134](https://www.solen.cz/incpdfs/far-202204-0002_10_001.pdf)

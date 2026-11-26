@@ -1,7 +1,9 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.29.0-readable-source-v1-20261117";
+const CACHE = "ayflux-static-v0.32.0-offline-charts-20261125";
 const CORE = [
+ "/assets/vendor/echarts-6.1.0.min.js",
+ "/assets/forecast-replay-view.js", "/assets/forecast-replay.js",
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
  "/assets/teaching-exports.js",
  "/assets/academic-exports.js", "/references/ayflux.bib",
@@ -20,7 +22,7 @@ const CORE = [
  "/assets/fonts/poppins-latin-300-normal.woff2", "/assets/fonts/poppins-latin-800-normal.woff2",
  "/learn/research-controls-v1.css",
  "/learn/", "/learn/learn.css", "/learn/interoperability/",
- "/learn/model-methods/", "/learn/dialysis/",
+ "/learn/model-methods/", "/learn/model-methods/post-hd.js", "/learn/model-methods/crrt-interruption.js", "/learn/dialysis/",
  "/license/", "/cite/", "/references/", "/disclaimer/"
 ];
 self.addEventListener("install", event => {
@@ -73,8 +75,7 @@ self.addEventListener("fetch", event => {
        return await cache.match(url.pathname) || await cache.match("/") || Response.error();
      }
    }
-   const vendor = ["/assets/vendor/echarts-6.1.0.min.js", "/assets/vendor/echarts-gl-2.1.0.min.js"];
-   if (!vendor.includes(url.pathname)) return fetch(request);
+   if (url.pathname !== "/assets/vendor/echarts-gl-2.1.0.min.js") return fetch(request);
    const cached = await cache.match(url.pathname);
    if (cached) return cached;
    const response = await fetch(request);

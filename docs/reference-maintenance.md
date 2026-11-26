@@ -50,7 +50,7 @@ identities and supplied full-text PDFs were checked for the stated scope.
 | --- | --- | --- |
 | 52 | Davenport 1992, DOI 10.1016/S0272-6386(12)70234-2 | Case trajectories and concentration changes around HD |
 | 53 | Strong 1997, DOI 10.1007/s004670050379 | Pediatric pre/post-dose samples after HD |
-| 54 | Berry 2014, DOI 10.1016/j.jcv.2014.09.001 | CSF day 5 and serum day 8 with intervening changes |
+| 54 | Berry 2014, DOI 10.1016/j.jcv.2014.09.001 | Author clarification: CSF on admission day 7 and serum on day 12 |
 | 55 | Yang 2007, DOI 10.1111/j.1365-4632.2007.03269.x | Limited serum sampling over three HD sessions |
 | 56 | Ueno 2025, DOI 10.7759/cureus.92365 | Whole blood sampled 5 h 40 min apart around four-hour HDF |
 

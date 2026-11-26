@@ -265,8 +265,8 @@
       { type: 'HD', start: VASQUEZ_ADMISSION + 16, end: VASQUEZ_ADMISSION + 18 },
       { type: 'HD', start: VASQUEZ_ADMISSION + 32, end: VASQUEZ_ADMISSION + 34.5 }
     ];
-  // Kacirova I et al. Klinicka farmakologie a farmacie 2022 [42]: one trough and one sample 25 min after the ninth infusion.
-  const KACIROVA_DOSES = Array.from({ length: 9 }, (_, i) => ({
+  // Kacirova I et al. Klinicka farmakologie a farmacie 2022 [42]: one trough and one sample 25 min after the fourth 850 mg infusion.
+  const KACIROVA_DOSES = Array.from({ length: 10 }, (_, i) => ({
     time: i * 8,
     route: 'Acyclovir IV',
     amount: i < 6 ? 750 : 850,
@@ -378,19 +378,19 @@
         renalMode: 'constant',
         dosingMode: 'custom',
         customDoses: KACIROVA_DOSES,
-        horizon: 72
+        horizon: 80
       },
       points: [
-        [64, 1.7],
-        [65 + 25 / 60, 8.9]
+        [72, 1.7],
+        [73 + 25 / 60, 8.9]
       ],
       cmmgPoints: [
-        [64, 0.27],
-        [65 + 25 / 60, 0.64]
+        [72, 0.27],
+        [73 + 25 / 60, 0.64]
       ],
       kinds: ['trough', 'post-infusion'],
       cmmgKinds: ['trough', 'post-infusion'],
-      note: "A 36-year-old man (86 kg, serum creatinine 87 µmol/L) given 750 mg IV every 8 hours for two days, then 850 mg. The dots are a measured trough and a sample 25 minutes after the ninth infusion, for both acyclovir and CMMG (shown on the CMMG graph). AyFlux estimates CrCl by Cockcroft–Gault. The infusion length (1 hour) and which infusion was sampled are read from the paper's figure, and the preceding oral course is not simulated."
+      note: 'A 36-year-old man (86 kg, serum creatinine 87 µmol/L) given 750 mg IV every 8 hours for two days, then 850 mg. Dr. Kacířová confirmed oral acyclovir 400 mg four times daily from July 17 to 22 before IV therapy. The dots show serum measurements before and 25 minutes after infusion. She confirmed that the acyclovir samples bracketed the fourth 850 mg infusion (tenth IV dose overall). The reconstruction uses a one-hour infusion from the cohort methods. The last oral dose time is unknown and the preceding oral course is not simulated.'
     },
     {
       id: 'vasquez',

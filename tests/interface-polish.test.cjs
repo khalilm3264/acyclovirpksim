@@ -57,7 +57,7 @@ test('heatmap cell text keeps WCAG AA contrast against its fill in both palettes
 test('page layout: primary mode first, merged reference tab, table under Concentration, library last',()=>{
  const html=read('public/index.html');
  const tabs=[...html.slice(html.indexOf('id="tabs"'),html.indexOf('id="alerts"')).matchAll(/data-tab="([a-z]+)"/g)].map(m=>m[1]);
- assert.deepEqual(tabs,['concentration','clearance','timeline','validation','research','experimental','method']);
+ assert.deepEqual(tabs,['concentration','clearance','timeline','validation','research','experimental','advanced','method']);
  const aside=html.slice(html.indexOf('<aside>'),html.indexOf('</aside>'));
  assert.ok(aside.indexOf('id="primary"')<aside.indexOf('id="patientControls"'),'primary dialysis mode precedes patient inputs');
  const concentration=html.slice(html.indexOf('<section id="concentration"'),html.indexOf('<section id="clearance"'));
@@ -67,7 +67,7 @@ test('page layout: primary mode first, merged reference tab, table under Concent
  assert.ok(research.lastIndexOf('<div class="card')===research.indexOf('<div class="card source-library" id="referenceLibraryPanel">'),'reference library is the last research card');
  // Graph colors live in settings, not the header; the comparison table is the last Concentration panel.
  assert.doesNotMatch(html.slice(html.indexOf('<header'),html.indexOf('</header>')),/colorblind|<input/i);
- assert.match(read('public/assets/simulator-ui.js'),/<label for="colorPalette">Graph colors<\/label>/);
+ assert.match(html,/<label for="colorPalette">Graph colors<\/label>/);
  assert.ok(read('public/explore/index.html').includes('id="graphColors"'));
  assert.match(concentration,/<\/details>\s*<\/section>\s*$/,'comparison table is at the bottom of Concentration');
  assert.ok(concentration.indexOf('id="tablePanel"')>concentration.indexOf('id="csfCmmgChart"'));

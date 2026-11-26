@@ -50,9 +50,11 @@ test('dialysis and single-patient studies reproduce the research/validation reco
  const vasquez=require('../research/validation/vasquez-hd.cjs').simulate(4,0.125),v=S.score(S.find('vasquez'),E,{draws:20});
  assert.deepEqual(v.rows.map(r=>r.observed),[vasquez[0][1],vasquez[1][1]]);
  v.rows.forEach((r,i)=>assert.ok(Math.abs(r.predicted-vasquez[i][2])<0.02,'Vasquez '+i));
- // Kacirova: the reference reconstruction (creatinine 87 µmol/L, ninth infusion, 1-hour infusions).
+ // Kacirova: the reference reconstruction (creatinine 87 µmol/L, tenth infusion, 1-hour infusions).
  // The 25-minute sample is between grid points here, so allow 3%.
- const kacirova=require('../research/validation/kacirova-paired.cjs').predict(87,8,1,1/12),k=S.score(S.find('kacirova'),E,{draws:20});
+ const kacirova=require('../research/validation/kacirova-paired.cjs').predict(87,9,1,1/12),k=S.score(S.find('kacirova'),E,{draws:20});
+ assert.deepEqual(S.find('kacirova').config.customDoses.map(d=>d.amount),[750,750,750,750,750,750,850,850,850,850]);
+ assert.deepEqual(S.find('kacirova').points[0],[72,1.7]);
  const byOrder=[k.rows[0],k.rows[1],k.rows[2],k.rows[3]].map(r=>r.predicted);
  byOrder.forEach((value,i)=>assert.ok(Math.abs(value/kacirova[i]-1)<0.03,'Kacirova endpoint '+i+': '+value+' vs '+kacirova[i]));
  assert.deepEqual(k.rows.map(r=>r.analyte),['plasma','plasma','cmmg','cmmg']);
@@ -64,7 +66,7 @@ test('scorecard CSV has one row per published point and quotes text safely',()=>
  assert.equal(lines[0],'study_id,citation,analyte,time_h,observed_mg_L,predicted_nominal_mg_L,interval_lower_mg_L,interval_upper_mg_L,inside_interval,point_type,central_volume_multiplier,clearance_multiplier,reference_id,regimen,scenario,subjects,assumptions,study_configuration_json,model_interval_fraction');
  assert.equal(lines.length,1+3+4);
  assert.match(lines[1],/^laskin-anuric,"Laskin 1982 \(anuric, before dialysis\) \[1\]",plasma,1,/);
- assert.match(lines.at(-1),/^kacirova,.*cmmg,65\.4167,0\.64,/);
+ assert.match(lines.at(-1),/^kacirova,.*cmmg,73\.4167,0\.64,/);
  assert.match(lines.at(-1),/,ref42,"750 mg IV q8h ×6, then 850 mg; estimated CrCl",No dialysis,1,/);
  assert.match(lines.at(-1),/,"A 36-year-old man .* preceding oral course is not simulated\.","\{.*\}",0\.9$/);
 });

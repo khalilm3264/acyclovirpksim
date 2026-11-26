@@ -2,7 +2,8 @@
 'use strict';
 const assert = require('node:assert/strict');
 const engine = require('../../public/assets/pk-engine.js');
-const observed={serumDay8:{parent:182.2,cmmg:57.3},csfDay5:{parent:.88,cmmg:1.6}};
+// Dr. Berry clarified CMMG collection on admission day 7 (CSF) and day 12 (serum).
+const observed={serum:{parent:182.2,cmmg:57.3},csf:{parent:.88,cmmg:1.6}};
 const firstCrcl=78, initialScr=73, peakScr=224; // Fig 1 IV-start Scr ~73 µmol/L
 const lateCrcl=firstCrcl*initialScr/peakScr; // same size under Cockcroft–Gault; approximate AKI proxy
 function simulate(weight,doseCount,kidney,dt) {

@@ -14,6 +14,30 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 Added a synthetic sampling comparison for repeated dosing in HD and CAPD. Each design forecasts a later trough withheld from the fit. No pharmacokinetic equations, parameters or defaults changed.
 
+## [0.32.0] - 2026-11-25 (preview)
+
+- Add a held-out measurement reveal for all five complete Almond cases and compare equal-duration CRRT interruptions early and late in a dose interval. No simulation engine equations, parameters or defaults changed.
+
+## [0.31.0] - 2026-11-24 (preview)
+
+- Add an experimental one-hour post-HD plasma acyclovir forecast and a carry-forward comparison. The tool estimates tissue concentration from two measurements using log-linear interpolation during dialysis. The simulation engine equations, parameters and defaults are unchanged.
+
+## [0.30.2] - 2026-11-23 (preview)
+
+- Align the Kacířová overlay and research comparison with the author-confirmed fourth 850 mg infusion. No model equations, parameters or defaults changed.
+
+## [0.30.1] - 2026-11-23 (preview)
+
+- Correct the Berry CMMG sampling days and document the preceding oral acyclovir regimen in the Kacířová IV case using author clarifications. No model equations, parameters or defaults changed.
+
+## [0.30.0] - 2026-11-23 (preview)
+
+- Add the von Euler and Chen–Chu case measurements to the simulator references and downloadable bibliography. No pharmacokinetic equations, parameters or defaults changed.
+
+- Add a local finder for common simulator tools and site pages and link the user guide directly to related simulator controls.
+- Keep the three plasma metrics visible by default and move secondary outputs and the uncertainty explanation into the summary disclosures. No model equations, parameters, defaults, or configuration schema changes.
+- Add rolling forecast replay to compare population and measurement-updated predictions at each successive sampling time. No pharmacokinetic equations, parameters or defaults changed.
+
 ## [0.29.0] - 2026-11-17 (preview)
 
 ### Readable application source

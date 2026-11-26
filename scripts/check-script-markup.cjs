@@ -21,6 +21,7 @@ const expectedSources = [
   './assets/timeline-labels.js',
   './assets/analysis-views.js',
   './assets/research-workspace.js',
+  './assets/forecast-replay-view.js',
   './assets/literature-cases.js',
   './assets/literature-workspace.js',
   './assets/pwa-register.js',

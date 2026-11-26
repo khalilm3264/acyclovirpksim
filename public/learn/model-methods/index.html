@@ -21,6 +21,10 @@
   <meta property="og:description" content="Review the AyFlux two-compartment model, CSF and CMMG estimates, Monte Carlo uncertainty, and limitations of simulated acyclovir concentrations.">
   <meta property="og:url" content="https://ayflux.org/learn/model-methods/">
   <meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/learn/research-controls-v1.css">
+<script defer src="/assets/pk-engine.js"></script>
+<script defer src="post-hd.js"></script>
+<script defer src="crrt-interruption.js"></script>
 </head>
 <body>
 <header class="site-header ay-header">
@@ -79,6 +83,32 @@
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="CSF_CMMG(next) = max[0, CSF_CMMG(t) + step size times lagged partition update]"><semantics><mrow><mrow><msub><mi>CSF</mi><mi>CMMG</mi></msub><mrow><mo>(</mo><mrow><mi>t</mi><mo>+</mo><mi>Δt</mi></mrow><mo>)</mo></mrow></mrow><mo>=</mo><mi>max</mi><mo>{</mo><mn>0</mn><mo>,</mo><mrow><msub><mi>CSF</mi><mi>CMMG</mi></msub><mrow><mo>(</mo><mi>t</mi><mo>)</mo></mrow></mrow><mo>+</mo><mi>Δt</mi><mo>×</mo><mfrac><mrow><msub><mi>k</mi><mi>CMMG</mi></msub><mrow><mo>⟨</mo><msub><mi>C</mi><mi>M</mi></msub><mo>⟩</mo></mrow><mo>−</mo><mrow><msub><mi>CSF</mi><mi>CMMG</mi></msub><mrow><mo>(</mo><mi>t</mi><mo>)</mo></mrow></mrow></mrow><msub><mi>τ</mi><mi>CMMG</mi></msub></mfrac><mo>}</mo></mrow><annotation encoding="application/x-tex">\mathrm{CSF}_{CMMG}(t+\Delta t)=\max\left\{0,\mathrm{CSF}_{CMMG}(t)+\Delta t\frac{k_{\mathrm{CMMG}}\langle C_M\rangle-\mathrm{CSF}_{CMMG}(t)}{\tau_{\mathrm{CMMG}}}\right\}</annotation></semantics></math></div>
   <p><span class="math-mean-definition">Angle brackets denote the arithmetic mean of the concentrations at the two step endpoints.</span> The core amount states use fourth-order Runge–Kutta with inserted medication and treatment boundaries; the CSF lag state uses the explicit update shown here. These are separate numerical methods, not a whole-body PBPK model.</p>
 </section>
+<section class="card" id="post-hd-forecast">
+  <h2>One-hour post-hemodialysis forecast</h2>
+  <p>Estimate plasma acyclovir one hour after disconnect using two measured concentrations from the same session. This research calculation assumes negligible kidney clearance, no intervening doses or further dialysis, and equal plasma and tissue concentrations at the start of dialysis.</p>
+  <div class="tool-fields tool-controls"><label>Forecast inputs <select id="hd-case"><option value="">Enter your own measurements</option></select></label></div>
+  <form id="hd-forecast"><div class="tool-fields tool-controls">
+    <label>Body weight (kg) <input name="weight" type="number" step="any" required></label>
+    <label>Session duration (h) <input name="hours" type="number" step="any" required></label>
+    <label>Before dialysis (µmol/L) <input name="before" type="number" step="any" required></label>
+    <label>At disconnect (µmol/L) <input name="end" type="number" step="any" required></label>
+  </div><button class="btn" type="submit">Forecast one-hour level</button></form>
+  <p role="status" id="hd-result"></p>
+  <form id="hd-compare" hidden><div id="hd-observed-entry"><div class="tool-fields tool-controls"><label>Measured one-hour level (µmol/L) <input name="observed" type="number" min="0" step="any" required></label></div></div>
+    <button id="hd-score" class="btn secondary" type="submit">Compare with measurement</button>
+    <p role="status" id="hd-errors"></p></form>
+  <details><summary>Source and calculation</summary><p><a href="/references/#ref21">Almond et al., Tables 1 and 2</a> provide five patients with measurements before dialysis, at disconnect and one hour later. Patients 3 and 6 lacked a disconnect measurement.</p>
+  <p>The calculation interpolates plasma concentrations on a logarithmic scale during dialysis and uses AyFlux’s adult blood–tissue exchange equations for the following hour. Carry-forward uses the disconnect concentration as its prediction. Evaluation so far covers five patients from one retrospective study.</p></details>
+</section>
+<section class="card" id="crrt-interruption">
+  <h2>When continuous dialysis stops</h2>
+  <p>Move a break in continuous renal replacement therapy (CRRT) from the end of the infusion to the hours before the next dose. Both schedules deliver the same number of hours.</p>
+  <div class="tool-fields tool-controls"><label>Time off dialysis in each schedule <select id="crrt-break"><option value="0">0 hours</option><option value="2">2 hours</option><option value="4" selected>4 hours</option><option value="8">8 hours</option></select></label></div>
+  <div style="overflow-x:auto"><table><caption>Simulated plasma concentration and circuit removal at 24 hours</caption><thead><tr><th scope="col">Break timing</th><th scope="col">Hours on CRRT</th><th scope="col">Predose plasma (mg/L)</th><th scope="col">Removed by CRRT (mg)</th></tr></thead><tbody id="crrt-comparison"></tbody></table></div>
+  <p id="crrt-summary" role="status"></p>
+  <details><summary>Scenario and source</summary><p>The simulated adult weighs 70 kg and starts with zero acyclovir and zero residual creatinine clearance. A 700 mg IV infusion runs from hour 0 to 1. The next dose is scheduled at hour 24. While running, the circuit delivers 25 mL/kg/h of effluent with a sieving coefficient of 0.95.</p>
+  <p>In <a href="/references/#ref43">Khajehdehi et al.</a>, one circuit clotted after six hours. If its spot effluent concentration of 11 mg/L had held at 1 L/h, estimated removal would be 66 mg over those six hours or 264 mg over a full day. The two schedules above are illustrative simulations.</p></details>
+</section>
 <section class="card">
   <h2>Changing kidney function over time</h2>
   <p>AyFlux can use either a constant residual creatinine clearance (CrCl) or a <strong>user-entered sequence of CrCl values</strong> at specified hours. In the time-varying mode, the simulator linearly interpolates between values and scales the acyclovir and CMMG renal elimination terms as CrCl changes.</p>
@@ -128,7 +158,7 @@
   <div class="model-table-wrap"><table class="model-parameter-table"><thead><tr><th>Study and endpoint</th><th>Published → predicted (difference)</th><th>Reconstruction assumptions</th></tr></thead><tbody>
   <tr><td>Vasquez Vasquez et al. (2025), HD1 serum at start and after two hours</td><td>8.80 → 8.27 (−0.53)<br>3.20 → 5.03 (+1.83)</td><td>Admission four hours after the fourth valacyclovir dose, constant Cockcroft–Gault clearance and HD drug clearance of 81.8 mL/min.</td></tr>
   <tr><td>Vasquez Vasquez et al., second-session removal and 30-hour urinary recovery</td><td>66.60 → 25.97 (−40.63)<br>17.70 → 153.85 (+136.15)</td><td>Urinary collection excludes HD1. The published dialysis recovery is estimated from effluent samples.</td></tr>
-  <tr><td>Kacířová et al., serum acyclovir trough and 25 minutes after infusion</td><td>1.70 → 0.45 (−1.25)<br>8.90 → 9.05 (+0.15)</td><td>One-hour infusion, ninth IV dose, creatinine 87 µmol/L and zero starting concentration after a preceding oral course with unmeasured baseline.</td></tr>
+  <tr><td>Kacířová et al., serum acyclovir trough and 25 minutes after infusion</td><td>1.70 → 0.45 (−1.25)<br>8.90 → 9.05 (+0.15)</td><td>Fourth 850 mg infusion confirmed by the author (tenth IV dose overall), assumed one-hour infusion, creatinine 87 µmol/L and zero starting concentration at the IV switch. Dr. Kacířová confirmed oral acyclovir 400 mg four times daily from July 17 to 22 before IV therapy. The concentration at the switch was unmeasured.</td></tr>
   <tr><td>Kacířová et al., paired serum CMMG</td><td>0.27 → 0.11 (−0.16)<br>0.64 → 0.71 (+0.07)</td><td>Same reconstruction and sampling times as the parent drug.</td></tr>
   <tr><td>Bataille et al. (1985), day-3 post-HD serum and CSF acyclovir</td><td>0.252 → 0.720 (+0.468)<br>0.151 → 0.342 (+0.191)</td><td>70 kg, CrCl zero, four-hour HD ending at hour 72 and drug clearance of 81.8 mL/min.</td></tr>
   <tr><td>Boelaert et al. (1987), five-day CAPD recovery, subjects 1 / 4 / 5</td><td>10.60% → 12.90% (+2.30 points)<br>13.60% → 10.85% (−2.75 points)<br>12.30% → 12.61% (+0.31 points)</td><td>CrCl zero, published doses and four daily 2 L exchanges with 4/4/4/12-hour dwells. Individual fluid transport remains assumed.</td></tr>

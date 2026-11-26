@@ -27,10 +27,14 @@ async function main(){
   await require('./check-reference-navigation.cjs')(page);
   await require('./check-configuration-import-race.cjs')(page);
   await require('./check-timeline-replacement.cjs')(page);
+  await require('./check-workspace-finder.cjs')(page);
   assert.equal(await page.locator('#jumpToWorkspace').isVisible(),false,'Mobile shortcut stays hidden on desktop');
   assert.equal(await page.locator('#jumpToInputs').isVisible(),false,'Mobile return stays hidden on desktop');
   // Tabs expose selection, support manual keyboard activation and return to results.
-  assert.equal(await page.locator('#tabs[role="tablist"] [role="tab"]').count(),7);
+  assert.deepEqual(await page.locator('#tabs[role="tablist"] [role="tab"]').evaluateAll(tabs=>tabs.map(tab=>tab.id)),[
+   'tab-concentration','tab-clearance','tab-timeline','tab-validation',
+   'tab-research','tab-experimental','tab-advanced','tab-method'
+  ]);
   assert.equal(await page.locator('#tabs [aria-selected="true"]').getAttribute('id'),'tab-concentration');
   await page.locator('#tab-concentration').focus();
   await page.keyboard.press('ArrowRight');
@@ -66,7 +70,11 @@ async function main(){
   }
   // Summary hierarchy: three plasma acyclovir numbers lead, the rest are secondary, and the guide names the level to read.
   assert.deepEqual(await page.$$eval('#metrics .metric.primary .key',n=>n.map(e=>e.textContent)),['Peak plasma acyclovir','Plasma acyclovir AUC','Plasma acyclovir trough']);
-  assert.ok(await page.locator('#metrics .metric.minor').count()>=5);
+  assert.ok(await page.locator('#metricsExtra .metric.minor').count()>=5);
+  assert.equal(await page.locator('#metricsExtra').isVisible(),false,'Secondary metrics are collapsed by default');
+  await page.locator('#summaryMore > summary').click();
+  assert.ok(await page.locator('#metricsExtra').isVisible());
+  await page.locator('#summaryMore > summary').click();
   assert.match(await page.textContent('#levelGuide'),/start with plasma acyclovir/);
   assert.match(await page.textContent('#troughMetric'),/just before the last dose/);
   const primaryWidths=await page.locator('#metrics .metric.primary').evaluateAll(cards=>cards.map(card=>card.getBoundingClientRect().width));
@@ -199,7 +207,7 @@ async function main(){
     assert.equal(await page.locator('footer.site-footer').count(),1);
     assert.equal(await page.locator('main > :last-child.actions a[href="/"]').count(),1);
     await page.locator('main > .actions').scrollIntoViewIfNeeded();
-    assert.ok(await page.locator('main > .actions a').isVisible());
+    assert.ok(await page.locator('main > .actions a.btn').isVisible());
     for (const control of await page.locator('.tool-controls select, .tool-controls input[type="number"], main .btn').all()) {
      const bounds=await control.boundingBox();
      if (bounds && await control.isVisible()) {
