@@ -9,3 +9,21 @@ test('combined offline shell has unique requests and includes every entry script
  const scripts=[...html.matchAll(/<script src="\.([^\"]+)"/g)].map(m=>m[1]);
  for(const asset of [...scripts,'/assets/scenario-summary.js','/assets/scenario-summary.css','/assets/academic-exports.js','/references/ayflux.bib','/assets/simulator-worker.js','/assets/osp-xlsx.js'])assert.ok(core.includes(asset),asset+' must work after an offline reload');
 });
+
+test('offline install revalidates the preloaded renderer and reloads the rest of the shell atomically',async()=>{
+ const source=read('public/sw.js');
+ const listeners={},batches=[];
+ vm.runInNewContext(source,{
+  self:{addEventListener:(type,fn)=>{listeners[type]=fn;}},
+  Request:class{constructor(url,options){this.url=url;this.cache=options.cache;}},
+  caches:{open:async()=>({addAll:async requests=>{batches.push(requests);}})}
+ });
+ let installed;
+ listeners.install({waitUntil:promise=>{installed=promise;}});
+ await installed;
+ assert.equal(batches.length,1);
+ assert.deepEqual(Array.from(batches[0].filter(r=>r.cache!=='reload'),r=>[r.url,r.cache]),[
+  ['/assets/vendor/echarts-6.1.0.min.js','no-cache']
+ ]);
+ assert.ok(batches[0].some(r=>r.url==='/'&&r.cache==='reload'));
+});

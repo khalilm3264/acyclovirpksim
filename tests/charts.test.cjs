@@ -63,3 +63,26 @@ test('simulator preloads its renderer while execution and research tools remain 
  assert.ok(precache.includes('"/assets/vendor/echarts-6.1.0.min.js"'));
  assert.doesNotMatch(precache,/echarts-gl/);
 });
+
+test('draw sets options once, while toolbar clicks still update pan styling and cursor',()=>{
+ for(const fine of [true,false]){
+  const calls=[],actions=[],el={style:{},dataset:{}};
+  const chart={setOption:opts=>calls.push(opts),dispatchAction:a=>actions.push(a),on(){},getDom:()=>el};
+  const window={matchMedia:()=>({matches:fine}),echarts:{getInstanceByDom:()=>chart}};
+  vm.runInNewContext(read('public/assets/charts.js'),{window});
+  const option=window.AyFluxCharts.options([], 'Time', 'Concentration');
+  window.AyFluxCharts.draw(el,option);
+  assert.equal(calls.length,1,'no redundant option update before first paint');
+  assert.equal(option.toolbox.feature.myPan.iconStyle.borderWidth,1);
+  assert.equal(actions.at(-1).dataZoomSelectActive,fine);
+  assert.equal(el.style.touchAction,'');
+  option.toolbox.feature.myPan.onclick(null,{getDom:()=>el});
+  assert.equal(calls.at(-1).toolbox.feature.myPan.iconStyle.borderWidth,2);
+  assert.equal(actions.at(-1).dataZoomSelectActive,false);
+  assert.equal(el.style.touchAction,'none');
+  window.AyFluxCharts.draw(el,option);
+  assert.equal(calls.length,3,'redraw also applies exactly one complete option');
+  assert.equal(actions.at(-1).dataZoomSelectActive,fine);
+  assert.equal(el.style.touchAction,'');
+ }
+});
