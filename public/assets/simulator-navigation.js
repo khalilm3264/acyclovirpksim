@@ -48,7 +48,39 @@
       '#uncertaintyNote',
       'long tail percentile coverage 90 Monte Carlo interval'
     ],
-    ['Advanced settings', '#advanced', 'Monte Carlo draws uncertainty colorblind options assay'],
+    ['Advanced settings', '#advanced', 'model display scientific settings options'],
+    [
+      'Graph display settings',
+      '#advancedDisplay',
+      'colorblind palette graph colors bands shading IC50 virus'
+    ],
+    [
+      'Uncertainty and fitting settings',
+      '#advancedUncertainty',
+      'Monte Carlo draws variability assay CV coverage interval'
+    ],
+    ['Model assumptions', '#advancedAssumptions', 'model parameters experimental override'],
+    [
+      'CSF distribution settings',
+      '#advancedCsf',
+      'acyclovir CMMG plasma CSF ratio lag equilibration'
+    ],
+    ['Blood–brain barrier preset', '#csfBarrier', 'CNS intact damaged CSF'],
+    [
+      'CMMG formation and clearance',
+      '#advancedCmmg',
+      'metabolite metabolic formation renal dialysis clearance'
+    ],
+    [
+      'Oral valacyclovir absorption settings',
+      '#advancedOral',
+      'oral valacyclovir absorption bioavailability valF valKa'
+    ],
+    [
+      'Peritoneal membrane settings',
+      '#advancedPd',
+      'PD small pore reflection ultrafiltration membrane'
+    ],
     [
       'Compare regimens and baselines',
       '#comparisonTools',

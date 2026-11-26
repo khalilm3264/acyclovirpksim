@@ -31,7 +31,10 @@ async function main(){
   assert.equal(await page.locator('#jumpToWorkspace').isVisible(),false,'Mobile shortcut stays hidden on desktop');
   assert.equal(await page.locator('#jumpToInputs').isVisible(),false,'Mobile return stays hidden on desktop');
   // Tabs expose selection, support manual keyboard activation and return to results.
-  assert.equal(await page.locator('#tabs[role="tablist"] [role="tab"]').count(),7);
+  assert.deepEqual(await page.locator('#tabs[role="tablist"] [role="tab"]').evaluateAll(tabs=>tabs.map(tab=>tab.id)),[
+   'tab-concentration','tab-clearance','tab-timeline','tab-validation',
+   'tab-research','tab-experimental','tab-advanced','tab-method'
+  ]);
   assert.equal(await page.locator('#tabs [aria-selected="true"]').getAttribute('id'),'tab-concentration');
   await page.locator('#tab-concentration').focus();
   await page.keyboard.press('ArrowRight');
