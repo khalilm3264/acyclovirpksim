@@ -1,7 +1,8 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.32.0-12e4a3aaca8e8fb32543";
+const CACHE = "ayflux-static-v0.32.0-chart-calculator-20261126";
 const CORE = [
+ "/assets/number-expressions.js", "/assets/number-expressions.css",
  "/assets/vendor/echarts-6.1.0.min.js",
  "/assets/forecast-replay-view.js", "/assets/forecast-replay.js",
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
