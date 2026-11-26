@@ -12,6 +12,8 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+Added a synthetic sampling comparison for repeated dosing in HD and CAPD. Each design forecasts a later trough withheld from the fit. No pharmacokinetic equations, parameters or defaults changed.
+
 ## [0.32.0] - 2026-11-25 (preview)
 
 - Add a held-out measurement reveal for all five complete Almond cases and compare equal-duration CRRT interruptions early and late in a dose interval. No simulation engine equations, parameters or defaults changed.

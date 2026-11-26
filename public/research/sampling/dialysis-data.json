@@ -1,0 +1,149 @@
+{
+  "seed": 20261120,
+  "profiles": [
+    {
+      "systemic": 0.82,
+      "dialysis": 1.38
+    },
+    {
+      "systemic": 1.18,
+      "dialysis": 0.72
+    },
+    {
+      "systemic": 1.04,
+      "dialysis": 0.98
+    }
+  ],
+  "drawsPerProfile": 24,
+  "trials": 72,
+  "firstTrough": 24,
+  "heldOutTime": 72,
+  "gridScales": [
+    0.5,
+    0.625,
+    0.75,
+    0.875,
+    1,
+    1.125,
+    1.25,
+    1.375,
+    1.5,
+    1.625,
+    1.75,
+    1.875,
+    2
+  ],
+  "dt": 0.125,
+  "scenarios": [
+    {
+      "id": "hd",
+      "label": "Intermittent hemodialysis",
+      "boundary": 32,
+      "boundaryLabel": "End of HD",
+      "designs": [
+        {
+          "label": "First trough only",
+          "times": [
+            24
+          ],
+          "medianError": 0.19431,
+          "medianWidth": 0.833628,
+          "covered": 68,
+          "systemicWidth": 0.25,
+          "dialysisWidth": 1.5
+        },
+        {
+          "label": "Add post-infusion sample",
+          "times": [
+            24,
+            25.5
+          ],
+          "medianError": 0.17123,
+          "medianWidth": 0.847778,
+          "covered": 69,
+          "systemicWidth": 0.25,
+          "dialysisWidth": 1.5
+        },
+        {
+          "label": "Add dialysis-timed sample",
+          "times": [
+            24,
+            32
+          ],
+          "medianError": 0.059605,
+          "medianWidth": 0.329063,
+          "covered": 62,
+          "systemicWidth": 0.25,
+          "dialysisWidth": 0.5
+        },
+        {
+          "label": "Add second trough",
+          "times": [
+            24,
+            48
+          ],
+          "medianError": 0.075098,
+          "medianWidth": 0.39902,
+          "covered": 67,
+          "systemicWidth": 0.25,
+          "dialysisWidth": 1
+        }
+      ]
+    },
+    {
+      "id": "capd",
+      "label": "Continuous ambulatory peritoneal dialysis",
+      "boundary": 36,
+      "boundaryLabel": "At a CAPD exchange boundary",
+      "designs": [
+        {
+          "label": "First trough only",
+          "times": [
+            24
+          ],
+          "medianError": 0.182458,
+          "medianWidth": 0.718804,
+          "covered": 63,
+          "systemicWidth": 0.25,
+          "dialysisWidth": 1.5
+        },
+        {
+          "label": "Add post-infusion sample",
+          "times": [
+            24,
+            25.5
+          ],
+          "medianError": 0.158774,
+          "medianWidth": 0.677475,
+          "covered": 62,
+          "systemicWidth": 0.25,
+          "dialysisWidth": 1.5
+        },
+        {
+          "label": "Add dialysis-timed sample",
+          "times": [
+            24,
+            36
+          ],
+          "medianError": 0.100141,
+          "medianWidth": 0.46296,
+          "covered": 54,
+          "systemicWidth": 0.125,
+          "dialysisWidth": 1.5
+        },
+        {
+          "label": "Add second trough",
+          "times": [
+            24,
+            48
+          ],
+          "medianError": 0.110871,
+          "medianWidth": 0.341245,
+          "covered": 53,
+          "systemicWidth": 0.125,
+          "dialysisWidth": 1.5
+        }
+      ]
+    }
+  ]
+}
