@@ -194,17 +194,20 @@
     }
   };
   const instance = (api) => root.echarts?.getInstanceByDom(api.getDom());
-  function setDragMode(chart, mode) {
+  function setDragMode(chart, mode, updateIcon = true) {
     if (!chart || chart.isDisposed?.()) return;
     const pan = mode === 'pan';
     dragModes.set(chart, mode);
-    chart.setOption({
-      toolbox: {
-        feature: {
-          myPan: { iconStyle: { borderColor: pan ? '#1767a0' : '#666', borderWidth: pan ? 2 : 1 } }
+    if (updateIcon)
+      chart.setOption({
+        toolbox: {
+          feature: {
+            myPan: {
+              iconStyle: { borderColor: pan ? '#1767a0' : '#666', borderWidth: pan ? 2 : 1 }
+            }
+          }
         }
-      }
-    });
+      });
     chart.dispatchAction({
       type: 'takeGlobalCursor',
       key: 'dataZoomSelect',
@@ -394,6 +397,7 @@
             show: true,
             title: 'Pan: drag to move the view (click again to return to box zoom)',
             icon: ICONS.pan,
+            iconStyle: { borderColor: '#666', borderWidth: 1 },
             onclick: (model, api) => {
               const chart = instance(api);
               setDragMode(chart, dragModes.get(chart) === 'pan' ? 'zoom' : 'pan');
@@ -490,7 +494,9 @@
     } else clearKeyboardAttributes(el);
     // Box zoom is armed by default with a mouse or trackpad; touch screens keep scrolling and use the toolbar.
     if (option.toolbox?.feature?.myPan && option.toolbox.feature.dataZoom)
-      setDragMode(chart, finePointer() ? 'zoom' : 'off');
+      // navigation() already supplied the inactive pan style in the full option.
+      // Another setOption here would reprocess every series before the first paint.
+      setDragMode(chart, finePointer() ? 'zoom' : 'off', false);
     return chart;
   }
   function dispose(el) {

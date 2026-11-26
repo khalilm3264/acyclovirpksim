@@ -381,11 +381,10 @@ html body .shell .import-history summary{cursor:pointer;font-weight:700;color:#2
 html body .shell .import-history-list{margin:6px 0 0;padding-left:22px}
 html body .shell .import-history-list li{margin:5px 0;overflow-wrap:anywhere}
 html body .shell .import-history-list button{margin-left:8px;padding:2px 9px;font-size:12px}
-html body .shell .source-library{background:#f4f1e8;border:1px solid #d5cbb0;border-left:5px solid #8a7440;margin-top:22px}
-html body .shell .source-library h2{font-family:Georgia,"Times New Roman",serif;font-weight:700;color:#4d4020}
-html body .shell .source-library h2::before{content:"Sources";font:700 10.5px Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.6px;color:#8a7440;display:block;margin-bottom:2px}
-html body .shell .source-library ul{list-style:none;margin:8px 0 0;padding:0}
-html body .shell .source-library li{padding:8px 0;border-top:1px solid #ddd4bb;font-family:Georgia,"Times New Roman",serif;font-size:13px;line-height:1.5}
+.source-library ul{list-style:none;margin:8px 0 0;padding:0}
+.source-library li{padding:9px 0;border-top:1px solid #d6e0e8;line-height:1.5}
+.source-library li:last-child{padding-bottom:0}
+.source-library li a{font-weight:600;text-underline-offset:2px}
 html body #reference .medmeas tr.medmeas-group th{background:#dfe8ef;color:#21435c;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.3px;padding:6px 7px}
 @media(max-width:700px){html body #reference .medmeas tr.medmeas-group{border:0;background:none;padding:10px 0 2px;margin:0}html body #reference .medmeas tr.medmeas-group th{display:block;width:100%;background:none;padding:0}}
 html body .shell .share-link-field{width:100%;margin:8px 0 0;padding:6px;border:1px solid #abbac6;background:#f7f9fa;color:#183349;font:12px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
@@ -608,12 +607,20 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 .chart-status--previous{align-items:flex-start;padding:10px;background:rgba(244,248,251,.12)}
 .chart-status--previous>span{max-width:100%;padding:6px 10px;border:1px solid #becbd6;background:#f4f8fb;font-weight:600}
 /* Keep finding tools separate from configuring a simulation. */
-.workspace-finder{position:relative;margin:0 0 12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
-.workspace-finder form{position:relative;flex:0 1 360px;min-width:0;width:100%}
+@media(min-width:811px){
+  html body .shell>.layout{grid-template-rows:auto 1fr}
+  html body .shell .layout>.workspace-finder{grid-column:1;grid-row:1}
+  html body .shell .layout>aside{grid-column:1;grid-row:2}
+  html body .shell .layout>main{grid-column:2;grid-row:1 / span 2}
+}
+.workspace-finder{display:flex;align-items:stretch;gap:6px;min-width:0}
+.workspace-finder form{position:relative;min-width:0;flex:1;margin:0}
 .workspace-finder .sr-only{left:0;top:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.workspace-finder input[type="search"]{box-sizing:border-box;width:100%;min-height:42px;padding:8px 12px;border:1px solid #9baebc;border-radius:2px;background:#fff;color:#263e52;font:inherit}
-.workspace-finder-links,.context-links{display:flex;gap:4px 14px;flex-wrap:wrap}
-.workspace-finder-links a,.context-links a{color:#245779;text-underline-offset:2px}
+.workspace-finder input[type="search"]{box-sizing:border-box;width:100%;height:100%;min-height:40px;padding:6px 9px;border:1px solid #9baebc;border-radius:2px;background:#fff;color:#263e52;font:inherit}
+.workspace-finder .guided-shortcut{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;padding:6px 10px;min-height:40px;box-sizing:border-box}
+.workspace-finder .guided-shortcut:focus-visible{outline:2px solid #387da8;outline-offset:2px}
+.context-links{display:flex;gap:4px 14px;flex-wrap:wrap}
+.context-links a{color:#245779;text-underline-offset:2px}
 .context-links{font-size:13px;margin:9px 0 0}
 .finder-results{position:absolute;top:100%;left:0;right:0;z-index:12;max-height:min(46vh,320px);overflow:auto;background:#fff;border:1px solid #9baebc;box-shadow:0 4px 10px #142e4326;margin:3px 0 0;padding:0;list-style:none}
 .finder-results li{margin:0;padding:0}
@@ -624,7 +631,27 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 .layout :target{scroll-margin-top:12px}
 #uncertaintyNote{margin:6px 0 0}
 #uncertaintyNote p{margin:6px 0}
-@media(max-width:540px){.workspace-finder form{flex-basis:100%}}
+@media(max-width:650px){.workspace-finder{width:100%}.workspace-finder form{max-width:none}.workspace-finder .guided-shortcut,.workspace-finder input[type="search"]{min-height:44px}}
+@media(max-width:300px){
+  .workspace-finder{flex-direction:column}
+  .workspace-finder form{flex:auto}
+  .workspace-finder .guided-shortcut{white-space:normal;overflow-wrap:anywhere;text-align:center}
+}
+
+.settings-entry{margin-top:16px;padding-top:10px;border-top:1px solid #c9d5de}
+.advanced-jump{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0 1px}
+.advanced-jump a{text-underline-offset:3px}
+.advanced-columns,.advanced-models{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.advanced-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
+.advanced-fields .inputrow,.advanced-models details{min-width:0}
+.advanced-fields .inputrow{margin:7px 0 9px}
+.advanced-models details{border:1px solid #c9d5de;padding:10px 12px}
+.advanced-models summary{font-weight:750;color:#234e6f;cursor:pointer;min-height:24px}
+.advanced-models details .tip{margin:6px 0 8px}
+.advanced-models details .context-links{margin:8px 0 0}
+#advanced .check{min-height:26px}
+@media(max-width:1180px){.advanced-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:960px){.advanced-columns,.advanced-models{grid-template-columns:minmax(0,1fr)}}
 </style><link rel="stylesheet" href="./assets/number-expressions.css">
 <script defer src="./assets/number-expressions.js"></script>
 </head><body>
@@ -636,33 +663,30 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
   <a class="ay-guide-link" href="/learn/" aria-label="Open AyFlux user guide">User guide</a>
 </header>
 <div class="shell"><div class="notice"><strong>Educational simulation only.</strong> Outputs are simplified model estimates, not clinical measurements or dosing recommendations. Do not use for prescribing, toxicity assessment, or dialysis decisions. <a href="/disclaimer/">Read the limitations</a>.</div>
+<a class="mobile-workspace-link" id="jumpToWorkspace" href="#tabs">Jump to results and tools</a>
+<div class="layout">
 <div class="workspace-finder">
   <form id="workspaceSearch" role="search" aria-label="Find AyFlux tools and pages" hidden>
     <label class="sr-only" for="workspaceQuery">Find a tool or page</label>
-    <input type="search" id="workspaceQuery" autocomplete="off" placeholder="Find a tool or page (e.g., PD, CSV)" aria-controls="workspaceResults">
+    <input type="search" id="workspaceQuery" autocomplete="off" placeholder="Find a tool or page" aria-controls="workspaceResults">
     <span class="sr-only" id="workspaceSearchStatus" role="status"></span>
     <ul id="workspaceResults" class="finder-results" aria-label="Search results" hidden></ul>
   </form>
-  <nav class="workspace-finder-links" aria-label="Common starting points">
-    <a href="#guidedPanel">Guided scenarios</a>
-    <a href="/learn/dialysis/">Dialysis guide</a>
-    <a href="/references/">Bibliography</a>
-  </nav>
+  <a class="btn secondary guided-shortcut" href="#guidedPanel">Guided scenarios</a>
 </div>
-<a class="mobile-workspace-link" id="jumpToWorkspace" href="#tabs">Jump to results and tools</a>
-<div class="layout"><aside>
+<aside>
 <h2 id="patientInputs" tabindex="-1">Dialysis scenario</h2><label for="primary" class="tip">Primary mode for detailed modeling and uncertainty band</label><select id="primary"><option>No dialysis</option><option>Intermittent HD</option><option>Peritoneal dialysis</option><option>CRRT</option><option>Custom sequence</option></select><p id="modeHint" class="tip"></p><div id="modeControls"></div>
 <h2>Patient</h2><div id="patientControls"></div><div id="drugCaution" class="advisory hidden" role="note"></div>
-<details class="advanced" id="advanced"><summary>Advanced settings</summary><div id="advancedControls"></div><p class="context-links"><a href="#uncertaintyNote">Understand the uncertainty band</a></p></details>
+<p class="context-links settings-entry"><a href="#advanced">Open advanced settings</a></p>
 </aside>
 <main>
 <a class="mobile-workspace-link" id="jumpToInputs" href="#patientInputs">Back to inputs</a>
-<div class="tabs" id="tabs" tabindex="-1" role="tablist" aria-label="Simulator sections"><button type="button" id="tab-concentration" role="tab" aria-controls="concentration" aria-selected="true" tabindex="0" data-tab="concentration" class="active">Concentration</button><button type="button" id="tab-clearance" role="tab" aria-controls="clearance" aria-selected="false" tabindex="-1" data-tab="clearance">Clearance & sessions</button><button type="button" id="tab-timeline" role="tab" aria-controls="timeline" aria-selected="false" tabindex="-1" data-tab="timeline">Custom timeline</button><button type="button" id="tab-validation" role="tab" aria-controls="validation" aria-selected="false" tabindex="-1" data-tab="validation">Model validation</button><button type="button" id="tab-research" role="tab" aria-controls="research" aria-selected="false" tabindex="-1" data-tab="research">Research tools</button><button type="button" id="tab-experimental" role="tab" aria-controls="experimental" aria-selected="false" tabindex="-1" data-tab="experimental">Experimental</button><button type="button" id="tab-method" role="tab" aria-controls="method reference" aria-selected="false" tabindex="-1" data-tab="method">References &amp; methods</button></div>
+<div class="tabs" id="tabs" tabindex="-1" role="tablist" aria-label="Simulator sections"><button type="button" id="tab-concentration" role="tab" aria-controls="concentration" aria-selected="true" tabindex="0" data-tab="concentration" class="active">Concentration</button><button type="button" id="tab-clearance" role="tab" aria-controls="clearance" aria-selected="false" tabindex="-1" data-tab="clearance">Clearance & sessions</button><button type="button" id="tab-timeline" role="tab" aria-controls="timeline" aria-selected="false" tabindex="-1" data-tab="timeline">Custom timeline</button><button type="button" id="tab-validation" role="tab" aria-controls="validation" aria-selected="false" tabindex="-1" data-tab="validation">Model validation</button><button type="button" id="tab-research" role="tab" aria-controls="research" aria-selected="false" tabindex="-1" data-tab="research">Research tools</button><button type="button" id="tab-experimental" role="tab" aria-controls="experimental" aria-selected="false" tabindex="-1" data-tab="experimental">Experimental</button><button type="button" id="tab-advanced" role="tab" aria-controls="advanced" aria-selected="false" tabindex="-1" data-tab="advanced">Advanced settings</button><button type="button" id="tab-method" role="tab" aria-controls="method reference" aria-selected="false" tabindex="-1" data-tab="method">References &amp; methods</button></div>
 <div id="alerts" class="warning hidden" role="alert"></div>
 <div id="scenarioNote" class="advisory scenario-note hidden" role="note"><div><strong id="scenarioNoteTitle"></strong><p id="scenarioNoteText"></p></div><button type="button" class="btn secondary" id="scenarioNoteClose">Dismiss</button></div>
 <p id="calculationState" class="progressbar hidden" role="status">Updating simulation…</p>
 <section id="concentration" role="tabpanel" aria-labelledby="tab-concentration" tabindex="0"><div class="start-here" id="startHere" role="note"><div><strong>New here?</strong> <span>Choose a dialysis scenario, enter the patient, and set the dose <span class="where-desktop">on the left</span><span class="where-mobile">above</span>. Start with the three plasma numbers below.</span></div><button type="button" class="btn secondary" id="startHereClose">Got it</button></div><div class="card summary-card"><div class="topline"><h2>Simulation summary</h2><button type="button" class="btn secondary" id="copyTeaching">Copy teaching note</button></div><span id="teachingStatus" role="status"></span><textarea id="teachingFallback" hidden readonly aria-label="Teaching note for manual copying"></textarea><p id="scenarioWords" class="scenario-words"></p><div class="stats" id="metrics"></div><div class="level-guide" id="levelGuide"><p class="level-guide-lead"><strong>Which level to look at:</strong> start with <strong>plasma acyclovir</strong>. Use it first to compare the simulated regimen with published plasma measurements.</p><details><summary>Reference levels and interpretation</summary><p>The injection label reports steady-state peaks and troughs for its studied regimens <a class="source-id" href="#ref10">[10]</a>; these are reference observations, not therapeutic targets. The displayed trough is just before the last dose within the simulation window and does not establish steady state. <strong>Plasma CMMG</strong> matters in kidney impairment, where high levels have been reported with neurotoxicity <a class="source-id" href="#ref3">[3]</a>. The <strong>CSF</strong> curves are exploratory.</p></details></div><details class="summary-more" id="summaryMore"><summary>More statistics and model interval</summary><div class="stats" id="metricsExtra"></div><div class="time-above"><div class="threshold-field"><label for="timeAboveLevel">Plasma acyclovir threshold</label><div class="threshold-entry"><input id="timeAboveLevel" type="number" min="0" step="any" inputmode="decimal" placeholder="Enter a level" aria-describedby="timeAboveNote"> <span id="timeAboveUnit">mg/L</span></div></div><span id="timeAboveResult" role="status" aria-live="polite"></span> <span id="accumulationResult" class="accumulation" role="status"></span> <span id="cmmgRatioResult" class="accumulation" role="status"></span><span class="time-above-note" id="timeAboveNote">The entered level also appears as a labeled line on the plasma acyclovir graph and its scenario small multiples; clear the field to remove it. Time above it is calculated from the median plasma acyclovir curve. These descriptive statistics have no established therapeutic or toxic cutoff.</span></div><details id="uncertaintyNote"><summary>How to read the uncertainty band</summary><p>A 90% model interval shows the 5th to 95th percentiles of the simulated outcomes. It is not a ±10% error margin or proof of 90% accuracy. A few model runs with slower clearance or more accumulation can stretch the upper band farther from the median.</p><p>“Unfitted” uses no measured drug levels; “updated” uses entered levels to reweight the model. <a href="#forecastPanel">Check a held-out measurement</a> or read the <a href="/learn/model-methods/">model assumptions</a>.</p></details></details></div>
-<div class="card graph-controls"><div class="topline graph-controls-head"><h2>Graph display and export</h2><div class="export-actions results-actions" role="group" aria-label="Graph display and exports"><div class="result-control"><label for="concUnit">Display units</label><div class="export-control"><select id="concUnit" class="export-picker" aria-label="Display units for graphs, summary and comparison table" title="Concentration units for graphs, summary and comparison table. Exports stay in mg/L."><option value="mg" selected>mg/L</option><option value="umol">µmol/L</option></select></div></div><div class="result-control"><label for="csv">Export results</label><div class="export-control"><select id="csv" class="export-picker" aria-label="Export results — choose a file format" title="Choose a file format to download"><option value="" selected>Choose format…</option><option value="wide">Detailed results (.csv)</option><option value="events">Pharmacometric events (.csv)</option><option value="tidy">R / OSP tidy (.csv)</option><option value="xlsx">PK-Sim / MoBi (.xlsx)</option><option value="latex">Summary table (.tex)</option><option value="bibtex">Full bibliography (.bib)</option><option value="print">Printable summary</option><option value="python">Nominal Python (.py)</option><option value="r">Nominal R / mrgsolve (.R)</option></select></div></div></div></div><div class="scenarios" id="scenarioChecks"></div><p class="dose-key"><span class="dose-key-iv"></span> IV acyclovir administration <span class="dose-key-oral"></span> Oral valacyclovir administration (vertical dashed lines)</p><div class="keyline" id="shadeLegend"></div><details class="graph-help"><summary>Graph help and comparison notes</summary><p class="tip">Choose overlays. <strong>Custom sequence</strong> represents one patient switching modalities; the other curves are separate counterfactual scenarios. Dialysis shading follows the primary scenario so windows do not become visually ambiguous. <a href="/learn/interoperability/">CSV and R guide</a> · <a href="#uncertaintyNote">Read the uncertainty band</a>.</p><p class="tip zoom-hint">To <strong>zoom in</strong>, drag across the area you want to see. Double-click to reset. The toolbar above each graph also offers pan, zoom in/out, undo, and image download. Hold Shift and scroll to zoom the time axis. Keyboard, Tab to a graph, use + or − to zoom, arrow keys to pan, and Home to reset.</p></details></div>
+<div class="card graph-controls"><div class="topline graph-controls-head"><h2>Graph display and export</h2><div class="export-actions results-actions" role="group" aria-label="Graph display and exports"><div class="result-control"><label for="concUnit">Display units</label><div class="export-control"><select id="concUnit" class="export-picker" aria-label="Display units for graphs, summary and comparison table" title="Concentration units for graphs, summary and comparison table. Exports stay in mg/L."><option value="mg" selected>mg/L</option><option value="umol">µmol/L</option></select></div></div><div class="result-control"><label for="csv">Export results</label><div class="export-control"><select id="csv" class="export-picker" aria-label="Export results — choose a file format" title="Choose a file format to download"><option value="" selected>Choose format…</option><option value="wide">Detailed results (.csv)</option><option value="events">Pharmacometric events (.csv)</option><option value="tidy">R / OSP tidy (.csv)</option><option value="xlsx">PK-Sim / MoBi (.xlsx)</option><option value="latex">Summary table (.tex)</option><option value="bibtex">Full bibliography (.bib)</option><option value="print">Printable summary</option><option value="python">Nominal Python (.py)</option><option value="r">Nominal R / mrgsolve (.R)</option></select></div></div></div></div><div class="scenarios" id="scenarioChecks"></div><p class="dose-key"><span class="dose-key-iv"></span> IV acyclovir administration <span class="dose-key-oral"></span> Oral valacyclovir administration (vertical dashed lines)</p><div class="keyline" id="shadeLegend"></div><details class="graph-help"><summary>Graph help and comparison notes</summary><p class="tip">Choose overlays. <strong>Custom sequence</strong> represents one patient switching modalities; the other curves are separate counterfactual scenarios. Dialysis shading follows the primary scenario so windows do not become visually ambiguous. <a href="/learn/interoperability/">CSV and R guide</a> · <a href="#uncertaintyNote">Read the uncertainty band</a> · <a href="#advancedDisplay">Graph settings</a>.</p><p class="tip zoom-hint">To <strong>zoom in</strong>, drag across the area you want to see. Double-click to reset. The toolbar above each graph also offers pan, zoom in/out, undo, and image download. Hold Shift and scroll to zoom the time axis. Keyboard, Tab to a graph, use + or − to zoom, arrow keys to pan, and Home to reset.</p></details></div>
 <div class="primary-charts">
 <div class="card" id="plasmaPanel"><div class="topline"><h2>Plasma acyclovir</h2></div><div class="study-compare"><label for="studySelect">Compare with a published study</label> <select id="studySelect"><option value="">None</option></select> <span id="studyStatus" class="tip" role="status" aria-live="polite"></span></div><details id="studyProvenance" class="hidden study-provenance" open><summary>What the study reported</summary><p class="tip" id="studyProvenanceCounts" role="status"></p><p class="source-check hidden" id="studySourceCheck"></p><p class="tip" id="studyMainSource"></p><div class="scroll"><table><thead><tr><th scope="col">Input and status</th><th scope="col">What the paper reports</th><th scope="col">What AyFlux uses</th></tr></thead><tbody id="studyProvenanceRows"></tbody></table></div><div id="studyExplore" class="study-explore hidden"><label for="studyExploreValue" id="studyExploreLabel"></label> <input id="studyExploreValue" type="number" step="any" inputmode="decimal"> <span id="studyExploreUnit"></span> <button type="button" class="btn secondary" id="studyExploreRun">Explore this assumption</button><p class="tip" id="studyExploreStatus" role="status" aria-live="polite"></p></div></details><div class="chart big" id="plasmaChart"></div><details id="eventsPanel"><summary>Show event timeline</summary><div id="eventStrip" style="height:230px;contain:inline-size"></div></details>
 <details id="comparisonPanel"><summary>Scenario small multiples</summary><div id="multipleCharts"></div></details>
@@ -707,8 +731,71 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 <div class="timeline-actions"><button class="btn secondary" id="addDose">+ Add medication dose</button><button class="btn" id="applyDoses">Apply medication doses</button><button class="btn secondary" id="exportDoses">Export doses CSV</button></div><p class="example-row"><span class="example-label">Load an example</span><button class="example-chip" type="button" id="oralIVPreset" title="1,000 mg oral valacyclovir at 12 h, then 250 mg IV acyclovir at 24 h and 48 h">Oral → IV switch</button></p>
 <div class="warning hidden" id="doseErrors" role="alert"></div>
 <h3>Medication administration timeline</h3><div class="schedulebar" id="doseBar"></div><div class="keyline"><span><i style="background:#159b87"></i>Oral valacyclovir</span><span><i style="background:#da5982"></i>IV acyclovir</span><span>Dotted markers also appear on graphs for up to 24 administrations.</span></div>
-<div class="advisory">The dosing sequence is independent of the dialysis schedule. To change PD/HD/CRRT windows, use <strong>Custom timeline</strong>. The present models, especially oral absorption, CNS, and CMMG, are not validated for selecting a patient dose [1] [4] [8] [9].</div>
+<div class="advisory">Enter doses here. To change when dialysis starts or stops, use <strong>Dialysis sessions</strong> above. Moving a session keeps dose times in place and can change the predicted concentrations.</div>
+<p class="tip">Use AyFlux to explore dosing and dialysis timing. Its predictions, especially for oral absorption, central nervous system exposure, and the acyclovir metabolite CMMG, have not been validated for choosing an individual patient’s dose [1] [4] [8] [9].</p>
 </div></div><div class="timeline-actions" style="margin-bottom:14px"><button id="applyFullTimelineBottom" class="btn" type="button">Apply custom timeline</button></div></section>
+
+<section id="advanced" role="tabpanel" aria-labelledby="tab-advanced" tabindex="0" class="hidden">
+  <div class="card">
+    <h2>Advanced settings</h2>
+    <p class="tip">Change how results are displayed, how uncertainty is modeled, or which assumptions the simulation uses. Edits update the current scenario. For patient, dose, and dialysis inputs, <a href="#patientInputs">go back to inputs</a>.</p>
+    <nav class="advanced-jump" aria-label="Jump to an advanced setting">
+      <a href="#advancedDisplay">Graph display</a>
+      <a href="#advancedUncertainty">Uncertainty and fitting</a>
+      <a href="#advancedAssumptions">Model assumptions</a>
+    </nav>
+  </div>
+  <div id="advancedControls">
+    <div class="advanced-columns">
+      <section class="card" id="advancedDisplay" aria-labelledby="advancedDisplayHeading">
+        <h2 id="advancedDisplayHeading">Graph display</h2>
+        <div class="inputrow"><label for="colorPalette">Graph colors</label><select id="colorPalette"><option value="standard">Standard</option><option value="accessible">Colorblind-friendly</option></select></div>
+        <label class="check"><input type="checkbox" data-toggle="showBands"> Show uncertainty bands</label>
+        <label class="check"><input type="checkbox" data-toggle="showShades"> Shade dialysis sessions</label>
+        <label class="check"><input type="checkbox" data-toggle="showIC50"> Show the cell-culture IC₅₀ range on the CSF acyclovir chart</label>
+        <div class="inputrow"><label for="virus">Virus susceptibility reference</label><select id="virus" aria-describedby="advancedVirusNote"><option value="VZV">Varicella-zoster virus (VZV)</option><option value="HSV-1">HSV-1</option><option value="HSV-2">HSV-2</option></select><p class="tip" id="advancedVirusNote">Used only for the optional IC₅₀ overlay. It is not a treatment target. <a href="#ref11">[11]</a></p></div>
+      </section>
+      <section class="card" id="advancedUncertainty" aria-labelledby="advancedUncertaintyHeading">
+        <h2 id="advancedUncertaintyHeading">Uncertainty and fitting</h2>
+        <p class="tip">Control how the model varies its inputs and summarizes the concentration curves.</p>
+        <div class="advanced-fields">
+          <div class="inputrow"><label for="draws">Monte Carlo samples</label><select id="draws"><option>30</option><option>60</option><option>120</option><option>200</option></select></div>
+          <div class="inputrow"><label for="coverage">Concentration interval</label><select id="coverage"><option value="0.5">50%</option><option value="0.8">80%</option><option value="0.9">90%</option><option value="0.95">95%</option></select></div>
+        </div>
+        <div id="advancedVariability"></div>
+        <div id="advancedAssay"></div>
+        <p class="tip">Assay CV represents measurement error when using measured levels. It is separate from the spread in simulated model parameters.</p>
+        <p class="context-links"><a href="#uncertaintyNote">Read the band</a><a href="#forecastPanel">Forecast with measured levels</a></p>
+      </section>
+    </div>
+    <section class="card" id="advancedAssumptions" aria-labelledby="advancedAssumptionsHeading">
+      <h2 id="advancedAssumptionsHeading">Model assumptions</h2>
+      <p class="tip">These controls can change predicted concentrations. Use them for research and teaching, not for choosing a dose.</p>
+      <div class="advanced-models">
+        <details id="advancedCsf"><summary>CSF distribution</summary>
+          <p class="tip">Set how much acyclovir and CMMG reach cerebrospinal fluid (CSF) and how quickly the model approaches that ratio.</p>
+          <div id="advancedCsfFields"></div>
+          <p class="context-links"><a href="#csfBarrier">Blood–brain barrier preset</a></p>
+        </details>
+        <details id="advancedCmmg"><summary>CMMG formation and clearance</summary>
+          <p class="tip">Change how much CMMG is formed and how quickly kidneys and dialysis remove it.</p>
+          <div id="advancedCmmgFields"></div>
+        </details>
+        <details id="advancedOral"><summary>Oral valacyclovir absorption</summary>
+          <p class="tip">Change the amount and rate of acyclovir reaching circulation after oral valacyclovir.</p>
+          <p class="tip" id="advancedOralUnavailable">These controls appear for an oral or custom medication schedule. They do not affect IV doses.</p>
+          <div id="advancedOralFields"></div>
+        </details>
+        <details id="advancedPd"><summary>Peritoneal membrane transport</summary>
+          <p class="tip">Change small-pore transport assumptions for modeled peritoneal dialysis (PD) dwells.</p>
+          <div id="advancedPdFields"></div>
+          <p class="context-links"><a href="#pdRxPanel">Edit the PD exchange prescription</a></p>
+        </details>
+      </div>
+      <p class="context-links"><a href="/learn/model-methods/">Read the model methods and limits</a><a href="#configurationPanel">Save or load a configuration</a></p>
+    </section>
+  </div>
+</section>
 <section id="validation" role="tabpanel" aria-labelledby="tab-validation" tabindex="0" class="hidden"><div class="card"><h2>Bayesian model updating & 90% interval coverage</h2>
 <p class="research-note">Enter actual assay measurements from the same dosing and dialysis scenario. Rows marked <strong>Fit</strong> update the relative probabilities of the model's sampled parameter sets using a Gaussian assay-error assumption. <strong>Hold-out</strong> rows are never used for fitting and test whether the 90% posterior predictive interval contains each observed value. The posterior is an importance-sampling approximation, not a clinically validated population model. Do not enter identifiable patient information.</p>
 <div class="measure-grid"><div><span>Held-out coverage</span><strong id="covFraction">Not assessed</strong><small id="covCount">No held-out observations</small></div><div><span>95% CI for observed coverage</span><strong id="covCI">—</strong><small>Wilson binomial interval; not a guarantee</small></div><div><span>Effective posterior sample size</span><strong id="posteriorESS">—</strong><small id="posteriorNote">No fitting measurements</small></div></div>
@@ -716,7 +803,7 @@ html body #timeline .rx-scroll-hint {margin:5px 0;font-size:11px;}
 <div class="scroll" role="region" aria-label="Assay measurements" tabindex="0"><table class="medmeas"><thead><tr><th>Hour</th><th>Analyte</th><th>Observed (mg/L)</th><th>Role</th><th></th></tr></thead><tbody id="measureRows"></tbody></table></div>
 <div class="timeline-actions"><button class="btn secondary" id="addMeasure">+ Add measurement</button><button class="btn" id="applyMeasures">Update model & evaluate</button><button class="btn secondary" id="clearMeasures">Clear measurements</button></div>
 <div id="measureWarning" class="warning hidden"></div><div id="validationResults" class="measure-stat">No observations entered. Coverage has not been assessed.</div>
-<p class="tip">Assessment requires <em>independent</em> held-out measurements. Fitted data cannot validate coverage. With only a few hold-outs the coverage percentage is statistically unstable. An assay-error CV is assumed; the actual laboratory error structure may differ.</p></div>
+<p class="tip">Assessment requires <em>independent</em> held-out measurements. Fitted data cannot validate coverage. With only a few hold-outs the coverage percentage is statistically unstable. The model <a href="#advancedUncertainty">assumes an assay CV</a>; the actual laboratory error may differ.</p></div>
 <div class="card" id="holdoutFigure" hidden>
 <h2>Held-out concentration diagnostics</h2>
 <label>Analyte <select id="holdoutAnalyte"></select></label>
