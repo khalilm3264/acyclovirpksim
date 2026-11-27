@@ -850,7 +850,6 @@
     requestPlotFrame();
   }
   function renderInputs() {
-    let keepAdvanced = $('advanced').open;
     $('patientControls').innerHTML =
       numericField('weight') +
       heightControl() +
@@ -872,38 +871,34 @@
     $('modeControls').innerHTML = modalControls();
     $('modeHint').textContent =
       primary === 'Custom sequence' ? 'Define sequential treatments in Treatment timeline.' : '';
-    $('advancedControls').innerHTML =
-      `<div class="inputrow"><label for="colorPalette">Graph colors</label><select id="colorPalette"><option value="standard" ${paletteMode === 'standard' ? 'selected' : ''}>Standard</option><option value="accessible" ${paletteMode === 'accessible' ? 'selected' : ''}>Colorblind-friendly</option></select><p class="tip">Colorblind-friendly uses Okabe–Ito curves and viridis heatmaps here and in the visual explorer.</p></div><div class="inputrow"><label for="virus">Virus susceptibility reference</label><select id="virus"><option value="VZV" ${c.virus === 'VZV' ? 'selected' : ''}>Varicella-zoster virus (VZV)</option><option value="HSV-1" ${c.virus === 'HSV-1' ? 'selected' : ''}>HSV-1</option><option value="HSV-2" ${c.virus === 'HSV-2' ? 'selected' : ''}>HSV-2</option></select><p class="tip virus-note">Only the optional cell-culture IC₅₀ range changes with virus selection; PK predictions remain unchanged. This is not a therapeutic target. <a href="#ref11">[11]</a></p></div>` +
-      group('CNS distribution', ['csfRatio', 'csfLag', 'csfMetRatio', 'csfMetLag']) +
-      group('CMMG model', ['formFactor', 'metRenal', 'metDial']) +
-      group(
-        'Uncertainty',
-        c.dosingMode === 'custom' || c.route === 'Valacyclovir oral'
-          ? ['valF', 'valKa', 'variability']
-          : ['variability']
-      ) +
-      group('Peritoneal membrane', ['pdSmallPore', 'pdSigma']) +
-      group('Assay error', ['assayCV']) +
-      `<div class="inputrow"><label for="draws">Monte Carlo samples</label><select id="draws"><option>30</option><option>60</option><option>120</option><option>200</option></select></div><div class="inputrow"><label for="coverage">Concentration interval</label><select id="coverage"><option value="0.5">50%</option><option value="0.8">80%</option><option value="0.9">90%</option><option value="0.95">95%</option></select></div>` +
-      [
-        ['showBands', 'Uncertainty bands'],
-        ['showShades', 'Dialysis session shading'],
-        ['showIC50', 'Cell-culture IC₅₀ range (not a treatment target)']
-      ]
-        .map(
-          ([id, lab]) =>
-            `<label class="check"><input type="checkbox" data-toggle="${id}" ${c[id] ? 'checked' : ''}> ${lab}</label>`
-        )
-        .join('');
-    $('draws').value = c.draws;
-    $('coverage').value = c.coverage;
-    $('advanced').open = keepAdvanced;
+    renderAdvancedSettings();
     $('drugCaution').classList.toggle(
       'hidden',
       c.dosingMode !== 'custom' && c.route !== 'Valacyclovir oral'
     );
     updateDrugCaution();
     if (c.dosingMode === 'custom') updateCustomDoseSummary();
+  }
+  function renderAdvancedSettings() {
+    for (const [slot, keys] of [
+      ['advancedVariability', ['variability']],
+      ['advancedAssay', ['assayCV']],
+      ['advancedCsfFields', ['csfRatio', 'csfLag', 'csfMetRatio', 'csfMetLag']],
+      ['advancedCmmgFields', ['formFactor', 'metRenal', 'metDial']],
+      ['advancedPdFields', ['pdSmallPore', 'pdSigma']]
+    ])
+      $(slot).innerHTML = keys.map(numericField).join('');
+    const hasOralControls = c.dosingMode === 'custom' || c.route === 'Valacyclovir oral';
+    $('advancedOralFields').innerHTML = hasOralControls
+      ? ['valF', 'valKa'].map(numericField).join('')
+      : '';
+    $('advancedOralUnavailable').hidden = hasOralControls;
+    $('colorPalette').value = paletteMode;
+    $('virus').value = c.virus;
+    $('draws').value = c.draws;
+    $('coverage').value = c.coverage;
+    for (const toggle of $('advancedControls').querySelectorAll('[data-toggle]'))
+      toggle.checked = c[toggle.dataset.toggle];
   }
   // Label kidney-function adjustment for repeat IV acyclovir, and the probenecid option.
   function labelAdjustmentState() {
@@ -2284,7 +2279,8 @@
       'reference',
       'method',
       'research',
-      'experimental'
+      'experimental',
+      'advanced'
     ])
       $(name).classList.toggle(
         'hidden',
@@ -3153,34 +3149,34 @@
       });
     }
   }
-  document.querySelector('aside').addEventListener('input', (e) => {
-    if (e.target.dataset.k) updateParam(e.target);
-  });
-  document.querySelector('aside').addEventListener('change', (e) => {
-    if (e.target.id === 'colorPalette') {
-      setPalette(e.target.value);
-      renderInputs();
-      if (results) render();
-    } else if (e.target.id === 'virus') {
-      c.virus = e.target.value;
-      renderInputs();
-      if (results) render();
-    } else if (e.target.id === 'pdMethod') {
-      c.pdMethod = e.target.value;
-      renderInputs();
-      researchRenderedPrimary = '';
-      defer();
-    } else if (e.target.id === 'draws') {
-      c.draws = +e.target.value;
-      defer();
-    } else if (e.target.id === 'coverage') {
-      c.coverage = +e.target.value;
-      defer();
-    } else if (e.target.dataset.toggle) {
-      c[e.target.dataset.toggle] = e.target.checked;
-      if (results) render();
-    } else if (e.target.dataset.k) commitParam(e.target);
-  });
+  for (const controls of [document.querySelector('aside'), $('advancedControls')]) {
+    controls.addEventListener('input', (e) => {
+      if (e.target.dataset.k) updateParam(e.target);
+    });
+    controls.addEventListener('change', (e) => {
+      if (e.target.id === 'colorPalette') {
+        setPalette(e.target.value);
+        if (results) render();
+      } else if (e.target.id === 'virus') {
+        c.virus = e.target.value;
+        if (results) render();
+      } else if (e.target.id === 'pdMethod') {
+        c.pdMethod = e.target.value;
+        renderInputs();
+        researchRenderedPrimary = '';
+        defer();
+      } else if (e.target.id === 'draws') {
+        c.draws = +e.target.value;
+        defer();
+      } else if (e.target.id === 'coverage') {
+        c.coverage = +e.target.value;
+        defer();
+      } else if (e.target.dataset.toggle) {
+        c[e.target.dataset.toggle] = e.target.checked;
+        if (results) render();
+      } else if (e.target.dataset.k) commitParam(e.target);
+    });
+  }
   $('scenarioChecks').addEventListener('change', (e) => {
     let m = e.target.dataset.mode;
     if (!m) return;

@@ -6,7 +6,7 @@ on:
     types: [completed]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ayflux-release
@@ -14,19 +14,43 @@ concurrency:
 
 jobs:
   release:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'
+    # Only tested pushes to this repository's main branch. Fork runs never qualify.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      # Check out trusted main, never the ref supplied by the triggering run.
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: main
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      # Release only if main is still exactly the commit that passed the tests.
+      # If main has moved on, its own test run will trigger the next release check.
+      - name: Confirm main is the tested commit
+        id: tested
+        env:
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$TESTED_SHA" ]; then
+            echo "match=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "main is at $(git rev-parse HEAD), not the tested $TESTED_SHA; skipping."
+            echo "match=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.tested.outputs.match == 'true'
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: Validate release identity and prepare notes
+        if: steps.tested.outputs.match == 'true'
         run: node scripts/release-metadata.cjs "$RUNNER_TEMP/release-notes.md"
       - name: Publish new version without changing existing releases
+        if: steps.tested.outputs.match == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
