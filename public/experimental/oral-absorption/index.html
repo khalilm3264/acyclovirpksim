@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oral absorption comparison | AyFlux Experimental</title>
+<meta name="description" content="Compare three models of oral valacyclovir absorption against plasma acyclovir measurements from two adult studies.">
+<link rel="canonical" href="https://ayflux.org/experimental/oral-absorption/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="AyFlux"><meta property="og:title" content="Oral absorption comparison"><meta property="og:description" content="Compare three models of oral valacyclovir absorption against plasma acyclovir measurements from two adult studies."><meta property="og:url" content="https://ayflux.org/experimental/oral-absorption/">
+<link rel="stylesheet" href="/learn/learn.css"><link rel="icon" href="/favicon.ico">
+<style>main{max-width:900px;margin:28px auto;padding:0 16px}#plot{height:320px}select{max-width:100%;padding:7px;font:inherit}th,td{padding:8px;text-align:left;border-bottom:1px solid #cbd5dd}table{width:100%;border-collapse:collapse} .scroll{overflow:auto}details{margin:16px 0}summary{cursor:pointer}#context{max-width:75ch}</style>
+<script defer src="/assets/charts.js"></script><script defer src="model.js"></script><script defer src="view.js"></script></head><body><main>
+<nav><a href="/">AyFlux</a> / <a href="/experimental/">Experimental</a></nav><h1>Oral absorption comparison</h1>
+<p>How does absorption change the time of the plasma acyclovir peak after a single 500 mg dose of valacyclovir? Compare three absorption models with concentrations digitized from published group means.</p>
+<label for="study">Study group</label> <select id="study"><option value="0">Weller · Development</option><option value="1">Phan Figure 3, visit 2 · Held out</option><option value="2">Phan Figure 4, visit 1 · Held out</option></select>
+<p id="context"></p><div id="plot" role="img" aria-label="Plasma acyclovir concentrations over time. Numerical results follow."></div>
+<div class="scroll"><table><caption id="caption"></caption><thead><tr><th>Series</th><th>Sampled peak (mg/L)</th><th>Peak time (h)</th><th>Window AUC (mg·h/L)</th><th>Total AUC (mg·h/L)</th></tr></thead><tbody id="metrics"></tbody></table></div>
+<p>Peak and window AUC use the study sampling times. Window AUC uses linear trapezoids. Model total AUC equals absorbed acyclovir mass divided by clearance, so all three absorption models give the same total within a study group. Weller’s observed total AUC is the mean individual estimate from Table II.</p>
+<details><summary>Concentrations at each sampling time</summary><div class="scroll"><table><thead><tr><th>Hour</th><th>Observed</th><th>One stage</th><th>Fixed lag</th><th>Two stages</th></tr></thead><tbody id="points"></tbody></table></div></details>
+<h2>Fit and evidence</h2><p>The baseline has one absorption stage (1.8 h⁻¹). The lag model delays its start by 0.590 h. The two-stage model passes the absorbed dose through two successive stages at 1.636 h⁻¹. Both candidates were developed on Weller. An independent numerical refit to the ten digitized Weller points gives 0.589 h and 1.635 h⁻¹. Both Phan groups use the original frozen candidates.</p>
+<p>All curves use the same 54.5% bioavailability and the adult disposition parameters from AyFlux revision <code>8fc1c9d</code>. These group-level comparisons cover a single dose in adults without dialysis. They cannot establish individual dose requirements.</p>
+<p><a href="https://doi.org/10.1038/clpt.1993.196">Weller et al., Figure 1 and Table II</a> · <a href="https://doi.org/10.1128/AAC.47.7.2351-2353.2003">Phan et al., Figures 3 and 4</a></p>
+</main></body></html>
