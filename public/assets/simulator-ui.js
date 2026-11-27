@@ -4534,6 +4534,9 @@
           .filter((r) => r.total)
           .map((r) => r.name + ': ' + description(r))
           .join('\n');
+        $('scorecardTroughs').textContent = summary.troughs
+          .map((r) => r.name + ': ' + (r.total ? description(r) : '0 troughs in this view.'))
+          .join('\n');
         drawScorecardFigure();
         drawResidualFigure();
       }, 30);

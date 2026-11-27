@@ -69,6 +69,8 @@ parameters or merge new observations into the 37-point frozen scorecard.
 
 ## Source-specific comparison runs
 
+The [Laskin, Shah and Abe replay notes](LASKIN-SHAH-ABE-REPLAYS.md) document a four-arm no-refit IV comparison, a CAPD sensitivity matrix, and a measurement-initialized AKI/HD sensitivity analysis. These research comparisons are separate from the frozen scorecard.
+
 Run `bash research/validation/check-source-comparisons.sh /tmp/ayflux-comparisons`
 from the repository root. The CI artifact `ayflux-source-comparisons` includes each
 runner's output, the checked-out commit, the engine blob and the Node version.

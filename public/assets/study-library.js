@@ -684,9 +684,22 @@
       name,
       ...stats(scores.flatMap((score) => score.rows.filter((r) => test(find(score.id), r))))
     }));
+    const troughs = [
+      ['Measured group means', 'means'],
+      ['Individual measured samples', 'individual'],
+      ['Author-fitted endpoints', 'fitted']
+    ].map(([name, kind]) => ({
+      name,
+      ...stats(
+        scores
+          .filter((score) => evidenceKind(find(score.id)) === kind)
+          .flatMap((score) => score.rows.filter((row) => row.kind === 'trough'))
+      )
+    }));
     return {
       overall: stats(all),
       groups,
+      troughs,
       scenarios: scores.length,
       sources: new Set(scores.map((s) => find(s.id).ref)).size
     };
