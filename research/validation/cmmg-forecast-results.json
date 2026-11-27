@@ -1,0 +1,1573 @@
+{
+  "metadata": {
+    "run_date": "2026-11-15",
+    "param_draw_seed": 2026,
+    "eval_noise_seed": 44556677,
+    "n_virtual_patients": 500,
+    "n_forecast_candidates": 400,
+    "parameter_overlap": 0,
+    "configured_hd_clearance_mL_min": 81.8,
+    "configured_hd_clearance_L_h": 4.908,
+    "notes": "In silico PK simulation only; not clinical decision support or validated external prediction."
+  },
+  "exact_4pct_cv": [
+    {
+      "config": "Complete History (Control)",
+      "scenario": "complete",
+      "condition": "exact_28h_4pct_cv",
+      "conditionLabel": "Exact 28.0h (4% CV)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "4.0 h",
+      "CF": {
+        "medAbs": 0.8146134447885722,
+        "medSigned": -0.8146134447885722,
+        "signs": {
+          "under": 489,
+          "over": 11,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 1.7104253248292256,
+        "medSigned": 0.14542837749448845,
+        "signs": {
+          "under": 234,
+          "over": 266,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 125,
+          "worsened": 375,
+          "tied": 0,
+          "pctHelped": "25.0%",
+          "medDiff": 0.9483973780727628,
+          "meanDiff": 1.212632640243017,
+          "medBoth": 1.7104253248292256,
+          "medCMMG": 0.8146134447885722,
+          "diffOfMarginalMedians": 0.8958118800406534
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.31451201579788224,
+        "cmmgMedSigned": 0.020053882391882993,
+        "cmmgSigns": {
+          "under": 244,
+          "over": 256,
+          "exact": 0
+        },
+        "bothMedAbs": 0.350336279747113,
+        "bothMedSigned": 0.0430259358308831,
+        "bothSigns": {
+          "under": 240,
+          "over": 260,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 200,
+          "worsened": 268,
+          "tied": 32,
+          "pctHelped": "40.0%",
+          "medDiff": 0.010435108819242256,
+          "meanDiff": 0.08606089368423453,
+          "medBoth": 0.350336279747113,
+          "medCMMG": 0.31451201579788224,
+          "diffOfMarginalMedians": 0.03582426394923077
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.35168618910073945,
+        "cmmgMedSigned": 0.019324575517693177,
+        "cmmgSigns": {
+          "under": 242,
+          "over": 258,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4188514505831673,
+        "bothMedSigned": 0.017098594982159376,
+        "bothSigns": {
+          "under": 246,
+          "over": 254,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 193,
+          "worsened": 307,
+          "tied": 0,
+          "pctHelped": "38.6%",
+          "medDiff": 0.056288864262556526,
+          "meanDiff": 0.05868372663405132,
+          "medBoth": 0.4188514505831673,
+          "medCMMG": 0.35168618910073945,
+          "diffOfMarginalMedians": 0.06716526148242785
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3056559815727167,
+        "cmmgMedSigned": -0.014751614710797334,
+        "cmmgSigns": {
+          "under": 255,
+          "over": 245,
+          "exact": 0
+        },
+        "bothMedAbs": 0.31967813179129534,
+        "bothMedSigned": 0.029055106578832923,
+        "bothSigns": {
+          "under": 240,
+          "over": 260,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 241,
+          "worsened": 259,
+          "tied": 0,
+          "pctHelped": "48.2%",
+          "medDiff": 0.00402421326493041,
+          "meanDiff": 0.04193196240289329,
+          "medBoth": 0.31967813179129534,
+          "medCMMG": 0.3056559815727167,
+          "diffOfMarginalMedians": 0.014022150218578666
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Hidden Dose (Fixed 1-Dose)",
+      "scenario": "hidden",
+      "condition": "exact_28h_4pct_cv",
+      "conditionLabel": "Exact 28.0h (4% CV)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "4.0 h",
+      "CF": {
+        "medAbs": 0.8146134447885722,
+        "medSigned": -0.8146134447885722,
+        "signs": {
+          "under": 489,
+          "over": 11,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 3.9738308891445717,
+        "medSigned": -3.9738308891445717,
+        "signs": {
+          "under": 481,
+          "over": 19,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 23,
+          "worsened": 477,
+          "tied": 0,
+          "pctHelped": "4.6%",
+          "medDiff": 3.0335837848818326,
+          "meanDiff": 3.4505950460957293,
+          "medBoth": 3.9738308891445717,
+          "medCMMG": 0.8146134447885722,
+          "diffOfMarginalMedians": 3.1592174443559995
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.492902603497559,
+        "cmmgMedSigned": -0.4065339895990072,
+        "cmmgSigns": {
+          "under": 357,
+          "over": 143,
+          "exact": 0
+        },
+        "bothMedAbs": 1.5532145569375726,
+        "bothMedSigned": -1.5532145569375726,
+        "bothSigns": {
+          "under": 453,
+          "over": 47,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 89,
+          "worsened": 389,
+          "tied": 22,
+          "pctHelped": "17.8%",
+          "medDiff": 0.5688750364409048,
+          "meanDiff": 0.7475154527576187,
+          "medBoth": 1.5532145569375726,
+          "medCMMG": 0.492902603497559,
+          "diffOfMarginalMedians": 1.0603119534400136
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.4968718696086283,
+        "cmmgMedSigned": -0.4846238754436021,
+        "cmmgSigns": {
+          "under": 437,
+          "over": 63,
+          "exact": 0
+        },
+        "bothMedAbs": 0.4044956880257784,
+        "bothMedSigned": -0.22016681423281614,
+        "bothSigns": {
+          "under": 311,
+          "over": 189,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 343,
+          "worsened": 157,
+          "tied": 0,
+          "pctHelped": "68.6%",
+          "medDiff": -0.1392206724181877,
+          "meanDiff": -0.09551655561062038,
+          "medBoth": 0.4044956880257784,
+          "medCMMG": 0.4968718696086283,
+          "diffOfMarginalMedians": -0.09237618158284988
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3723550365776829,
+        "cmmgMedSigned": -0.24056406501288752,
+        "cmmgSigns": {
+          "under": 340,
+          "over": 160,
+          "exact": 0
+        },
+        "bothMedAbs": 0.44587329097437767,
+        "bothMedSigned": 0.29850174848464484,
+        "bothSigns": {
+          "under": 137,
+          "over": 363,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 221,
+          "worsened": 279,
+          "tied": 0,
+          "pctHelped": "44.2%",
+          "medDiff": 0.04745415342264625,
+          "meanDiff": -0.007033493052007786,
+          "medBoth": 0.44587329097437767,
+          "medCMMG": 0.3723550365776829,
+          "diffOfMarginalMedians": 0.0735182543966948
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Uncertain Dose (50/50 Mixture)",
+      "scenario": "mixture",
+      "condition": "exact_28h_4pct_cv",
+      "conditionLabel": "Exact 28.0h (4% CV)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "4.0 h",
+      "CF": {
+        "medAbs": 0.8146134447885722,
+        "medSigned": -0.8146134447885722,
+        "signs": {
+          "under": 489,
+          "over": 11,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 2.636427596953118,
+        "medSigned": -2.636427596953118,
+        "signs": {
+          "under": 447,
+          "over": 53,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 63,
+          "worsened": 437,
+          "tied": 0,
+          "pctHelped": "12.6%",
+          "medDiff": 1.8007502401813222,
+          "meanDiff": 2.2899457169591266,
+          "medBoth": 2.636427596953118,
+          "medCMMG": 0.8146134447885722,
+          "diffOfMarginalMedians": 1.8218141521645457
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.3086981779071065,
+        "cmmgMedSigned": 0.012321455373238699,
+        "cmmgSigns": {
+          "under": 247,
+          "over": 253,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3415075169299997,
+        "bothMedSigned": 0.032816718729976824,
+        "bothSigns": {
+          "under": 242,
+          "over": 258,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 216,
+          "worsened": 261,
+          "tied": 23,
+          "pctHelped": "43.2%",
+          "medDiff": 0.007971261436108268,
+          "meanDiff": 0.06170523024836505,
+          "medBoth": 0.3415075169299997,
+          "medCMMG": 0.3086981779071065,
+          "diffOfMarginalMedians": 0.03280933902289318
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.36325423076803,
+        "cmmgMedSigned": -0.2794025362653696,
+        "cmmgSigns": {
+          "under": 359,
+          "over": 141,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3872770609661458,
+        "bothMedSigned": -0.09699685798257285,
+        "bothSigns": {
+          "under": 274,
+          "over": 226,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 259,
+          "worsened": 241,
+          "tied": 0,
+          "pctHelped": "51.8%",
+          "medDiff": -0.015252505024121454,
+          "meanDiff": 0.005004935548578537,
+          "medBoth": 0.3872770609661458,
+          "medCMMG": 0.36325423076803,
+          "diffOfMarginalMedians": 0.024022830198115797
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3025052952862808,
+        "cmmgMedSigned": 0.006726252288979051,
+        "cmmgSigns": {
+          "under": 248,
+          "over": 252,
+          "exact": 0
+        },
+        "bothMedAbs": 0.31444455405330984,
+        "bothMedSigned": 0.032330066884546316,
+        "bothSigns": {
+          "under": 239,
+          "over": 261,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 239,
+          "worsened": 261,
+          "tied": 0,
+          "pctHelped": "47.8%",
+          "medDiff": 0.006703153006722751,
+          "meanDiff": 0.03564597005436204,
+          "medBoth": 0.31444455405330984,
+          "medCMMG": 0.3025052952862808,
+          "diffOfMarginalMedians": 0.01193925876702906
+        }
+      },
+      "mixtureQuantiles": {
+        "w_H1": {
+          "min": 0,
+          "p25": 2.0226224568460678e-79,
+          "median": 2.3183754164380695e-43,
+          "p75": 3.7872129127483735e-21,
+          "max": 0.9999999999999999,
+          "mean": 0.02847965213025155,
+          "sd": 0.1428861879557389
+        },
+        "w_H2": {
+          "min": 1.717432382954708e-35,
+          "p25": 0.9999999999999996,
+          "median": 1,
+          "p75": 1.0000000000000002,
+          "max": 1.0000000000000013,
+          "mean": 0.9715203478697485,
+          "sd": 0.14288618795573868
+        },
+        "ess": {
+          "min": 1,
+          "p25": 3.4983770284955695,
+          "median": 6.744321164760491,
+          "p75": 9.927194636250844,
+          "max": 17.998771604914428,
+          "mean": 7.066293273197395,
+          "sd": 3.9982878704710254
+        }
+      }
+    }
+  ],
+  "perturbed_fixed32h_4pct_cv": [
+    {
+      "config": "Complete History (Control)",
+      "scenario": "complete",
+      "condition": "perturbed_15m_fixed32h_4pct_cv",
+      "conditionLabel": "Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "3.75–4.25 h",
+      "CF": {
+        "medAbs": 0.7513918631373997,
+        "medSigned": -0.7509474041075723,
+        "signs": {
+          "under": 478,
+          "over": 22,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 1.7104253248292256,
+        "medSigned": 0.14542837749448845,
+        "signs": {
+          "under": 234,
+          "over": 266,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 116,
+          "worsened": 384,
+          "tied": 0,
+          "pctHelped": "23.2%",
+          "medDiff": 0.9595338371295332,
+          "meanDiff": 1.2790973185542296,
+          "medBoth": 1.7104253248292256,
+          "medCMMG": 0.7513918631373997,
+          "diffOfMarginalMedians": 0.9590334616918259
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2727232254208074,
+        "cmmgMedSigned": -0.003377029911152629,
+        "cmmgSigns": {
+          "under": 253,
+          "over": 247,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3420607647175453,
+        "bothMedSigned": -0.007339697321508076,
+        "bothSigns": {
+          "under": 251,
+          "over": 249,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 188,
+          "worsened": 275,
+          "tied": 37,
+          "pctHelped": "37.6%",
+          "medDiff": 0.016544965407219614,
+          "meanDiff": 0.10305680480811108,
+          "medBoth": 0.3420607647175453,
+          "medCMMG": 0.2727232254208074,
+          "diffOfMarginalMedians": 0.06933753929673792
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.33721909243127235,
+        "cmmgMedSigned": -0.025274019226332545,
+        "cmmgSigns": {
+          "under": 256,
+          "over": 244,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3916208660541938,
+        "bothMedSigned": 0.016035350572895624,
+        "bothSigns": {
+          "under": 241,
+          "over": 259,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 215,
+          "worsened": 285,
+          "tied": 0,
+          "pctHelped": "43.0%",
+          "medDiff": 0.029864531939738814,
+          "meanDiff": 0.0437418473405162,
+          "medBoth": 0.3916208660541938,
+          "medCMMG": 0.33721909243127235,
+          "diffOfMarginalMedians": 0.05440177362292142
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.276051430046099,
+        "cmmgMedSigned": -0.03385586844345623,
+        "cmmgSigns": {
+          "under": 268,
+          "over": 232,
+          "exact": 0
+        },
+        "bothMedAbs": 0.29829992586770526,
+        "bothMedSigned": -0.008202101647827975,
+        "bothSigns": {
+          "under": 251,
+          "over": 249,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 242,
+          "worsened": 258,
+          "tied": 0,
+          "pctHelped": "48.4%",
+          "medDiff": 0.004512067121642094,
+          "meanDiff": 0.040117004899207276,
+          "medBoth": 0.29829992586770526,
+          "medCMMG": 0.276051430046099,
+          "diffOfMarginalMedians": 0.022248495821606262
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Hidden Dose (Fixed 1-Dose)",
+      "scenario": "hidden",
+      "condition": "perturbed_15m_fixed32h_4pct_cv",
+      "conditionLabel": "Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "3.75–4.25 h",
+      "CF": {
+        "medAbs": 0.7513918631373997,
+        "medSigned": -0.7509474041075723,
+        "signs": {
+          "under": 478,
+          "over": 22,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 3.9738308891445717,
+        "medSigned": -3.9738308891445717,
+        "signs": {
+          "under": 481,
+          "over": 19,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 24,
+          "worsened": 476,
+          "tied": 0,
+          "pctHelped": "4.8%",
+          "medDiff": 3.1782866920841553,
+          "meanDiff": 3.5170597244069444,
+          "medBoth": 3.9738308891445717,
+          "medCMMG": 0.7513918631373997,
+          "diffOfMarginalMedians": 3.222439026007172
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.5093056361506909,
+        "cmmgMedSigned": -0.4140676289125942,
+        "cmmgSigns": {
+          "under": 372,
+          "over": 128,
+          "exact": 0
+        },
+        "bothMedAbs": 1.5702325464997138,
+        "bothMedSigned": -1.5702325464997138,
+        "bothSigns": {
+          "under": 460,
+          "over": 40,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 96,
+          "worsened": 381,
+          "tied": 23,
+          "pctHelped": "19.2%",
+          "medDiff": 0.5688750364409048,
+          "meanDiff": 0.755710385043958,
+          "medBoth": 1.5702325464997138,
+          "medCMMG": 0.5093056361506909,
+          "diffOfMarginalMedians": 1.0609269103490229
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.5166385727647111,
+        "cmmgMedSigned": -0.5116543501242679,
+        "cmmgSigns": {
+          "under": 440,
+          "over": 60,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3756758478150748,
+        "bothMedSigned": -0.20966565247160407,
+        "bothSigns": {
+          "under": 328,
+          "over": 172,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 365,
+          "worsened": 135,
+          "tied": 0,
+          "pctHelped": "73.0%",
+          "medDiff": -0.16656787881916646,
+          "meanDiff": -0.1178959459122726,
+          "medBoth": 0.3756758478150748,
+          "medCMMG": 0.5166385727647111,
+          "diffOfMarginalMedians": -0.14096272494963635
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.37068935425215166,
+        "cmmgMedSigned": -0.2512083662046707,
+        "cmmgSigns": {
+          "under": 345,
+          "over": 155,
+          "exact": 0
+        },
+        "bothMedAbs": 0.44347439190467464,
+        "bothMedSigned": 0.28715414475081813,
+        "bothSigns": {
+          "under": 142,
+          "over": 358,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 244,
+          "worsened": 256,
+          "tied": 0,
+          "pctHelped": "48.8%",
+          "medDiff": 0.020252554650764143,
+          "meanDiff": -0.0305061257307608,
+          "medBoth": 0.44347439190467464,
+          "medCMMG": 0.37068935425215166,
+          "diffOfMarginalMedians": 0.07278503765252298
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Uncertain Dose (50/50 Mixture)",
+      "scenario": "mixture",
+      "condition": "perturbed_15m_fixed32h_4pct_cv",
+      "conditionLabel": "Perturbed ±15m (Fixed 32.0h Target, Horizon 3.75–4.25h)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "3.75–4.25 h",
+      "CF": {
+        "medAbs": 0.7513918631373997,
+        "medSigned": -0.7509474041075723,
+        "signs": {
+          "under": 478,
+          "over": 22,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 2.636427596953118,
+        "medSigned": -2.636427596953118,
+        "signs": {
+          "under": 447,
+          "over": 53,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 60,
+          "worsened": 440,
+          "tied": 0,
+          "pctHelped": "12.0%",
+          "medDiff": 1.914001379469576,
+          "meanDiff": 2.3564103952703435,
+          "medBoth": 2.636427596953118,
+          "medCMMG": 0.7513918631373997,
+          "diffOfMarginalMedians": 1.8850357338157182
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2544648224708683,
+        "cmmgMedSigned": -0.02563573528261731,
+        "cmmgSigns": {
+          "under": 264,
+          "over": 236,
+          "exact": 0
+        },
+        "bothMedAbs": 0.33698732527270625,
+        "bothMedSigned": 0.007837000769533198,
+        "bothSigns": {
+          "under": 249,
+          "over": 251,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 193,
+          "worsened": 285,
+          "tied": 22,
+          "pctHelped": "38.6%",
+          "medDiff": 0.027892577615626468,
+          "meanDiff": 0.09435055568637865,
+          "medBoth": 0.33698732527270625,
+          "medCMMG": 0.2544648224708683,
+          "diffOfMarginalMedians": 0.08252250280183793
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.38812454964886545,
+        "cmmgMedSigned": -0.3154338159579755,
+        "cmmgSigns": {
+          "under": 372,
+          "over": 128,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3621192330388956,
+        "bothMedSigned": -0.10377402077609776,
+        "bothSigns": {
+          "under": 291,
+          "over": 209,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 275,
+          "worsened": 225,
+          "tied": 0,
+          "pctHelped": "55.0%",
+          "medDiff": -0.043983025170631684,
+          "meanDiff": -0.014586240786531727,
+          "medBoth": 0.3621192330388956,
+          "medCMMG": 0.38812454964886545,
+          "diffOfMarginalMedians": -0.026005316609969853
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.27442398705646553,
+        "cmmgMedSigned": -0.02965794493960061,
+        "cmmgSigns": {
+          "under": 268,
+          "over": 232,
+          "exact": 0
+        },
+        "bothMedAbs": 0.2998470988640576,
+        "bothMedSigned": 0.010639059154125441,
+        "bothSigns": {
+          "under": 247,
+          "over": 253,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 233,
+          "worsened": 267,
+          "tied": 0,
+          "pctHelped": "46.6%",
+          "medDiff": 0.01084207429496109,
+          "meanDiff": 0.042812483164555264,
+          "medBoth": 0.2998470988640576,
+          "medCMMG": 0.27442398705646553,
+          "diffOfMarginalMedians": 0.025423111807592047
+        }
+      },
+      "mixtureQuantiles": {
+        "w_H1": {
+          "min": 4.4e-323,
+          "p25": 3.0155637017285075e-78,
+          "median": 4.100496507267156e-45,
+          "p75": 5.226787086000923e-21,
+          "max": 1,
+          "mean": 0.023524621795823777,
+          "sd": 0.12851775570316326
+        },
+        "w_H2": {
+          "min": 1.7015174640823419e-25,
+          "p25": 0.9999999999999996,
+          "median": 0.9999999999999999,
+          "p75": 1.0000000000000002,
+          "max": 1.0000000000000013,
+          "mean": 0.9764753782041757,
+          "sd": 0.1285177557031632
+        },
+        "ess": {
+          "min": 1.0000000000000875,
+          "p25": 3.6823160157413053,
+          "median": 7.044864925245454,
+          "p75": 10.300686545465831,
+          "max": 18.791636644252986,
+          "mean": 7.236860297836997,
+          "sd": 4.172768341853846
+        }
+      }
+    }
+  ],
+  "perturbed_elapsed4h_4pct_cv": [
+    {
+      "config": "Complete History (Control)",
+      "scenario": "complete",
+      "condition": "perturbed_15m_elapsed4h_4pct_cv",
+      "conditionLabel": "Perturbed ±15m (Fixed Horizon Draw+4.0h)",
+      "targetMode": "elapsed_4h",
+      "targetTimeDesc": "Fixed horizon (draw + 4.0h)",
+      "horizonRange": "4.0 h strictly",
+      "CF": {
+        "medAbs": 0.7674604407599233,
+        "medSigned": -0.7672831626167045,
+        "signs": {
+          "under": 476,
+          "over": 24,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 1.7122343664443238,
+        "medSigned": 0.11091691877191634,
+        "signs": {
+          "under": 240,
+          "over": 260,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 118,
+          "worsened": 382,
+          "tied": 0,
+          "pctHelped": "23.6%",
+          "medDiff": 0.9784480644687106,
+          "meanDiff": 1.2765531672162533,
+          "medBoth": 1.7122343664443238,
+          "medCMMG": 0.7674604407599233,
+          "diffOfMarginalMedians": 0.9447739256844006
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2744294417692621,
+        "cmmgMedSigned": -0.010450652474873312,
+        "cmmgSigns": {
+          "under": 256,
+          "over": 244,
+          "exact": 0
+        },
+        "bothMedAbs": 0.34283602521535217,
+        "bothMedSigned": -0.001735501215326174,
+        "bothSigns": {
+          "under": 251,
+          "over": 249,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 184,
+          "worsened": 279,
+          "tied": 37,
+          "pctHelped": "36.8%",
+          "medDiff": 0.01847607083752978,
+          "meanDiff": 0.10272844804400914,
+          "medBoth": 0.34283602521535217,
+          "medCMMG": 0.2744294417692621,
+          "diffOfMarginalMedians": 0.06840658344609007
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.33612583498442783,
+        "cmmgMedSigned": -0.025309042122762637,
+        "cmmgSigns": {
+          "under": 256,
+          "over": 244,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3930356665127279,
+        "bothMedSigned": 0.019293088833664207,
+        "bothSigns": {
+          "under": 243,
+          "over": 257,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 215,
+          "worsened": 285,
+          "tied": 0,
+          "pctHelped": "43.0%",
+          "medDiff": 0.025914999337114164,
+          "meanDiff": 0.04421122632492483,
+          "medBoth": 0.3930356665127279,
+          "medCMMG": 0.33612583498442783,
+          "diffOfMarginalMedians": 0.05690983152830009
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.2817741259422393,
+        "cmmgMedSigned": -0.031584260079161375,
+        "cmmgSigns": {
+          "under": 268,
+          "over": 232,
+          "exact": 0
+        },
+        "bothMedAbs": 0.29985921684984795,
+        "bothMedSigned": -0.006842311546074953,
+        "bothSigns": {
+          "under": 252,
+          "over": 248,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 240,
+          "worsened": 260,
+          "tied": 0,
+          "pctHelped": "48.0%",
+          "medDiff": 0.004628199121248677,
+          "meanDiff": 0.040042299023732936,
+          "medBoth": 0.29985921684984795,
+          "medCMMG": 0.2817741259422393,
+          "diffOfMarginalMedians": 0.01808509090760868
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Hidden Dose (Fixed 1-Dose)",
+      "scenario": "hidden",
+      "condition": "perturbed_15m_elapsed4h_4pct_cv",
+      "conditionLabel": "Perturbed ±15m (Fixed Horizon Draw+4.0h)",
+      "targetMode": "elapsed_4h",
+      "targetTimeDesc": "Fixed horizon (draw + 4.0h)",
+      "horizonRange": "4.0 h strictly",
+      "CF": {
+        "medAbs": 0.7674604407599233,
+        "medSigned": -0.7672831626167045,
+        "signs": {
+          "under": 476,
+          "over": 24,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 3.997339006561499,
+        "medSigned": -3.997339006561499,
+        "signs": {
+          "under": 481,
+          "over": 19,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 24,
+          "worsened": 476,
+          "tied": 0,
+          "pctHelped": "4.8%",
+          "medDiff": 3.1858732802450627,
+          "meanDiff": 3.513750183150463,
+          "medBoth": 3.997339006561499,
+          "medCMMG": 0.7674604407599233,
+          "diffOfMarginalMedians": 3.2298785658015756
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.5028409934585236,
+        "cmmgMedSigned": -0.41695556425226465,
+        "cmmgSigns": {
+          "under": 371,
+          "over": 129,
+          "exact": 0
+        },
+        "bothMedAbs": 1.5716097446933626,
+        "bothMedSigned": -1.5716097446933626,
+        "bothSigns": {
+          "under": 459,
+          "over": 41,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 96,
+          "worsened": 381,
+          "tied": 23,
+          "pctHelped": "19.2%",
+          "medDiff": 0.6029934959527834,
+          "meanDiff": 0.7567796206751175,
+          "medBoth": 1.5716097446933626,
+          "medCMMG": 0.5028409934585236,
+          "diffOfMarginalMedians": 1.068768751234839
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.5277667409291249,
+        "cmmgMedSigned": -0.5160995816540019,
+        "cmmgSigns": {
+          "under": 442,
+          "over": 58,
+          "exact": 0
+        },
+        "bothMedAbs": 0.36749847573746797,
+        "bothMedSigned": -0.21375338914269193,
+        "bothSigns": {
+          "under": 328,
+          "over": 172,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 365,
+          "worsened": 135,
+          "tied": 0,
+          "pctHelped": "73.0%",
+          "medDiff": -0.1660286864563485,
+          "meanDiff": -0.11737810728763295,
+          "medBoth": 0.36749847573746797,
+          "medCMMG": 0.5277667409291249,
+          "diffOfMarginalMedians": -0.16026826519165693
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.3718633227388226,
+        "cmmgMedSigned": -0.2536257082174975,
+        "cmmgSigns": {
+          "under": 344,
+          "over": 156,
+          "exact": 0
+        },
+        "bothMedAbs": 0.44315576515035504,
+        "bothMedSigned": 0.2807739675247731,
+        "bothSigns": {
+          "under": 143,
+          "over": 357,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 242,
+          "worsened": 258,
+          "tied": 0,
+          "pctHelped": "48.4%",
+          "medDiff": 0.02150645250303551,
+          "meanDiff": -0.02934820748125924,
+          "medBoth": 0.44315576515035504,
+          "medCMMG": 0.3718633227388226,
+          "diffOfMarginalMedians": 0.07129244241153243
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Uncertain Dose (50/50 Mixture)",
+      "scenario": "mixture",
+      "condition": "perturbed_15m_elapsed4h_4pct_cv",
+      "conditionLabel": "Perturbed ±15m (Fixed Horizon Draw+4.0h)",
+      "targetMode": "elapsed_4h",
+      "targetTimeDesc": "Fixed horizon (draw + 4.0h)",
+      "horizonRange": "4.0 h strictly",
+      "CF": {
+        "medAbs": 0.7674604407599233,
+        "medSigned": -0.7672831626167045,
+        "signs": {
+          "under": 476,
+          "over": 24,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 2.6387510617629975,
+        "medSigned": -2.6387510617629975,
+        "signs": {
+          "under": 446,
+          "over": 54,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 60,
+          "worsened": 440,
+          "tied": 0,
+          "pctHelped": "12.0%",
+          "medDiff": 1.9182681234022008,
+          "meanDiff": 2.3524924154715903,
+          "medBoth": 2.6387510617629975,
+          "medCMMG": 0.7674604407599233,
+          "diffOfMarginalMedians": 1.8712906210030742
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.2626672463651989,
+        "cmmgMedSigned": -0.024614367313313235,
+        "cmmgSigns": {
+          "under": 265,
+          "over": 235,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3408372510559996,
+        "bothMedSigned": 0.006239084804463779,
+        "bothSigns": {
+          "under": 249,
+          "over": 251,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 191,
+          "worsened": 284,
+          "tied": 25,
+          "pctHelped": "38.2%",
+          "medDiff": 0.02534207723510784,
+          "meanDiff": 0.09374232051263981,
+          "medBoth": 0.3408372510559996,
+          "medCMMG": 0.2626672463651989,
+          "diffOfMarginalMedians": 0.07817000469080071
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.38749052353540403,
+        "cmmgMedSigned": -0.3207637068941924,
+        "cmmgSigns": {
+          "under": 372,
+          "over": 128,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3590876143279744,
+        "bothMedSigned": -0.10120795335730959,
+        "bothSigns": {
+          "under": 291,
+          "over": 209,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 276,
+          "worsened": 224,
+          "tied": 0,
+          "pctHelped": "55.2%",
+          "medDiff": -0.03858172617002875,
+          "meanDiff": -0.013549432964816616,
+          "medBoth": 0.3590876143279744,
+          "medCMMG": 0.38749052353540403,
+          "diffOfMarginalMedians": -0.028402909207429605
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.274776710698724,
+        "cmmgMedSigned": -0.028715054594714795,
+        "cmmgSigns": {
+          "under": 267,
+          "over": 233,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3024936403762064,
+        "bothMedSigned": 0.009734709020848165,
+        "bothSigns": {
+          "under": 248,
+          "over": 252,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 229,
+          "worsened": 271,
+          "tied": 0,
+          "pctHelped": "45.8%",
+          "medDiff": 0.009483905501732393,
+          "meanDiff": 0.04276860181287231,
+          "medBoth": 0.3024936403762064,
+          "medCMMG": 0.274776710698724,
+          "diffOfMarginalMedians": 0.027716929677482405
+        }
+      },
+      "mixtureQuantiles": {
+        "w_H1": {
+          "min": 4.4e-323,
+          "p25": 3.0155637017285075e-78,
+          "median": 4.100496507267156e-45,
+          "p75": 5.226787086000923e-21,
+          "max": 1,
+          "mean": 0.023524621795823777,
+          "sd": 0.12851775570316326
+        },
+        "w_H2": {
+          "min": 1.7015174640823419e-25,
+          "p25": 0.9999999999999996,
+          "median": 0.9999999999999999,
+          "p75": 1.0000000000000002,
+          "max": 1.0000000000000013,
+          "mean": 0.9764753782041757,
+          "sd": 0.1285177557031632
+        },
+        "ess": {
+          "min": 1.0000000000000875,
+          "p25": 3.6823160157413053,
+          "median": 7.044864925245454,
+          "p75": 10.300686545465831,
+          "max": 18.791636644252986,
+          "mean": 7.236860297836997,
+          "sd": 4.172768341853846
+        }
+      }
+    }
+  ],
+  "zero_noise_sanity": [
+    {
+      "config": "Complete History (Control)",
+      "scenario": "complete",
+      "condition": "zero_noise_28h",
+      "conditionLabel": "Zero-Noise Sanity (0% CV, Exact 28.0h)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "4.0 h",
+      "CF": {
+        "medAbs": 0.7922157186859944,
+        "medSigned": -0.7922157186859944,
+        "signs": {
+          "under": 497,
+          "over": 3,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 1.7104253248292256,
+        "medSigned": 0.14542837749448845,
+        "signs": {
+          "under": 234,
+          "over": 266,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 123,
+          "worsened": 377,
+          "tied": 0,
+          "pctHelped": "24.6%",
+          "medDiff": 0.9534882590117193,
+          "meanDiff": 1.221810349017526,
+          "medBoth": 1.7104253248292256,
+          "medCMMG": 0.7922157186859944,
+          "diffOfMarginalMedians": 0.9182096061432312
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.22077518888771985,
+        "cmmgMedSigned": 0.03229767648519255,
+        "cmmgSigns": {
+          "under": 235,
+          "over": 265,
+          "exact": 0
+        },
+        "bothMedAbs": 0.28329587463954153,
+        "bothMedSigned": 0.057790725063501025,
+        "bothSigns": {
+          "under": 219,
+          "over": 281,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 186,
+          "worsened": 281,
+          "tied": 33,
+          "pctHelped": "37.2%",
+          "medDiff": 0.028094829826228462,
+          "meanDiff": 0.08364717710900892,
+          "medBoth": 0.28329587463954153,
+          "medCMMG": 0.22077518888771985,
+          "diffOfMarginalMedians": 0.06252068575182168
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.3001676870864496,
+        "cmmgMedSigned": 0.0218479455224192,
+        "cmmgSigns": {
+          "under": 243,
+          "over": 257,
+          "exact": 0
+        },
+        "bothMedAbs": 0.3347343001811116,
+        "bothMedSigned": -0.019901529806964025,
+        "bothSigns": {
+          "under": 256,
+          "over": 244,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 203,
+          "worsened": 297,
+          "tied": 0,
+          "pctHelped": "40.6%",
+          "medDiff": 0.04377383761504472,
+          "meanDiff": 0.05209345575511689,
+          "medBoth": 0.3347343001811116,
+          "medCMMG": 0.3001676870864496,
+          "diffOfMarginalMedians": 0.034566613094662024
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.19927186092188887,
+        "cmmgMedSigned": -0.010068822720402881,
+        "cmmgSigns": {
+          "under": 253,
+          "over": 247,
+          "exact": 0
+        },
+        "bothMedAbs": 0.22600044447760848,
+        "bothMedSigned": 0.023091143344770693,
+        "bothSigns": {
+          "under": 234,
+          "over": 266,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 231,
+          "worsened": 269,
+          "tied": 0,
+          "pctHelped": "46.2%",
+          "medDiff": 0.009182924833943673,
+          "meanDiff": 0.028678370190697935,
+          "medBoth": 0.22600044447760848,
+          "medCMMG": 0.19927186092188887,
+          "diffOfMarginalMedians": 0.02672858355571961
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Hidden Dose (Fixed 1-Dose)",
+      "scenario": "hidden",
+      "condition": "zero_noise_28h",
+      "conditionLabel": "Zero-Noise Sanity (0% CV, Exact 28.0h)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "4.0 h",
+      "CF": {
+        "medAbs": 0.7922157186859944,
+        "medSigned": -0.7922157186859944,
+        "signs": {
+          "under": 497,
+          "over": 3,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 3.9738308891445717,
+        "medSigned": -3.9738308891445717,
+        "signs": {
+          "under": 481,
+          "over": 19,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 21,
+          "worsened": 479,
+          "tied": 0,
+          "pctHelped": "4.2%",
+          "medDiff": 3.056358607315177,
+          "meanDiff": 3.4597727548702384,
+          "medBoth": 3.9738308891445717,
+          "medCMMG": 0.7922157186859944,
+          "diffOfMarginalMedians": 3.1816151704585773
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.42331737770689504,
+        "cmmgMedSigned": -0.3488570818184882,
+        "cmmgSigns": {
+          "under": 355,
+          "over": 145,
+          "exact": 0
+        },
+        "bothMedAbs": 1.4845930651769998,
+        "bothMedSigned": -1.4845930651769998,
+        "bothSigns": {
+          "under": 454,
+          "over": 46,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 89,
+          "worsened": 388,
+          "tied": 23,
+          "pctHelped": "17.8%",
+          "medDiff": 0.5655998349273759,
+          "meanDiff": 0.7555448143751985,
+          "medBoth": 1.4845930651769998,
+          "medCMMG": 0.42331737770689504,
+          "diffOfMarginalMedians": 1.0612756874701048
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.48498918804485047,
+        "cmmgMedSigned": -0.48096677832901547,
+        "cmmgSigns": {
+          "under": 459,
+          "over": 41,
+          "exact": 0
+        },
+        "bothMedAbs": 0.35256354007783264,
+        "bothMedSigned": -0.2540737437963352,
+        "bothSigns": {
+          "under": 334,
+          "over": 166,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 372,
+          "worsened": 128,
+          "tied": 0,
+          "pctHelped": "74.4%",
+          "medDiff": -0.17632637696368025,
+          "meanDiff": -0.12105638082463777,
+          "medBoth": 0.35256354007783264,
+          "medCMMG": 0.48498918804485047,
+          "diffOfMarginalMedians": -0.13242564796701783
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.320052411235491,
+        "cmmgMedSigned": -0.2287418909697898,
+        "cmmgSigns": {
+          "under": 332,
+          "over": 168,
+          "exact": 0
+        },
+        "bothMedAbs": 0.43377737952756457,
+        "bothMedSigned": 0.31970030421829954,
+        "bothSigns": {
+          "under": 119,
+          "over": 381,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 228,
+          "worsened": 272,
+          "tied": 0,
+          "pctHelped": "45.6%",
+          "medDiff": 0.03931965215657707,
+          "meanDiff": -0.020787476695414045,
+          "medBoth": 0.43377737952756457,
+          "medCMMG": 0.320052411235491,
+          "diffOfMarginalMedians": 0.11372496829207357
+        }
+      },
+      "mixtureQuantiles": null
+    },
+    {
+      "config": "Uncertain Dose (50/50 Mixture)",
+      "scenario": "mixture",
+      "condition": "zero_noise_28h",
+      "conditionLabel": "Zero-Noise Sanity (0% CV, Exact 28.0h)",
+      "targetMode": "fixed_32h",
+      "targetTimeDesc": "Fixed clock 32.0h",
+      "horizonRange": "4.0 h",
+      "CF": {
+        "medAbs": 0.7922157186859944,
+        "medSigned": -0.7922157186859944,
+        "signs": {
+          "under": 497,
+          "over": 3,
+          "exact": 0
+        }
+      },
+      "CH": {
+        "medAbs": 2.636427596953118,
+        "medSigned": -2.636427596953118,
+        "signs": {
+          "under": 447,
+          "over": 53,
+          "exact": 0
+        },
+        "diffsVsCF": {
+          "helped": 65,
+          "worsened": 435,
+          "tied": 0,
+          "pctHelped": "13.0%",
+          "medDiff": 1.7558241006458348,
+          "meanDiff": 2.299123425733635,
+          "medBoth": 2.636427596953118,
+          "medCMMG": 0.7922157186859944,
+          "diffOfMarginalMedians": 1.8442118782671235
+        }
+      },
+      "ER": {
+        "cmmgMedAbs": 0.20869166723653176,
+        "cmmgMedSigned": 0.01989155163394596,
+        "cmmgSigns": {
+          "under": 238,
+          "over": 262,
+          "exact": 0
+        },
+        "bothMedAbs": 0.27795858774525284,
+        "bothMedSigned": 0.058106054503454185,
+        "bothSigns": {
+          "under": 217,
+          "over": 283,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 192,
+          "worsened": 284,
+          "tied": 24,
+          "pctHelped": "38.4%",
+          "medDiff": 0.030877684718543907,
+          "meanDiff": 0.07667489550300685,
+          "medBoth": 0.27795858774525284,
+          "medCMMG": 0.20869166723653176,
+          "diffOfMarginalMedians": 0.06926692050872107
+        }
+      },
+      "SU_Unw": {
+        "cmmgMedAbs": 0.3296351694962667,
+        "cmmgMedSigned": -0.2781857223668056,
+        "cmmgSigns": {
+          "under": 394,
+          "over": 106,
+          "exact": 0
+        },
+        "bothMedAbs": 0.33637316961923647,
+        "bothMedSigned": -0.1393446108750842,
+        "bothSigns": {
+          "under": 295,
+          "over": 205,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 268,
+          "worsened": 232,
+          "tied": 0,
+          "pctHelped": "53.6%",
+          "medDiff": -0.032093524315421895,
+          "meanDiff": -0.00565320908518915,
+          "medBoth": 0.33637316961923647,
+          "medCMMG": 0.3296351694962667,
+          "diffOfMarginalMedians": 0.006738000122969767
+        }
+      },
+      "SU_Rew": {
+        "cmmgMedAbs": 0.20011198494365745,
+        "cmmgMedSigned": 0.0036372320501154576,
+        "cmmgSigns": {
+          "under": 248,
+          "over": 252,
+          "exact": 0
+        },
+        "bothMedAbs": 0.22672264163228295,
+        "bothMedSigned": 0.031415427077504,
+        "bothSigns": {
+          "under": 230,
+          "over": 270,
+          "exact": 0
+        },
+        "diffs": {
+          "helped": 223,
+          "worsened": 277,
+          "tied": 0,
+          "pctHelped": "44.6%",
+          "medDiff": 0.010534900657162005,
+          "meanDiff": 0.03325971250313168,
+          "medBoth": 0.22672264163228295,
+          "medCMMG": 0.20011198494365745,
+          "diffOfMarginalMedians": 0.0266106566886255
+        }
+      },
+      "mixtureQuantiles": {
+        "w_H1": {
+          "min": 0,
+          "p25": 2.725669156980672e-79,
+          "median": 2.5364569793592508e-45,
+          "p75": 3.277902734863733e-20,
+          "max": 1,
+          "mean": 0.02344069520344141,
+          "sd": 0.13758030016155548
+        },
+        "w_H2": {
+          "min": 7.363145312157791e-31,
+          "p25": 0.9999999999999996,
+          "median": 0.9999999999999999,
+          "p75": 1.0000000000000002,
+          "max": 1.000000000000001,
+          "mean": 0.976559304796559,
+          "sd": 0.1375803001615555
+        },
+        "ess": {
+          "min": 1,
+          "p25": 3.8357488164308537,
+          "median": 6.660662111063948,
+          "p75": 10.348796567739573,
+          "max": 18.91174467612763,
+          "mean": 7.170998506271513,
+          "sd": 4.114363763855635
+        }
+      }
+    }
+  ]
+}
