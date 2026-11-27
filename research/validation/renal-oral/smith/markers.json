@@ -1,0 +1,8 @@
+{
+  "paper":"Smith et al. 2010, Figure 1A CKD panel, printed page 1148; Library PDF p.4, native 3500×2406 raster, XObject 12",
+  "measuredSeries":"Plasma acyclovir, CKD (n=3), solid filled circles; centers, not SD bars",
+  "times_h":[0,0.5,1,1.5,2,3,4,6,8,12],
+  "xy_px":[[1718,319],[1762,328],[1807,293],[1851,266],[1896,238],[1985,262],[2074,272],[2252,287],[2430,304],[2787,334]],
+  "y_ticks":[[100,217],[10,445],[1,676],[0.1,904]],
+  "assumed_marker_bound_px":3
+}
