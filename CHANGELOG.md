@@ -12,6 +12,10 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+- Evaluate arithmetic in numeric fields. Open the calculator with the ƒx button or the equals key, then apply the result in the field's existing units. For example, enter `24*9` for 216 hours. No pharmacokinetic equations, parameters, defaults or configuration schema changed.
+
+Added a synthetic sampling comparison for repeated dosing in HD and CAPD. Each design forecasts a later trough withheld from the fit. No pharmacokinetic equations, parameters or defaults changed.
+
 ## [0.32.0] - 2026-11-25 (preview)
 
 - Add a held-out measurement reveal for all five complete Almond cases and compare equal-duration CRRT interruptions early and late in a dose interval. No simulation engine equations, parameters or defaults changed.

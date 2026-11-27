@@ -49,6 +49,12 @@
   <h2>What does AyFlux show?</h2>
   <p>AyFlux lets you explore how dosing, kidney function, and dialysis affect predicted acyclovir concentrations over time. It uses a two-compartment pharmacokinetic model and also displays estimates for cerebrospinal fluid (CSF) and CMMG, an acyclovir metabolite.</p>
   <p>The graphs show model predictions, not concentrations measured in a patient.</p>
+  <details>
+    <summary>Why topical acyclovir isn’t modeled</summary>
+    <p>AyFlux models systemic exposure after IV acyclovir or oral valacyclovir. It does not estimate how much acyclovir cream or ointment crosses the skin or reaches the site of infection.</p>
+    <p>In a study of 5% cream applied to healthy skin, acyclovir was detectable in plasma in only one of six adults at the reported sampling time. With 5% skin ointment, a small study in people with localized shingles reported plasma concentrations up to 0.78 mg/L in one patient with impaired kidney function. These studies do not establish a blood concentration curve for topical use.</p>
+    <p>Sources: <a href="https://www.dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=125dbe4e-94ba-45bd-a714-f9c4b8e8b5c2&amp;type=display" target="_blank" rel="noopener noreferrer">Zovirax cream prescribing information</a> and <a href="https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=50278e0e-da1e-45ee-9fcb-672b2a219911" target="_blank" rel="noopener noreferrer">Zovirax ointment prescribing information</a>.</p>
+  </details>
 </section>
 <section class="card">
   <h2>Why does kidney function matter?</h2>
@@ -58,6 +64,10 @@
 <section class="card">
   <h2>Where does valacyclovir fit in?</h2>
   <p>Valacyclovir is an oral prodrug that the body converts to acyclovir. AyFlux includes an oral valacyclovir mode so you can explore how absorption and conversion assumptions change the predicted acyclovir curve.</p>
+</section>
+<section class="card">
+  <h2>Entering a calculation</h2>
+  <p>To enter nine days in a field labeled in hours, type <code>24*9</code>. The calculator previews <strong>216</strong>. Select <strong>Apply</strong> to enter 216 hours. You can also focus a numeric field and press <kbd>=</kbd> or select <strong>ƒx</strong> to open the calculator.</p>
 </section>
 <section class="card">
   <h2>Reading the charts</h2>
@@ -84,7 +94,7 @@
   <div class="topic-grid">
     <a class="topic-link" href="/references/"><strong>Complete bibliography</strong><span>Read the numbered sources, DOI links and study limitations.</span></a>
     <a class="topic-link" href="/research/exchanges/"><strong>PD exchanges and sample timing</strong><span>Inspect drains, explore observation timing and replay Boelaert CAPD curves.</span></a>
-    <a class="topic-link" href="/research/sampling/"><strong>Plasma sampling and parameter recovery</strong><span>Compare exposure and clearance estimates from three sampling schedules.</span></a>
+    <a class="topic-link" href="/research/sampling/"><strong>Plasma sampling and parameter recovery</strong><span>Compare single-infusion estimates and later trough forecasts during dialysis.</span></a>
     <a class="topic-link" href="/research/pediatric/"><strong>Pediatric IV acyclovir</strong><span>Examine the effects of body weight and renal function in a published population pharmacokinetic model.</span></a>
     <a class="topic-link" href="/learn/dialysis/"><strong>Dialysis and acyclovir</strong><span>Compare hemodialysis, peritoneal dialysis, CRRT, and residual kidney function.</span></a>
     <a class="topic-link" href="/learn/model-methods/"><strong>Model methods and limits</strong><span>Understand the compartments, CSF and CMMG estimates, and uncertainty displays.</span></a>

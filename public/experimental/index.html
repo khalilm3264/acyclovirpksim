@@ -5,4 +5,47 @@
 <meta property="og:site_name" content="AyFlux">
 <meta property="og:title" content="Experimental | AyFlux">
 <meta property="og:description" content="Early AyFlux research modules with their own published models and evidence limits, including a neonatal acyclovir clearance explorer. Research only.">
-<meta property="og:url" content="https://ayflux.org/experimental/"><link rel="stylesheet" href="/learn/learn.css"></head><body><main style="max-width:900px;margin:40px auto;padding:20px"><a href="/">AyFlux simulator</a><h1>Experimental</h1><p>Early research modules with their own published models and evidence limits.</p><h2><a href="/experimental/neonatal/">AyFlux Neonatal</a></h2><p>Explore predicted IV acyclovir clearance from 25 to 41 weeks postmenstrual age using the Sampson infant model. Research only; no dose recommendations.</p><h2><a href="/experimental/oral-absorption/">Oral absorption comparison</a></h2><p>Compare peak timing and exposure after oral valacyclovir against two adult studies.</p></main></body></html>
+<meta property="og:url" content="https://ayflux.org/experimental/"><link rel="stylesheet" href="/learn/learn.css"><script defer src="/experimental/exercises.js"></script></head><body><main style="max-width:900px;margin:40px auto;padding:20px"><a href="/">AyFlux simulator</a><h1>Experimental</h1><p>Early research modules with their own published models and evidence limits.</p><h2><a href="/experimental/neonatal/">AyFlux Neonatal</a></h2><p>Explore predicted IV acyclovir clearance from 25 to 41 weeks postmenstrual age using the Sampson infant model. Research only; no dose recommendations.</p>
+<h2><a href="/experimental/oral-absorption/">Oral absorption comparison</a></h2><p>Compare peak timing and exposure after oral valacyclovir against two adult studies.</p>
+<section class="card" id="observed-peaks" aria-labelledby="peak-heading">
+  <h2 id="peak-heading">Peak acyclovir concentrations after oral valacyclovir</h2>
+  <p>The <strong>peak of the group mean</strong> is the highest average at a shared sampling time. The <strong>mean of individual peaks</strong> averages each participant’s own highest measured concentration. When people peak at different times, the group curve can flatten.</p>
+  <p>Spread the absorption start times of five simulated people. Each person's curve reaches 5 mg/L. The gray lines show individuals and the blue line shows their average.</p>
+  <label for="spread">Time between the first and last onset</label>
+  <input id="spread" type="range" min="0" max="240" step="15" value="0"> <output for="spread" id="spread-value"></output>
+  <div id="peaks-plot"></div><p id="peaks-result" aria-live="polite"></p>
+  <details><summary>Compare with published measurements</summary>
+  <div class="model-table-wrap" role="region" aria-label="Published peak comparisons" tabindex="0">
+    <table class="model-parameter-table">
+      <caption>Published plasma acyclovir concentrations (mg/L)</caption>
+      <thead><tr><th scope="col">Study and oral valacyclovir regimen</th><th scope="col">Peak of group mean (from figure)</th><th scope="col">Mean of individual peaks (reported)</th></tr></thead>
+      <tbody>
+        <tr><th scope="row"><a href="https://doi.org/10.1128/AAC.46.2.458-463.2002">De Bony et al.</a> · 1,000 mg alone, single dose</th><td>≈4.85 at 1.25 h</td><td>5.35 (Table 3)</td></tr>
+        <tr><th scope="row"><a href="https://doi.org/10.1038/clpt.1993.196">Weller et al.</a> · 500 mg, single dose</th><td>≈2.95 at 1.5 h</td><td>3.28 (Table II)</td></tr>
+        <tr><th scope="row"><a href="https://pubmed.ncbi.nlm.nih.gov/9790357/">Kimberlin et al.</a> · 500 mg, first dose at 36 weeks of pregnancy</th><td>≈2.28 at 1.5 h</td><td>3.1</td></tr>
+        <tr><th scope="row"><a href="https://pubmed.ncbi.nlm.nih.gov/9790357/">Kimberlin et al.</a> · 500 mg twice daily, steady state at 38 weeks</th><td>≈2.18 at 2 h</td><td>3.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Figure values are approximate readings from published curves. Times identify the highest sampled group mean. Each peak also depends on how often blood was drawn.</p></details>
+</section>
+<section class="card" id="sample-timing">
+  <h2>CSF and serum samples taken at different times</h2>
+  <p>Keep a simulated CSF CMMG sample fixed on day 7 and move the serum draw. In this illustration serum CMMG halves every two days. The displayed values are synthetic.</p>
+  <label for="serum-day">Serum draw day</label>
+  <input type="range" id="serum-day" min="5" max="12" step="0.5" value="7"> <output for="serum-day" id="serum-value"></output>
+  <div id="timing-plot"></div><p id="timing-result" aria-live="polite"></p>
+  <p>Only the day-7 serum sample gives a same-time ratio. A later draw can inflate the ratio as serum levels fall. <a href="https://doi.org/10.1093/jac/dkz357">Lindström et al. studied paired samples during herpesvirus CNS infection.</a></p>
+</section>
+<section class="card" id="drug-interactions">
+  <h2>Cimetidine and probenecid</h2>
+  <p>Twelve healthy volunteers took 1,000 mg oral valacyclovir in each of four study periods. Choose a regimen to compare measured plasma acyclovir exposure and renal clearance with valacyclovir alone.</p>
+  <fieldset><legend>Medication taken with valacyclovir</legend>
+    <label><input type="radio" name="interaction" value="0" checked> None</label>
+    <label><input type="radio" name="interaction" value="1"> Cimetidine</label>
+    <label><input type="radio" name="interaction" value="2"> Probenecid</label>
+    <label><input type="radio" name="interaction" value="3"> Both</label>
+  </fieldset><ul id="drug-result" aria-live="polite"></ul>
+  <p>Values are study means. Percentages compare each mean with the control mean. <a href="https://doi.org/10.1128/AAC.46.2.458-463.2002">De Bony et al., Table 3</a></p>
+</section>
+</main></body></html>

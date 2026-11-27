@@ -1,7 +1,8 @@
 /* AyFlux offline cache: only public static application files, never user data. */
 "use strict";
-const CACHE = "ayflux-static-v0.32.0-offline-charts-20261125";
+const CACHE = "ayflux-static-v0.32.0-chart-calculator-20261126";
 const CORE = [
+ "/assets/number-expressions.js", "/assets/number-expressions.css",
  "/assets/vendor/echarts-6.1.0.min.js",
  "/assets/forecast-replay-view.js", "/assets/forecast-replay.js",
  "/assets/osp-import.js", "/assets/pwa-register.js", "/assets/offline-update.js", "/assets/simulator-worker.js", "/assets/osp-xlsx.js",
@@ -28,7 +29,11 @@ const CORE = [
 self.addEventListener("install", event => {
  // Fill a separate release cache before this worker can serve an application shell.
  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(
-   CORE.map(path => new Request(path, {cache: "reload"}))
+   // The foreground preloads ECharts. Require revalidation so a matching
+   // validator can save a second large transfer without accepting stale bytes.
+   CORE.map(path => new Request(path, {
+     cache: path === "/assets/vendor/echarts-6.1.0.min.js" ? "no-cache" : "reload"
+   }))
  )));
 });
 
