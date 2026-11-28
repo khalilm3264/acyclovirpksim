@@ -26,6 +26,36 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
   fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
 }
 
+async function waitForBrandFonts(page) {
+  // Check the actual local faces without waiting on the document-wide
+  // FontFaceSet.ready promise while requests are intentionally held open.
+  await page.waitForFunction(() => {
+    const faces = Array.from(document.fonts).filter(face => face.family.replace(/["']/g, '') === 'AyFlux Poppins');
+    return ['300', '800'].every(weight => {
+      const face = faces.find(face => face.weight === weight);
+      if (face?.status === 'error') throw new Error(`AyFlux Poppins ${weight} failed to load`);
+      return face?.status === 'loaded';
+    });
+  }, undefined, { timeout: 5000 }).catch(error => {
+    throw new Error('Expected staged AyFlux Poppins weights 300 and 800 to load', { cause: error });
+  });
+}
+
+async function captureChart(page, filename) {
+  // Playwright 1.56.1 waits on FontFaceSet.ready for even a chart-only crop.
+  // Brand faces were checked after navigation. Bypass only that redundant
+  // wait, and let Playwright report any locator or capture failure.
+  const flag = 'PW_TEST_SCREENSHOT_NO_FONTS_READY';
+  const previous = process.env[flag];
+  process.env[flag] = '1';
+  try {
+    await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, filename) });
+  } finally {
+    if (previous === undefined) delete process.env[flag];
+    else process.env[flag] = previous;
+  }
+}
+
 async function assertStatus(page, expected, busy) {
   const state = await page.locator('#plasmaChart .chart-status').evaluate(el => {
     const box = el.getBoundingClientRect(), range = document.createRange();
@@ -61,7 +91,7 @@ async function createServer() {
       response.writeHead(404).end('Not Found');
       return;
     }
-    response.setHeader('Content-Type', ({ '.js': 'application/javascript', '.html': 'text/html', '.css': 'text/css' })[path.extname(file)] || 'application/octet-stream');
+    response.setHeader('Content-Type', ({ '.js': 'application/javascript', '.html': 'text/html', '.css': 'text/css', '.woff2': 'font/woff2' })[path.extname(file)] || 'application/octet-stream');
     fs.createReadStream(file).pipe(response);
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -115,6 +145,7 @@ async function runLoadingStatesAudit() {
 
       const rendererRequested = page.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
       await page.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
+      await waitForBrandFonts(page);
       await page.locator('#plasmaChart').scrollIntoViewIfNeeded();
       await rendererRequested;
 
@@ -130,7 +161,7 @@ async function runLoadingStatesAudit() {
       assert.ok(calcRectPortrait.width > 0 && calcRectPortrait.height > 0);
       await assertStatus(page, 'Calculating simulation…', true);
 
-      await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-calc-portrait.png`) });
+      await captureChart(page, `${key}-calc-portrait.png`);
 
       // Check Calculating State in Landscape
       console.log(`  2. Rotating to Landscape (${profile.landscape.width}x${profile.landscape.height}) during calculation...`);
@@ -144,7 +175,7 @@ async function runLoadingStatesAudit() {
       assert.ok(calcRectLandscape.width > 0);
       await assertStatus(page, 'Calculating simulation…', true);
 
-      await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-calc-landscape.png`) });
+      await captureChart(page, `${key}-calc-landscape.png`);
 
       // Rotate back to portrait
       await page.setViewportSize(profile.portrait);
@@ -162,7 +193,7 @@ async function runLoadingStatesAudit() {
       assert.equal(loadColorPortrait, 'rgb(40, 79, 107)');
       await assertStatus(page, 'Loading chart…', true);
 
-      await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-loading-portrait.png`) });
+      await captureChart(page, `${key}-loading-portrait.png`);
 
       // Rotate to landscape during chart loading
       console.log(`  4. Rotating to Landscape during chart loading...`);
@@ -174,7 +205,7 @@ async function runLoadingStatesAudit() {
       assert.equal(loadMsgLandscape, 'Loading chart…');
       await assertStatus(page, 'Loading chart…', true);
 
-      await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-loading-landscape.png`) });
+      await captureChart(page, `${key}-loading-landscape.png`);
 
       // Rotate back to portrait and release renderer gate
       await page.setViewportSize(profile.portrait);
@@ -192,7 +223,7 @@ async function runLoadingStatesAudit() {
       assert.ok(canvasVisible, 'Canvas must be visible');
       assert.equal(await page.locator('#plasmaChart').getAttribute('aria-busy'), 'false');
 
-      await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-rendered-clean.png`) });
+      await captureChart(page, `${key}-rendered-clean.png`);
       // Hold the next Worker calculation to inspect the retained chart.
       const previousCurve = await page.evaluate(() => JSON.stringify(echarts.getInstanceByDom(document.querySelector('#plasmaChart')).getOption().series));
       await page.evaluate(() => {
@@ -221,7 +252,7 @@ async function runLoadingStatesAudit() {
           return label.left >= plot.left && label.right <= plot.right && label.top >= plot.top && label.bottom <= plot.bottom;
         });
         assert.ok(fits, 'Previous-results label fits within the graph');
-        await page.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-previous-${viewport.width}.png`) });
+        await captureChart(page, `${key}-previous-${viewport.width}.png`);
       }
       await page.evaluate(() => window.resumeChartUpdate());
       await page.waitForFunction(() => !document.querySelector('#plasmaChart .chart-status') && window.AyFluxResearchBridge.snapshot().updated);
@@ -246,6 +277,7 @@ async function runLoadingStatesAudit() {
       const failedRendererRequested = failedPage.waitForRequest('**/assets/vendor/echarts-6.1.0.min.js*');
 
       await failedPage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
+      await waitForBrandFonts(failedPage);
       await failedPage.locator('#plasmaChart').scrollIntoViewIfNeeded();
 
       await failedRendererRequested;
@@ -275,14 +307,14 @@ async function runLoadingStatesAudit() {
       assert.ok(alertsHtml.includes('open AyFlux Lite'));
       await assertStatus(failedPage, 'Chart unavailable. Check your connection.', false);
 
-      await failedPage.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-failed-portrait.png`) });
+      await captureChart(failedPage, `${key}-failed-portrait.png`);
 
       await failedPage.setViewportSize(profile.landscape);
       await failedPage.waitForTimeout(200);
       assert.equal(await failedPage.locator('#plasmaChart .chart-status').textContent(), 'Chart unavailable. Check your connection.');
       await assertStatus(failedPage, 'Chart unavailable. Check your connection.', false);
 
-      await failedPage.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-failed-landscape.png`) });
+      await captureChart(failedPage, `${key}-failed-landscape.png`);
 
       // Rotate back
       await failedPage.setViewportSize(profile.portrait);
@@ -340,7 +372,7 @@ async function runLoadingStatesAudit() {
       assert.equal(chartVerification.hasThresholdLine, false, 'Cleared threshold line must not be present on chart');
       assert.equal(chartVerification.legendHasThreshold, false, 'Cleared threshold legend entry must not be present');
 
-      await failedPage.locator('#plasmaChart').screenshot({ path: path.join(SCREENSHOT_DIR, `${key}-recovered.png`) });
+      await captureChart(failedPage, `${key}-recovered.png`);
 
       await failedPage.close();
       await context.close();

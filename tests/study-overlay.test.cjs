@@ -150,6 +150,10 @@ test('case observations cite the case publication and mass endpoints remain sepa
  assert.equal(S.STUDIES.flatMap(S.pointsOf).length,37);
  const scores=S.STUDIES.map(s=>({id:s.id,rows:S.pointsOf(s).map(r=>({...r,predicted:r.observed,inside:true}))}));
  const summary=S.summarize(scores);assert.equal(summary.scenarios,9);assert.equal(summary.sources,6);
+ assert.deepEqual(summary.troughs.map(group=>group.total),[2,2,6]);
+ assert.equal(S.summarize(scores.filter(score=>S.evidenceKind(S.find(score.id))==='individual')).troughs[1].total,2);
+ assert.equal(S.summarize(scores.filter(score=>S.evidenceKind(S.find(score.id))==='individual')).troughs[2].total,undefined);
+ assert.match(html,/id="scorecardTroughs"/);
 });
 
 test('component ablation reuses the scorecard predictions and moves bias in the expected directions',()=>{

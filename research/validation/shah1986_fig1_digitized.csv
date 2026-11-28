@@ -1,0 +1,21 @@
+point_id,study_day,dose_mg_per_kg,dose_mg_total_55kg,sample_type,x_px_600dpi,y_px_600dpi,t_fig_h,t_rel_nominal_dose_start_h,t_rel_day_fitted_peak_h,conc_ug_per_ml,conc_uM,timing_status,nominal_protocol_match,notes
+D1_1,1,5.0,275.0,post_infusion_peak,341.5,476.0,0.98,0.98,-0.02,7.7,34.19,stated,0 h post-infusion (t=1 h),Matches text Day 1 peak 7.7 ug/mL (5 mg/kg IV over 1 h); 7-9 AM infusion window
+D1_2,1,5.0,275.0,post_infusion,355.5,699.5,2.6,2.6,1.6,4.879,21.67,ambiguous,1 h or 2 h post-infusion?,Plots at +1.60 h post-infusion (midway between nominal 1 h and 2 h); 3 of 9 Day 1 protocol points absent
+D1_3,1,5.0,275.0,post_infusion,379.33,893.67,5.3,5.3,4.3,3.282,14.57,inferred,~4 h post-infusion (t=5 h),+0.30 h past nominal 4 h post-infusion
+D1_4,1,5.0,275.0,post_infusion,404.4,956.2,8.08,8.08,7.08,2.888,12.82,ambiguous,6 h or 8 h post-infusion?,Plots at +7.08 h post-infusion (midway between nominal 6 h and 8 h)
+D1_5,1,5.0,275.0,post_infusion,434.4,972.0,11.38,11.38,10.38,2.795,12.41,inferred,~10 h post-infusion (t=11 h),+0.38 h past nominal 10 h post-infusion; 12 h point absent
+D1_6,1,5.0,275.0,predose_trough,556.57,1361.71,24.19,24.19,23.19,1.26,5.59,inferred,~24 h / Day 2 predose trough,Plots at 24.19 h (just before Day 2 infusion rise); Methods says 24 h post-infusion (25 h) with 7-9 AM window
+D4_1,4,2.5,137.5,predose_trough,1012.5,1422.0,72.26,0.26,-0.74,1.107,4.92,inferred,Day 4 predose trough (~72 h),Plots at 72.26 h just before Day 4 infusion; predose draw not explicitly listed in Day 4 post-infusion schedule
+D4_2,4,2.5,137.5,post_infusion_peak,1027.0,773.5,73.57,1.57,0.57,4.157,18.46,stated,0 h post-infusion (t=73 h),Matches text 2.5 mg/kg peak 4.1 ug/mL (digitized 4.16); +0.57 h right of 73 h (7-9 AM window or drafting offset)
+D4_3,4,2.5,137.5,post_infusion,1036.17,843.0,74.53,2.53,1.53,3.607,16.02,inferred,~1 h post-infusion (t=74 h),+0.96 h after D4_2 peak (+0.53 h right of nominal 74 h)
+D4_4,4,2.5,137.5,post_infusion,1051.83,964.17,76.19,4.19,3.19,2.816,12.5,ambiguous,2 h or 4 h post-infusion?,+2.62 h after D4_2 peak (+3.19 h after nominal 73 h); midway between 2 h and 4 h
+D4_5,4,2.5,137.5,post_infusion,1086.25,1022.0,79.8,7.8,6.8,2.502,11.11,inferred,~6 h post-infusion (t=79 h),+6.23 h after D4_2 peak (+6.80 h after nominal 73 h)
+D4_6,4,2.5,137.5,post_infusion,1125.0,1001.25,83.71,11.71,10.71,2.608,11.58,inferred,~10 h post-infusion (t=83 h),+10.14 h after D4_2 peak; slight rebound above D4_5 (8 h point absent)
+D4_7,4,2.5,137.5,post_infusion,1158.33,1063.33,87.14,15.14,14.14,2.297,10.2,ambiguous,~12 h post-infusion? (shifted),+13.57 h after D4_2 peak (+14.14 h after nominal 73 h; >1.5 h past nominal 12 h)
+D4_8,4,2.5,137.5,predose_trough,1239.0,1340.0,95.67,23.67,22.67,1.305,5.79,inferred,~24 h / Day 5 predose trough,Plots at 95.67 h on Day 5 trough vertex (23.67 h after 72 h; 22.10 h after D4_2)
+D7_1,7,2.5,137.5,post_infusion,1501.5,929.5,147.83,3.83,2.16,3.004,13.34,inferred,~2 h post-infusion (post-break),Day 7 predose and 0 h peak absent; +2.16 h after Day 7 fitted peak (145.67 h); axis break omits Day 6
+D7_2,7,2.5,137.5,post_infusion,1527.25,942.75,150.46,6.46,4.79,2.923,12.98,ambiguous,4 h or 6 h post-infusion?,+4.79 h after Day 7 fitted peak (+5.46 h after nominal 145 h); midway between 4 h and 6 h
+D7_3,7,2.5,137.5,post_infusion,1543.33,1037.33,152.18,8.18,6.51,2.409,10.7,inferred,~6 h post-infusion (post-break),+6.51 h after Day 7 fitted peak (+7.18 h after nominal 145 h)
+D7_4,7,2.5,137.5,post_infusion,1578.75,1125.75,155.9,11.9,10.23,2.011,8.93,inferred,~10 h post-infusion (post-break),+10.23 h after Day 7 fitted peak; lower than D7_5 (8 h point absent)
+D7_5,7,2.5,137.5,post_infusion,1600.5,1075.0,158.11,14.11,12.44,2.229,9.9,inferred,~12 h post-infusion (post-break),+12.44 h after Day 7 fitted peak; slight rebound above D7_4
+D7_6,7,2.5,137.5,predose_trough,1711.17,1296.33,170.02,26.02,24.35,1.417,6.29,inferred,~24 h post-infusion trough,Plots at 170.02 h (+24.35 h after Day 7 fitted peak 145.67 h; +25.02 h after nominal 145 h)

@@ -12,6 +12,8 @@ Every entry states whether pharmacokinetic equations, parameters or defaults cha
 
 ## [Unreleased]
 
+- Show trough summaries by measured group mean, individual sample and author-fitted endpoint. New frozen-engine research replays for Laskin, Shah and Abe remain outside the scorecard denominators. Pharmacokinetic equations, parameters and defaults are unchanged.
+
 - Evaluate arithmetic in numeric fields. Open the calculator with the ƒx button or the equals key, then apply the result in the field's existing units. For example, enter `24*9` for 216 hours. No pharmacokinetic equations, parameters, defaults or configuration schema changed.
 
 Added a synthetic sampling comparison for repeated dosing in HD and CAPD. Each design forecasts a later trough withheld from the fit. No pharmacokinetic equations, parameters or defaults changed.
